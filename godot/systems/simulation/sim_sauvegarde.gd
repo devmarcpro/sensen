@@ -231,7 +231,7 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 		SimLieux.charger_donjon(sim, str(d.theme), int(d.graine), int(d.id), int(d.etage), joueur_sauve)
 		for id in sim.ordre.duplicate():   # les êtres frais de la régénération cèdent la place aux êtres sauvés
 			if id != joueur_sauve.id:
-				sim.grille.liberer(sim.entites[id].pos)
+				sim.grille.liberer(sim.entites[id].pos, sim.entites[id].id)
 				sim.entites.erase(id)
 				sim.ordre.erase(id)
 		for id in ent.ordre:
@@ -240,7 +240,7 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 			if sim.entites[id].vivant and sim.grille.dans(sim.entites[id].pos):
 				sim.grille.placer(id, sim.entites[id].pos)
 		if sim.grille.dans(pos_sauvee) and not sim.grille.bloque_passage(pos_sauvee) and sim.grille.occupant(pos_sauvee).is_empty():
-			sim.grille.liberer(joueur_sauve.pos)   # le joueur reprend où il a sauvé, pas à l'entrée (Sauvegarde)
+			sim.grille.liberer(joueur_sauve.pos, joueur_sauve.id)   # le joueur reprend où il a sauvé, pas à l'entrée (Sauvegarde)
 			joueur_sauve.pos = pos_sauvee
 			joueur_sauve.ancre = pos_sauvee
 			sim.grille.placer(joueur_sauve.id, pos_sauvee)
@@ -372,9 +372,9 @@ static func _sauver_etage(sim: Simulation, joueur: Dictionary) -> void:
 		if id != joueur.id and not (id in partants):
 			sauve.entites[id] = sim.entites[id]
 			sauve.ordre.append(id)
-	sim.grille.liberer(joueur.pos)
+	sim.grille.liberer(joueur.pos, joueur.id)
 	for id_p in partants:
-		sim.grille.liberer(sim.entites[id_p].pos)
+		sim.grille.liberer(sim.entites[id_p].pos, sim.entites[id_p].id)
 	sim.etages_visites[int(sim.donjon.etage)] = sauve
 
 

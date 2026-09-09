@@ -6,7 +6,7 @@
     "temps_a_l_action": true
   },
   "deplacement": {
-    "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque",
+    "_doc": "Hauteur de terrain ±10 · Boucle de tick · poussee_des_par_tuile : degats (des) par tuile perdue quand une projection/attraction bute ; poussee_part_occupant : part encaissee par l'etre qui bloque | LA PILE (designer 2026-09-08, code 2026-09-09) : `pile_max` etres sur une meme tuile — « un PNJ peut porter un PNJ qui porte un PNJ », donc trois. Un ennemi n'est jamais escalade : c'est lui qu'on attaque.",
     "cout_base": 300,
     "montee_1": 500,
     "montee_2": 800,
@@ -30,7 +30,8 @@
       "_doc": "Nage (designer 2026-09-01, point 57) : chaque tuile d'eau coûte ticks_par_tuile, divisé par le facteur de la compétence nage et multiplié par la charge portée.",
       "competence": "nage",
       "ticks_par_tuile": 600
-    }
+    },
+    "pile_max": 3
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",

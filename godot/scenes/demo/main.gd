@@ -9,6 +9,7 @@ const TW := 40            # largeur d'une tuile à l'écran
 const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
+var _pile_hauteur := 22.0        # de combien un être monte à l'écran par étage de pile (styles.sprites.pile_hauteur)
 var rayon_vue := 20              # tuiles dessinées autour du joueur : suit la fenêtre et le zoom (designer 2026-09-06, 23 h : « afficher plus à l'écran »), borné par styles.vue.rayon_max
 var centre_terrain := Vector2i(-99, -99)   # la tuile du joueur à la dernière mise à jour des morceaux de terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
@@ -1338,6 +1339,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 	var glissement_s := float(GameData.config("styles").get("tempo", {}).get("glissement_s", 0.22))   # la durée d'un pas quand l'horloge ne coule pas (donjon)
 	var pas_px := Vector2(float(TW) * 0.5, float(TH) * 0.5).length()   # ce que fait un pas à l'écran : la phase de la marche s'y mesure
 	var seuil_picto := int(sim.regles.r.get("tempo", {}).get("pictogramme_au_dela", 0))   # 0 : jamais de pictogramme
+	_pile_hauteur = float(GameData.config("styles").get("sprites", {}).get("pile_hauteur", 22.0))
 	_calculer_visibles(j)
 	for ke in _vivants_image.size():
 		var e: Dictionary = _vivants_image[ke]
@@ -1363,6 +1365,11 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 			n.lointain = loin
 			n.queue_redraw()
 		var cible := _ecran(e.pos, sim.grille.h(e.pos))
+		# UNE TUILE TIENT UNE PILE (26 ter) : celui qui est monté sur un autre se dessine plus haut, et devant lui.
+		var etage_p := sim.grille.etage_pile(e.pos, e.id)
+		if etage_p > 0:
+			cible.y -= float(etage_p) * _pile_hauteur
+			n.z_index = mini(4000, _profondeur(e.pos) + etage_p)
 		var d_reste := n.position.distance_to(cible)
 		if not n.visible or d_reste > TW * 3.0:
 			n.position = cible   # apparition ou saut (changement de grille, respawn) : pas de glissement

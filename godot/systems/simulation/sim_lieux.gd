@@ -343,9 +343,9 @@ static func _sauver_camp(sim: Simulation, joueur: Dictionary) -> void:
 			sim.entites[id]["dormant_depuis"] = sim.horloge_monde.ticks   # LOD de simulation : au retour, sa routine le remettra à sa place
 			sauve.entites[id] = sim.entites[id]
 			sauve.ordre.append(id)
-	sim.grille.liberer(joueur.pos)
+	sim.grille.liberer(joueur.pos, joueur.id)
 	for id_p in partants:
-		sim.grille.liberer(sim.entites[id_p].pos)
+		sim.grille.liberer(sim.entites[id_p].pos, sim.entites[id_p].id)
 	sim.camp_sauve = sauve
 
 
@@ -699,7 +699,7 @@ static func _zones_a_l_entree(sim: Simulation, e: Dictionary, pos: Vector2i, tic
 				if not paire.is_empty():
 					var sortie: Vector2i = paire.back().pos
 					if sim.grille.dans(sortie) and sim.grille.occupant(sortie).is_empty() and not sim.grille.bloque_passage(sortie):
-						sim.grille.liberer(e.pos)
+						sim.grille.liberer(e.pos, e.id)
 						e.pos = sortie
 						sim.grille.placer(e.id, sortie)
 						EventBus.emettre(&"journal", [&"journal.portail_traverse", {"nom": e.name_key}])

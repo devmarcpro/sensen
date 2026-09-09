@@ -266,7 +266,7 @@ static func _traverser_mur(sim: Simulation, e: Dictionary, vers: Vector2i, tick:
 	if Etres.bloque_statuts(e, "deplacement", sim.statuts_defs):
 		return false
 	sim._quitter_garde(e)
-	sim.grille.liberer(e.pos)
+	sim.grille.liberer(e.pos, e.id)
 	e.orientation = Vector2i(signi(d.x), signi(d.y))
 	e.pos = vers
 	sim.grille.placer(e.id, vers)
@@ -523,7 +523,7 @@ static func _traverser(sim: Simulation, e: Dictionary, tick: int) -> bool:
 			var vers: Vector2i = j
 			if not sim.grille.occupant(vers).is_empty():
 				return false
-			sim.grille.liberer(e.pos)
+			sim.grille.liberer(e.pos, e.id)
 			e.pos = vers
 			sim.grille.placer(e.id, vers)
 			e["vue_sale"] = true
@@ -618,7 +618,7 @@ static func _lancer_etre(sim: Simulation, e: Dictionary, vers: Vector2i, tick: i
 	# On place la cible du côté du lancer, puis on la projette.
 	var depart: Vector2i = e.pos + d
 	if sim.grille.dans(depart) and not sim.grille.bloque_passage(depart) and (sim.grille.occupant(depart).is_empty() or sim.grille.occupant(depart) == c.id):
-		sim.grille.liberer(c.pos)
+		sim.grille.liberer(c.pos, c.id)
 		c.pos = depart
 		sim.grille.placer(c.id, depart)
 	var cibles: Array[Dictionary] = [c]

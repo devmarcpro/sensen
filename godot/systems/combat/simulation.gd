@@ -465,7 +465,7 @@ func _tiquer_faune(tick: int) -> void:
 		return
 	for b in betes:   # despawn au loin, hors combat
 		if Grille.distance(b.pos, j.pos) > int(fa.despawn) and not en_combat(b):
-			grille.liberer(b.pos)
+			grille.liberer(b.pos, b.id)
 			b.vivant = false
 			ordre.erase(b.id)
 			entites.erase(b.id)
@@ -634,7 +634,7 @@ func _tiquer_faim(tick: int) -> void:
 				if int(e.sante) <= 0 and e.vivant:   # mort de faim : la même sortie que la mort au combat
 					e.sante = 0
 					e.vivant = false
-					grille.liberer(e.pos)
+					grille.liberer(e.pos, e.id)
 					EventBus.emettre(&"journal", [&"journal.mort", {"nom": e.name_key}])
 					EventBus.emettre(&"creature_killed", [e.id, e.id])
 		e.faim_tick = tick
@@ -862,7 +862,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 	for x in vivants():   # les relevés du Fossoyeur retournent à la terre
 		if x.has("fin_invocation") and x.horloge == nom and int(x.fin_invocation) <= tick:
 			x.vivant = false
-			grille.liberer(x.pos)
+			grille.liberer(x.pos, x.id)
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
 	SimTalents._tirs_d_affuts(self, nom, tick)
 	SimTerrain._maj_etats_meteo(self)
@@ -1246,21 +1246,28 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 					break
 			if not marche_ok:
 				return false
-	# ON NE SE BLOQUE PLUS ENTRE AMIS (designer 2026-09-08 : « possible d'être sur la même case qu'un PNJ non
-	# hostile »). La grille ne tient qu'UN occupant par tuile — son miroir dans le noyau C++ non plus —, donc deux
-	# êtres ne peuvent pas s'y tenir vraiment : on ÉCHANGE les deux places. En jeu c'est ce qui compte, un villageois
-	# ne ferme plus une porte ni un couloir ; et le modèle d'occupation, lui, ne bouge pas d'une ligne.
-	var echange: Dictionary = {}
-	if not grille.occupant(vers).is_empty():
-		var occupe: Dictionary = entites.get(grille.occupant(vers), {})
-		if occupe.is_empty() or not occupe.vivant or SimPnj.ennemis(self, e, occupe):
-			return false   # un ennemi barre toujours le passage : c'est lui qu'on attaque, pas qu'on contourne
-		if Etres.bloque_statuts(occupe, "deplacement", statuts_defs) or occupe.has("monture"):
-			return false   # enraciné, ou à cheval : il ne se pousse pas
-		echange = occupe
+	# ON MONTE SUR LA PILE (designer 2026-09-08 : « les entités peuvent se stack sur la même case, un PNJ peut porter
+	# un PNJ qui porte un PNJ »). L'échange posé ce jour-là — celui qu'on croise prenait la place qu'on quittait —
+	# donnait le bon résultat en jeu sans faire une pile ; le designer a tranché. Un ennemi barre toujours le
+	# passage : c'est lui qu'on attaque, pas qu'on escalade.
+	var pile_vers: Array = grille.occupants_de(vers)
+	if not pile_vers.is_empty():
+		for autre_id in pile_vers:
+			var occupe: Dictionary = entites.get(str(autre_id), {})
+			if occupe.is_empty() or not occupe.vivant or SimPnj.ennemis(self, e, occupe):
+				return false
+		if pile_vers.size() >= int(regles.r.deplacement.get("pile_max", 3)):
+			return false   # la pile a une hauteur : au-delà, la tuile est pleine
 	if not par_escalier and grille.a_lien(vers):
 		arrivee = grille.lien_de(vers)
-		if not grille.occupant(arrivee).is_empty():
+		# L'autre bout de l'escalier obéit à la même règle que le pas ordinaire (la pile, 26 ter) : on monte sur des
+		# amis, jamais sur un ennemi, et jamais au-delà de `pile_max`.
+		var pile_arr: Array = grille.occupants_de(arrivee)
+		for autre_a in pile_arr:
+			var occ_a: Dictionary = entites.get(str(autre_a), {})
+			if occ_a.is_empty() or not occ_a.vivant or SimPnj.ennemis(self, e, occ_a):
+				return false
+		if pile_arr.size() >= int(regles.r.deplacement.get("pile_max", 3)):
 			return false
 	if "fermee" in grille.contenu_de(vers).get("tags", []):   # une porte fermée : ce pas l'ouvre, le suivant passe
 		return _basculer_porte(e, vers, tick)
@@ -1286,14 +1293,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 		EventBus.emettre(&"journal", [&"journal.coule", {}])   # le poids tire vers le fond : on refuse d'entrer
 		return false
 	_quitter_garde(e)
-	grille.liberer(e.pos)
-	if not echange.is_empty():   # l'échange : celui qu'on croise prend la place qu'on quitte, sans rien payer
-		var depart_ech: Vector2i = e.pos
-		grille.liberer(echange.pos)
-		echange.pos = depart_ech
-		echange.orientation = Grille.plat(depart_ech) - Grille.plat(vers)
-		echange["vue_sale"] = true
-		grille.placer(echange.id, depart_ech)
+	grille.liberer(e.pos, e.id)   # son id, pas le sommet : il peut être SOUS quelqu'un (la pile, 26 ter)
 	e.orientation = Grille.plat(vers) - Grille.plat(e.pos)
 	if arrivee != vers or par_escalier:   # l'escalier franchi : on est à l'autre bout, un étage plus haut ou plus bas
 		vers = arrivee
@@ -2116,7 +2116,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		SimPnj.reputation(self, att, cible, "tuer" if cible.sante <= 0 else "frapper")
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
-		grille.liberer(cible.pos)
+		grille.liberer(cible.pos, cible.id)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
 		SimPnj._quetes_sur_mort(self, cible, source)
@@ -2736,7 +2736,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 					var dh := grille.h(vers) - grille.h(c.pos)
 					if dh >= int(regles.r.deplacement.falaise_delta):
 						break
-					grille.liberer(c.pos)
+					grille.liberer(c.pos, c.id)
 					c.pos = vers
 					grille.placer(c.id, vers)
 					if -dh >= int(regles.r.deplacement.chute_delta):
@@ -2751,7 +2751,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 			for p in chemin:
 				if grille.cout_pas(e.pos, p, Etres.est_volant(e)) < 0 or not grille.occupant(p).is_empty():
 					break
-				grille.liberer(e.pos)
+				grille.liberer(e.pos, e.id)
 				e.pos = p
 				grille.placer(e.id, p)
 		"attraction":   # la cible est tirée vers le lanceur (Modules — Attraction, Convocation)
@@ -2766,7 +2766,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 						if vers != e.pos:
 							_choc_de_poussee(c, vers, n_a - i, e.id)   # tiré contre un mur ou un autre être
 						break
-					grille.liberer(c.pos)
+					grille.liberer(c.pos, c.id)
 					c.pos = vers
 					grille.placer(c.id, vers)
 		"recul":   # le lanceur se dégage, dos à sa cible (Botte)
@@ -2775,7 +2775,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				var vers: Vector2i = e.pos + dr
 				if not grille.dans(vers) or grille.bloque_passage(vers) or not grille.occupant(vers).is_empty():
 					break
-				grille.liberer(e.pos)
+				grille.liberer(e.pos, e.id)
 				e.pos = vers
 				grille.placer(e.id, vers)
 		"saut":   # Élan : le lanceur bondit vers la tuile visée, par-dessus ce qui gêne
@@ -2791,7 +2791,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 					continue   # on saute par-dessus
 				arrivee = vers
 			if arrivee != e.pos:
-				grille.liberer(e.pos)
+				grille.liberer(e.pos, e.id)
 				e.pos = arrivee
 				grille.placer(e.id, arrivee)
 		"permutation":   # les deux échangent leurs places
@@ -2812,7 +2812,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				var libre := _tuile_libre_autour(e.pos)
 				if libre == Vector2i(-1, -1):
 					continue
-				grille.liberer(c.pos)
+				grille.liberer(c.pos, c.id)
 				c.pos = libre
 				grille.placer(c.id, libre)
 				EventBus.emettre(&"journal", [&"journal.convocation", {"nom": e.name_key, "allie": c.name_key}])
@@ -2846,7 +2846,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				if grille.occupant(q).is_empty() and not grille.bloque_passage(q):
 					but = q
 			if but != e.pos:
-				grille.liberer(e.pos)
+				grille.liberer(e.pos, e.id)
 				e.pos = but
 				grille.placer(e.id, but)
 		"retour_ancre":   # Retour : l'Ancre posée plus tôt rappelle son auteur
@@ -2859,7 +2859,7 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 				return
 			var but_a: Vector2i = ancres.back().pos
 			if grille.dans(but_a) and grille.occupant(but_a).is_empty() and not grille.bloque_passage(but_a):
-				grille.liberer(e.pos)
+				grille.liberer(e.pos, e.id)
 				e.pos = but_a
 				grille.placer(e.id, but_a)
 				EventBus.emettre(&"journal", [&"journal.retour_ancre", {"nom": e.name_key}])
@@ -4579,7 +4579,7 @@ func _ia_lointain(e: Dictionary, profil: Dictionary, tick: int) -> void:
 		e.compteur = tick + int(lod.get("attente_ticks", 200))
 		return
 	var parcouru := Grille.distance(e.pos, q)
-	grille.liberer(e.pos)
+	grille.liberer(e.pos, e.id)
 	e.pos = q
 	grille.placer(e.id, q)
 	e.orientation = Vector2i(signi(cible.x - q.x), signi(cible.y - q.y)) if cible != q else e.get("orientation", Vector2i(0, 1))

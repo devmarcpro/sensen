@@ -322,6 +322,47 @@ func _comparer_noyau(g: Grille, nom: String, n: int) -> void:
 	print("  noyau (%s) : %d chemins, GDScript %.1f ms, C++ %.2f ms" % [nom, n, float(t_gd) / 1000.0, float(t_cpp) / 1000.0])
 
 
+## UNE TUILE TIENT UNE PILE (ordre de travail 26 ter ; designer 2026-09-08 : « les entités peuvent se stack sur la
+## même case, un PNJ peut porter un PNJ qui porte un PNJ »). Ce test prouve les quatre règles : on monte sur un ami,
+## `occupant` reste le SOMMET (les cent quatre-vingts lecteurs de la grille lisent ça), celui du dessous peut partir
+## sans emporter celui du dessus, et un ennemi ne s'escalade pas.
+func test_pile_sur_une_tuile() -> void:
+	var s := nouvelle_sim("plaine_au_talus")
+	var j := joueur_de(s)
+	var g := s.grille
+	var h := s.horloge_de(j)
+	# Deux compagnons du même camp, l'un à côté de l'autre : personne n'est hostile à personne.
+	var a := s.ajouter("villageois", j.pos + Vector2i(2, 0), "ia")
+	var b := s.ajouter("villageois", j.pos + Vector2i(3, 0), "ia")
+	a.camp = j.camp
+	b.camp = j.camp
+	var tuile: Vector2i = a.pos
+	verifier(g.occupants_de(tuile) == [a.id] and g.etage_pile(tuile, a.id) == 0, "une tuile à un occupant : une pile d'un, au sol")
+	# b monte sur a.
+	b.compteur = h.ticks
+	s.attente[b.id] = true
+	verifier(s.intention(b.id, {"type": "deplacer", "vers": tuile}), "on marche sur un ami : le pas est accepté")
+	verifier(b.pos == tuile and a.pos == tuile, "les deux êtres sont sur la MÊME tuile (%s)" % str(tuile))
+	verifier(g.occupants_de(tuile) == [a.id, b.id], "la pile va du bas vers le haut : %s" % str(g.occupants_de(tuile)))
+	verifier(g.occupant(tuile) == b.id and g.etage_pile(tuile, b.id) == 1, "`occupant` rend le SOMMET, et le sommet est à l'étage 1")
+	# Celui du DESSOUS s'en va : celui du dessus reste, et redevient le sol de sa tuile.
+	a.compteur = h.ticks
+	s.attente[a.id] = true
+	verifier(s.intention(a.id, {"type": "deplacer", "vers": tuile + Vector2i(0, 1)}), "celui du dessous s'en va")
+	verifier(g.occupants_de(tuile) == [b.id] and g.occupant(tuile) == b.id and g.etage_pile(tuile, b.id) == 0, "le dessus reste et redescend au sol")
+	verifier(not g.piles.has(g.idx(tuile)), "une tuile revenue à un seul occupant ne coûte plus rien : elle sort des piles")
+	# Un ennemi ne s'escalade pas : c'est lui qu'on attaque.
+	var loup: Dictionary = s.entites["loup_2"]
+	g.liberer(loup.pos, loup.id)
+	loup.pos = tuile + Vector2i(2, 0)
+	g.placer(loup.id, loup.pos)
+	b.compteur = h.ticks
+	s.attente[b.id] = true
+	verifier(not s.intention(b.id, {"type": "deplacer", "vers": loup.pos}) or b.pos != loup.pos, "un ennemi barre le passage : on ne lui monte pas dessus")
+	# La hauteur de pile est en données, et elle borne.
+	verifier(int(s.regles.r.deplacement.pile_max) >= 3, "pile_max vaut au moins trois : « un PNJ peut porter un PNJ qui porte un PNJ »")
+
+
 func test_grille() -> void:
 	var s := nouvelle_sim("gorge")
 	var g := s.grille
@@ -492,21 +533,25 @@ func test_simulation() -> void:
 	var avant: int = j.compteur
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, -1)}), "intention de déplacement acceptée")
 	verifier(j.compteur == s.horloge_monde.ticks + 300, "déplacement plat : 300 ticks")
-	# ON NE SE BLOQUE PLUS ENTRE AMIS (designer 2026-09-08) : marcher sur un non-hostile ÉCHANGE les deux places ;
-	# un ennemi, lui, barre toujours le passage — c'est lui qu'on attaque, pas qu'on contourne.
+	# UNE TUILE TIENT UNE PILE (designer 2026-09-08, codée le 2026-09-09) : marcher sur un non-hostile met le
+	# marcheur AU SOMMET de sa tuile — il ne prend plus sa place, il monte dessus. Un ennemi, lui, barre toujours le
+	# passage : c'est lui qu'on attaque, pas qu'on escalade.
 	var ami := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
 	ami.camp = "civil"
 	var pos_ami: Vector2i = ami.pos
-	var pos_j: Vector2i = j.pos
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "deplacer", "vers": pos_ami}), "marcher sur un PNJ non hostile est accepté")
-	verifier(j.pos == pos_ami and ami.pos == pos_j, "les deux places sont échangées (%s ↔ %s)" % [str(j.pos), str(ami.pos)])
-	verifier(s.grille.occupant(pos_ami) == j.id and s.grille.occupant(pos_j) == ami.id, "la grille suit l'échange")
+	verifier(j.pos == pos_ami and ami.pos == pos_ami, "les deux êtres tiennent la MÊME tuile (%s)" % str(j.pos))
+	verifier(s.grille.occupants_de(pos_ami) == [ami.id, j.id] and s.grille.occupant(pos_ami) == j.id, "la pile va du bas vers le haut, et `occupant` rend le sommet")
 	var hostile := s.ajouter("loup", j.pos + Vector2i(1, 0), "ia")
 	s.attente[j.id] = true
 	var pos_avant_h: Vector2i = j.pos
 	s.intention(j.id, {"type": "deplacer", "vers": hostile.pos})
 	verifier(j.pos == pos_avant_h, "un hostile barre toujours le passage")
+	# Ce loup-là a fini son office. On le retire de la grille : depuis la pile, poser un être sur une tuile occupée
+	# n'ÉCRASE plus l'occupant, il s'empile — et la suite du test pose un second loup exactement ici.
+	s.grille.liberer(hostile.pos, hostile.id)
+	hostile.vivant = false
 	s.attente.erase(j.id)   # le refus n'a pas consommé l'attente : on la rend, l'assertion suivante la teste
 	verifier(not s.intention(j.id, {"type": "deplacer", "vers": j.pos + Vector2i(0, -1)}), "pas d'intention hors attente")
 	verifier(not s.attente.has(j.id), "intention consommée")

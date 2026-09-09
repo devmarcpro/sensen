@@ -82,6 +82,13 @@ Les règles générales du combat : pas de jet de toucher, la géométrie décid
 > **Deux refus subsistent, et ils sont voulus** : un **ennemi** barre toujours le passage — c'est lui qu'on attaque, pas qu'on contourne ; et un être **enraciné** (statut qui bloque le déplacement) ou **à cheval** ne se pousse pas.
 > `test_simulation` le prouve dans les deux sens : l'échange accepté et la grille qui suit, le pas refusé sur un hostile.
 
+> [!success] Codé le 2026-09-09 — **une tuile tient une pile** (designer 2026-09-08 : « les entités peuvent se stack sur la même case, un PNJ peut porter un PNJ qui porte un PNJ »)
+> **La règle** : on marche sur une tuile occupée si **aucun** de ses occupants n'est hostile, et on arrive **au sommet** de la pile ; un ennemi barre toujours le passage, c'est lui qu'on attaque. La hauteur est en données — `combat_rules.deplacement.pile_max`, trois, parce que « un PNJ peut porter un PNJ qui porte un PNJ ». L'escalier obéit à la même règle à son autre bout.
+> **Le modèle, et c'est lui qui a rendu le changement petit** : `occupants` garde sa forme d'avant (index → un id) et désigne le **sommet** ; un second dictionnaire `piles` ne porte que les tuiles à plusieurs. Les 183 lecteurs d'`occupant()` n'ont pas eu une ligne à changer, et le **miroir d'octets du noyau C++ garde son sens** — il dit « il y a quelqu'un », ce qui est toujours vrai. Le noyau n'a pas bougé.
+> **`liberer` prend un id** : sans lui il retire le sommet (ce qui reste juste quand on est seul sur sa tuile), avec lui il retire le bon être — car depuis la pile, on peut être SOUS quelqu'un.
+> **UN DÉFAUT QUE LA PILE A RÉVÉLÉ** : avant, `placer` sur une tuile déjà occupée **écrasait silencieusement** l'occupant — le dictionnaire ne gardait que le dernier venu, et l'être évincé continuait de croire qu'il tenait cette tuile. C'était une corruption discrète, que rien ne signalait ; un test la traversait sans le savoir. `placer` empile désormais, ce qui est le comportement juste d'une primitive — mais il faut savoir que les chemins de spawn qui posaient un être sur une tuile occupée fabriquent maintenant une pile au lieu d'une corruption. Les deux sont des défauts d'appelant ; le second se voit.
+> **Ce qui reste** : le **chemin** ne traverse toujours pas un ami. Le pas passe, l'itinéraire non — le noyau n'ignore qu'un seul id. Voir [[Ordre de travail]], ligne 26 nonies. Et **porter** quelqu'un est une relation, pas une pile : ligne 26 decies.
+
 ## Liens
 - **Dépend de** : [[Action-time à ticks]], [[Grille continue]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[Zones de coup par dénivelé]], [[Garde en posture]], [[Attaque lourde et télégraphe]], [[XP de combat]], [[Pipeline de résolution du combat]]

@@ -200,23 +200,39 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     donc **dans l'autre sens** : c'est la carte de lumière qu'il faudra refaire sur le patron de la chaleur. Celui qui
     écrira le son doit copier la chaleur, surtout pas la lumière.
 
-26 ter. **UNE TUILE TIENT UNE PILE** — êtres ET meubles *(designer 2026-09-08 : « les entités peuvent se stack sur la
-    même case, un PNJ peut porter un PNJ qui porte un PNJ ; si un PNJ non hostile bloque une porte le joueur peut
-    passer par-dessus », puis « on peut aussi mettre des meubles les uns sur les autres »).*
-    **L'état du 2026-09-08** : une tuile tient **un** occupant (`occupants` : index → un id) et **un** meuble
-    (`meubles` : index → un id). Le contournement posé ce jour-là — marcher sur un non-hostile **échange** les deux
-    places — donne le bon résultat en jeu mais ne fait pas une pile ; le designer a tranché : il veut la pile.
-    **Ce que ça touche, et il faut le dire avant de commencer** : `occupant()` est lu à **179 endroits**, et surtout
-    le **noyau C++** lit `occupants` pour le pathfinding (`s.occupants.get(vi, String())` : une tuile occupée ne se
-    traverse que si l'occupant est celui qu'on ignore) et en tient un **miroir d'octets** `occ`. Une pile veut dire :
-    `occupant()` rend le **sommet** (les 179 lecteurs continuent de marcher), `occupants_de()` rend la pile, `liberer`
-    retire **un id** au lieu de vider la tuile, le noyau apprend à ignorer **un ensemble** d'ids, et le dessin empile
-    les paperdolls au lieu de les superposer.
-    **Et « porter » n'est pas « être au même endroit »** : un PNJ qui en porte un autre le **déplace avec lui**. C'est
-    une relation, pas une coïncidence de position — elle se range avec le corps (28 bis) et les cadavres (28 ter),
-    parce que porter un corps est le premier usage qu'on en fera.
-    **Pourquoi ici** : la pile est un changement de modèle. La faire avant la mort des 236 contenus, c'est la refaire
-    après ; la faire après le corps-plan-de-parties, c'est se priver de porter un cadavre pendant tout le palier.
+~~26 ter. **UNE TUILE TIENT UNE PILE**~~ — **FAITE le 2026-09-09** *(designer 2026-09-08 : « les entités peuvent se
+    stack sur la même case, un PNJ peut porter un PNJ qui porte un PNJ ; si un PNJ non hostile bloque une porte le
+    joueur peut passer par-dessus »).* L'échange posé ce jour-là — celui qu'on croise prenait la place qu'on quittait
+    — donnait le bon résultat en jeu sans faire une pile ; il a disparu.
+    **Le choix de modèle, et c'est lui qui a rendu le changement petit** : `occupants` garde sa forme (index → UN id)
+    et désigne désormais le **sommet** ; un second dictionnaire `piles` ne porte que les tuiles à **plusieurs**.
+    Conséquences : les **183 lecteurs** d'`occupant()` n'ont pas eu une ligne à changer — ils lisent le sommet,
+    c'est-à-dire l'être qu'on vise, qu'on attaque, qu'on survole —, le **miroir d'octets `occ`** du noyau C++ garde
+    exactement son sens (1 = il y a quelqu'un), et **le noyau n'a pas bougé**. Une tuile à un seul occupant ne coûte
+    rien de plus qu'avant, ce qui est le cas de toutes sauf une poignée.
+    **Ce qui a changé ailleurs** : `liberer(pos)` prend un `id` optionnel — sans lui il retire le sommet, ce qui
+    reste juste partout où l'appelant est seul sur sa tuile ; les **38 appels** des systèmes donnent maintenant leur
+    id, parce qu'un être peut être SOUS un autre. Le client dessine celui qui est monté `styles.sprites.pile_hauteur`
+    pixels plus haut et devant. La hauteur de pile est en données (`deplacement.pile_max` = 3, « un PNJ peut porter
+    un PNJ qui porte un PNJ »). Un ennemi ne s'escalade jamais : c'est lui qu'on attaque.
+    **CE QUI RESTE, et c'est la ligne 26 nonies** : le CHEMIN ne traverse toujours pas un ami.
+
+26 nonies. **LE CHEMIN TRAVERSE LES AMIS.** Le pas passe depuis le 2026-09-09 (on monte sur la pile), mais le
+    **pathfinding** refuse encore toute tuile occupée : le noyau C++ lit le miroir `occ` et n'ignore qu'**un seul**
+    id, celui qu'on lui passe. Un villageois dans une embrasure ne bloque donc plus le pas, mais bloque encore
+    l'itinéraire — un clic lointain contourne, ou échoue. **Ce qu'il faut** : que le noyau accepte un **ensemble**
+    d'ids à ignorer (ou, mieux, un miroir « qui bloque QUI » — mais l'hostilité est relative au marcheur, donc c'est
+    l'ensemble qui est juste). C'est une modification du C++ et une reconstruction de la DLL, plus la même chose
+    dans `_chemin_gd` pour que le test d'égalité tienne.
+
+26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.** La pile est une coïncidence de position ; **porter** est une
+    relation — celui qui porte déplace l'autre avec lui. C'est ce que le designer voulait dire par « un PNJ peut
+    porter un PNJ ». La relation se range avec le corps (ligne 28 bis) et les cadavres (28 ter), parce que porter un
+    corps est le premier usage qu'on en fera. **Non codée.**
+
+26 undecies. **LES MEUBLES S'EMPILENT AUSSI** *(designer 2026-09-08 : « on peut aussi mettre des meubles les uns sur
+    les autres »).* `meubles` est un dictionnaire index → **un** id, exactement comme `occupants` l'était : le même
+    remède s'applique, et il est maintenant écrit et prouvé pour les êtres. **Non codée.**
 
 26 quater. **UN ÉTAGE NE MONTRE QUE SON NIVEAU** *(designer 2026-09-08 : « pour les étages, quand on est à un autre
     étage, est seulement rendu ce qu'il y a à ce niveau Z »).* **C'est un RENVERSEMENT de la décision du 2026-09-06**,

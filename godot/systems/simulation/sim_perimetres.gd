@@ -445,7 +445,7 @@ static func _installer_a_la_base(sim: Simulation, x: Dictionary, base: Vector2i)
 		if SimCamp._cell_de(sim, x.pos) != base or not sim.entites.has(x.id):
 			var q: Vector2i = SimLieux._tuile_libre_pres(sim, x, chez)
 			if sim.entites.has(x.id):
-				sim.grille.liberer(x.pos)
+				sim.grille.liberer(x.pos, x.id)
 			x.pos = q
 			if not sim.entites.has(x.id):
 				sim.entites[x.id] = x
@@ -453,7 +453,7 @@ static func _installer_a_la_base(sim: Simulation, x: Dictionary, base: Vector2i)
 			sim.grille.placer(x.id, x.pos)
 	else:
 		if sim.entites.has(x.id):   # il part : hors de la grille, dormant dans la cellule de la base
-			sim.grille.liberer(x.pos)
+			sim.grille.liberer(x.pos, x.id)
 			sim.ordre.erase(x.id)
 			sim.entites.erase(x.id)
 		x.pos = chez

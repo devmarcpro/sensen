@@ -729,7 +729,7 @@ static func _vieillir_semaine(sim: Simulation, tick: int) -> void:
 			if rng.randf() < float(ag.chance_mort_par_an) * ecart:
 				x.vivant = false
 				if sim.entites.has(x.id):
-					sim.grille.liberer(x.pos)
+					sim.grille.liberer(x.pos, x.id)
 				EventBus.emettre(&"journal", [&"journal.mort_vieillesse", {"nom": x.name_key}])
 				continue
 		var tranches := int(maxf(0.0, float(x.age) - float(ag.age)) / float(ag.tranche))

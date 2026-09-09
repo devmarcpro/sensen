@@ -67,7 +67,7 @@ static func _quitter_le_territoire(sim: Simulation, x: Dictionary) -> void:
 	x.erase("lit")
 	x.camp = "civil"
 	if sim.entites.has(x.id):
-		sim.grille.liberer(x.pos)
+		sim.grille.liberer(x.pos, x.id)
 		sim.ordre.erase(x.id)
 		sim.entites.erase(x.id)
 	EventBus.emettre(&"journal", [&"journal.quitte_territoire", {"nom": x.name_key}])
@@ -970,7 +970,7 @@ static func _caravanes_du_jour(sim: Simulation, jour: int) -> void:
 	for x in sim.vivants():   # la veille repart
 		if x.has("itinerant") and int(x.itinerant.get("jour", -1)) < jour:
 			EventBus.emettre(&"journal", [&"journal.itinerant_part", {"origine": str(x.itinerant.get("depuis", ""))}])
-			sim.grille.liberer(x.pos)
+			sim.grille.liberer(x.pos, x.id)
 			x.vivant = false
 			sim.ordre.erase(x.id)
 			sim.entites.erase(x.id)

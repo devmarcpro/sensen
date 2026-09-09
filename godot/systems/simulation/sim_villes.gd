@@ -213,7 +213,7 @@ static func _ia_vehicule(sim: Simulation, e: Dictionary, tick: int) -> void:
 
 static func _retirer_vehicule(sim: Simulation, e: Dictionary) -> void:
 	if sim.entites.has(e.id):
-		sim.grille.liberer(e.pos)
+		sim.grille.liberer(e.pos, e.id)
 		sim.ordre.erase(e.id)
 		sim.entites.erase(e.id)
 	e.vivant = false
@@ -246,7 +246,7 @@ static func _monter(sim: Simulation, e: Dictionary, id: String, i: Dictionary, t
 			if vd.has("quai"):   # on descend sur le quai
 				var q: Vector2i = sim._tuile_libre_autour(sim.monde.pos_monde(dest, vd.quai))
 				if sim.grille.dans(q) and sim.grille.occupant(q).is_empty():
-					sim.grille.liberer(e.pos)
+					sim.grille.liberer(e.pos, e.id)
 					e.pos = q
 					sim.grille.placer(e.id, q)
 					sim.maj_vision()
@@ -262,7 +262,7 @@ static func _monter(sim: Simulation, e: Dictionary, id: String, i: Dictionary, t
 			if not sim.grille.dans(q2) or not sim.grille.occupant(q2).is_empty():
 				return false
 			e.or = int(e.or) - prix_c
-			sim.grille.liberer(e.pos)
+			sim.grille.liberer(e.pos, e.id)
 			e.pos = q2
 			sim.grille.placer(e.id, q2)
 			e.compteur = tick + int(tcfg.caleches.get("ticks_trajet", 120))
@@ -273,7 +273,7 @@ static func _monter(sim: Simulation, e: Dictionary, id: String, i: Dictionary, t
 	# Une monture.
 	if str(v.get("maitre", "")) != e.id or not bool(GameData.catalogues.creatures.get(str(v.def), {}).get("monture", false)) or e.has("monture"):
 		return false
-	sim.grille.liberer(v.pos)
+	sim.grille.liberer(v.pos, v.id)
 	sim.ordre.erase(v.id)
 	sim.entites.erase(v.id)
 	e["monture"] = {"id": v.id, "etre": v, "nom": v.name_key}
@@ -961,8 +961,8 @@ static func _oter_bete(sim: Simulation, b: Dictionary, cell_dormante: Vector2i) 
 		(sim.monde.dormants[cell_dormante] as Array).erase(b)
 		return
 	b["vivant"] = false
-	if sim.grille.dans(b.pos) and sim.grille.occupant(b.pos) == str(b.id):
-		sim.grille.liberer(b.pos)
+	if sim.grille.dans(b.pos):   # son id, pas le sommet : depuis la pile (26 ter) il peut être SOUS quelqu'un
+		sim.grille.liberer(b.pos, b.id)
 
 
 ## Les périmètres d'un quartier, dans le contexte de sa ville : le résidentiel, les stockages des entrepôts, les
@@ -1262,7 +1262,7 @@ static func _migrer(sim: Simulation, x: Dictionary, vers: String) -> void:
 	var pos_c: Vector2i = sim.monde.pos_monde(centre, Vector2i(sim.monde.taille / 2, sim.monde.taille / 2))
 	var cell_ici: Vector2i = SimCamp._cell_de(sim, x.pos)
 	if sim.entites.has(x.id):
-		sim.grille.liberer(x.pos)
+		sim.grille.liberer(x.pos, x.id)
 		sim.ordre.erase(x.id)
 		sim.entites.erase(x.id)
 	elif sim.monde.dormants.has(cell_ici):

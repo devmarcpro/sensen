@@ -28,7 +28,10 @@ var contenu := PackedInt32Array()
 var c_data := PackedInt32Array()
 var contenu_ids: Array[String] = [""]    # index de contenu → id (0 = rien)
 var contenu_defs: Dictionary = {}         # id → définition (tile_contents.json)
-var occupants: Dictionary = {}            # index de tuile → id d'entité
+var occupants: Dictionary = {}            # index de tuile → id de l'entité AU SOMMET de la pile
+## Les tuiles qui portent PLUSIEURS êtres (designer 2026-09-08, ordre de travail 26 ter) : index → tableau du bas
+## vers le haut. Seules les tuiles à plusieurs y figurent — une tuile normale ne coûte rien de plus qu'avant.
+var piles: Dictionary = {}                # index de tuile → Array[String], du bas vers le haut
 var dep: Dictionary = {}:                 # combat_rules/deplacement
 	set(v):
 		dep = v
@@ -344,23 +347,66 @@ func hauteur_vue(p: Vector2i) -> int:
 	return h(p) + (int(c.get("hauteur_vue", 0)) if c.get("bloque_vue", false) else 0)
 
 
+## Le SOMMET de la pile d'une tuile — l'être qu'on vise, qu'on attaque, qu'on survole. Les cent quatre-vingts
+## lecteurs de cette fonction n'ont pas eu à changer quand la tuile est devenue une pile (2026-09-09) : c'est tout
+## le bénéfice d'avoir gardé `occupants` sous sa forme d'avant, un id par tuile, et d'avoir mis les tuiles à
+## PLUSIEURS occupants dans un second dictionnaire.
 func occupant(p: Vector2i) -> String:
 	return occupants.get(idx(p), "")
 
 
+## Toute la pile, du BAS vers le HAUT (designer 2026-09-08 : « les entités peuvent se stack sur la même case, un
+## PNJ peut porter un PNJ qui porte un PNJ »). Un seul occupant : un tableau d'un élément ; aucun : vide.
+func occupants_de(p: Vector2i) -> Array:
+	var i := idx(p)
+	if piles.has(i):
+		return piles[i]
+	var un: String = occupants.get(i, "")
+	return [] if un.is_empty() else [un]
+
+
+## L'étage d'un être dans la pile de sa tuile : 0 au sol, 1 sur les épaules du premier. −1 s'il n'y est pas.
+func etage_pile(p: Vector2i, id: String) -> int:
+	return occupants_de(p).find(id)
+
+
+## Poser un être sur une tuile : il arrive AU SOMMET de la pile. Reposer un être déjà présent le remet au sommet
+## plutôt que de le compter deux fois — un `placer` sans `liberer` est une erreur d'appelant, pas un doublon.
 func placer(id: String, p: Vector2i) -> void:
-	var i := idx(p)
-	occupants[i] = id
-	if i >= 0 and i < occ.size():
-		occ[i] = 1
-	_n_occ = occupants.size()
+	var pile := occupants_de(p)
+	pile.erase(id)
+	pile.append(id)
+	_poser_pile(idx(p), pile)
 
 
-func liberer(p: Vector2i) -> void:
-	var i := idx(p)
-	occupants.erase(i)
+## Retirer un être. Sans `id`, on retire le SOMMET : c'est ce que faisait cette fonction quand une tuile ne tenait
+## qu'un occupant, et c'est encore juste partout où l'appelant est seul sur sa tuile. Là où un être peut être SOUS
+## un autre — le déplacement, la mort, la téléportation —, l'appelant donne son id.
+func liberer(p: Vector2i, id: String = "") -> void:
+	var pile := occupants_de(p)
+	if pile.is_empty():
+		return
+	if id.is_empty():
+		pile.pop_back()
+	else:
+		pile.erase(id)
+	_poser_pile(idx(p), pile)
+
+
+## Le sommet, le dictionnaire des piles et le miroir d'octets, tenus ensemble. Le miroir garde son sens d'avant —
+## 1 = il y a quelqu'un —, donc le noyau C++ n'a pas une ligne à changer.
+func _poser_pile(i: int, pile: Array) -> void:
+	if pile.is_empty():
+		occupants.erase(i)
+		piles.erase(i)
+	else:
+		occupants[i] = str(pile.back())
+		if pile.size() > 1:
+			piles[i] = pile
+		else:
+			piles.erase(i)
 	if i >= 0 and i < occ.size():
-		occ[i] = 0
+		occ[i] = 0 if pile.is_empty() else 1
 	_n_occ = occupants.size()
 
 

@@ -76,6 +76,7 @@ func _ready() -> void:
 		if args[i] == "--seul" and i + 1 < args.size():
 			_filtre = str(args[i + 1])
 	verifier(GameData.erreurs.is_empty(), "données valides (Décision — Pipeline de contenu)")
+	_lancer("test_pile_sur_une_tuile")
 	_lancer("test_grille")
 	_lancer("test_noyau_cpp")
 	_lancer("test_lumiere_incrementale")

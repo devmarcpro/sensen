@@ -120,7 +120,7 @@ static func _demonter(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int)
 			for x in sim.vivants():
 				if x.get("hall", Vector2i(-1, -1)) == vers:
 					x.vivant = false
-					sim.grille.liberer(x.pos)
+					sim.grille.liberer(x.pos, x.id)
 			EventBus.emettre(&"journal", [&"journal.hall_demonte", {"guilde": "guilde.%s.name" % str(sim.territoire.halls[_pm(sim, vers)])}])
 			sim.territoire.halls.erase(_pm(sim, vers))
 	sim.grille.meubles.erase(idx)
@@ -297,7 +297,7 @@ static func voyager(sim: Simulation, e: Dictionary, cell: Vector2i, cout_force: 
 	var ou: Vector2i = sim.monde.pos_monde(cell, ec.entree_donjon + Vector2i(0, 1)) if bool(ec.get("a_donjon", false)) else sim.monde.point_marchable(cell)
 	if sim.en_combat(e):
 		sim._quitter_combat(e)   # on ne voyage pas en gardant un combat derrière soi
-	sim.grille.liberer(e.pos)
+	sim.grille.liberer(e.pos, e.id)
 	e.pos = ou
 	SimLieux._verifier_fenetre(sim, e)
 	if not sim.grille.occupant(ou).is_empty() or sim.grille.bloque_passage(ou):

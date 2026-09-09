@@ -830,7 +830,7 @@ static func _respawn(sim: Simulation, e: Dictionary) -> bool:
 		SimTalents._devenir_spectre(sim, e)   # mort en forte corruption sans Renaissance (Talents de race)
 	if sim.lieu == "donjon" and not sim.camp_sauve.is_empty() and e.has("lit"):
 		# Mort en expédition : on se relève au dernier lit, au camp (Mort et pénalité) ; l'expédition est finie.
-		sim.grille.liberer(e.pos)
+		sim.grille.liberer(e.pos, e.id)
 		e["mort_en_expedition"] = true
 		sim.etages_visites.clear()
 		sim.expedition = {}
@@ -950,7 +950,7 @@ static func _effet_echec_lecture(sim: Simulation, e: Dictionary, grave: bool, ti
 		for essai in 50:
 			var p := Vector2i(sim.des.entier(0, sim.grille.largeur - 1), sim.des.entier(0, sim.grille.hauteur_grille - 1))
 			if not sim.grille.bloque_passage(p) and sim.grille.occupant(p).is_empty():
-				sim.grille.liberer(e.pos)
+				sim.grille.liberer(e.pos, e.id)
 				e.pos = p
 				sim.grille.placer(e.id, p)
 				break
