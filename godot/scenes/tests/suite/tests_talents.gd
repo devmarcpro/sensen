@@ -810,16 +810,23 @@ func test_terrasser() -> void:
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "terrasser", "vers": t, "sens": 1})
 	verifier(s.modifs_terrain.has(t) and int(s.modifs_terrain[t].h) == h0, "l'état d'origine est mémorisé (h %d)" % h0)
-	# Hors claim, la semaine rend la tuile ; sur un claim, elle persiste
+	# Hors claim, le monde rend la tuile ; sur un claim, elle persiste.
+	# ET IL PREND SON TEMPS DEPUIS LE 2026-09-09 (ordre de travail 30) : une modification porte l'heure où elle a
+	# été faite, et le délai suit l'`alteration` de la matière. La semaine ne suffit donc plus — on laisse passer
+	# le délai, ce qui est exactement ce que la ligne voulait : *un mur de granit ne tombe pas en sept jours.*
 	var cell := s._cell_de(t)
 	s.monde.claims.erase(cell)
 	s._regenerer_terrain_sauvage()
-	verifier(s.grille.h(t) == h0 and not s.modifs_terrain.has(t), "hors claim : le monde rend la hauteur %d" % h0)
+	verifier(s.modifs_terrain.has(t), "avant son délai, le monde ne rend rien : la tranchée est encore là")
+	s.horloge_monde.ticks += SimTerrain.delai_ruine(s, t, s.modifs_terrain[t]) + 1
+	s._regenerer_terrain_sauvage()
+	verifier(s.grille.h(t) == h0 and not s.modifs_terrain.has(t), "son délai passé, le monde rend la hauteur %d" % h0)
 	s.attente[j.id] = true
 	s.intention(j.id, {"type": "terrasser", "vers": t, "sens": -1})
 	s.monde.claims[cell] = {"proprietaire": j.id}
+	s.horloge_monde.ticks += 100000000
 	s._regenerer_terrain_sauvage()
-	verifier(s.grille.h(t) == h0 - 1, "sur un claim : la tranchée persiste")
+	verifier(s.grille.h(t) == h0 - 1, "sur un claim : la tranchée persiste, quel que soit le temps qui passe")
 	s.monde.fermer()
 
 

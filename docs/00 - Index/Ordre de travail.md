@@ -595,7 +595,21 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     et `relation_de` qui ajoute ce que les factions du PNJ pensent. **Ce qui reste** : les ROYAUMES ne
     portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
     moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
-30. **Le temps long** — usure, ruine, repousse — avec `alteration`.
+~~30. **Le temps long** — usure, ruine, repousse — avec `alteration`.~~ — **LA RUINE ET LA REPOUSSE FAITES le
+    2026-09-09** ; **l'usure d'un objet reste**.
+    **CE QUI N'ALLAIT PAS, ET QUI N'ÉTAIT PAS UN MANQUE MAIS UNE FAUTE** : la repousse existait déjà — chaque
+    semaine, le monde effaçait les modifications de terrain hors des claims. Mais **d'un coup, toutes à la
+    fois, sans regarder la matière** : un mur de granit et un toit de chaume tombaient à la même seconde, et
+    le passage creusé dans la roche se refermait aussi vite qu'un sentier dans les roseaux. C'était une
+    repousse, pas un temps long.
+    **CE QUE LA COLONNE `alteration` APPORTE** : le DÉLAI. Ce qui est **debout** décide en premier — un mur
+    bâti résiste par SA matière, pas par celle qu'il a remplacée ; à défaut, c'est la matière **retirée** qui
+    dit à quelle vitesse le monde la remet. **Et le délai ne se tique pas** : la modification porte l'heure où
+    elle a été faite, et la passe hebdomadaire compare — même économie que la pourriture d'une dépouille et
+    que la rumeur. *Ce qui peut se déduire ne se balaie pas.*
+    **RESTE L'USURE D'UN OBJET** : une lame qui s'émousse et une armure qui se troue demandent que la qualité
+    d'une instance baisse à l'usage — c'est le même `alteration`, appliqué au matériau d'un objet plutôt qu'à
+    celui d'une tuile, et cela touche au combat, donc à des nombres calibrés.
 31. **Les besoins au-delà de la faim** : ~~soif~~, sommeil, peur qui dure (aucun bloqueur non plus).
     ~~**L'HYDRATATION**~~ — **FAITE le 2026-09-09 au soir** *(designer : « on rajoutera l'hydratation aussi »).*
     Elle est la faim avec des nombres plus courts — trois semaines sans manger, trois jours sans boire —, les deux

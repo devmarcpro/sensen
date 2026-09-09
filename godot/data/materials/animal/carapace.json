@@ -17,7 +17,8 @@
     "friction": 32,
     "fusion": 9999,
     "portance": 52,
-    "absorption": 32
+    "absorption": 32,
+    "alteration": 63
   },
   "tags": [
     "carapace"

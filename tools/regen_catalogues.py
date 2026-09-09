@@ -37,9 +37,9 @@ LOCALE = os.path.join(RACINE, 'godot', 'locale', 'fr.csv')
 # il la supprime. Les deux listes sont donc tenues ensemble, ici et dans gen_materials.py.
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
          "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
-         "fusion", "portance", "absorption"]
-ENTETE = "| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Fus | Por | Abs |"
-SEPAR = "|---|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|"
+         "fusion", "portance", "absorption", "alteration"]
+ENTETE = "| Matériau | Dur | Den | Val | CMa | Fla | Iso | CÉl | Flo | Lum | Fer | Tra | Éla | Fri | Fus | Por | Abs | Alt |"
+SEPAR = "|---|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|"
 
 CAT_FICHIER = {
     "bois": "Bois", "metal": "Métaux", "roche": "Roches", "mineral": "Minéraux", "gemme": "Gemmes",

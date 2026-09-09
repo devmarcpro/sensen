@@ -17,7 +17,8 @@
     "friction": 20,
     "fusion": 9999,
     "portance": 3,
-    "absorption": 88
+    "absorption": 88,
+    "alteration": 73
   },
   "tags": [
     "animal"

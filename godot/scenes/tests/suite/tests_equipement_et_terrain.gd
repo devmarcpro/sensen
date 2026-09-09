@@ -4,6 +4,46 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## LE TEMPS LONG (ordre de travail 30, 2026-09-09) : la repousse existait, mais elle était IMMÉDIATE et identique
+## pour tout le monde — un mur de granit et un toit de chaume tombaient à la même seconde. La colonne `alteration`
+## lui donne enfin un délai, et c'est ce délai qu'on éprouve : sa dépendance à la matière, et le fait qu'il ne se
+## tique pas.
+func test_temps_long() -> void:
+	var tl: Dictionary = GameData.config("combat_rules").get("temps_long", {})
+	verifier(not tl.is_empty(), "le temps long a ses nombres en données")
+	# 1. LA COLONNE EXISTE SUR LES 247 MATIÈRES, et elle range le monde dans le bon ordre.
+	var sans := 0
+	for mid: String in GameData.catalogues.materials.keys():
+		if not (GameData.catalogues.materials[mid].get("stats", {}) as Dictionary).has("alteration"):
+			sans += 1
+	verifier(sans == 0, "chaque matière dit à quelle vitesse elle se dégrade exposée (%d muette(s))" % sans)
+	var alt := func(m: String) -> int: return int(GameData.catalogues.materials.get(m, {}).get("stats", {}).get("alteration", -1))
+	verifier(alt.call("granit") < alt.call("chene") and alt.call("chene") < alt.call("paille"), "la pierre tient, le bois moins, la paille pas du tout (%d < %d < %d)" % [alt.call("granit"), alt.call("chene"), alt.call("paille")])
+	verifier(alt.call("or") < alt.call("fer"), "l'or ne s'oxyde pas et le fer rouille — et c'est POUR CELA que l'or vaut cher (%d < %d)" % [alt.call("or"), alt.call("fer")])
+
+	# 2. LE DÉLAI SUIT LA MATIÈRE. On le demande à la règle, sur deux tuiles de matières opposées.
+	var s := nouvelle_sim("gorge")
+	var t: Vector2i = s.vivants()[0].pos + Vector2i(2, 0)
+	if not s.grille.dans(t):
+		return
+	var memo := {"h": 0, "contenu": 0, "tick": 0, "materiau": "granit"}
+	var d_granit: int = SimTerrain.delai_ruine(s, t, memo)
+	memo["materiau"] = "paille"
+	var d_paille: int = SimTerrain.delai_ruine(s, t, memo)
+	verifier(d_granit > d_paille * 3, "un passage creusé dans le granit reste ouvert bien plus longtemps qu'un sentier dans la paille (%d contre %d)" % [d_granit, d_paille])
+
+	# 3. IL NE SE TIQUE PAS : la modification porte son heure, et la passe hebdomadaire compare. Tant que le délai
+	# n'est pas échu, le monde ne rend rien — et une mémoire d'AVANT cette ligne, sans heure, est échue d'emblée.
+	var s2 := nouvelle_sim("gorge")
+	var j2 := joueur_de(s2)
+	var q: Vector2i = j2.pos + Vector2i(1, 0)
+	if not s2.grille.dans(q) or s2.monde != null:
+		return   # l'arène n'a pas de monde : la passe hors claim ne s'y joue pas, on s'arrête ici
+	SimTerrain._memoriser_terrain(s2, q)
+	verifier(s2.modifs_terrain.has(q) and int(s2.modifs_terrain[q].get("tick", -1)) == s2.horloge_monde.ticks, "une modification retient l'heure où elle a été faite")
+	verifier(s2.modifs_terrain[q].has("materiau"), "et la matière qu'il faudra remettre")
+
+
 func test_effets_equipement() -> void:
 	var s := Simulation.new(139)
 	s.charger_camp()

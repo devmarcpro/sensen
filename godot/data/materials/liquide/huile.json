@@ -17,7 +17,8 @@
     "friction": 5,
     "fusion": -6,
     "portance": 0,
-    "absorption": 22
+    "absorption": 22,
+    "alteration": 70
   },
   "tags": [
     "liquide"

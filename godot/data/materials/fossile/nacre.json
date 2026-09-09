@@ -17,7 +17,8 @@
     "friction": 14,
     "fusion": 825,
     "portance": 28,
-    "absorption": 34
+    "absorption": 34,
+    "alteration": 14
   },
   "tags": [
     "marin"

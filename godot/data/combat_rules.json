@@ -1961,5 +1961,10 @@
         "ordre_garde"
       ]
     }
+  },
+  "temps_long": {
+    "_doc": "LE TEMPS LONG (ordre de travail 30, 2026-09-09) : ce qu on fait au monde hors de ses claims ne dure pas — mais cela dure LONGTEMPS quand la matiere resiste. `ruine_ticks_base` est le delai d une matiere de reference (alteration 50) ; le delai reel est `ruine_ticks_base * (100 - alteration) / 50`, si bien qu un mur de granit (alteration 5) tient pres de deux fois la reference et qu un toit de chaume (alteration 88) s en va en un quart. C EST CE QUI EST DEBOUT QUI DECIDE : un mur bati resiste par SA matiere, pas par celle qu il a remplacee ; a defaut, c est la matiere RETIREE qui dit a quelle vitesse le monde la remet.\nLe delai ne se tique pas : la modification porte l heure ou elle a ete faite, et la passe hebdomadaire compare. Meme economie que la pourriture d une depouille.",
+    "ruine_ticks_base": 36000000,
+    "alteration_defaut": 50
   }
 }

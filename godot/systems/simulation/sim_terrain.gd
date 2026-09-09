@@ -11,7 +11,11 @@ extends RefCounted
 ## Mémoriser l'état d'origine d'une tuile avant de la modifier (régénération des cases sauvages).
 static func _memoriser_terrain(sim: Simulation, t: Vector2i) -> void:
 	if not sim.modifs_terrain.has(t):
-		sim.modifs_terrain[t] = {"h": sim.grille.h(t), "contenu": int(sim.grille.contenu[sim.grille.idx(t)])}
+		# L'HEURE ET LA MATIÈRE (ordre de travail 30, 2026-09-09) : sans elles, la repousse ne pouvait qu'être
+		# immédiate et identique pour tout le monde. `tick` dit depuis quand, `materiau` dit ce que le monde doit
+		# remettre — et à quelle vitesse il sait le faire.
+		sim.modifs_terrain[t] = {"h": sim.grille.h(t), "contenu": int(sim.grille.contenu[sim.grille.idx(t)]),
+			"tick": sim.horloge_monde.ticks, "materiau": str(sim.grille.materiau_de(t))}
 	_reveiller_eau_autour(sim, t)
 
 
@@ -1519,7 +1523,22 @@ static func _terrasser(sim: Simulation, e: Dictionary, vers: Vector2i, sens: int
 	return true
 
 
-## Chaque semaine, le monde efface les modifications de terrain hors des claims (Claims et persistance).
+## CE QU'UNE MODIFICATION MET À S'EFFACER (ordre de travail 30, 2026-09-09). **Ce qui est debout décide en
+## premier** : un mur bâti résiste par SA matière, pas par celle qu'il a remplacée. À défaut, c'est la matière
+## RETIRÉE qui dit à quelle vitesse le monde la remet — un passage creusé dans le granit reste ouvert des mois, un
+## sentier taillé dans les roseaux se referme en quelques jours.
+static func delai_ruine(sim: Simulation, t: Vector2i, o: Dictionary) -> int:
+	var tl: Dictionary = sim.regles.r.get("temps_long", {})
+	var mat := str(sim.grille.materiau_de(t))
+	if mat.is_empty():
+		mat = str(o.get("materiau", ""))
+	var alt := float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("alteration", tl.get("alteration_defaut", 50)))
+	return maxi(1, roundi(float(tl.get("ruine_ticks_base", 36000000)) * (100.0 - alt) / 50.0))
+
+
+## Chaque semaine, le monde efface les modifications de terrain hors des claims (Claims et persistance) — **celles
+## qui ont fait leur temps** (ordre de travail 30). Avant, il les effaçait toutes d'un coup, sans regarder la
+## matière : un mur de granit et un toit de chaume tombaient à la même seconde.
 static func _regenerer_terrain_sauvage(sim: Simulation) -> void:
 	var n := 0
 	for t in sim.modifs_terrain.keys():
@@ -1530,6 +1549,10 @@ static func _regenerer_terrain_sauvage(sim: Simulation) -> void:
 		if not sim.grille.occupant(t).is_empty() or sim.grille.meubles.has(sim.grille.idx(t)) or sim.grille.stations_fixes.has(sim.grille.idx(t)):
 			continue
 		var o: Dictionary = sim.modifs_terrain[t]
+		# LE DÉLAI NE SE TIQUE PAS : la modification porte son heure, et l'on compare. Une mémoire d'avant cette
+		# ligne n'a pas d'heure — elle est traitée comme échue, ce qui est le comportement d'avant.
+		if sim.horloge_monde.ticks - int(o.get("tick", -99999999)) < delai_ruine(sim, t, o):
+			continue
 		sim.grille.hauteurs[sim.grille.idx(t)] = int(o.h)
 		sim.grille.contenu[sim.grille.idx(t)] = int(o.contenu)
 		sim.modifs_terrain.erase(t)

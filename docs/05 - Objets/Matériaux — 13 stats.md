@@ -110,6 +110,12 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 >
 > **Preuve** : `tools/verif_generateurs.py` relance la chaîne complète et compare **chaque champ de chaque fiche**. Il dit aujourd'hui : *247 fiches après, le générateur les reproduit toutes*. À relancer après toute retouche d'un catalogue, de la palette ou du générateur.
 
+> [!success] Codé le 2026-09-09 — **la quatorzième colonne : `alteration`**, et le temps long qui la lit (ordre de travail 30)
+> **Elle est DÉRIVÉE, pas tapée à la main**, et c'est la règle de la maison depuis les tables d'agriculture : 247 valeurs écrites une à une seraient 247 occasions de se tromper, et personne ne pourrait dire *pourquoi* le chêne vieillit plus vite que le granit. **Trois faits du monde réel suffisent à les ranger** — la **catégorie** donne le socle (une fibre pourrit, une pierre non) ; la **dureté** ralentit à catégorie égale (l'ébène tient plus que le pin) ; et chez les **métaux**, la **valeur protège**. *Ce n'est pas une commodité de jeu mais une raison du monde : l'or et le platine valent cher **parce qu'**ils ne s'oxydent pas, le fer rouille et ne vaut rien.* La stat qui dit le prix dit donc aussi la noblesse — or 2, argent 18, acier 28, fer 43, cuivre 51.
+> L'ordre obtenu : gemme 1-3, roche 5-8, fossile 8-16, minéral 19-22, synthétique 29-40, métal 1-55, terre 54-55, bois 50-61, liquide 70, animal 61-74, végétal 82-88, météorologique 94-96.
+> **Le sens de la vérité** : la colonne est un **calcul**, donc la dérivation en est la source et la table son tirage — comme les trois colonnes qui l'ont précédée. `regen_catalogues.py --vraiment` l'a portée dans les onze tables ; `gen_materials.py` et `regen_catalogues.py` la connaissent tous les deux, faute de quoi le prochain aller-retour l'effacerait.
+> **Il reste une colonne sur cinq** : `permeabilite`, qui attend son champ (l'eau qui pèse, ligne 32). La note en dit donc **17**.
+
 ## Liens
 - **Dépend de** : [[Data-driven design]]
 - **Alimente** : [[Application des stats de matériau]], [[Schéma matériau]], [[Stats d'un objet crafté]], [[Récolte]], [[Craft compositionnel]]

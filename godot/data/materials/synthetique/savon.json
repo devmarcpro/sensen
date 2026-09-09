@@ -17,7 +17,8 @@
     "friction": 20,
     "fusion": 60,
     "portance": 4,
-    "absorption": 64
+    "absorption": 64,
+    "alteration": 40
   },
   "tags": [],
   "color": "#E4E0CE",

@@ -17,7 +17,8 @@
     "friction": 25,
     "fusion": 1500,
     "portance": 99,
-    "absorption": 9
+    "absorption": 9,
+    "alteration": 1
   },
   "tags": [
     "industriel"

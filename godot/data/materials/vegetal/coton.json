@@ -17,7 +17,8 @@
     "friction": 55,
     "fusion": 9999,
     "portance": 22,
-    "absorption": 88
+    "absorption": 88,
+    "alteration": 88
   },
   "tags": [
     "organique"
