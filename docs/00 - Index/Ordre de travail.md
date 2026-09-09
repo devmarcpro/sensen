@@ -220,19 +220,41 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 26 nonies. **LE CHEMIN TRAVERSE LES AMIS.** Le pas passe depuis le 2026-09-09 (on monte sur la pile), mais le
     **pathfinding** refuse encore toute tuile occupée : le noyau C++ lit le miroir `occ` et n'ignore qu'**un seul**
     id, celui qu'on lui passe. Un villageois dans une embrasure ne bloque donc plus le pas, mais bloque encore
-    l'itinéraire — un clic lointain contourne, ou échoue. **Ce qu'il faut** : que le noyau accepte un **ensemble**
-    d'ids à ignorer (ou, mieux, un miroir « qui bloque QUI » — mais l'hostilité est relative au marcheur, donc c'est
-    l'ensemble qui est juste). C'est une modification du C++ et une reconstruction de la DLL, plus la même chose
-    dans `_chemin_gd` pour que le test d'égalité tienne.
+    l'itinéraire — un clic lointain contourne, ou échoue. C'est la moitié visible de ce que le designer demandait.
+    **La solution que j'ai instruite le 2026-09-09, pour ne pas la redériver** : *pas* un ensemble d'ids passé à
+    chaque appel — le construire coûterait `O(êtres)` par recherche de chemin, soit quarante mille insertions par
+    tick dans une cité. Ce qu'il faut est un **second miroir d'octets** `occ_camp` : pour chaque tuile, l'**indice de
+    camp** de son occupant (0 = libre, 255 = pile de plusieurs, qui bloque par prudence), tenu par `_poser_pile`
+    comme `occ` l'est déjà. Le chercheur de chemin reçoit alors une **table de 256 octets** « ce camp me barre-t-il »,
+    que l'appelant construit en `O(nombre de camps)` — cinq, pas deux cents.
+    **Pourquoi ça suffit** : `SimPnj.ennemis` est presque entièrement affaire de camp — même camp, amis ; `joueur` et
+    `civil` ensemble, amis *sauf* si la relation tombe sous `reputation.hostile_seuil`. Ce seul cas est **par être**
+    et non par camp : il se traite en passant, à côté de la table, la poignée d'ids qui font exception (les civils
+    fâchés contre le joueur), ce qui est court et borné.
+    **Ce que ça touche** : `Grille` (le miroir et son garde-fou), `_chemin_gd`, `atteignables` et `champ_de_cout`
+    côté GDScript ; les mêmes dans `cpp/src/sensen_grille.cpp`, plus la reconstruction de la DLL
+    (`tools/build_cpp.ps1`) ; et `test_noyau_cpp`, qui compare les deux sur des centaines de paires et prouvera
+    l'égalité. **Faire les deux côtés dans le même commit** : un noyau et un GDScript qui divergent, c'est le test
+    d'égalité qui tombe, et on ne sait plus lequel a raison.
 
 26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.** La pile est une coïncidence de position ; **porter** est une
     relation — celui qui porte déplace l'autre avec lui. C'est ce que le designer voulait dire par « un PNJ peut
     porter un PNJ ». La relation se range avec le corps (ligne 28 bis) et les cadavres (28 ter), parce que porter un
     corps est le premier usage qu'on en fera. **Non codée.**
 
-26 undecies. **LES MEUBLES S'EMPILENT AUSSI** *(designer 2026-09-08 : « on peut aussi mettre des meubles les uns sur
-    les autres »).* `meubles` est un dictionnaire index → **un** id, exactement comme `occupants` l'était : le même
-    remède s'applique, et il est maintenant écrit et prouvé pour les êtres. **Non codée.**
+~~26 undecies. **LES MEUBLES S'EMPILENT AUSSI**~~ — **FAIT le 2026-09-09** *(designer 2026-09-08 : « on peut aussi
+    mettre des meubles les uns sur les autres »).* Le même remède que pour les êtres, écrit et prouvé la veille :
+    `meubles` garde sa forme (index → un id) et désigne le **sommet** — les 154 lecteurs de `grille.meubles[i]` lisent
+    toujours le meuble qu'on voit, qu'on utilise, qu'on démonte —, un second dictionnaire `piles_meubles` ne porte que
+    les tuiles à plusieurs, et les écritures directes passent désormais par `poser_meuble` / `retirer_meuble`.
+    **Ce qui diffère des êtres, et qui a demandé du soin** : (a) une tuile de meuble porte un **contenu** de tuile, et
+    ce contenu est celui de la PILE — elle bloque le passage dès qu'un seul de ses meubles bloque ; (b) le sac se
+    souvient de ce qu'on a posé (`objets_poses`), et cette mémoire devient une **liste** pour que démonter rende le
+    bon objet ; (c) démonter ne vide le **contenant** que si c'est lui qu'on retire — ôter le lit posé sur le coffre
+    ne vide plus le coffre.
+    **UN DÉFAUT QUE LE TEST A ATTRAPÉ** : la capture d'une cellule ne gardait qu'**un** meuble par tuile
+    (`"meuble": str(g.meubles.get(gi))`). Une pile perdait donc son dessous au premier aller-retour hors de la
+    cellule. Elle garde maintenant toute la pile, et relit la forme d'avant sans migration.
 
 26 quater. **UN ÉTAGE NE MONTRE QUE SON NIVEAU** *(designer 2026-09-08 : « pour les étages, quand on est à un autre
     étage, est seulement rendu ce qu'il y a à ce niveau Z »).* **C'est un RENVERSEMENT de la décision du 2026-09-06**,

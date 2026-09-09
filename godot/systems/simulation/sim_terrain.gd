@@ -739,7 +739,7 @@ static func _consumer(sim: Simulation, t: Vector2i) -> void:
 		sim.grille.contenu[idx] = 0
 		sim.grille.marquer(t)
 	if sim.grille.meubles.has(idx):
-		sim.grille.meubles.erase(idx)
+		sim.grille.retirer_meuble(idx)
 		sim.grille.marquer(t)
 	sim.lumiere_sale = true
 	EventBus.emettre(&"journal", [&"journal.feu_consume", {"x": t.x, "y": t.y}])

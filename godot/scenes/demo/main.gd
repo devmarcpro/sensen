@@ -10,6 +10,7 @@ const TH := 20            # hauteur du losange
 const HSTEP := 8          # pixels par niveau de hauteur
 const DELAI_PAS := 0.12   # secondes réelles entre deux pas d'une horloge de combat (lisibilité)
 var _pile_hauteur := 22.0        # de combien un être monte à l'écran par étage de pile (styles.sprites.pile_hauteur)
+var _pile_hauteur_meuble := 10.0 # de combien un meuble monte par étage de pile (styles.sprites.pile_hauteur_meuble)
 var rayon_vue := 20              # tuiles dessinées autour du joueur : suit la fenêtre et le zoom (designer 2026-09-06, 23 h : « afficher plus à l'écran »), borné par styles.vue.rayon_max
 var centre_terrain := Vector2i(-99, -99)   # la tuile du joueur à la dernière mise à jour des morceaux de terrain
 var vue_version := -1                      # version du champ de vue dessiné (brouillard de guerre)
@@ -1340,6 +1341,7 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 	var pas_px := Vector2(float(TW) * 0.5, float(TH) * 0.5).length()   # ce que fait un pas à l'écran : la phase de la marche s'y mesure
 	var seuil_picto := int(sim.regles.r.get("tempo", {}).get("pictogramme_au_dela", 0))   # 0 : jamais de pictogramme
 	_pile_hauteur = float(GameData.config("styles").get("sprites", {}).get("pile_hauteur", 22.0))
+	_pile_hauteur_meuble = float(GameData.config("styles").get("sprites", {}).get("pile_hauteur_meuble", 10.0))
 	_calculer_visibles(j)
 	for ke in _vivants_image.size():
 		var e: Dictionary = _vivants_image[ke]
@@ -2791,15 +2793,24 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 ## `station_<id>.png` dans le dossier des sprites, dressé sur la tuile par-dessus le bloc de couleur — s'il existe.
 func _dessiner_sprite_tuile(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, teinte: Color) -> void:
 	var gi := g.idx(t)
-	var tex: Texture2D = null
-	if g.meubles.has(gi):
-		tex = Pictos.texture_objet({"id": "meuble_" + str(g.meubles[gi]), "type": "meuble"})
-	elif g.stations_fixes.has(gi):
-		tex = Pictos.texture_objet({"id": "station_" + str(g.stations_fixes[gi]), "type": "station"})
+	var l := TW * 0.9
+	# UNE TUILE PORTE UNE PILE DE MEUBLES (26 undecies) : on les dessine du bas vers le haut, chacun un peu plus
+	# haut que celui qu'il couvre — le coffre posé sur la table se voit sur la table.
+	var pile_m: Array = g.meubles_de(gi)
+	if not pile_m.is_empty():
+		_lot_vider(ci)   # les sprites se dessinent par-dessus les triangles déjà posés
+		for k_m in pile_m.size():
+			var tex_m := Pictos.texture_objet({"id": "meuble_" + str(pile_m[k_m]), "type": "meuble"})
+			if tex_m == null:
+				continue
+			ci.draw_texture_rect(tex_m, Rect2(c + Vector2(-l * 0.5, TH * 0.4 - l - float(k_m) * _pile_hauteur_meuble), Vector2(l, l)), false, teinte)
+		return
+	if not g.stations_fixes.has(gi):
+		return
+	var tex := Pictos.texture_objet({"id": "station_" + str(g.stations_fixes[gi]), "type": "station"})
 	if tex == null:
 		return
-	var l := TW * 0.9
-	_lot_vider(ci)   # le sprite se dessine par-dessus les triangles déjà posés
+	_lot_vider(ci)
 	ci.draw_texture_rect(tex, Rect2(c + Vector2(-l * 0.5, TH * 0.4 - l), Vector2(l, l)), false, teinte)
 
 

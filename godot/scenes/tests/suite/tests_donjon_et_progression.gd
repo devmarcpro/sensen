@@ -198,6 +198,22 @@ func test_camp() -> void:
 	verifier(s.intention(j.id, {"type": "poser", "objet": coffre_it.uid, "vers": ou}), "poser un coffre")
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "ranger", "objet": pioche, "vers": ou}) and s.contenants[s.grille.idx(ou)] == [pioche] and not (pioche in j.sac), "ranger la pioche dans le coffre")
+	# LES MEUBLES S'EMPILENT (ordre de travail 26 undecies ; designer 2026-09-08 : « on peut aussi mettre des meubles
+	# les uns sur les autres »). On pose un second meuble SUR le coffre : la tuile en porte deux, `meubles` rend le
+	# sommet — c'est celui qu'on voit et qu'on démonte —, et démonter rend le dessus en laissant le dessous.
+	var idx_ou := s.grille.idx(ou)
+	var dessus := s.generer_objet("meuble_lit_de_paille", 1, {}, "commun", 0)
+	j.sac.append(dessus.uid)
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "poser", "objet": dessus.uid, "vers": ou}), "poser un meuble SUR un meuble")
+	verifier(s.grille.meubles_de(idx_ou) == ["coffre", "lit_de_paille"], "la pile de meubles va du bas vers le haut : %s" % str(s.grille.meubles_de(idx_ou)))
+	verifier(str(s.grille.meubles.get(idx_ou, "")) == "lit_de_paille", "`meubles` rend le meuble du SOMMET")
+	verifier(s.grille.bloque_passage(ou), "la pile bloque le passage dès qu'un seul de ses meubles bloque")
+	s.attente[j.id] = true
+	verifier(s.intention(j.id, {"type": "demonter", "vers": ou}) and dessus.uid in j.sac, "démonter rend le meuble du sommet")
+	verifier(s.grille.meubles_de(idx_ou) == ["coffre"] and not s.grille.piles_meubles.has(idx_ou), "le meuble du dessous reste, et la tuile sort des piles")
+	verifier(s.contenants.has(idx_ou) and s.contenants[idx_ou] == [pioche], "le coffre du dessous a gardé son contenu")
+	verifier(int(s.regles.r.camp.meuble_pile_max) >= 2, "meuble_pile_max borne la pile de meubles")
 	# Partir en expédition, ressortir : le camp revient tel quel. Depuis le retrait des entrées posées
 	# (designer 2026-09-01), on part en marchant sur une cellule corrompue — il n'y a plus d'escalier au camp.
 	var cell_corr := Vector2i(-9999, -9999)

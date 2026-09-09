@@ -489,7 +489,7 @@
     }
   },
   "camp": {
-    "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.LE SOMMEIL AVANCE PAR TRANCHES (2026-09-08) : le monde ne saute pas la nuit d'un bloc, il avance par `sommeil_tranche_ticks` pour que les etres agissent, au plus `sommeil_tranches_max` fois. Ces deux nombres etaient ECRITS EN DUR (100 et 200) : au passage du tick a la milliseconde, une nuit de 800 000 ticks n'en avancait plus que 20 000 — le dormeur se reveillait douze minutes plus tard. Le produit des deux doit couvrir `dormir_ticks`.",
+    "_doc": "Camp de base : poser_ticks (poser/démonter) ; dormir_ticks = durée du sommeil (8 h à 24 000 ticks/jour) ; repose_ticks / repose_xp_mult = buff Reposé ; repose_potentiel / repose_top = +potentiel aux N compétences les plus travaillées depuis le dernier repos ; mur_familles : ce qui fait un mur.LE SOMMEIL AVANCE PAR TRANCHES (2026-09-08) : le monde ne saute pas la nuit d'un bloc, il avance par `sommeil_tranche_ticks` pour que les etres agissent, au plus `sommeil_tranches_max` fois. Ces deux nombres etaient ECRITS EN DUR (100 et 200) : au passage du tick a la milliseconde, une nuit de 800 000 ticks n'en avancait plus que 20 000 — le dormeur se reveillait douze minutes plus tard. Le produit des deux doit couvrir `dormir_ticks`. | LES MEUBLES S'EMPILENT (designer 2026-09-08, code 2026-09-09) : `meuble_pile_max` meubles sur une meme tuile. La pile bloque le passage des qu'UN de ses meubles le bloque ; demonter retire celui du sommet.",
     "poser_ticks": 1000,
     "dormir_ticks": 800000,
     "repose_ticks": 400000,
@@ -503,7 +503,8 @@
     ],
     "porte_famille": "bois",
     "sommeil_tranche_ticks": 10000,
-    "sommeil_tranches_max": 400
+    "sommeil_tranches_max": 400,
+    "meuble_pile_max": 3
   },
   "faim": {
     "_doc": "La faim peut tuer (designer 2026-09-01, point 52) : à zéro, la famine ronge les PV par paliers jusqu'à la mort.",

@@ -177,7 +177,7 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 	for i in e.get("meubles", {}).keys():
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
 		var m: Dictionary = GameData.catalogues.meubles.get(str(e.meubles[i]), {})
-		g.meubles[g.idx(p)] = str(e.meubles[i])
+		g.poser_meuble(g.idx(p), str(e.meubles[i]))
 		g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
 	for i in e.get("rails", {}).keys():   # les rails du royaume (Villes B4), franchissables
 		var p := base + Vector2i(int(i) % taille, int(i) / taille)
@@ -273,7 +273,7 @@ func _poser_etages(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 						g.poser_contenu(p, "mur_construit")
 					elif meubles.has(c) and c != "P":
 						var m: Dictionary = GameData.catalogues.meubles.get(str(meubles[c]), {})
-						g.meubles[gi] = str(meubles[c])
+						g.poser_meuble(gi, str(meubles[c]))
 						g.poser_contenu(p, "meuble" if bool(m.get("bloque_passage", true)) else "meuble_sol")
 						if c == "^":
 							haut = p
@@ -299,7 +299,7 @@ func _appliquer_memoire(g: Grille, cell: Vector2i, z: int) -> void:
 		g.hauteurs[gi] = int(m.h)
 		g.contenu[gi] = 0
 		g.materiaux.erase(gi)
-		g.meubles.erase(gi)
+		g.vider_meubles(gi)   # toute la pile, pas seulement le sommet (26 undecies)
 		g.stations_fixes.erase(gi)
 		g.oter_eau(gi)
 		if int(m.get("eau", 0)) > 0:   # le niveau d'un écoulement (Eau et liquides)
@@ -308,8 +308,11 @@ func _appliquer_memoire(g: Grille, cell: Vector2i, z: int) -> void:
 			g.poser_contenu(p, str(m.contenu))
 		if not str(m.materiau).is_empty():
 			g.materiaux[gi] = str(m.materiau)
-		if not str(m.meuble).is_empty():
-			g.meubles[gi] = str(m.meuble)
+		# LA CELLULE GARDE TOUTE LA PILE (26 undecies). `meuble`, au singulier, est la forme d'avant le 2026-09-09 :
+		# une sauvegarde de ce temps-là se relit sans migration.
+		for mid_p in (m.meubles if m.has("meubles") else ([str(m.get("meuble", ""))] if not str(m.get("meuble", "")).is_empty() else [])):
+			if not str(mid_p).is_empty():
+				g.poser_meuble(gi, str(mid_p))
 		if not str(m.station).is_empty():
 			g.stations_fixes[gi] = str(m.station)
 	for i in decouvert.get(cell, {}).keys():
@@ -327,7 +330,7 @@ func capturer(g: Grille) -> void:
 			modifications[cell] = {}
 		var c := g.contenu_de(p)
 		modifications[cell][idx_local(p)] = {"h": g.h(p), "contenu": str(g.contenu_ids[g.contenu[gi]]) if g.contenu[gi] > 0 else "",
-			"materiau": str(g.materiaux.get(gi, "")), "meuble": str(g.meubles.get(gi, "")), "station": str(g.stations_fixes.get(gi, "")), "sol": str(g.sols.get(gi, "")), "eau": int(g.niveau_eau.get(gi, 0))}
+			"materiau": str(g.materiaux.get(gi, "")), "meubles": g.meubles_de(gi).duplicate(), "station": str(g.stations_fixes.get(gi, "")), "sol": str(g.sols.get(gi, "")), "eau": int(g.niveau_eau.get(gi, 0))}
 	for gi in g.decouvert.keys():
 		var p := g.pos_de(int(gi))
 		var cell := cellule_de(p)

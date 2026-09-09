@@ -47,7 +47,10 @@ var materiau_defaut: String = "":         # le matériau des murs ordinaires (ma
 	set(v):
 		materiau_defaut = v
 		_frott_sale = true
-var meubles: Dictionary = {}              # index de tuile → id de meuble (data/meubles/)
+var meubles: Dictionary = {}              # index de tuile → id du meuble AU SOMMET de la pile (data/meubles/)
+## Les tuiles qui portent PLUSIEURS meubles (designer 2026-09-08, ordre de travail 26 undecies) : index → tableau du
+## bas vers le haut. Comme pour les êtres, seules les tuiles à plusieurs y figurent.
+var piles_meubles: Dictionary = {}        # index de tuile → Array[String], du bas vers le haut
 var stations_fixes: Dictionary = {}       # index de tuile → id de station posée
 var niveau_eau: Dictionary = {}           # index de tuile → niveau 1-7 d'un écoulement (Eau et liquides) ; une source vaut 8
 var dangers: Dictionary = {}              # index de tuile → intensité 1-100 : à éviter en chemin (Émergence — le champ de danger, 2026-09-08). Le booléen d'avant ne disait que « oui » ; le noyau refuse toujours toute valeur non nulle, donc graduer ne change rien pour lui.
@@ -154,7 +157,7 @@ static func depuis_etage(etage: Dictionary, contenus: Dictionary, regles_dep: Di
 			g.contenu[i] = id_roche if bord_e.has(i) else id_mur
 	for i in etage.get("meubles", {}).keys():   # Talents de race : source maudite, autel du rituel
 		var pm := Vector2i(int(i) % g.largeur, int(i) / g.largeur)
-		g.meubles[int(i)] = str(etage.meubles[i])
+		g.poser_meuble(int(i), str(etage.meubles[i]))
 		g.poser_contenu(pm, "meuble")
 	for i in etage.get("portes", {}).keys():   # les seuils fermés des salles (Génération de donjon, 2026-08-30)
 		g.poser_contenu(Vector2i(int(i) % g.largeur, int(i) / g.largeur), "porte_fermee")
@@ -408,6 +411,52 @@ func _poser_pile(i: int, pile: Array) -> void:
 	if i >= 0 and i < occ.size():
 		occ[i] = 0 if pile.is_empty() else 1
 	_n_occ = occupants.size()
+
+
+## Toute la pile de meubles d'une tuile, du BAS vers le HAUT (designer 2026-09-08 : « on peut aussi mettre des
+## meubles les uns sur les autres »). Un seul meuble : un tableau d'un élément ; aucun : vide.
+func meubles_de(i: int) -> Array:
+	if piles_meubles.has(i):
+		return piles_meubles[i]
+	var un: String = meubles.get(i, "")
+	return [] if un.is_empty() else [un]
+
+
+## Poser un meuble AU SOMMET de la pile d'une tuile.
+func poser_meuble(i: int, id: String) -> void:
+	var pile := meubles_de(i)
+	pile.append(id)
+	_poser_pile_meubles(i, pile)
+
+
+## Retirer un meuble. Sans `id`, on retire celui du SOMMET — c'est celui qu'on démonte, celui qu'on voit.
+func retirer_meuble(i: int, id: String = "") -> void:
+	var pile := meubles_de(i)
+	if pile.is_empty():
+		return
+	if id.is_empty():
+		pile.pop_back()
+	else:
+		pile.erase(id)
+	_poser_pile_meubles(i, pile)
+
+
+## Vider toute la pile d'une tuile — ce que fait la restitution d'une cellule avant de reposer ce qu'elle a gardé.
+func vider_meubles(i: int) -> void:
+	meubles.erase(i)
+	piles_meubles.erase(i)
+
+
+func _poser_pile_meubles(i: int, pile: Array) -> void:
+	if pile.is_empty():
+		meubles.erase(i)
+		piles_meubles.erase(i)
+		return
+	meubles[i] = str(pile.back())
+	if pile.size() > 1:
+		piles_meubles[i] = pile
+	else:
+		piles_meubles.erase(i)
 
 
 ## Une tuile à éviter en chemin — et son miroir pour le noyau. L'intensité va de 1 à 100 (Émergence, 2026-09-08) :

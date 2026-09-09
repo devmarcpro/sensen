@@ -24,6 +24,12 @@ Ce qui persiste et ce qui se régénère dans le monde : la règle qui fait qu'o
 > [!success] Décidé et codé le 2026-08-30 — retour aux cellules de **64 × 64**
 > **Instruction du designer** : « on repasse à des cellules de 64 × 64 » (la cellule était passée à 128 le 2026-08-28, après un passage à 64). `planete.taille_cellule = 64`, `camp.taille = 64`, la fenêtre glissante fait donc **192 × 192** (3 × 3 cellules) — quatre fois moins de tuiles à générer et à dessiner à chaque recentrage, ce qui est l'intention (le temps de chargement entre cellules vient juste après dans la file du designer). **Conséquences réglées** : la génération de donjon lit désormais la taille de cellule de `planete` au lieu d'un 128 en dur, et les thèmes de donjon sont **remis à l'échelle** (6–10 salles par étage au lieu de 14–24, grandes salles 8–12, boucles et impasses divisées par deux) — un étage reste une cellule, donc quatre fois plus petit ; les accidents de relief passent de 2–5 à **1–3 par cellule** ; les tests qui écrivaient 128 lisent la planète. Les chunks d'exploration restent de 32 (deux par côté de cellule).
 
+> [!success] Codé le 2026-09-09 — **les meubles s'empilent** (designer 2026-09-08 : « on peut aussi mettre des meubles les uns sur les autres »)
+> **La règle** : on pose sur une tuile libre, ou sur une tuile qui porte déjà des meubles et pas plus que `combat_rules.camp.meuble_pile_max` (trois). Ce qui n'est pas un meuble — un mur, un arbre, une porte — barre toujours. Démonter retire celui du **sommet**, c'est-à-dire celui qu'on voit.
+> **Le modèle** est celui de la pile d'êtres, écrit la veille : `meubles` désigne le sommet, `piles_meubles` ne porte que les tuiles à plusieurs, et les 154 lecteurs n'ont pas eu à changer.
+> **Trois soins particuliers** : le **contenu** de la tuile est celui de la pile (elle bloque dès qu'un seul meuble bloque) ; `objets_poses` devient une **liste**, pour que démonter rende le bon objet du sac ; et démonter ne vide le **contenant** que si c'est lui qu'on retire — ôter le lit posé sur le coffre ne vide plus le coffre.
+> **Un défaut attrapé par le test** : la capture d'une cellule ne gardait qu'un meuble par tuile. Une pile perdait son dessous au premier aller-retour hors de la cellule. Elle garde toute la pile désormais, et relit la forme d'avant sans migration.
+
 ## Liens
 - **Dépend de** : [[Grille continue]], [[Simulation à ticks]]
 - **Alimente** : [[Rôles de cases]], [[Royaume du joueur]], [[Destruction du terrain]], [[Récolte]]

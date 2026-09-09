@@ -227,7 +227,7 @@ static func _rituel_race(sim: Simulation, e: Dictionary, vers: Vector2i, type_me
 	if str(e.get("race", "")) in ["vampire", "spectre", "lycanthrope"]:
 		EventBus.emettre(&"journal", [&"journal.deja_maudit", {}])
 		return false
-	sim.grille.meubles.erase(gi)   # à usage unique : la source se tarit, l'autel se brise
+	sim.grille.retirer_meuble(gi)   # à usage unique : la source se tarit, l'autel se brise
 	sim.grille.contenu[gi] = 0
 	sim.grille.marquer(vers)
 	sim.lumiere_sale = true

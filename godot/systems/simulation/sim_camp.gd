@@ -6,9 +6,29 @@ extends RefCounted
 ## `tools/fragmenter.py`, sans changement de comportement.
 
 
+## UN MEUBLE SE POSE SUR UN MEUBLE (designer 2026-09-08 : « on peut aussi mettre des meubles les uns sur les
+## autres »). La tuile doit être libre — ou porter DÉJÀ des meubles, et pas plus que `camp.meuble_pile_max` : on
+## empile alors dessus. Ce qui n'est pas un meuble (un mur, un arbre, une porte) barre toujours.
 static func _tuile_libre_pour_poser(sim: Simulation, e: Dictionary, vers: Vector2i) -> bool:
-	return sim.lieu == "camp" and sim.grille.dans(vers) and Grille.distance(e.pos, vers) == 1 and sim.grille.contenu_de(vers).is_empty() \
-		and sim.grille.occupant(vers).is_empty() and not sim.contenants.has(sim.grille.idx(vers))
+	if not (sim.lieu == "camp" and sim.grille.dans(vers) and Grille.distance(e.pos, vers) == 1) \
+			or not sim.grille.occupant(vers).is_empty():
+		return false
+	var idx_l := sim.grille.idx(vers)
+	if sim.grille.contenu_de(vers).is_empty():
+		return not sim.contenants.has(idx_l)
+	var pile_l: Array = sim.grille.meubles_de(idx_l)
+	return not pile_l.is_empty() and pile_l.size() < int(sim.regles.r.camp.get("meuble_pile_max", 3))
+
+
+## Ce que cet être a posé sur une tuile, du bas vers le haut. Une sauvegarde d'avant le 2026-09-09 y range une
+## CHAÎNE (une tuile ne portait qu'un meuble) : on la relit comme une liste d'un élément, sans migration.
+static func _poses_de(e: Dictionary, idx: int) -> Array:
+	var v: Variant = e.get("objets_poses", {}).get(idx, null)
+	if v == null:
+		return []
+	if v is Array:
+		return (v as Array).duplicate()
+	return [str(v)]
 
 
 ## Poser un meuble ou une station portative du sac sur une tuile adjacente (Construction cadrée).
@@ -24,8 +44,8 @@ static func _poser(sim: Simulation, e: Dictionary, uid: String, vers: Vector2i, 
 		SimPnj._progresser_quetes(sim, e, "construire", ["meuble" if it.type == "meuble" else "station"])
 	if it.type == "meuble":
 		var m: Dictionary = GameData.entree("meubles", str(it.meuble))
-		sim.grille.poser_contenu(vers, "meuble" if bool(m.bloque_passage) else "meuble_sol")
-		sim.grille.meubles[idx] = str(it.meuble)
+		sim.grille.poser_meuble(idx, str(it.meuble))
+		_maj_contenu_pile(sim, vers)   # la pile bloque dès qu'UN de ses meubles bloque
 		if int(m.capacite_slots) > 0:
 			sim.contenants[idx] = []
 		if str(m.type_meuble) == "etal" and sim.monde != null:
@@ -33,8 +53,8 @@ static func _poser(sim: Simulation, e: Dictionary, uid: String, vers: Vector2i, 
 		if str(m.type_meuble) == "hall":
 			var guilde: String = SimTerritoire._meilleure_guilde(sim, e)
 			if guilde.is_empty():
-				sim.grille.contenu[idx] = 0
-				sim.grille.meubles.erase(idx)
+				sim.grille.retirer_meuble(idx, str(it.meuble))
+				_maj_contenu_pile(sim, vers)
 				EventBus.emettre(&"journal", [&"journal.hall_refuse", {}])
 				return false
 			var vil: Dictionary = SimTerritoire._ry(sim).villes
@@ -60,8 +80,12 @@ static func _poser(sim: Simulation, e: Dictionary, uid: String, vers: Vector2i, 
 		sim.grille.poser_contenu(vers, "station_fixe")
 		sim.grille.stations_fixes[idx] = str(it.station)
 	e.sac.erase(uid)
+	# CE QU'ON A POSÉ SUR UNE TUILE EST UNE LISTE (26 undecies) : une tuile peut porter plusieurs meubles, et
+	# démonter doit rendre CELUI DU SOMMET. Une sauvegarde d'avant y range une chaîne : `_poses_de` la relit.
 	e["objets_poses"] = e.get("objets_poses", {})
-	e.objets_poses[idx] = uid
+	var poses_l := _poses_de(e, idx)
+	poses_l.append(uid)
+	e.objets_poses[idx] = poses_l
 	e.compteur = tick + int(sim.regles.r.camp.poser_ticks)
 	EventBus.emettre(&"journal", [&"journal.pose", {"nom": e.name_key, "objet": SimObjets.nom_objet(sim, uid)}])
 	EventBus.emettre(&"tile_changed", [vers])
@@ -102,16 +126,25 @@ static func _demonter(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int)
 	if not ("construit" in c.get("tags", [])):
 		return false
 	var idx := sim.grille.idx(vers)
-	if sim.contenants.has(idx) and not sim.contenants[idx].is_empty():
+	# On ne vide le contenant que si c'est LUI qu'on démonte (26 undecies) : retirer le lit posé SUR le coffre ne
+	# doit pas vider le coffre.
+	var somm := str(sim.grille.meubles.get(idx, ""))
+	var porte_contenu := int(GameData.entree("meubles", somm).get("capacite_slots", 0)) > 0 if not somm.is_empty() else true
+	if porte_contenu and sim.contenants.has(idx) and not sim.contenants[idx].is_empty():
 		_prendre(sim, e, vers, tick)   # on vide le coffre d'abord
-	var uid: String = str(e.get("objets_poses", {}).get(idx, ""))
+	var poses_d := _poses_de(e, idx)
+	var uid: String = str(poses_d.pop_back()) if not poses_d.is_empty() else ""
 	if not uid.is_empty() and sim.items.has(uid):
 		e.sac.append(uid)
-		e.objets_poses.erase(idx)
+		if poses_d.is_empty():
+			e.objets_poses.erase(idx)
+		else:
+			e.objets_poses[idx] = poses_d
 		EventBus.emettre(&"journal", [&"journal.demonte", {"nom": e.name_key, "objet": SimObjets.nom_objet(sim, uid)}])
 	else:
 		EventBus.emettre(&"journal", [&"journal.demonte", {"nom": e.name_key, "objet": {"base": str(c.name_key)}}])
-	sim.grille.contenu[idx] = 0
+	sim.grille.retirer_meuble(idx)   # le SOMMET : c'est celui qu'on voit et qu'on démonte
+	_maj_contenu_pile(sim, vers)
 	sim.grille.marquer(vers)
 	if sim.monde != null:
 		sim.territoire.etals.erase(_pm(sim, vers))
@@ -123,13 +156,32 @@ static func _demonter(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int)
 					sim.grille.liberer(x.pos, x.id)
 			EventBus.emettre(&"journal", [&"journal.hall_demonte", {"guilde": "guilde.%s.name" % str(sim.territoire.halls[_pm(sim, vers)])}])
 			sim.territoire.halls.erase(_pm(sim, vers))
-	sim.grille.meubles.erase(idx)
-	sim.grille.stations_fixes.erase(idx)
-	sim.grille.materiaux.erase(idx)
-	sim.contenants.erase(idx)
+	if sim.grille.meubles_de(idx).is_empty():   # la pile est vide : la tuile redevient nue
+		sim.grille.stations_fixes.erase(idx)
+		sim.grille.materiaux.erase(idx)
+		sim.contenants.erase(idx)
+	elif porte_contenu:
+		sim.contenants.erase(idx)   # c'est le contenant qu'on a retiré : ce qui reste dessous n'en porte pas
 	e.compteur = tick + int(sim.regles.r.camp.poser_ticks)
 	EventBus.emettre(&"tile_changed", [vers])
 	return true
+
+
+## Le contenu d'une tuile qui porte des meubles : « meuble » si UN SEUL de la pile bloque le passage, « meuble_sol »
+## sinon, et rien du tout si la pile est vide. Sans ça, démonter la table laisserait le coffre posé dessus dans une
+## tuile déclarée nue — et poser un coffre sur une table rendrait la table franchissable.
+static func _maj_contenu_pile(sim: Simulation, vers: Vector2i) -> void:
+	var idx_c := sim.grille.idx(vers)
+	var pile_c: Array = sim.grille.meubles_de(idx_c)
+	if pile_c.is_empty():
+		sim.grille.contenu[idx_c] = 0
+		return
+	var bloque := false
+	for mid in pile_c:
+		if bool(GameData.entree("meubles", str(mid)).get("bloque_passage", false)):
+			bloque = true
+			break
+	sim.grille.poser_contenu(vers, "meuble" if bloque else "meuble_sol")
 
 
 static func _coffre_a(sim: Simulation, vers: Vector2i) -> Dictionary:

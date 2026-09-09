@@ -1036,7 +1036,7 @@ static func enterrer(sim: Simulation, mort: Dictionary, source: String = "") -> 
 					"station": "", "sol": str(e.sols.get(i, "")), "eau": 0}
 				var pm: Vector2i = sim.monde.pos_monde(cell, q)
 				if sim.grille != null and sim.grille.dans(pm):   # la ville est sous les yeux : la tombe s'y voit tout de suite
-					sim.grille.meubles[sim.grille.idx(pm)] = "tombe"
+					sim.grille.poser_meuble(sim.grille.idx(pm), "tombe")
 					sim.grille.marquer(pm)
 					EventBus.emettre(&"tile_changed", [pm])
 				_porter_le_deuil(sim, mort, village, source)   # la ville apprend la mort au moment où elle reçoit le corps

@@ -324,7 +324,7 @@ static func _batir_maisons(sim: Simulation) -> int:
 				elif meubles.has(ch):
 					var m: Dictionary = GameData.entree("meubles", str(meubles[ch]))
 					sim.grille.poser_contenu(pos, "meuble" if bool(m.get("bloque_passage", false)) else "meuble_sol")
-					sim.grille.meubles[idx] = str(meubles[ch])
+					sim.grille.poser_meuble(idx, str(meubles[ch]))
 					if str(meubles[ch]).begins_with("lit"):
 						lit = pos
 				sim.grille.marquer(pos)
