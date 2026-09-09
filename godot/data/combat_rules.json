@@ -1905,5 +1905,20 @@
     "_doc": "Un tick est devenu une MILLISECONDE le 2026-09-08 (il valait 100 ms). Une partie enregistree avant porte une horloge en ticks de 100 ms : `version` 1. Au chargement, son horloge est multipliee par `echelle_v1_vers_v2`, sinon le calendrier recule de plusieurs jours.",
     "version": 2,
     "echelle_v1_vers_v2": 100
+  },
+  "soif": {
+    "_doc": "L HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l hydratation aussi »). LA MEME MECANIQUE QUE LA FAIM, EN PLUS PRESSANT : on tient trois semaines sans manger et trois jours sans boire, donc `ticks_par_point` est la MOITIE de celui de la faim (calibre le 2026-09-09 au soir : le tiers vidait la jauge en 1,25 jour de monde et tuait le joueur au milieu d un test d agriculture qui court sur plusieurs jours — le rapport reel, trois semaines contre trois jours, donnerait une demi-journee, injouable a cote d une faim aussi genereuse ; c est la coherence de ressenti qui tranche, pas la biologie) et `periode_zero` sa moitie. `gorgee_tuile` est ce qu une gorgee d eau libre rend ; `risque_eau_libre` est ce qu elle coute — une eau de mare n est pas potable, et elle passe le meme jet d infection que la viande crue. Un objet desaltere de ce que sa fiche porte en `hydratation` : une biere moins qu une gourde, et c est sur la fiche, pas dans le code.",
+    "ticks_par_point": 45000,
+    "seuil_conseil": 60,
+    "seuil_stats": 25,
+    "malus_stats": 0.9,
+    "periode_zero": 12000,
+    "pct_sante_max": 2,
+    "degats_par_palier": 3,
+    "gorgee_tuile": 35,
+    "ticks_boire": 600,
+    "risque_eau_libre": {
+      "infection": 0.08
+    }
   }
 }

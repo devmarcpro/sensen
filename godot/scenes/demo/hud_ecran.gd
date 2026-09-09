@@ -13,7 +13,7 @@ const BARRE_L := 160.0
 const BARRE_H := 10.0
 const NB_BARRES := 6   # vie, vigueur, mana, sang-froid, faim, charge — le bloc remonte d'autant
 const CASE := 56.0   # assez large pour lire « Étincelle » ou « Attaque » sans les tronquer
-const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "sang_froid": Color(0.55, 0.75, 0.8), "faim": Color(0.55, 0.35, 0.15), "charge": Color(0.55, 0.55, 0.6)}
+const COULEURS := {"sante": Color(0.85, 0.2, 0.2), "vigueur": Color(0.9, 0.7, 0.2), "mana": Color(0.3, 0.5, 0.95), "sang_froid": Color(0.55, 0.75, 0.8), "faim": Color(0.55, 0.35, 0.15), "soif": Color(0.25, 0.55, 0.8), "charge": Color(0.55, 0.55, 0.6)}
 
 
 func _ready() -> void:
@@ -120,7 +120,7 @@ func _dessiner_barres(j: Dictionary, o: Vector2) -> void:
 	# 126/55 — surcharge ×3 — sans que rien à l'écran ne le dise.
 	var pds: Dictionary = main.sim.poids_de(j) if main.sim != null else {"poids": 0.0, "capacite": 1.0}
 	var lignes := [["sante", int(j.sante), int(j.sante_max)], ["vigueur", int(j.vigueur), int(j.vigueur_max)],
-		["mana", int(j.mana), int(j.mana_max)], ["sang_froid", int(j.get("sang_froid", 0)), int(j.get("sang_froid_max", 0))], ["faim", int(j.get("faim", 100)), 100],
+		["mana", int(j.mana), int(j.mana_max)], ["sang_froid", int(j.get("sang_froid", 0)), int(j.get("sang_froid_max", 0))], ["faim", int(j.get("faim", 100)), 100], ["soif", int(j.get("soif", 100)), 100],
 		["charge", int(round(float(pds.poids))), maxi(1, int(round(float(pds.capacite))))]]
 	for k in lignes.size():
 		var l: Array = lignes[k]

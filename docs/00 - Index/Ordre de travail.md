@@ -591,9 +591,22 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Il est ici et pas ailleurs parce qu'il est le lecteur naturel de la rumeur** : elle transporte le fait, les tags
     décident qui s'en offusque. À faire **avec** la ligne 29, pas avant.
 30. **Le temps long** — usure, ruine, repousse — avec `alteration`.
-31. **Les besoins au-delà de la faim** : soif, sommeil, peur qui dure (aucun bloqueur non plus).
-    **L'HYDRATATION est demandée nommément** *(designer 2026-09-09, en marge de l'anatomie : « on rajoutera l'hydratation aussi »).* Elle est la « soif » de cette ligne, et elle a maintenant un porteur naturel : le
-    corps est un plan de parties depuis le même jour, et les **reins** y figurent. *Noté, pas codé.*
+31. **Les besoins au-delà de la faim** : ~~soif~~, sommeil, peur qui dure (aucun bloqueur non plus).
+    ~~**L'HYDRATATION**~~ — **FAITE le 2026-09-09 au soir** *(designer : « on rajoutera l'hydratation aussi »).*
+    Elle est la faim avec des nombres plus courts — trois semaines sans manger, trois jours sans boire —, les deux
+    malus de stats se cumulent, et elle n'a demandé **aucune règle nouvelle**. On boit à même l'eau (gratuit,
+    abondant, risqué : une eau de mare passe le jet d'infection de la viande crue) ou un objet qui porte
+    `hydratation` sur sa fiche. **Et les reins ont cessé d'attendre** : leur bloc `perdu` a remplacé leur `attend`
+    — un rein en moins fait boire plus souvent. C'était le seul manque ÉCRIT du plan de corps.
+    **Restent** : le **sommeil** (le cycle existe, la fatigue non) et la **peur qui dure** (le sang-froid est une
+    jauge de combat, pas une trace).
+    **UN DÉFAUT JUMEAU, TROUVÉ ET LAISSÉ** : `Etres.creer` pose `faim_tick: 0` — une valeur de fiche, pas une heure.
+    Un être créé alors que l'horloge du monde en est à cinq millions de ticks se voit donc retirer d'un coup tout
+    le temps écoulé **depuis le début du monde**. La soif l'a révélé en tuant des PNJ à leur naissance ; sa cadence
+    étant plus courte, elle vidait la jauge là où la faim n'en ôte que la moitié. **La soif est corrigée** (elle
+    s'estampille à la première lecture) ; **la faim ne l'est pas**, parce que les nombres de ses tests sont
+    calibrés sur ce comportement — un PNJ de village naît à moitié affamé, et plusieurs seuils s'y accrochent.
+    *C'est un manque écrit, pas un manque tu.*
 32. **L'eau qui pèse** — pression, poids, érosion — avec `permeabilite`.
 
 ## Palier 8 — les nombres cessent de mentir

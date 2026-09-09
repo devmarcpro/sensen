@@ -1761,6 +1761,73 @@ func test_cadavres() -> void:
 	verifier(hash([s.graine, "prelever", str(cible.id), membre]) == g0, "et le jet ne dépend pas de l'heure : réessayer plus tard ne changerait rien")
 
 
+## L'HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l'hydratation aussi »). Elle est la
+## faim en plus pressant, et c'est ce que le test vérifie d'abord : les nombres, pas seulement la mécanique. Puis
+## ce qui la rend intéressante — elle est le seul manque que le corps déclarait ENCORE, sur les reins.
+func test_hydratation() -> void:
+	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
+	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")
+	if f.is_empty():
+		return
+	var faim: Dictionary = GameData.config("combat_rules").faim
+	verifier(int(f.ticks_par_point) < int(faim.ticks_par_point) and int(f.periode_zero) < int(faim.periode_zero), "on tient MOINS longtemps sans boire que sans manger (%d contre %d ticks par point)" % [int(f.ticks_par_point), int(faim.ticks_par_point)])
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	verifier(int(j.get("soif", -1)) == 100, "un être naît désaltéré (%d)" % int(j.get("soif", -1)))
+	# 1. LE TEMPS ASSÈCHE. On avance de quoi perdre vingt points, et pas un de plus.
+	# L'HORLOGE PART D'UN TICK NON NUL : `soif_tick` à zéro est lu comme « jamais estampillé » (un être créé alors
+	# que le monde en est à cinq millions de ticks ne doit pas mourir de soif à sa naissance), donc un test qui
+	# part de zéro ne verrait rien s'écouler.
+	var t0: int = maxi(1, s.horloge_monde.ticks)
+	s.horloge_monde.ticks = t0
+	j["soif_tick"] = t0
+	s.horloge_monde.ticks = t0 + int(f.ticks_par_point) * 20
+	s._tiquer_soif(s.horloge_monde.ticks)
+	verifier(int(j.soif) == 80, "vingt périodes ôtent vingt points (%d)" % int(j.soif))
+	# 2. SOUS LE SEUIL, LES STATS BAISSENT — et le malus de soif se cumule avec celui de la faim, parce que ce sont
+	# deux manques et non deux noms du même.
+	var for0: int = int(j.stats_eff.force)
+	j["soif"] = int(f.seuil_stats) - 1
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(int(j.stats_eff.force) < for0, "déshydraté, il perd de la force (%d → %d)" % [for0, int(j.stats_eff.force)])
+	# 3. BOIRE À MÊME L'EAU, s'il y a de l'eau à côté. Sinon la règle refuse, et c'est elle qu'on éprouve.
+	var eau := Vector2i(-1, -1)
+	for dd in Grille.DIRS:
+		var q: Vector2i = j.pos + dd
+		if s.grille.dans(q) and ("eau" in s.grille.contenu_de(q).get("tags", []) or "liquide" in s.grille.contenu_de(q).get("tags", [])):
+			eau = q
+	verifier(not s.boire(j, j.pos + Vector2i(0, 0), s.horloge_monde.ticks) or eau == j.pos, "on ne boit pas une tuile sèche")
+	if eau.x >= 0:
+		var avant: int = int(j.soif)
+		verifier(s.boire(j, eau, s.horloge_monde.ticks) and int(j.soif) > avant, "une gorgée à même l'eau désaltère (%d → %d)" % [avant, int(j.soif)])
+	# 4. CE QUI DÉSALTÈRE EST SUR LA FICHE DE L'OBJET, pas dans le code.
+	var gourde: Dictionary = GameData.catalogues.items.get("gourde_eau", {})
+	verifier(int(gourde.get("hydratation", 0)) > int(GameData.catalogues.items.get("biere", {}).get("hydratation", 0)), "une gourde d'eau désaltère mieux qu'une bière, et c'est écrit sur les fiches")
+	j["soif"] = 40
+	var o := s.generer_objet("gourde_eau", 1, {}, "commun", 0)
+	if not o.is_empty():
+		j.sac.append(o.uid)
+		var avant_g: int = int(j.soif)
+		# On appelle la RÈGLE directement : passer par la file d'intentions ferait échouer le test pour une raison
+		# qui n'est pas la sienne — la gorgée d'eau juste avant a posé un compteur, et l'être n'est plus en attente.
+		s._manger(j, str(o.uid), s.horloge_monde.ticks)
+		verifier(int(j.soif) > avant_g, "boire la gourde remonte la jauge (%d → %d)" % [avant_g, int(j.soif)])
+	# 5. LES REINS N'ATTENDENT PLUS. C'était le seul manque ÉCRIT du plan de corps — un organe qui ne coûtait rien
+	# et disait ce qu'il attendait. Il coûte maintenant : un rein en moins fait boire plus souvent.
+	var plans: Dictionary = GameData.catalogues.plans_corps
+	var attend_encore: Array[String] = []
+	for pid: String in plans.keys():
+		for nom: String in (plans[pid].parties as Dictionary).keys():
+			if str((plans[pid].parties[nom] as Dictionary).get("attend", "")) == "hydratation":
+				attend_encore.append("%s/%s" % [pid, nom])
+	verifier(attend_encore.is_empty(), "aucun organe n'attend plus l'hydratation (%s)" % str(attend_encore))
+	var j5 := joueur_de(nouvelle_sim("gorge"))
+	verifier(float(j5.get("soif_vitesse", 1.0)) == 1.0, "un corps entier boit à son rythme")
+	Etres.perdre_partie(j5, "rein_D")
+	Etres.recalculer(j5, s.items, s.affixes_defs, s.regles)
+	verifier(float(j5.get("soif_vitesse", 1.0)) > 1.0, "un rein en moins fait boire plus souvent (×%.2f)" % float(j5.get("soif_vitesse", 1.0)))
+
+
 # ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
 
 ## La CARTE DE LUMIÈRE ne se refait plus à chaque tick (2026-09-08, sur « énorme lag en ville quand le joueur se

@@ -62,6 +62,7 @@ static func instancier(id: String, def: Dictionary, pos: Vector2i, controle: Str
 		"competences_eff": def.get("competences", {}).duplicate(),
 		"sac": [],                                                  # uids des objets portés non équipés
 		"faim": 100, "faim_tick": 0,                                # la jauge de faim (Faim), tickée par la simulation
+		"soif": 100, "soif_tick": 0,                                # l'hydratation (ordre de travail 31) : la faim en plus pressant
 		"tags_acquis": [],                                          # grant_tag des effets passifs
 		"tags_acquis_race": def.get("tags_acquis_race", []).duplicate(),   # ceux du talent de race
 		"apparence": def.get("apparence", {}).duplicate(),                 # loci visuels (Apparence — données et équipement)
@@ -254,6 +255,12 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 					mana_bonus += int(t.valeur)
 				"vigueur_max":
 					vigueur_bonus += int(t.valeur)
+	# LA SOIF MORD AVANT LA FAIM. Les deux malus se multiplient : un être affamé ET déshydraté est deux fois puni,
+	# et c'est juste — ce sont deux manques, pas deux noms du même.
+	var s_soif: Dictionary = regles.r.get("soif", {})
+	if not s_soif.is_empty() and int(e.get("soif", 100)) < int(s_soif.get("seuil_stats", 25)):
+		for k_s in stats.keys():
+			stats[k_s] = maxi(1, roundi(float(stats[k_s]) * float(s_soif.get("malus_stats", 0.9))))
 	if int(e.get("faim", 100)) < int(regles.r.faim.seuil_stats):   # Faim < 25 : −10 % à toutes les stats
 		for k in stats.keys():
 			stats[k] = maxi(1, roundi(float(stats[k]) * float(regles.r.faim.malus_stats)))
@@ -283,6 +290,7 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	# un estomac en moins fait creuser plus vite. **Tout est déclaré sur l'organe**, dans son bloc `perdu` : le code
 	# ne connaît aucun nom d'organe, il additionne ce que le plan lui donne.
 	var faim_mult := 1.0
+	var soif_mult := 1.0
 	var pct_vig := 0.0
 	for nom_pc: String in (plan_corps(e).get("parties", {}) as Dictionary).keys():
 		var pc: Dictionary = plan_corps(e).parties[nom_pc]
@@ -290,8 +298,11 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 			continue
 		pct_vig += float((pc.perdu as Dictionary).get("vigueur_max_pct", 0.0))
 		faim_mult *= float((pc.perdu as Dictionary).get("faim_vitesse_mult", 1.0))
+		soif_mult *= float((pc.perdu as Dictionary).get("soif_vitesse_mult", 1.0))   # un rein en moins fait boire plus souvent
 	if not is_equal_approx(faim_mult, 1.0) or e.has("faim_vitesse"):
 		e["faim_vitesse"] = faim_mult
+	if not is_equal_approx(soif_mult, 1.0) or e.has("soif_vitesse"):
+		e["soif_vitesse"] = soif_mult
 	var end_max: int = regles.vigueur_max(stats) + vigueur_bonus
 	if not is_zero_approx(pct_vig):
 		end_max = maxi(1, roundi(float(end_max) * (1.0 + pct_vig / 100.0)))

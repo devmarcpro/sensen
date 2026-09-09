@@ -631,8 +631,13 @@ func test_agriculture_et_boutique() -> void:
 			s.horloge_monde.avancer(n)
 			reste -= n
 		# La faim tue depuis le point 52 : quelques jours de pousse affameraient le fermier. Il mange.
+		# ET IL BOIT, depuis l'hydratation (ordre de travail 31, 2026-09-09) : la soif vide sa jauge deux fois plus
+		# vite que la faim, et quelques jours de pousse tuaient le fermier là où ils l'avaient seulement affamé.
+		# Le test se comporte donc comme un joueur, au lieu d'exiger un monde sans soif.
 		j.faim = 100
 		j.faim_tick = s.horloge_monde.ticks
+		j["soif"] = 100
+		j["soif_tick"] = s.horloge_monde.ticks
 		j.sante = j.sante_max
 		j.vivant = true
 		verifier(bool(s.territoire.cultures[pm].mure) and "mure" in s.grille.contenu_de(loc).get("tags", []), "à l'échéance la parcelle est mûre")
@@ -664,6 +669,7 @@ func test_agriculture_et_boutique() -> void:
 		s.regles.r.royaume.boutique.clients_base = 3.0
 		s.horloge_monde.avancer(400000)
 		verifier(int(s.territoire.caisse) > 0 and s._stock_etal(s._pm(et)).size() < 3, "des clients ont acheté : caisse %d or" % int(s.territoire.caisse))
+		verifier(j.vivant and int(j.sante) > 0, "le marchand a tenu la journée : il a mangé et bu (soif %d, faim %d, PV %d)" % [int(j.get("soif", 100)), int(j.get("faim", 100)), int(j.sante)])
 		var or0: int = int(j.or)
 		var caisse: int = int(s.territoire.caisse)
 		s.attente[j.id] = true

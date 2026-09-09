@@ -454,6 +454,7 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 		_dans_avancee_monde = false
 	t0 = _top("pas", t0)
 	_tiquer_faim(horloge_monde.ticks)
+	_tiquer_soif(horloge_monde.ticks)
 	t0 = _top("faim", t0)
 	_tiquer_monde(horloge_monde.ticks)
 	t0 = _top("monde", t0)
@@ -665,6 +666,73 @@ func _tiquer_faim(tick: int) -> void:
 		e.faim_tick = tick
 
 
+## L'HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l'hydratation aussi »). C'est la faim
+## en plus pressant — on tient trois semaines sans manger et trois jours sans boire —, et c'est tout le dessin : la
+## même mécanique, des nombres plus courts. Elle n'a pas demandé une règle de plus.
+func _tiquer_soif(tick: int) -> void:
+	var f: Dictionary = regles.r.get("soif", {})
+	if f.is_empty():
+		return
+	for e in joueurs():
+		if not e.vivant:
+			continue
+		# L'HEURE DE RÉFÉRENCE EST CELLE OÙ L'ÊTRE ENTRE DANS LE MONDE, pas zéro. `Etres.creer` pose `soif_tick: 0`
+		# — une valeur de fiche, pas une heure —, et un être créé alors que l'horloge du monde en est à cinq
+		# millions de ticks se verrait retirer cent soixante points d'un coup : mort de soif à la seconde de sa
+		# naissance. On stampe donc à la première lecture. *La faim porte le même défaut, en dormance* : sa cadence
+		# est trois fois plus lente, si bien qu'elle n'ôte que la moitié de la jauge au lieu de la vider — c'est
+		# noté dans l'Ordre de travail, pas corrigé ici, parce que les nombres de ses tests sont calibrés dessus.
+		if not e.has("soif") or int(e.get("soif_tick", 0)) <= 0:
+			e["soif"] = int(e.get("soif", 100))
+			e["soif_tick"] = tick
+		var periode := maxi(1, int(float(f.get("ticks_par_point", 30000)) / maxf(0.05, float(e.get("soif_vitesse", 1.0)))))
+		var points := tick / periode - int(e.soif_tick) / periode
+		if points > 0:
+			var avant := int(e.soif)
+			e.soif = maxi(0, int(e.soif) - points)
+			if avant >= int(f.get("seuil_conseil", 60)) and int(e.soif) < int(f.get("seuil_conseil", 60)):
+				EventBus.emettre(&"journal", [&"journal.soif_conseil", {"nom": e.name_key}])
+			if avant >= int(f.get("seuil_stats", 25)) and int(e.soif) < int(f.get("seuil_stats", 25)):
+				Etres.recalculer(e, items, affixes_defs, regles)
+				EventBus.emettre(&"journal", [&"journal.soif_stats", {"nom": e.name_key}])
+			if avant > 0 and int(e.soif) == 0:
+				EventBus.emettre(&"journal", [&"journal.assoiffe", {"nom": e.name_key}])
+		if int(e.soif) == 0:
+			var pz := maxi(1, int(f.get("periode_zero", 12000)))
+			var coups := tick / pz - int(e.soif_tick) / pz
+			if coups > 0 and not (invincible and e.controle == "joueur"):
+				var degats := coups * maxi(int(f.get("degats_par_palier", 3)), int(e.sante_max) * int(f.get("pct_sante_max", 2)) / 100)
+				e.sante = int(e.sante) - degats
+				EventBus.emettre(&"journal", [&"journal.deshydratation", {"nom": e.name_key, "n": degats}])
+				if int(e.sante) <= 0 and e.vivant:   # mourir de soif : la même sortie que toutes les autres morts
+					e.sante = 0
+					e.vivant = false
+					e["mort_tick"] = horloge_monde.ticks
+					grille.liberer(e.pos, e.id)
+					EventBus.emettre(&"journal", [&"journal.mort", {"nom": e.name_key}])
+					EventBus.emettre(&"creature_killed", [e.id, e.id])
+		e.soif_tick = tick
+
+
+## BOIRE À MÊME L'EAU. Gratuit, abondant — et risqué : une eau de mare n'est pas potable, et elle passe le même jet
+## d'infection que la viande crue. C'est ce qui laisse sa place à la gourde et à la bière.
+func boire(e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	var f: Dictionary = regles.r.get("soif", {})
+	if f.is_empty() or not grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var tags: Array = grille.contenu_de(vers).get("tags", [])
+	if not ("eau" in tags or "liquide" in tags):
+		return false
+	e["soif"] = mini(100, int(e.get("soif", 100)) + int(f.get("gorgee_tuile", 35)))
+	e.compteur = tick + int(f.get("ticks_boire", 600))
+	for statut: String in (f.get("risque_eau_libre", {}) as Dictionary).keys():
+		if des.reel() < float(f.risque_eau_libre[statut]):
+			appliquer_statut(e, statut, int(statuts_defs.get(statut, {}).get("duree_ticks", 6000)), "")
+	Etres.recalculer(e, items, affixes_defs, regles)
+	EventBus.emettre(&"journal", [&"journal.boit_eau_libre", {"nom": e.name_key, "soif": int(e.soif)}])
+	return true
+
+
 ## Le poids porté et la capacité d'un être (Armures et poids porté).
 func poids_de(e: Dictionary) -> Dictionary:
 	var total := 0.0
@@ -773,6 +841,11 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		EventBus.emettre(&"journal", [&"journal.harmonie", {}])
 	var avant := int(e.faim)
 	e.faim = mini(100, int(e.faim) + roundi(nutrition))
+	# CE QUI DÉSALTÈRE EST SUR LA FICHE, pas dans le code : une bière rend moins qu'une gourde, et l'on n'a pas eu
+	# à écrire le mot « bière » nulle part (ordre de travail 31).
+	if float(it.get("hydratation", 0.0)) > 0.0:
+		e["soif"] = mini(100, int(e.get("soif", 100)) + roundi(float(it.hydratation)))
+		EventBus.emettre(&"journal", [&"journal.boit", {"nom": e.name_key, "soif": int(e.soif)}])
 	if avant < int(regles.r.faim.seuil_stats) and int(e.faim) >= int(regles.r.faim.seuil_stats):
 		Etres.recalculer(e, items, affixes_defs, regles)
 	if not str(it.get("soin_des", "")).is_empty() and not SimTalents.a_talent(self, e, "sans_chair"):   # le Spectre ne se soigne que par mana
@@ -1159,6 +1232,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._equiper(self, e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
 			ok = SimObjets._ramasser(self, e, h.ticks)
+		"boire":   # une gorgée à même l'eau (ordre de travail 31)
+			ok = boire(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"porter":
 			ok = porter(e, entites.get(str(i.get("qui", "")), {}), h.ticks) if entites.has(str(i.get("qui", ""))) else false
 		"prelever":   # démonter une dépouille : un membre, un organe (28 ter)

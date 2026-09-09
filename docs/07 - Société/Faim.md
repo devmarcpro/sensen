@@ -38,6 +38,11 @@ Manger restaure selon l'aliment (valeur nutritive en données).
 > [!success] Décidé le 2026-09-01 — la faim tue (designer, point 52)
 > « Une jauge qui ne tue jamais » n'était plus tenable : dans l'esprit de *Rogue*, la nourriture est **l'horloge qui pousse à avancer**. À jauge vide, la famine ronge les PV par paliers — `faim.degats_par_palier` PV tous les `faim.periode_zero` ticks — jusqu'à la mort. Rien ne change pour les PNJ, qui gardent leur pénalité d'humeur : c'est le joueur qui reprend un compte à rebours.
 
+> [!success] Codé le 2026-09-09 — **l'hydratation**, la sœur pressante de la faim (ordre de travail 31 ; designer 2026-09-09, en marge de l'anatomie : « on rajoutera l'hydratation aussi »)
+> **Elle est la faim, avec des nombres plus courts, et c'est tout le dessin** : on tient trois semaines sans manger et trois jours sans boire. `soif.ticks_par_point` est le tiers de celui de la faim, `periode_zero` sa moitié, et les deux malus de stats **se cumulent** — un être affamé ET déshydraté est deux fois puni, parce que ce sont deux manques et non deux noms du même. Elle n'a demandé **aucune règle nouvelle**.
+> **Ce qu'on boit** : une gorgée **à même l'eau** sur une tuile adjacente — gratuite, abondante, et **risquée** (une eau de mare n'est pas potable : elle passe le même jet d'infection que la viande crue) — ou un objet qui porte `hydratation` sur sa fiche. *Une bière désaltère moins qu'une gourde, et le mot « bière » n'est écrit nulle part dans le code.*
+> **ELLE ARRIVE MAINTENANT PARCE QU'ELLE AVAIT UN PORTEUR.** Le corps est un plan de parties depuis le matin même, et les **reins** y figuraient avec un mot qui attendait : `attend: "hydratation"`. Un test refuse un organe qui ne coûte rien **et** ne dit pas ce qui lui manque ; les reins étaient le **seul manque écrit** du plan de corps. Il est comblé : leur bloc `perdu` a remplacé leur `attend`, et **un rein en moins fait boire plus souvent** (×1,5). *Un manque écrit vaut mieux qu'un manque tu — et il finit par se combler.*
+
 ## Liens
 - **Dépend de** : [[Agriculture et élevage]], [[Boucle de tick]]
 - **Alimente** : [[Cuisine et alchimie]], [[Nourriture, potentiel et potions]], [[Faim des PNJ]]

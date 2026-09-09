@@ -1838,6 +1838,8 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "boire_source", "vers": t})
 	if d <= 1 and meuble_id == "autel_rituel":
 		res.append({"id": "rituel", "vers": t})
+	if "eau" in tags or "liquide" in tags:   # boire à même l'eau (ordre de travail 31)
+		res.append({"id": "boire", "vers": t})
 	if "plante_sauvage" in tags and _outil_en_main(j, "cueillir"):
 		res.append({"id": "cueillir", "vers": t})
 	if ("plante" in tags or "arbre" in tags) and _outil_en_main(j, "abattre"):
@@ -1951,6 +1953,9 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
 		"boire_source":
 			sim.intention(joueur_id, {"type": "boire_source", "vers": opt.vers})
+		"boire":
+			if not sim.intention(joueur_id, {"type": "boire", "vers": opt.vers}):
+				_log(tr("journal.rien_a_boire"))
 		"rituel":
 			sim.intention(joueur_id, {"type": "rituel", "vers": opt.vers})
 		"designer":
@@ -3278,7 +3283,7 @@ func _maj_ui() -> void:
 				lignes.append("  " + tr("ui.lieu").format({"a": tr("element." + str(cles[0])), "pa": roundi(float(vl[cles[0]]) * 100.0), "b": tr("element." + str(cles[1])), "pb": roundi(float(vl[cles[1]]) * 100.0)}))
 		var pd: Dictionary = sim.poids_de(j)
 		lignes.append("  " + tr("ui.entite.mana").format({"mana": j.mana, "mana_max": j.mana_max}) + " · " + tr("ui.munitions").format({"n": j.munitions}) + " · " + tr("ui.modules_connus").format({"n": j.modules_connus.size()})
-			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
+			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.soif").format({"soif": int(j.get("soif", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
 		var nd := sim.progression.niveaux_derives(j)
 		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
 		var hb: Array[String] = []

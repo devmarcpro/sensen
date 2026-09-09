@@ -2775,6 +2775,17 @@ ui.monde.d_opt.suture,"The width of plate sutures: mountain chains where contine
 ui.monde.apercu,"The whole world - seas, coasts and relief; the cross marks the starting cell."
 ui.monde.opt.monde_ratio,"World proportion (height/width)"
 ui.monde.d_opt.monde_ratio,"The map's shape: 0.50 gives a rectangle twice as wide as tall, like a world map; 1.00 a square."
+item.gourde_eau.name,Waterskin
+ui.soif,"thirst {soif}"
+barre.soif,Thirst
+option.boire,Drink
+journal.boit,"{nom} drinks — thirst {soif}"
+journal.boit_eau_libre,"{nom} drinks straight from the water — thirst {soif}"
+journal.soif_conseil,"{nom}'s throat is dry: time to drink"
+journal.soif_stats,"{nom} is dehydrated: their strength fails"
+journal.assoiffe,"{nom} has not a drop left"
+journal.deshydratation,"{nom} suffers from thirst (−{n} HP)"
+journal.rien_a_boire,There is nothing to drink here.
 journal.famine,"{nom} is starving: −{n} HP"
 objet.inconnu.consommable,"{apparence} vial"
 objet.inconnu.gemme,"{apparence} gem"

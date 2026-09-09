@@ -2846,6 +2846,17 @@ ui.monde.d_opt.suture,"La largeur des sutures entre plaques : chaînes de montag
 ui.monde.apercu,"Le monde entier — mers, côtes et reliefs ; la croix marque la cellule de départ."
 ui.monde.opt.monde_ratio,"Proportion du monde (haut/large)"
 ui.monde.d_opt.monde_ratio,"La forme de la carte : 0,50 donne un rectangle deux fois plus large que haut, comme une carte du monde ; 1,00 un carré."
+item.gourde_eau.name,Gourde d'eau
+ui.soif,"soif {soif}"
+barre.soif,Soif
+option.boire,Boire
+journal.boit,"{nom} boit — soif {soif}"
+journal.boit_eau_libre,"{nom} boit à même l'eau — soif {soif}"
+journal.soif_conseil,"{nom} a la gorge sèche : il faudrait boire"
+journal.soif_stats,"{nom} est déshydraté : ses forces le quittent"
+journal.assoiffe,"{nom} n'a plus une goutte"
+journal.deshydratation,"{nom} souffre de la soif (−{n} PV)"
+journal.rien_a_boire,Il n'y a rien à boire ici.
 journal.famine,"{nom} meurt de faim : −{n} PV"
 objet.inconnu.consommable,"Fiole {apparence}"
 objet.inconnu.gemme,"Gemme {apparence}"
