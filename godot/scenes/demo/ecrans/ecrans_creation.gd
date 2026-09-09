@@ -730,7 +730,7 @@ static func _construire_echange(ec: Ecrans, j: Dictionary) -> void:
 		ec.entrees.append({"kind": "donner", "uid": uid})
 	ec.liste.add_item(ec.tr("ui.echange.reprendre").format({"nom": ec.tr(pnj.name_key)}), null, false)
 	ec.entrees.append({"kind": "texte", "texte": ""})
-	for slot in Array(GameData.config("combat_rules").equipement.slots):
+	for slot in Etres.emplacements(pnj):   # les emplacements DÉRIVENT du corps (2026-09-09)
 		var uid: String = str(pnj.equipement.get(slot, ""))
 		if uid.is_empty():
 			continue

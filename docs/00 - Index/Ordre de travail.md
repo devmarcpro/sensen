@@ -469,24 +469,35 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Ce palier dissout deux lignes plus bas** : les 23 sorts qui ne produisent rien disparaissent entièrement, et la
     moitié « données » du sort au contact gratuit avec eux.
 
-28 bis. **LE CORPS DEVIENT UN PLAN DE PARTIES** — membres et organes *(designer 2026-09-08 : « un personnage est composé
-    de membres, un personnage peut perdre ses membres, les membres peuvent être remplacés ou même certains rajoutés,
-    membres et organes — plusieurs estomacs = pouvoir manger plus mais demande plus de place »).*
-    **Elle est ici, et pas plus tôt, pour une raison** : une prothèse ou une greffe est **du contenu qui module une
-    règle du monde** — exactement ce que la grammaire des modules devient aux lignes 27 et 28. La poser avant, ce
-    serait l'écrire deux fois.
-    **Le point structurel, et il commande tout le reste** : `e.equipement` a des clés **fixes** (`main_principale`,
-    `tete`, `torse`…). Perdre un bras doit **retirer** un emplacement, en gagner un doit en **ajouter**. Tant que les
-    emplacements sont une liste écrite d'avance, ni la perte, ni la prothèse, ni le membre surnuméraire ne sont
-    possibles. C'est **le chantier le plus intrusif de toute la file** : `degats_finaux` et `_appliquer_degats` sont
-    le cœur le plus chaud du code, le paperdoll dessine **par emplacement**, et la suite entière suppose à la fois
-    une jauge de santé unique et des emplacements fixes.
-    **Ce qu'il apporte de neuf** : les organes introduisent une **contenance interne** qui n'existe nulle part —
-    deux estomacs font manger plus **et** laissent moins de place. On n'ajoute pas, on **arbitre**.
-    **Trois questions au designer avant la première ligne** (n° 6, 6 bis et 6 ter des [[Décisions en attente]]) : la
-    granularité d'un corps, si les emplacements doivent vraiment dériver du corps, et l'unité de la contenance.
-    Détail : [[Combat tactique sur grille]] (callout du 2026-09-08, 21 h).
-
+~~28 bis. **LE CORPS DEVIENT UN PLAN DE PARTIES**~~ — **FAIT le 2026-09-09** *(designer : « oui on y va » sur la
+    question 6 bis, puis quatre précisions le même jour).* Le corps est un **plan en données**, un par silhouette
+    (`data/plans_corps/`), et les **emplacements d'équipement en dérivent** : perdre un bras retire un emplacement,
+    et ce qui s'y trouvait retombe dans le sac.
+    **LE CHANTIER ÉTAIT BIEN PLUS PETIT QUE CETTE LIGNE NE LE CROYAIT, et c'est mesurable.** Elle annonçait « le plus
+    intrusif de toute la file » parce que « les emplacements sont une liste écrite d'avance ». Or la consolidation du
+    2026-09-04 les avait déjà ramenés à **une** source en données, lue par **quatre** endroits, tous du client — la
+    simulation, elle, lit `e.equipement[slot]` par clé et n'a jamais connu la liste. *Une estimation d'intrusivité
+    vieillit aussi vite que le code qu'elle décrit.*
+    **Les quatre précisions du designer, et ce qu'elles ont changé** :
+    · **le monde réel, donc des ORGANES** — cœur, poumons, foie, reins, estomac, cerveau, yeux ; et l'anatomie de
+      *son* animal pour chacun : sacs aériens et gésier pour l'oiseau, poumons-livres et filières pour l'araignée,
+      **un seul** poumon fonctionnel pour le serpent, **aucun organe** pour la gelée ;
+    · **il y a bien de la SANTÉ PAR PARTIES** — chaque partie a sa réserve (`part_sante × sante_max`) ;
+    · **les non-humanoïdes portent de l'équipement** — mais **« un torse est un torse »** : une pièce d'armure suit
+      la FORME du membre, pas l'espèce. J'avais inventé neuf types (barde, chanfrein, fers, chaperon, serres…), le
+      designer les a réduits à **deux** — `protege_ailes` et `protege_queue`, les seuls membres sans équivalent
+      humain. *Le bon partage n'était pas par espèce, il était par forme.*
+    · **l'HYDRATATION** est notée à la ligne 31, avec son porteur naturel : les reins existent maintenant.
+    **TROIS DÉFAUTS QUE LA SUITE M'A LEVÉS, ET ILS ÉTAIENT TOUS LES MIENS.** (1) Le routage d'un coup vers une partie
+    tirait dans `des`, LE dé du combat : le résultat restait déterministe mais la **séquence** changeait, et six
+    tests calibrés sur des jets ont rougi d'un coup — *un consommateur neuf ne perturbe pas un flux existant*,
+    l'anatomie a son propre dé. (2) Mes organes étaient **en sucre** : un cœur à 0,15 de la santé maximale touché une
+    fois sur dix se crevait à chaque échange, et les cibles mouraient bien avant l'heure. (3) Le plus intéressant :
+    je mettais **deux compteurs de mort sur la même chose** — une partie vitale EXTERNE (le torse, la tête) *est* le
+    corps, et le corps a déjà la santé globale. *Ce qui se perd, ce sont les membres et les organes ; ce qui tue,
+    c'est le compteur global.*
+    **Reste** : les prothèses et les greffes, qui sont du contenu modulant une règle — donc de la grammaire des
+    modules, lignes 27-28 ; et la contenance interne (décision 6 ter, toujours ouverte).
 28 ter. **LES CADAVRES RESTENT, ET SE DÉMONTENT** *(designer 2026-09-08 : « il va falloir faire en sorte que les
     cadavres restent, comme ça le joueur peut loot, faire le nécromancien, récupérer des membres, des organes — pour
     se les greffer, les vendre, les greffer sur un PNJ, construire une chimère, porter le corps et s'en servir comme
@@ -523,6 +534,8 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     décident qui s'en offusque. À faire **avec** la ligne 29, pas avant.
 30. **Le temps long** — usure, ruine, repousse — avec `alteration`.
 31. **Les besoins au-delà de la faim** : soif, sommeil, peur qui dure (aucun bloqueur non plus).
+    **L'HYDRATATION est demandée nommément** *(designer 2026-09-09, en marge de l'anatomie : « on rajoutera l'hydratation aussi »).* Elle est la « soif » de cette ligne, et elle a maintenant un porteur naturel : le
+    corps est un plan de parties depuis le même jour, et les **reins** y figurent. *Noté, pas codé.*
 32. **L'eau qui pèse** — pression, poids, érosion — avec `permeabilite`.
 
 ## Palier 8 — les nombres cessent de mentir

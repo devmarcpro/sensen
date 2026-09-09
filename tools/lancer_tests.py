@@ -28,6 +28,13 @@ MOTIFS = ("SCRIPT ERROR", "Parse Error", "Compilation failed")
 
 
 def main():
+    # LA SORTIE DE LA CONSOLE EST EN CP1252 SUR CE POSTE (2026-09-09, appris en plein vol) : l outil a plante en
+    # imprimant une ligne d echec qui contenait un « ~= ». Un garde-fou qui MEURT en rendant son verdict est pire
+    # qu un garde-fou muet — il fait croire a une erreur d outil la ou il y avait un vrai echec a lire.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     args = sys.argv[1:]
     fragment = ""
     # UN FICHIER PAR RUN, ET UN SEUL GODOT (2026-09-09, appris a mes depens). La sortie s appelait `build/tests.txt`

@@ -1955,6 +1955,61 @@ journal.mur_effondre,"a section of wall gives way ({x},{y})"
 journal.plancher_cede,"{nom} falls through the floor: {degats} damage"
 journal.plancher_effondre,"the upper floor gives way ({x},{y})"
 journal.entend,"{nom} hears something and goes to look"
+slot.protege_ailes,Wing guards
+slot.protege_queue,Tail guard
+partie.abdomen,Abdomen
+partie.aile_D,Right wing
+partie.aile_G,Left wing
+partie.bras_D,Right arm
+partie.bras_G,Left arm
+partie.cephalothorax,Cephalothorax
+partie.cerveau,Brain
+partie.chelizeres,Chelicerae
+partie.coeur,Heart
+partie.corps,Body
+partie.estomac,Stomach
+partie.filieres,Spinnerets
+partie.foie,Liver
+partie.gesier,Gizzard
+partie.glande_venin,Venom gland
+partie.intestin_moyen,Midgut
+partie.intestins,Intestines
+partie.jambe_D,Right leg
+partie.jambe_G,Left leg
+partie.main_D,Right hand
+partie.main_G,Left hand
+partie.masse,Mass
+partie.oeil_D,Right eye
+partie.oeil_G,Left eye
+partie.patte_1,Leg 1
+partie.patte_2,Leg 2
+partie.patte_3,Leg 3
+partie.patte_4,Leg 4
+partie.patte_5,Leg 5
+partie.patte_6,Leg 6
+partie.patte_7,Leg 7
+partie.patte_8,Leg 8
+partie.patte_AR_D,Right hind leg
+partie.patte_AR_G,Left hind leg
+partie.patte_AV_D,Right foreleg
+partie.patte_AV_G,Left foreleg
+partie.patte_D,Right leg
+partie.patte_G,Left leg
+partie.pied_D,Right foot
+partie.pied_G,Left foot
+partie.poumon,Lung
+partie.poumon_D,Right lung
+partie.poumon_G,Left lung
+partie.poumons_livres,Book lungs
+partie.queue,Tail
+partie.rein,Kidney
+partie.rein_D,Right kidney
+partie.rein_G,Left kidney
+partie.sacs_aeriens,Air sacs
+partie.tete,Head
+partie.torse,Torso
+journal.partie_perdue,"{nom} loses: {partie}"
+journal.partie_vitale,"{nom}'s {partie} is destroyed — they collapse"
 journal.effondrement,"the ceiling caves in ({x},{y})"
 journal.effondrement_blesse,"{nom} is caught in the cave-in: {degats} damage"
 journal.lave_figee,"the lava cools where it meets the water ({x},{y})"

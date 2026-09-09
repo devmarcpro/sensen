@@ -1844,7 +1844,7 @@
     }
   },
   "equipement": {
-    "_doc": "Les quatorze emplacements d'equipement (Equipement — 14 slots), dans l'ordre d'affichage. Quatre listes en dur les recopiaient — deux a neuf, deux a quatorze — et l'ecran d'echange avec un compagnon ne voyait donc ni ses bottes, ni ses brassards, ni sa cape : une seule source, ici, lue partout (2026-09-04).",
+    "_doc": "Les quatorze emplacements d'equipement (Equipement — 14 slots), dans l'ordre d'affichage. Quatre listes en dur les recopiaient — deux a neuf, deux a quatorze — et l'ecran d'echange avec un compagnon ne voyait donc ni ses bottes, ni ses brassards, ni sa cape : une seule source, ici, lue partout (2026-09-04). | DEPUIS LE 2026-09-09 CETTE LISTE NE DIT PLUS QUELS EMPLACEMENTS EXISTENT, seulement DANS QUEL ORDRE les afficher : c est le plan de corps qui les accorde (ordre de travail 28 bis). `protege_ailes` et `protege_queue` y figurent pour avoir une place stable a l ecran, et aucun humain ne les recoit — il n a ni aile ni queue.",
     "slots": [
       "main_principale",
       "main_secondaire",
@@ -1859,7 +1859,9 @@
       "amulette",
       "carquois",
       "accessoire_1",
-      "accessoire_2"
+      "accessoire_2",
+      "protege_ailes",
+      "protege_queue"
     ]
   },
   "cran": {

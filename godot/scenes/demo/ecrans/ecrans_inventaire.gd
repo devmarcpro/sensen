@@ -8,7 +8,7 @@ extends RefCounted
 
 static func _construire_inventaire(ec: Ecrans, j: Dictionary) -> void:
 	ec.titre.text = ec.tr("ui.ecran.inventaire").format({"n": j.sac.size()})
-	var slots: Array = Array(GameData.config("combat_rules").equipement.slots)
+	var slots: Array = Etres.emplacements(j)   # les emplacements DÉRIVENT du corps (2026-09-09)
 	for slot in slots:
 		var uid: String = str(j.equipement.get(slot, ""))
 		var nom: String = ec.main.nom_objet(ec.main.sim.nom_objet(uid)) if not uid.is_empty() else "—"

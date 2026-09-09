@@ -1,0 +1,157 @@
+{
+  "_doc": "Le plan du corps volant (ordre de travail 28 bis, 2026-09-09). Chaque partie dit sa ZONE de coup, sa partie PARENT (la perdre emporte ce qu elle porte), les EMPLACEMENTS d equipement qu elle accorde, si elle est VITALE, son POIDS_COUP (sa chance relative d etre touchee dans sa zone) et sa PART_SANTE (sa reserve, en part de la sante maximale de l etre). Une partie INTERNE est un organe : elle est logee dans un `contenant` et se touche rarement, mais un coeur perce tue. Les organes sont ceux du monde reel — c est la regle du designer, et elle vaut ici comme pour les matieres. LES ORGANES SONT PROTEGES (corrige le 2026-09-09) : un premier reglage les rendait fragiles au point qu un coeur se crevait a chaque echange et que les cibles mouraient bien avant l heure — six tests calibres l ont dit. Leur poids de coup est le tiers du premier, et la reserve d un organe vital plus du triple : un coeur perce redevient un evenement rare. UNE PARTIE VITALE EXTERNE (le torse, la tete) EST LE CORPS LUI-MEME, et le corps a deja son compteur : la sante globale. Sa reserve est donc mise hors de portee (2.0), sans quoi un coup unique assez gros la detruirait et tuerait la ou la sante globale ne l aurait pas fait — deux compteurs de mort sur la meme chose. Ce qui se PERD, ce sont les membres et les organes ; ce qui TUE, c est le compteur global. UN TORSE EST UN TORSE (designer 2026-09-09) : une piece d armure suit la FORME du membre, pas l espece qui le porte — un torse de cheval et un torse d homme portent la meme cuirasse, a une taille pres, et la taille n est pas un type. Casque sur une tete, brassards sur un membre anterieur, jambieres sur un posterieur, bottes sur ce qui touche le sol. SEULS gardent un emplacement a eux les membres sans equivalent humain : la queue et les ailes.",
+  "racine": "torse",
+  "parties": {
+    "torse": {
+      "zone": "torse",
+      "vital": true,
+      "poids_coup": 3.0,
+      "part_sante": 2.0,
+      "emplacements": [
+        "cuirasse",
+        "dos",
+        "carquois",
+        "accessoire_1",
+        "accessoire_2"
+      ]
+    },
+    "tete": {
+      "zone": "tete",
+      "parent": "torse",
+      "vital": true,
+      "poids_coup": 2.0,
+      "part_sante": 2.0,
+      "emplacements": [
+        "casque",
+        "amulette"
+      ]
+    },
+    "aile_D": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 1.5,
+      "part_sante": 0.3,
+      "emplacements": [
+        "protege_ailes"
+      ]
+    },
+    "aile_G": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 1.5,
+      "part_sante": 0.3,
+      "emplacements": [
+        "protege_ailes"
+      ]
+    },
+    "patte_D": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 0.5,
+      "part_sante": 0.22,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_G": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 0.5,
+      "part_sante": 0.22,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "queue": {
+      "zone": "pieds",
+      "parent": "torse",
+      "poids_coup": 0.4,
+      "part_sante": 0.15,
+      "emplacements": [
+        "protege_queue"
+      ]
+    },
+    "cerveau": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "vital": true,
+      "poids_coup": 0.033,
+      "part_sante": 0.42
+    },
+    "oeil_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.047,
+      "part_sante": 0.16
+    },
+    "oeil_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.047,
+      "part_sante": 0.16
+    },
+    "coeur": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "vital": true,
+      "poids_coup": 0.033,
+      "part_sante": 0.42
+    },
+    "poumon_D": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.3
+    },
+    "poumon_G": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.3
+    },
+    "sacs_aeriens": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.05,
+      "part_sante": 0.3
+    },
+    "foie": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "vital": true,
+      "poids_coup": 0.033,
+      "part_sante": 0.525
+    },
+    "gesier": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.3
+    },
+    "rein_D": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.023,
+      "part_sante": 0.24
+    },
+    "rein_G": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.023,
+      "part_sante": 0.24
+    }
+  }
+}

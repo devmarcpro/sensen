@@ -1424,6 +1424,137 @@ func test_niveaux() -> void:
 	verifier(p.ticks == 400 + 200, "plancher : Flamme ne descend jamais sous 400 ticks")
 
 
+## LE CORPS EST UN PLAN DE PARTIES (ordre de travail 28 bis ; designer 2026-09-08 « un personnage est composé de
+## membres, un personnage peut perdre ses membres », 2026-09-09 « oui on y va », puis quatre précisions le même
+## jour : le monde réel donc des ORGANES, les non-humanoïdes portent de l'équipement ADAPTÉ, et il y a bien de la
+## SANTÉ PAR PARTIES).
+## **Ce test doit prouver que ce n'est pas la même liste déguisée** — sinon on aurait déplacé du code sans rien
+## gagner. Il coupe donc un bras et compte ; puis il crève un cœur.
+func j_test_vide() -> Dictionary:
+	return {"corps": {"silhouette": "humanoide"}}
+
+
+func test_plan_corps() -> void:
+	var plans: Dictionary = GameData.catalogues.plans_corps
+	verifier(plans.size() >= 6, "chaque silhouette a son plan de corps (%d)" % plans.size())
+	var sans := []
+	for cid: String in GameData.catalogues.creatures.keys():
+		var sil := str((GameData.catalogues.creatures[cid] as Dictionary).get("corps", {}).get("silhouette", ""))
+		if not sil.is_empty() and not plans.has(sil) and not (sil in sans):
+			sans.append(sil)
+	verifier(sans.is_empty(), "aucune créature ne porte une silhouette sans plan (%s)" % str(sans))
+	# Un plan est un ARBRE : racine présente, parents et contenants existants.
+	var casse := []
+	for pid: String in plans.keys():
+		var plan: Dictionary = plans[pid]
+		if not (plan.get("parties", {}) as Dictionary).has(str(plan.get("racine", ""))):
+			casse.append(pid)
+		for nom: String in (plan.parties as Dictionary).keys():
+			for cle in ["parent", "contenant"]:
+				var lien := str((plan.parties[nom] as Dictionary).get(cle, ""))
+				if not lien.is_empty() and not (plan.parties as Dictionary).has(lien):
+					casse.append("%s/%s.%s" % [pid, nom, cle])
+	verifier(casse.is_empty(), "chaque plan est un arbre : racine, parents et contenants existants (%s)" % str(casse))
+
+	# 1. LE MONDE RÉEL : un torse humain a cœur, poumons, foie, reins. Ce n'est pas de la couleur.
+	var h: Dictionary = plans.humanoide.parties
+	var attendus := ["coeur", "poumon_D", "poumon_G", "foie", "rein_D", "rein_G", "estomac", "cerveau"]
+	var absents := []
+	for o in attendus:
+		if not h.has(o):
+			absents.append(o)
+	verifier(absents.is_empty(), "le torse et la tête humains ont leurs organes du monde réel (%s)" % str(absents))
+	verifier(bool(h.coeur.get("interne", false)) and str(h.coeur.contenant) == "torse" and bool(h.coeur.get("vital", false)), "le cœur est un organe INTERNE du torse, et il est vital")
+	verifier(not bool(h.poumon_D.get("vital", false)), "mais un poumon sur deux n'est pas vital : on respire encore")
+	# Chaque silhouette a l'anatomie de SON animal, pas celle de l'homme recopiée.
+	verifier(plans.volant.parties.has("sacs_aeriens") and plans.volant.parties.has("gesier"), "l'oiseau a des sacs aériens et un gésier")
+	verifier(plans.arachnide.parties.has("poumons_livres") and plans.arachnide.parties.has("filieres"), "l'araignée a des poumons-livres et des filières")
+	verifier(plans.serpentin.parties.has("poumon") and not plans.serpentin.parties.has("poumon_G"), "le serpent n'a qu'UN poumon fonctionnel — c'est le monde réel qui le dit")
+	verifier(plans.amorphe.parties.size() == 1, "et la gelée n'a aucun organe : rien à lui percer")
+
+	# 2. UN TORSE EST UN TORSE (designer 2026-09-09 : « pas de type d'armure différents pour les animaux SAUF pour
+	#    les autres membres, genre pour queues, ailes »). Une pièce d'armure suit la FORME du membre, pas l'espèce :
+	#    un torse de cheval et un torse d'homme portent la même cuirasse. Seuls la QUEUE et les AILES, qui n'ont
+	#    aucun équivalent humain, gardent un emplacement à eux.
+	var cheval := {"corps": {"silhouette": "quadrupede"}}
+	var rapace := {"corps": {"silhouette": "volant"}}
+	var emp_q := Etres.emplacements(cheval)
+	verifier("cuirasse" in emp_q and "casque" in emp_q and "jambieres" in emp_q, "un quadrupède porte la MÊME cuirasse, le MÊME casque, les MÊMES jambières qu'un homme (%s)" % str(emp_q))
+	verifier("protege_queue" in emp_q, "et un protège-queue, parce qu'une queue n'a pas d'équivalent humain")
+	var emp_v := Etres.emplacements(rapace)
+	verifier("protege_ailes" in emp_v and "cuirasse" in emp_v, "un volant porte un protège-ailes, et la même cuirasse que tout le monde (%s)" % str(emp_v))
+	verifier(not ("brassards" in emp_v), "mais pas de brassards : une aile n'est pas un bras")
+	verifier(not ("protege_queue" in Etres.emplacements(j_test_vide())), "et un humain ne reçoit ni queue ni ailes — la liste d'affichage ne décide de rien")
+	verifier(Etres.emplacements({"corps": {"silhouette": "amorphe"}}).is_empty(), "une gelée ne porte rien, et c'est une affirmation, pas un manque")
+	# Le compte des types d'armure reste petit : c'est la règle du designer, et elle se vérifie.
+	var types := {}
+	for pid3: String in GameData.catalogues.plans_corps.keys():
+		for part3 in (GameData.catalogues.plans_corps[pid3] as Dictionary).parties.values():
+			for sl in (part3 as Dictionary).get("emplacements", []):
+				types[str(sl)] = true
+	verifier(types.size() <= 16, "seize types d'équipement pour six anatomies — pas dix mille (%d)" % types.size())
+	# Ce que chaque créature équipe tient dans son plan : si un jour on coiffe un loup, ça se verra ici.
+	var hors_plan := []
+	for cid2: String in GameData.catalogues.creatures.keys():
+		var def: Dictionary = GameData.catalogues.creatures[cid2]
+		var permis := Etres.emplacements({"corps": {"silhouette": str(def.get("corps", {}).get("silhouette", ""))}})
+		for uid in def.get("equipement", []):
+			var slot := str((GameData.catalogues.items.get(str(uid), {}) as Dictionary).get("equip_slot", ""))
+			if not slot.is_empty() and not (slot in permis):
+				hors_plan.append("%s:%s" % [cid2, slot])
+		for slot2: String in (def.get("equipement_slots", {}) as Dictionary).keys():
+			if not (slot2 in permis):
+				hors_plan.append("%s:%s" % [cid2, slot2])
+	verifier(hors_plan.is_empty(), "aucune créature n'équipe un emplacement que son plan n'accorde pas (%s)" % str(hors_plan))
+
+	# 3. COUPER UN BRAS : la preuve que la liste n'est pas une liste.
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	# La liste d'affichage en compte SEIZE depuis qu'elle range aussi les ailes et la queue ; un homme en reçoit
+	# QUATORZE, parce qu'il n'a ni l'une ni l'autre. C'est précisément ce que « la liste ne décide de rien » veut dire.
+	var tous: Array = Array(GameData.config("combat_rules").equipement.slots)
+	var emp_j := Etres.emplacements(j)
+	verifier(emp_j.size() == 14 and tous.size() == 16, "le joueur entier a ses 14 emplacements, sur les %d que la liste sait ranger" % tous.size())
+	var ordre_ok := true
+	var prec := -1
+	for sl_j in emp_j:
+		var pos := tous.find(sl_j)
+		if pos <= prec:
+			ordre_ok = false
+		prec = pos
+	verifier(ordre_ok, "et ils sortent dans l'ordre d'affichage des données")
+	var arme_uid := str(j.equipement.get("main_principale", ""))
+	verifier(not arme_uid.is_empty(), "le joueur tient une arme en main principale")
+	var sac0: int = j.sac.size()
+	verifier(not Etres.perdre_partie(j, "bras_D"), "un bras n'est pas vital — le module le dit à l'appelant, il ne tue personne")
+	var emp2 := Etres.emplacements(j)
+	verifier(not ("main_principale" in emp2) and not ("anneau_1" in emp2), "le bras perdu, la main principale et son anneau ne sont plus des emplacements")
+	verifier("main_secondaire" in emp2 and "brassards" in emp2, "la main gauche reste, et les brassards tiennent avec un seul bras — une paire suffit")
+	verifier(not j.equipement.has("main_principale") and arme_uid in j.sac and j.sac.size() > sac0, "l'arme est retombée dans le sac, pas détruite (%d → %d)" % [sac0, j.sac.size()])
+	verifier(Etres.partie_intacte(j, "bras_G") and not Etres.partie_intacte(j, "main_D"), "une main ne survit pas au bras : l'état se lit par la chaîne des parents")
+
+	# 4. LA SANTÉ PAR PARTIES. Chaque partie a SA réserve, et le compteur global décide seul de la mort.
+	var j2 := joueur_de(nouvelle_sim("gorge"))
+	var max_torse := Etres.sante_partie_max(j2, "torse")
+	var max_coeur := Etres.sante_partie_max(j2, "coeur")
+	verifier(max_torse > max_coeur and max_coeur > 0, "chaque partie a sa réserve, tirée de la santé maximale (torse %d, cœur %d sur %d)" % [max_torse, max_coeur, int(j2.sante_max)])
+	verifier(Etres.blesser_partie(j2, "jambe_D", 1) == "" and Etres.sante_partie(j2, "jambe_D") == Etres.sante_partie_max(j2, "jambe_D") - 1, "une égratignure entame la réserve de la jambe sans rien lui coûter")
+	verifier(Etres.blesser_partie(j2, "jambe_D", 100000) == "perdue" and not Etres.partie_intacte(j2, "jambe_D"), "assez de dégâts sur la même jambe, et elle tombe")
+	verifier(not Etres.partie_intacte(j2, "pied_D") and Etres.partie_intacte(j2, "pied_G"), "le pied qu'elle portait tombe avec elle, l'autre non")
+	verifier(Etres.blesser_partie(j2, "coeur", 100000) == "vitale", "un cœur crevé se dit VITAL — et c'est l'appelant qui en tire la mort, pas ce module")
+	# Le tirage de la partie touchée reste dans la zone demandée, et il atteint les organes.
+	var vus := {}
+	for k in 400:
+		var q := Etres.partie_touchee(j2, "torse", s.des)
+		vus[q] = true
+	var hors_zone := []
+	for q2: String in vus.keys():
+		if str((GameData.catalogues.plans_corps.humanoide.parties[q2] as Dictionary).zone) != "torse":
+			hors_zone.append(q2)
+	verifier(hors_zone.is_empty(), "un coup au torse ne touche qu'une partie du torse (%s)" % str(hors_zone))
+	verifier(vus.has("torse") and (vus.has("poumon_D") or vus.has("poumon_G") or vus.has("foie")), "et il atteint parfois un organe — le coup chanceux n'a demandé aucune règle de « critique » (%d parties vues)" % vus.size())
+
+
 # ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
 
 ## La CARTE DE LUMIÈRE ne se refait plus à chaque tick (2026-09-08, sur « énorme lag en ville quand le joueur se

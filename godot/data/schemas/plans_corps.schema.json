@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "required": [
+    "racine",
+    "parties"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "racine": {
+      "type": "string"
+    },
+    "parties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "zone",
+          "part_sante"
+        ],
+        "properties": {
+          "zone": {
+            "type": "string",
+            "enum": [
+              "tete",
+              "torse",
+              "bras",
+              "jambes",
+              "pieds"
+            ]
+          },
+          "parent": {
+            "type": "string"
+          },
+          "contenant": {
+            "type": "string"
+          },
+          "interne": {
+            "type": "boolean"
+          },
+          "emplacements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "vital": {
+            "type": "boolean"
+          },
+          "poids_coup": {
+            "type": "number",
+            "minimum": 0
+          },
+          "part_sante": {
+            "type": "number",
+            "minimum": 0.01,
+            "maximum": 2.0
+          }
+        }
+      }
+    }
+  }
+}

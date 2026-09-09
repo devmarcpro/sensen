@@ -1,0 +1,160 @@
+{
+  "_doc": "Le plan du corps arachnide (ordre de travail 28 bis, 2026-09-09). Chaque partie dit sa ZONE de coup, sa partie PARENT (la perdre emporte ce qu elle porte), les EMPLACEMENTS d equipement qu elle accorde, si elle est VITALE, son POIDS_COUP (sa chance relative d etre touchee dans sa zone) et sa PART_SANTE (sa reserve, en part de la sante maximale de l etre). Une partie INTERNE est un organe : elle est logee dans un `contenant` et se touche rarement, mais un coeur perce tue. Les organes sont ceux du monde reel — c est la regle du designer, et elle vaut ici comme pour les matieres. LES ORGANES SONT PROTEGES (corrige le 2026-09-09) : un premier reglage les rendait fragiles au point qu un coeur se crevait a chaque echange et que les cibles mouraient bien avant l heure — six tests calibres l ont dit. Leur poids de coup est le tiers du premier, et la reserve d un organe vital plus du triple : un coeur perce redevient un evenement rare. UNE PARTIE VITALE EXTERNE (le torse, la tete) EST LE CORPS LUI-MEME, et le corps a deja son compteur : la sante globale. Sa reserve est donc mise hors de portee (2.0), sans quoi un coup unique assez gros la detruirait et tuerait la ou la sante globale ne l aurait pas fait — deux compteurs de mort sur la meme chose. Ce qui se PERD, ce sont les membres et les organes ; ce qui TUE, c est le compteur global. UN TORSE EST UN TORSE (designer 2026-09-09) : une piece d armure suit la FORME du membre, pas l espece qui le porte — un torse de cheval et un torse d homme portent la meme cuirasse, a une taille pres, et la taille n est pas un type. Casque sur une tete, brassards sur un membre anterieur, jambieres sur un posterieur, bottes sur ce qui touche le sol. SEULS gardent un emplacement a eux les membres sans equivalent humain : la queue et les ailes.",
+  "racine": "cephalothorax",
+  "parties": {
+    "cephalothorax": {
+      "zone": "torse",
+      "vital": true,
+      "poids_coup": 3.0,
+      "part_sante": 2.0,
+      "emplacements": [
+        "cuirasse",
+        "dos",
+        "carquois",
+        "accessoire_1",
+        "accessoire_2"
+      ]
+    },
+    "abdomen": {
+      "zone": "torse",
+      "parent": "cephalothorax",
+      "vital": true,
+      "poids_coup": 2.5,
+      "part_sante": 2.0
+    },
+    "chelizeres": {
+      "zone": "tete",
+      "parent": "cephalothorax",
+      "poids_coup": 0.6,
+      "part_sante": 0.2,
+      "emplacements": [
+        "casque",
+        "amulette"
+      ]
+    },
+    "patte_1": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_2": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_3": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_4": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_5": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_6": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_7": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "patte_8": {
+      "zone": "jambes",
+      "parent": "cephalothorax",
+      "poids_coup": 0.5,
+      "part_sante": 0.18,
+      "emplacements": [
+        "jambieres",
+        "bottes"
+      ]
+    },
+    "cerveau": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "cephalothorax",
+      "vital": true,
+      "poids_coup": 0.033,
+      "part_sante": 0.42
+    },
+    "glande_venin": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "chelizeres",
+      "poids_coup": 0.053,
+      "part_sante": 0.24
+    },
+    "coeur": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "abdomen",
+      "vital": true,
+      "poids_coup": 0.04,
+      "part_sante": 0.525
+    },
+    "poumons_livres": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "abdomen",
+      "poids_coup": 0.06,
+      "part_sante": 0.36
+    },
+    "intestin_moyen": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "abdomen",
+      "poids_coup": 0.047,
+      "part_sante": 0.3
+    },
+    "filieres": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "abdomen",
+      "poids_coup": 0.04,
+      "part_sante": 0.24
+    }
+  }
+}

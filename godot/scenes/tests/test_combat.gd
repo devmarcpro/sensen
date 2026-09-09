@@ -98,6 +98,7 @@ func _ready() -> void:
 	# DÉSACTIVÉ : _lancer("test_glyphes_terrain")
 	_lancer("test_evenements")
 	_lancer("test_niveaux")
+	_lancer("test_plan_corps")
 	_lancer("test_paperdoll_et_tutoriels")
 	_lancer("test_materiaux")
 	_lancer("test_recolte")

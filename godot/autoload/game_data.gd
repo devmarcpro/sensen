@@ -14,7 +14,7 @@ const RACINE_LOCALE := "res://locale/"
 ## Collections (un fichier par entrée) — une ligne ici = un catalogue (règle 5 du pipeline).
 const CATALOGUES: Array[String] = [
 	"modules", "creatures", "creature_actions", "ai_profiles", "functionalities",
-	"items", "status_effects", "prototype_arenas", "rigs", "tutorials",
+	"items", "status_effects", "prototype_arenas", "rigs", "plans_corps", "tutorials",
 	"dungeon_rooms", "dungeon_connectors", "dungeon_themes", "affixes", "competences", "races", "classes",
 	"materials", "stations", "recipes", "components", "component_recipes", "meubles", "biomes", "vegetaux", "weather_states",
 	"functions", "dialogue", "traits", "histoires", "souhaits", "royaumes_evenements", "name_cultures", "village_buildings", "quest_templates", "plants", "governments", "guilds", "shop_types", "species", "talents", "grilles", "serments", "gaz",

@@ -377,6 +377,177 @@ static func arme(e: Dictionary, items: Dictionary) -> Dictionary:
 
 
 ## La pièce d'armure couvrant la zone, ou {} (zone nue = 0).
+## ---------------------------------------------------------------- le corps est un plan de parties (2026-09-09)
+
+## LE PLAN DU CORPS (ordre de travail 28 bis ; designer 2026-09-08 « un personnage est composé de membres, un
+## personnage peut perdre ses membres, les membres peuvent être remplacés ou même certains rajoutés », puis
+## 2026-09-09 « oui on y va » sur la question 6 bis).
+## **Le point structurel est ici, et tout le reste en dépend** : les emplacements d'équipement cessent d'être une
+## liste écrite d'avance et **dérivent du corps**. Perdre un bras retire un emplacement ; en gagner un en ajoute.
+## Tant que la liste était fixe, ni la perte, ni la prothèse, ni le membre surnuméraire n'étaient possibles.
+## Le plan est en données, un par silhouette (`data/plans_corps/`), et il dit pour chaque partie sa zone de coup, sa
+## partie parente, les emplacements qu'elle accorde et si elle est vitale.
+static func plan_corps(e: Dictionary) -> Dictionary:
+	return GameData.catalogues.plans_corps.get(str(e.get("corps", {}).get("silhouette", "")), {})
+
+
+## Les parties QUE CET ÊTRE A PERDUES. Comme pour les piles de tuiles, on ne stocke que l'exception : un corps
+## entier ne coûte rien de plus qu'avant, et la liste vide est le cas de tout le monde.
+static func parties_perdues(e: Dictionary) -> Array:
+	return e.get("corps", {}).get("perdues", [])
+
+
+## Une partie est-elle encore là ? Elle ne l'est plus si elle a été perdue, ni si l'une de ses ASCENDANTES l'a été —
+## une main ne survit pas au bras qui la portait.
+static func partie_intacte(e: Dictionary, partie: String) -> bool:
+	var plan := plan_corps(e)
+	var parties: Dictionary = plan.get("parties", {})
+	if not parties.has(partie):
+		return false
+	var perdues := parties_perdues(e)
+	var courant := partie
+	var garde := 0
+	while not courant.is_empty() and garde < 32:
+		garde += 1
+		if courant in perdues:
+			return false
+		courant = str((parties.get(courant, {}) as Dictionary).get("parent", ""))
+	return true
+
+
+## LES EMPLACEMENTS DE CET ÊTRE — **et ce ne sont plus les quatorze** (designer 2026-09-09 : « les non humanoïdes
+## peuvent porter de l'équipement adapté à leurs membres »). Un cheval porte une barde et un chanfrein, un rapace un
+## chaperon et des serres, un serpent un harnais : la liste de `combat_rules.equipement.slots` ne dit donc plus
+## QUELS emplacements existent, seulement **dans quel ordre** afficher ceux qu'elle connaît. C'est le plan qui les crée.
+## **Un emplacement existe dès qu'UNE des parties qui l'accordent est intacte** — les brassards tiennent avec un seul
+## bras, les bottes avec un seul pied. C'est ce qui évite d'inventer une règle par emplacement.
+## Sans plan de corps, on rend la liste complète : rien de ce qui existait ne se met à disparaître.
+static func emplacements(e: Dictionary) -> Array:
+	var connus: Array = Array(GameData.config("combat_rules").equipement.slots)
+	var plan := plan_corps(e)
+	if plan.is_empty():
+		return connus
+	var offerts: Array = []
+	for nom: String in (plan.get("parties", {}) as Dictionary).keys():
+		if not partie_intacte(e, nom):
+			continue
+		for slot in (plan.parties[nom] as Dictionary).get("emplacements", []):
+			if not (str(slot) in offerts):
+				offerts.append(str(slot))
+	var res: Array = []
+	for slot in connus:      # d'abord ceux que l'ordre d'affichage connaît…
+		if str(slot) in offerts:
+			res.append(slot)
+	for slot in offerts:     # … puis ceux que ce corps invente, dans l'ordre du plan
+		if not (slot in connus):
+			res.append(slot)
+	return res
+
+
+## ---------------------------------------------------------------- la santé par partie (designer 2026-09-09)
+
+## « IL Y A BIEN DE LA SANTÉ PAR PARTIES. » Chaque partie porte sa propre réserve, `part_sante × sante_max`, et elle
+## ne se partage avec aucune autre. Le compteur global reste et décide toujours de la MORT ; la santé par partie
+## décide de ce qu'on PERD. Un bras à 0,30 veut dire qu'il faut concentrer un tiers de la santé totale d'un être sur
+## ce bras-là pour le trancher : un événement rare et spectaculaire, pas la routine du combat.
+## Comme pour les piles de tuiles, on ne stocke que ce qui s'écarte du plein : un corps intact ne coûte rien.
+static func sante_partie_max(e: Dictionary, partie: String) -> int:
+	var p: Dictionary = plan_corps(e).get("parties", {}).get(partie, {})
+	return maxi(1, roundi(float(e.get("sante_max", 1)) * float(p.get("part_sante", 0.3))))
+
+
+static func sante_partie(e: Dictionary, partie: String) -> int:
+	var etat: Dictionary = e.get("corps", {}).get("sante_parties", {})
+	if etat.has(partie):
+		return int(etat[partie])
+	return sante_partie_max(e, partie)
+
+
+## LA PARTIE TOUCHÉE dans une zone : un tirage pondéré par `poids_coup` parmi les parties INTACTES de cette zone.
+## Les organes y figurent avec un poids faible — c'est ainsi qu'un coup chanceux perce un poumon sans qu'aucune
+## règle ne parle de « coup critique ».
+static func partie_touchee(e: Dictionary, zone: String, des: Des) -> String:
+	var parties: Dictionary = plan_corps(e).get("parties", {})
+	var noms: Array[String] = []
+	var poids: Array[float] = []
+	var total := 0.0
+	for nom: String in parties.keys():
+		if str((parties[nom] as Dictionary).get("zone", "")) != zone or not partie_intacte(e, nom):
+			continue
+		var w := float((parties[nom] as Dictionary).get("poids_coup", 1.0))
+		if w <= 0.0:
+			continue
+		noms.append(nom)
+		poids.append(w)
+		total += w
+	if noms.is_empty():
+		return ""
+	var tir := des.reel() * total
+	for k in noms.size():
+		tir -= poids[k]
+		if tir <= 0.0:
+			return noms[k]
+	return noms[noms.size() - 1]
+
+
+## Blesser une partie. Rend "" si elle tient, "perdue" si elle vient de tomber, "vitale" si ce qui vient de tomber
+## était vital — l'appelant décide alors ce qu'il en fait, ce module ne tue personne.
+static func blesser_partie(e: Dictionary, partie: String, degats: int) -> String:
+	if degats <= 0 or not partie_intacte(e, partie):
+		return ""
+	var corps: Dictionary = e.get("corps", {})
+	var etat: Dictionary = corps.get("sante_parties", {})
+	var reste := maxi(0, sante_partie(e, partie) - degats)
+	etat[partie] = reste
+	corps["sante_parties"] = etat
+	e["corps"] = corps
+	if reste > 0:
+		return ""
+	return "vitale" if perdre_partie(e, partie) else "perdue"
+
+
+## La zone d'un coup qui n'en désigne aucune — une explosion, une chute, un poison. La distribution est celle de
+## `combat_rules.zones.moyenne`, qui existait déjà : on ne l'invente pas ici.
+static func zone_au_hasard(regles: Regles, des: Des) -> String:
+	var moy: Dictionary = regles.r.zones.get("moyenne", {})
+	var total := 0.0
+	for k in moy.keys():
+		total += float(moy[k])
+	if total <= 0.0:
+		return "torse"
+	var tir := des.reel() * total
+	for k: String in moy.keys():
+		tir -= float(moy[k])
+		if tir <= 0.0:
+			return k
+	return "torse"
+
+
+## PERDRE UNE PARTIE. Ce qui était équipé dans un emplacement que plus rien n'accorde retombe dans le sac — on ne
+## détruit pas l'objet, on le décroche. Les parties portées par celle-ci tombent avec elle : `partie_intacte` le dit
+## déjà par la chaîne des parents, donc rien à propager à la main.
+## Rend `true` si la partie était vitale — l'appelant décide alors ce qu'il en fait, ce module ne tue personne.
+static func perdre_partie(e: Dictionary, partie: String) -> bool:
+	var plan := plan_corps(e)
+	var parties: Dictionary = plan.get("parties", {})
+	if not parties.has(partie) or not partie_intacte(e, partie):
+		return false
+	var corps: Dictionary = e.get("corps", {})
+	var perdues: Array = corps.get("perdues", [])
+	perdues.append(partie)
+	corps["perdues"] = perdues
+	e["corps"] = corps
+	var restants := emplacements(e)
+	for slot: String in (e.get("equipement", {}) as Dictionary).keys().duplicate():
+		if slot in restants:
+			continue
+		var uid := str(e.equipement[slot])
+		e.equipement.erase(slot)
+		if not uid.is_empty():
+			e.sac.append(uid)
+	return bool((parties[partie] as Dictionary).get("vital", false))
+
+
 static func piece_zone(e: Dictionary, zone: String, items: Dictionary) -> Dictionary:
 	for item_id: String in e.equipement.values():
 		var it: Dictionary = items.get(item_id, {})

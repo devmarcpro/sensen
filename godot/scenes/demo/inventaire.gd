@@ -39,6 +39,8 @@ func _ready() -> void:
 	grille_slots.add_theme_constant_override("h_separation", 6)
 	grille_slots.add_theme_constant_override("v_separation", 6)
 	rangee_haute.add_child(grille_slots)
+	# LA GRILLE DES CASES est bâtie une fois, sur la liste complète : c'est du mobilier d'interface, et l'être
+	# n'est pas connu ici. Ce sont les cases QUE CET ÊTRE N'A PAS qui se cachent au rafraîchissement.
 	for slot in Array(GameData.config("combat_rules").equipement.slots):
 		var c := CaseSlot.new()
 		c.inventaire = self
@@ -143,7 +145,9 @@ func reconstruire() -> void:
 	for c in cases.values():
 		c.uid = ""
 		c.index = -1
-	var slots_ordre: Array = Array(GameData.config("combat_rules").equipement.slots)
+	var slots_ordre: Array = Etres.emplacements(j)   # les emplacements DÉRIVENT du corps (2026-09-09)
+	for nom_slot: String in cases.keys():   # une case dont l'être n'a plus la partie ne se montre pas
+		cases[nom_slot].visible = nom_slot in slots_ordre
 	var k := 0
 	for en in ecrans.entrees:
 		var kind := str(en.get("kind", ""))

@@ -8,6 +8,10 @@ extends RefCounted
 
 var graine: int
 var des: Des
+## LE DÉ DE L'ANATOMIE (2026-09-09) — à part, et c'est la leçon d'un échec. Le routage d'un coup vers une partie
+## tirait d'abord dans `des`, le dé du combat : le résultat restait déterministe, mais la SÉQUENCE changeait, et six
+## tests calibrés sur des jets ont rougi d'un coup. **Un consommateur neuf ne perturbe pas un flux existant.**
+var des_corps: Des
 var regles: Regles
 var wuxing: WuXing
 var capacites: Capacites
@@ -130,6 +134,7 @@ var graine_monde := -1   # la graine du monde choisie à l'écran Monde (Écrans
 func _init(p_graine: int) -> void:
 	graine = p_graine
 	des = Des.new(p_graine)
+	des_corps = Des.new(p_graine ^ 0x5C0)   # un grain dérivé : même partie, même anatomie, mais un autre fil
 	regles = Regles.new(GameData.config("combat_rules"))
 	wuxing = WuXing.new(GameData.config("wuxing"))
 	capacites = Capacites.new(GameData.catalogues.get("modules", {}))
@@ -2157,6 +2162,23 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	var att: Dictionary = entites.get(source, {})
 	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
 		SimPnj.reputation(self, att, cible, "tuer" if cible.sante <= 0 else "frapper")
+	# LA SANTÉ PAR PARTIE (designer 2026-09-09 : « il y a bien de la santé par parties »). Le coup a déjà été
+	# retranché du compteur global, qui décide de la mort ; il frappe maintenant UNE partie, tirée dans la zone
+	# touchée au poids de chacune. Les organes y sont, avec un poids faible : c'est ainsi qu'un coup chanceux perce
+	# un poumon sans qu'aucune règle ne parle de « coup critique ». Un organe vital détruit tue — et l'on se contente
+	# de vider le compteur global, pour que la mort suive le seul chemin qu'elle ait jamais eu.
+	if degats > 0 and cible.vivant and not Etres.plan_corps(cible).is_empty():
+		var zone_c := str(detail.get("zone", ""))
+		if zone_c.is_empty():
+			zone_c = Etres.zone_au_hasard(regles, des_corps)
+		var quelle := Etres.partie_touchee(cible, zone_c, des_corps)
+		if not quelle.is_empty():
+			var issue := Etres.blesser_partie(cible, quelle, degats)
+			if issue == "perdue":
+				EventBus.emettre(&"journal", [&"journal.partie_perdue", {"nom": cible.name_key, "partie": "partie." + quelle}])
+			elif issue == "vitale":
+				EventBus.emettre(&"journal", [&"journal.partie_vitale", {"nom": cible.name_key, "partie": "partie." + quelle}])
+				cible.sante = 0
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
 		grille.liberer(cible.pos, cible.id)
