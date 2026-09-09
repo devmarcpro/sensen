@@ -1,0 +1,25 @@
+{
+  "name_key": "faction.gens_d_armes.name",
+  "_doc": "Gardes, commandants et seigneurs : l ordre avant tout ; le sang verse dans la rue est leur affaire, celui d une bete dans les bois ne l est pas.",
+  "valeurs": {
+    "meurtre": -6.0,
+    "ordre_trouble": -3.0,
+    "vol": -3.0,
+    "ordre_garde": 3.0,
+    "chasse": 0.5
+  },
+  "membres": {
+    "races": [],
+    "fonctions": [
+      "garde",
+      "commandant",
+      "seigneur",
+      "maire",
+      "dirigeant",
+      "syndic"
+    ],
+    "tags": [
+      "garde"
+    ]
+  }
+}

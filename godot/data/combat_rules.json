@@ -1920,5 +1920,46 @@
     "risque_eau_libre": {
       "infection": 0.08
     }
+  },
+  "faits": {
+    "_doc": "CE QU UN ACTE LAISSE DERRIERE LUI (ordre de travail 29 bis, 2026-09-09). Un acte ne dit pas « c est mal » : il pose des TAGS, et ce sont les valeurs d une faction qui decident si elle s en offusque. C est toute l economie du systeme — un acte de plus est une ligne de donnee, pas une regle.\nLes tags qui commencent par `espece:` sont poses par le code a partir de la bete touchee : c est ainsi qu une espece devient une faction sans qu on ecrive un fichier par bete.",
+    "actes": {
+      "tuer_civil": [
+        "sang_verse",
+        "meurtre",
+        "ordre_trouble"
+      ],
+      "frapper_civil": [
+        "sang_verse",
+        "ordre_trouble"
+      ],
+      "tuer_bete": [
+        "sang_verse",
+        "nature_detruite",
+        "chasse"
+      ],
+      "tuer_bete_paisible": [
+        "sang_verse",
+        "nature_detruite",
+        "chasse",
+        "cruaute"
+      ],
+      "abattre_arbre": [
+        "nature_detruite",
+        "industrie"
+      ],
+      "creuser_roche": [
+        "nature_detruite",
+        "industrie"
+      ],
+      "voler": [
+        "vol",
+        "ordre_trouble"
+      ],
+      "quete_rendue": [
+        "entraide",
+        "ordre_garde"
+      ]
+    }
   }
 }

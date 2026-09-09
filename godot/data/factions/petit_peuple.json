@@ -1,0 +1,27 @@
+{
+  "name_key": "faction.petit_peuple.name",
+  "_doc": "Ceux qui n ont ni titre ni guilde : ils se souviennent de qui aide et de qui frappe, et rien d autre ne les regarde beaucoup.",
+  "valeurs": {
+    "entraide": 4.0,
+    "sang_verse": -2.0,
+    "vol": -2.0,
+    "meurtre": -4.0
+  },
+  "membres": {
+    "races": [
+      "humain",
+      "mutant"
+    ],
+    "fonctions": [
+      "journalier",
+      "oisif",
+      "cuisinier",
+      "portefaix",
+      "eleveur",
+      "pretre"
+    ],
+    "tags": [
+      "civil"
+    ]
+  }
+}

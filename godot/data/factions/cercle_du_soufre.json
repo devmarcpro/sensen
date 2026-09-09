@@ -1,0 +1,22 @@
+{
+  "name_key": "faction.cercle_du_soufre.name",
+  "_doc": "Ceux qui trouvent le monde trop tiede : la cruaute et le desordre les amusent, l entraide les ennuie. Une faction qu on ne se concilie qu en faisant ce que les autres reprouvent.",
+  "valeurs": {
+    "cruaute": 4.0,
+    "meurtre": 2.0,
+    "ordre_trouble": 2.0,
+    "entraide": -2.0,
+    "ordre_garde": -3.0
+  },
+  "membres": {
+    "races": [
+      "daemon",
+      "vampire",
+      "spectre"
+    ],
+    "fonctions": [],
+    "tags": [
+      "hostile"
+    ]
+  }
+}

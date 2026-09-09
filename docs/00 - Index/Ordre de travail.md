@@ -577,8 +577,8 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 
-29. **La rumeur qui circule** (aucun bloqueur — elle pourrait se faire au palier 5 ; l'ordre du designer la place ici).
-29 bis. **Les factions par tags idéologiques — et une faction par espèce** *(élargi le 2026-09-08 par le designer : « réputation par factions, une faction par espèce »).* La réputation existe déjà par PNJ, par village, par royaume et globalement ; **l'étage des factions manque**, et avec lui l'idée qu'une **espèce** en est une — aujourd'hui, chasser les cerfs jusqu'au dernier ne fâche personne. C'est le **lecteur naturel** de la rumeur (ligne 29) : elle transporte le fait, la faction décide qui s'en offusque. Les trois — rumeur, tags, factions — sont un seul système, à écrire ensemble.
+~~29. **La rumeur qui circule**~~ — **FAITE le 2026-09-09**, avec 29 bis, parce que les deux ne sont qu'un système. Voir [[Rumeur et factions]].
+~~29 bis. **Les factions par tags idéologiques — et une faction par espèce**~~ — **FAITES le 2026-09-09** *(élargi le 2026-09-08 par le designer : « réputation par factions, une faction par espèce »).* La réputation existe déjà par PNJ, par village, par royaume et globalement ; **l'étage des factions manque**, et avec lui l'idée qu'une **espèce** en est une — aujourd'hui, chasser les cerfs jusqu'au dernier ne fâche personne. C'est le **lecteur naturel** de la rumeur (ligne 29) : elle transporte le fait, la faction décide qui s'en offusque. Les trois — rumeur, tags, factions — sont un seul système, à écrire ensemble.
 
 *L'analyse d'origine :* — *validé le 2026-09-08 sur un avis extérieur, voir [[Vers la production]] ligne 149.*
     **Le fait vérifié** : `Surface._lier_royaumes` calcule la relation entre deux royaumes à partir d'**attributs
@@ -590,6 +590,11 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     région, types de gouvernance, réputation à trois étages, vecteurs Wu Xing.
     **Il est ici et pas ailleurs parce qu'il est le lecteur naturel de la rumeur** : elle transporte le fait, les tags
     décident qui s'en offusque. À faire **avec** la ligne 29, pas avant.
+    **CE QUI EST FAIT** : les faits tagués, la rumeur DÉDUITE (rien ne se propage : un observateur sait à
+    partir de sa distance et du temps écoulé), les cinq factions nommées, l'espèce comme faction implicite,
+    et `relation_de` qui ajoute ce que les factions du PNJ pensent. **Ce qui reste** : les ROYAUMES ne
+    portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
+    moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
 30. **Le temps long** — usure, ruine, repousse — avec `alteration`.
 31. **Les besoins au-delà de la faim** : ~~soif~~, sommeil, peur qui dure (aucun bloqueur non plus).
     ~~**L'HYDRATATION**~~ — **FAITE le 2026-09-09 au soir** *(designer : « on rajoutera l'hydratation aussi »).*

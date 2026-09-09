@@ -100,7 +100,7 @@ static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
 	# une transaction — mais la moitié du risque tient dans cet ordre.
 	var monde_json := {"version": int(GameData.config("combat_rules").get("sauvegarde", {}).get("version", 2)), "resume": resume_partie(sim), "graine": sim.graine, "graine_monde": sim.graine_monde, "planete_options": sim.planete_options, "identifies": sim.identifies, "ticks": sim.horloge_monde.ticks, "prochain_donjon": sim.prochain_donjon, "n_entites": sim._n_entites,
 		"cellule_camp": sim.monde.cellule_camp, "camp": {"entree": sim.camp_sauve.get("entree", Vector2i.ZERO), "biome": sim.camp_sauve.get("biome", ""), "cellule": sim.camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": sim.monde.explores,
-		"delta": sim.monde.delta, "foyers": sim.monde.foyers, "faune_densite": sim.monde.faune_densite, "semaine": sim.monde.semaine_courante, "peuplees": sim.monde.peuplees, "claims": sim.territoires.joueur.cellules, "territoire": sim.territoires.joueur, "territoires": sim.territoires, "tresors_royaumes": sim.monde.tresors_royaumes, "etats_royaumes": sim.monde.etats_royaumes, "vacances": sim.monde.vacances, "villages": sim.monde.villages, "tombes": sim.monde.tombes, "heritiers": sim.monde.heritiers, "vacances_guildes": sim.monde.vacances_guildes,
+		"delta": sim.monde.delta, "foyers": sim.monde.foyers, "faune_densite": sim.monde.faune_densite, "semaine": sim.monde.semaine_courante, "peuplees": sim.monde.peuplees, "claims": sim.territoires.joueur.cellules, "territoire": sim.territoires.joueur, "territoires": sim.territoires, "tresors_royaumes": sim.monde.tresors_royaumes, "etats_royaumes": sim.monde.etats_royaumes, "vacances": sim.monde.vacances, "villages": sim.monde.villages, "faits": sim.monde.faits, "tombes": sim.monde.tombes, "heritiers": sim.monde.heritiers, "vacances_guildes": sim.monde.vacances_guildes,
 		"modifs_terrain": sim.modifs_terrain, "portails": sim.portails, "gouffres_vides": sim.gouffres_vides, "mines_creusees": sim.mines_creusees,
 		"nettoyages": sim.monde.nettoyages,
 		"carte_cache": sim.monde.carte_cache_serialise()}   # indexés par position monde, donc valables au rechargement
@@ -173,6 +173,7 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 	sim.monde.heritiers = w.get("heritiers", {})
 	sim.monde.vacances_guildes = w.get("vacances_guildes", {})
 	sim.monde.villages = w.get("villages", {})
+	sim.monde.faits = w.get("faits", [])   # ce que le monde se raconte survit au rechargement (rumeur, 29)
 	sim.monde.tombes = w.get("tombes", {})   # les morts enterres : le monde s en souvient, la cellule non
 	sim.monde.tresors_royaumes = w.get("tresors_royaumes", {})
 	sim.monde.etats_royaumes = w.get("etats_royaumes", {})

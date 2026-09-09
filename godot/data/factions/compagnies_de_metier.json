@@ -1,0 +1,25 @@
+{
+  "name_key": "faction.compagnies_de_metier.name",
+  "_doc": "Les guildes d artisans et de mineurs : elles saluent ce qui produit et detestent ce qui trouble le commerce.",
+  "valeurs": {
+    "industrie": 3.0,
+    "nature_detruite": 1.0,
+    "vol": -4.0,
+    "ordre_trouble": -2.0,
+    "entraide": 2.0
+  },
+  "membres": {
+    "races": [
+      "nain",
+      "robot"
+    ],
+    "fonctions": [
+      "artisan",
+      "mineur",
+      "commercant",
+      "couturier",
+      "transporteur"
+    ],
+    "tags": []
+  }
+}

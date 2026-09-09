@@ -4,6 +4,58 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## LA RUMEUR QUI CIRCULE ET LES FACTIONS QUI L'ÉCOUTENT (ordre de travail 29 et 29 bis ; designer 2026-09-08 :
+## « réputation par factions, une faction par espèce »). Quatre choses à prouver, et la première est celle qui donne
+## son nom à la ligne : **une nouvelle met du temps à arriver**.
+func test_rumeur_et_factions() -> void:
+	var cfg: Dictionary = GameData.config("rumeur")
+	verifier(not cfg.is_empty() and GameData.catalogues.get("factions", {}).size() >= 4, "la rumeur a ses nombres et le monde a ses factions (%d)" % GameData.catalogues.get("factions", {}).size())
+	var s := Simulation.new(4242)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.monde.faits.clear()
+	var ici: Vector2i = s.monde.cellule_de(j.pos)
+	var t0: int = s.horloge_monde.ticks
+	SimRumeur.rapporter(s, j, "abattre_arbre", j.pos, [])
+	verifier(s.monde.faits.size() == 1 and "nature_detruite" in s.monde.faits[0].tags, "un arbre abattu laisse un fait tagué (%s)" % str(s.monde.faits[0].tags))
+
+	# 1. LA NOUVELLE MET DU TEMPS. Ici on la sait tout de suite ; à dix cellules, il faut que le temps passe — et
+	# c'est DÉDUIT de la distance, sans une ligne qui colporte.
+	var fait: Dictionary = s.monde.faits[0]
+	var loin := ici + Vector2i(10, 0)
+	verifier(SimRumeur.fraicheur(cfg, fait, ici, t0) > 0.9, "sur place, on sait tout de suite (%.2f)" % SimRumeur.fraicheur(cfg, fait, ici, t0))
+	verifier(SimRumeur.fraicheur(cfg, fait, loin, t0) == 0.0, "à dix cellules, personne n'a encore rien entendu")
+	var arrivee: int = t0 + 10 * int(cfg.ticks_par_cellule)
+	verifier(SimRumeur.fraicheur(cfg, fait, loin, arrivee + 1) > 0.9, "le temps de la route passée, la nouvelle y est (%.2f)" % SimRumeur.fraicheur(cfg, fait, loin, arrivee + 1))
+	verifier(SimRumeur.fraicheur(cfg, fait, loin, arrivee + int(cfg.duree_memoire) + 1) == 0.0, "et elle finit par s'oublier, sans qu'une ligne l'efface")
+	verifier(SimRumeur.fraicheur(cfg, fait, ici + Vector2i(int(cfg.portee_max_cellules) + 5, 0), t0 + 100000000) == 0.0, "au-delà de la portée, elle se perd en route : elle n'arrive JAMAIS")
+
+	# 2. DEUX FACTIONS NE S'OFFUSQUENT PAS DU MÊME FAIT. C'est tout l'intérêt de la ligne : l'acte ne juge pas, les
+	# valeurs jugent. Un arbre abattu fâche les Gardiens des bois et laisse les gens d'armes de marbre.
+	var bois := SimRumeur.reputation(s, "gardiens_des_bois", str(j.id), ici, t0)
+	var armes := SimRumeur.reputation(s, "gens_d_armes", str(j.id), ici, t0)
+	verifier(bois < 0 and armes == 0, "l'arbre abattu fâche les Gardiens des bois (%d) et laisse les gens d'armes indifférents (%d)" % [bois, armes])
+
+	# 3. UNE ESPÈCE EST UNE FACTION, sans un fichier de plus. Chasser les cerfs fâche les cerfs, pas les loups.
+	s.monde.faits.clear()
+	SimRumeur.rapporter(s, j, "tuer_bete", j.pos, ["espece:loup"])
+	verifier(SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0) < 0, "tuer un loup fâche les loups")
+	verifier(SimRumeur.reputation(s, "espece:cerf", str(j.id), ici, t0) == 0, "et ne fâche pas les cerfs : une espèce est une faction à elle seule")
+	verifier(SimRumeur.reputation(s, "gardiens_des_bois", str(j.id), ici, t0) < 0, "les Gardiens des bois, eux, comptent aussi les bêtes")
+
+	# 4. LA RÉPUTATION EST UNE SOMME, PAS UN COMPTEUR : deux fois le même acte pèse deux fois, et rien ne se compte
+	# deux fois quand on la relit. C'est ce qui la rend gratuite et ce qui la fait s'effacer toute seule.
+	var un: int = SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0)
+	var relu: int = SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0)
+	SimRumeur.rapporter(s, j, "tuer_bete", j.pos, ["espece:loup"])
+	var deux: int = SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0)
+	verifier(relu == un and deux < un, "la relire ne l'aggrave pas (%d), la refaire si (%d)" % [relu, deux])
+	# Et le plafond de faits est le seul oubli qui soit un choix : au-delà, le plus ancien tombe.
+	for k in int(cfg.faits_max) + 20:
+		SimRumeur.rapporter(s, j, "creuser_roche", j.pos, [])
+	verifier(s.monde.faits.size() == int(cfg.faits_max), "la liste des faits est bornée : le plus ancien tombe (%d)" % s.monde.faits.size())
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)

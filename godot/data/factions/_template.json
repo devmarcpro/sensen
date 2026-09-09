@@ -1,0 +1,12 @@
+{
+  "_doc": "Faction (ordre de travail 29 bis). `valeurs` : ce que la faction pense de chaque tag d acte, en points de reputation par unite de gravite — negatif, elle s en offusque ; positif, elle applaudit. `membres` dit qui en fait partie : par race, par fonction de village, ou par tag d etre. Un etre peut appartenir a plusieurs factions ; sa relation les additionne.",
+  "name_key": "faction.<id>.name",
+  "valeurs": {
+    "<tag>": 0.0
+  },
+  "membres": {
+    "races": [],
+    "fonctions": [],
+    "tags": []
+  }
+}

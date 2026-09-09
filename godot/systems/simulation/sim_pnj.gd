@@ -749,7 +749,7 @@ static func quetes_offertes(sim: Simulation, pnj: Dictionary, e: Dictionary) -> 
 	if not ("quetes" in pnj.get("tags", [])):
 		return []
 	# Refusées sous −20 : la relation du donneur, ou la réputation de son village (le collectif compte).
-	if mini(relation_de(sim, pnj, e), int(e.get("reputations", {}).get(str(pnj.get("village", "")), 0))) < int(sim.regles.r.reputation.quetes_seuil):
+	if mini(relation_vue(sim, pnj, e), int(e.get("reputations", {}).get(str(pnj.get("village", "")), 0))) < int(sim.regles.r.reputation.quetes_seuil):
 		return []
 	var semaine := sim.horloge_monde.ticks / int(GameData.config("planete").corruption.ticks_par_semaine)
 	if int(pnj.get("quetes_semaine", -1)) != semaine:
@@ -917,19 +917,33 @@ static func ennemis(sim: Simulation, a: Dictionary, b: Dictionary) -> bool:
 		# Réputation et relations : ≤ −50, hostile à vue.
 		var seuil := int(sim.regles.r.reputation.hostile_seuil)
 		if a.camp == "civil" and b.camp == "joueur":
-			return relation_de(sim, a, b) <= seuil
+			return relation_vue(sim, a, b) <= seuil
 		if b.camp == "civil" and a.camp == "joueur":
-			return relation_de(sim, b, a) <= seuil
+			return relation_vue(sim, b, a) <= seuil
 		return false
 	return true
 
 
 ## La relation d'un PNJ envers un être (−100..+100), la réputation de son village en repli.
+## LA RELATION ACQUISE : ce que CE PNJ sait de lui-même, et rien d'autre. C'est la valeur qu'on écrit, celle qu'un
+## acte modifie — et c'est pour cela qu'elle ne doit PAS contenir l'opinion des factions.
 static func relation_de(sim: Simulation, pnj: Dictionary, e: Dictionary) -> int:
 	var rels: Dictionary = pnj.get("social", {}).get("relations", {})
 	if rels.has(e.id):
 		return int(rels[e.id])
 	return int(e.get("reputations", {}).get(str(pnj.get("village", "")), 0))
+
+
+## LA RELATION VUE : l'acquise, PLUS ce que ses factions pensent de lui (ordre de travail 29 bis, 2026-09-09). Un
+## garde qui n'a jamais vu le joueur le regarde de travers si la nouvelle du meurtre est arrivée jusqu'à son village,
+## et un bûcheron des Gardiens des bois s'offusque de l'arbre abattu que le garde ignore.
+##
+## **LES DEUX NE SONT PAS LA MÊME CHOSE, et les confondre coûte cher** : la première version ajoutait l'opinion dans
+## `relation_de`, or `reputation()` ÉCRIT `social.relations` à partir de cette même fonction — l'opinion se trouvait
+## donc **recopiée dans la valeur acquise**, puis rajoutée à la lecture suivante. Un test qui attendait « +10 après
+## une quête » l'a levé à la première exécution. *Une valeur dérivée ne doit jamais servir de base à ce qu'on écrit.*
+static func relation_vue(sim: Simulation, pnj: Dictionary, e: Dictionary) -> int:
+	return clampi(relation_de(sim, pnj, e) + SimRumeur.opinion(sim, pnj, e), -100, 100)
 
 
 ## Un acte du joueur envers un PNJ : gains [pnj, village, globale] (Réputation et relations), modulés
@@ -954,13 +968,13 @@ static func reputation(sim: Simulation, e: Dictionary, pnj: Dictionary, acte: St
 		e.reputations[roy] = clampi(int(e.reputations.get(roy, 0)) + int(gains[1]), -100, 100)
 	e.reputations["_globale"] = clampi(int(e.reputations.get("_globale", 0)) + int(gains[2]), -100, 100)
 	EventBus.emettre(&"journal", [&"journal.reputation", {"nom": pnj.name_key, "pnj": int(pnj.social.relations[e.id]), "village": village if not village.is_empty() else "—", "rep": int(e.reputations.get(village, 0))}])
-	if relation_de(sim, pnj, e) <= int(rp.hostile_seuil):
+	if relation_vue(sim, pnj, e) <= int(rp.hostile_seuil):
 		EventBus.emettre(&"journal", [&"journal.hostile_a_vue", {"nom": pnj.name_key}])
 
 
 ## Le palier d'information d'un PNJ pour le joueur (L'information comme récompense) : 0..5.
 static func palier_info(sim: Simulation, pnj: Dictionary, e: Dictionary) -> int:
-	var rel := relation_de(sim, pnj, e)
+	var rel := relation_vue(sim, pnj, e)
 	if rel < 0:
 		return 0
 	var paliers: Array = sim.regles.r.reputation.paliers_info

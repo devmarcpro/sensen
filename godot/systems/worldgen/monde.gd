@@ -42,6 +42,10 @@ var heritiers: Dictionary = {}         # id de royaume → id de l'héritier dé
 var vacances_guildes: Dictionary = {}  # "guilde|village" → semaine de résolution : hall sans maître
 var tombes: Dictionary = {}            # cellule → [{tuile locale, nom, fonction, an}] : les morts enterrés (Villes — les repères, 2026-09-07)
 var villages: Dictionary = {}          # nom de village → {cellule, royaume, conquis_par, defense_jusqua, abandonne} (Conquête de village)
+## LES FAITS QUE LE MONDE SE RACONTE (ordre de travail 29, 2026-09-09) : {auteur, acte, tags, cellule, tick,
+## gravite}. Ils ne se propagent pas — un observateur DÉDUIT s'il en a eu vent, de sa distance et du temps écoulé
+## (`SimRumeur`). C'est la liste entière du système : ni carte de connaissance, ni compteur de réputation.
+var faits: Array = []
 var tresors_royaumes: Dictionary = {}  # id de royaume → or prélevé sur ses villes (Villes B3 ; les royaumes-pays de D)
 var etats_royaumes: Dictionary = {}    # id de royaume → son état (population, armée, humeur, règne, ère, blason, guerres, journal) — Royaumes-pays (D)
 var mutex := Mutex.new()

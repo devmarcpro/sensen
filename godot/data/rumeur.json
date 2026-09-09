@@ -1,0 +1,17 @@
+{
+  "_doc": "LA RUMEUR (ordre de travail 29, 2026-09-09). Un fait met du temps a parcourir la carte, et RIEN NE LE COLPORTE : un observateur a `d` cellules du lieu le sait a partir de `fait.tick + d * ticks_par_cellule`. On le DEDUIT, comme le stade d une depouille se deduit de l heure de la mort — aucune boucle, aucun etat qui s accumule.\nLA FRAICHEUR fait le reste : un fait pese `1` a son arrivee et decroit jusqu a zero sur `duree_memoire`. Une rancune s efface donc toute seule, sans une ligne pour l effacer. `faits_max` borne la liste — au-dela, le plus ancien tombe, et c est le seul oubli qui soit un choix.\n`gravite` multiplie ce qu un acte pese : tuer n est pas voler.\n`memo_ticks` : on ne refait pas la somme d une opinion a chaque regard — `relation_de` est appele par l IA pour chaque paire d etres et a chaque pas. Elle se garde par paire et se refait quand un fait nouveau arrive, ou quand ce temps a passe.",
+  "ticks_par_cellule": 120000,
+  "duree_memoire": 24000000,
+  "faits_max": 240,
+  "portee_max_cellules": 24,
+  "gravite": {
+    "_doc": "Ce qu un acte pese, avant les valeurs de la faction.",
+    "tuer": 1.0,
+    "frapper": 0.35,
+    "voler": 0.5,
+    "abattre": 0.25,
+    "creuser": 0.15,
+    "quete": 0.6
+  },
+  "memo_ticks": 60000
+}

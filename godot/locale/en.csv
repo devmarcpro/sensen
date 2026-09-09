@@ -2195,6 +2195,11 @@ journal.remontee,you go back up to floor {etage}
 journal.renaissance,"{nom} calls {compagnon} back through Rebirth"
 journal.renaissance_rien,no soul to call back
 journal.repeuplement,"{village}: a new inhabitant settles in"
+faction.gardiens_des_bois.name,Wardens of the Woods
+faction.compagnies_de_metier.name,Trade Companies
+faction.gens_d_armes.name,Men-at-Arms
+faction.petit_peuple.name,Common Folk
+faction.cercle_du_soufre.name,Circle of Sulphur
 journal.reputation,"{nom}: relationship {pnj} · {village}: {rep}"
 journal.respawn,{nom} rises again at the entrance ({perdus} item(s) lost)
 journal.ressuscite,"{nom} returns to life, weakened ({or} gold)"

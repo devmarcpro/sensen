@@ -1,0 +1,24 @@
+{
+  "name_key": "faction.gardiens_des_bois.name",
+  "_doc": "Ceux pour qui la foret vaut plus qu une poutre : ils comptent les arbres abattus et les betes tuees, et se moquent de qui commande.",
+  "valeurs": {
+    "nature_detruite": -4.0,
+    "chasse": -2.0,
+    "industrie": -3.0,
+    "cruaute": -3.0,
+    "entraide": 1.0
+  },
+  "membres": {
+    "races": [
+      "elfe",
+      "homme_bete",
+      "nautique"
+    ],
+    "fonctions": [
+      "bucheron",
+      "herboriste",
+      "fermier"
+    ],
+    "tags": []
+  }
+}

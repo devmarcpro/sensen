@@ -1362,6 +1362,11 @@ journal.quete_acceptee,"quête acceptée : {texte}"
 journal.quete_progres,"quête : {fait}/{count}"
 journal.quete_rendue,"quête rendue : +{or} or, +{xp} XP ({guilde})"
 journal.rang_guilde,"{guilde} : tu es maintenant {rang}"
+faction.gardiens_des_bois.name,Gardiens des bois
+faction.compagnies_de_metier.name,Compagnies de métier
+faction.gens_d_armes.name,Gens d'armes
+faction.petit_peuple.name,Petit peuple
+faction.cercle_du_soufre.name,Cercle du soufre
 journal.reputation,"{nom} : relation {pnj} · {village} : {rep}"
 journal.rumeur,"{nom} te confie une rumeur : quelque chose en ({x},{y})"
 journal.hostile_a_vue,{nom} te traite en ennemi

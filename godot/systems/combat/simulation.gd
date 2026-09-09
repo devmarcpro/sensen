@@ -47,6 +47,7 @@ var prochain_donjon: int = 1         # id du prochain donjon lancé depuis le ca
 var monde: Monde = null              # la surface comme fenêtre glissante (étape 8.2a)
 var bombes: Array = []               # les bombes posées, en attente d'explosion (Explosions)
 var affuts: Array[Dictionary] = []   # tourelles portatives de L'Engrenage : {pos, source, prochain}
+var opinions_memo: Dictionary = {}   # « pnj|auteur » → {v, tick, version} : ce que les factions d'un PNJ pensent de quelqu'un (rumeur, 29)
 var pluie_heure := -1   # la dernière heure de monde où la pluie a rempli les creux
 var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (Météo)
 var evapo_heure := -1   # la dernière heure de canicule où les flaques ont baissé
@@ -2330,6 +2331,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	var att: Dictionary = entites.get(source, {})
 	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
 		SimPnj.reputation(self, att, cible, "tuer" if cible.sante <= 0 else "frapper")
+	if degats > 0 and cible.sante > 0 and not att.is_empty() and cible.camp == "civil":
+		SimRumeur.rapporter(self, att, "frapper_civil", cible.pos, [])   # frapper se raconte aussi, moins fort
 	# LA SANTÉ PAR PARTIE (designer 2026-09-09 : « il y a bien de la santé par parties »). Le coup a déjà été
 	# retranché du compteur global, qui décide de la mort ; il frappe maintenant UNE partie, tirée dans la zone
 	# touchée au poids de chacune. Les organes y sont, avec un poids faible : c'est ainsi qu'un coup chanceux perce
@@ -2364,6 +2367,13 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			EventBus.emettre(&"journal", [&"journal.dissimule", {"nom": att.name_key}])
 		if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil":
 			SimRoyaumes._infraction(self, att, "comportement", "meurtre", cible.pos, "")
+		# LE FAIT QUE LE MONDE VA SE RACONTER (ordre de travail 29). Il ne juge rien : il pose des tags, et ce sont
+		# les valeurs des factions qui décideront qui s'en offusque. L'espèce en est un — c'est ainsi qu'une espèce
+		# devient une faction sans qu'on écrive un fichier par bête.
+		if not att.is_empty():
+			var acte_f := "tuer_civil" if cible.camp == "civil" else ("tuer_bete_paisible" if est_faune_paisible(cible) else "tuer_bete")
+			var extra_f: Array = [] if cible.camp == "civil" else ["espece:" + str(cible.get("def", ""))]
+			SimRumeur.rapporter(self, att, acte_f, cible.pos, extra_f)
 		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
 			monde.vacances[str(cible.royaume)] = monde.semaine_courante + int(SimTerritoire._ry(self).succession.semaines)
 			var h: String = SimRoyaumes.heritier_de(self, cible)
@@ -5995,7 +6005,7 @@ func ennemis(a: Dictionary, b: Dictionary) -> bool:
 	return SimPnj.ennemis(self, a, b)
 
 func relation_de(pnj: Dictionary, e: Dictionary) -> int:
-	return SimPnj.relation_de(self, pnj, e)
+	return SimPnj.relation_vue(self, pnj, e)   # ce que le PNJ montre : l'acquise plus ce que ses factions pensent
 
 func reputation(e: Dictionary, pnj: Dictionary, acte: String) -> void:
 	SimPnj.reputation(self, e, pnj, acte)

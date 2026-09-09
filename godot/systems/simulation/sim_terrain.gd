@@ -1636,6 +1636,9 @@ static func _creuser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) 
 			EventBus.emettre(&"journal", [&"journal.creuse", {"nom": e.name_key, "x": vers.x, "y": vers.y}])
 		else:
 			EventBus.emettre(&"journal", [&"journal.effrite", {"nom": e.name_key, "materiau": mat.name_key}])
+	# CE QU ON VIENT DE FAIRE SE RACONTE (ordre de travail 29) : un arbre abattu et une roche percee ne fachent pas
+	# les memes gens, et c est aux valeurs des factions de le dire — pas a cette ligne.
+	SimRumeur.rapporter(sim, e, "abattre_arbre" if ("arbre" in contenu.get("tags", []) or "plante" in contenu.get("tags", [])) else "creuser_roche", vers, [])
 	EventBus.emettre(&"tile_changed", [vers])
 	return true
 

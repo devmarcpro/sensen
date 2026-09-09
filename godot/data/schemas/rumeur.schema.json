@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "required": [
+    "ticks_par_cellule",
+    "duree_memoire",
+    "faits_max"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "ticks_par_cellule": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "duree_memoire": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "faits_max": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "portee_max_cellules": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "gravite": {
+      "type": "object"
+    },
+    "memo_ticks": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
