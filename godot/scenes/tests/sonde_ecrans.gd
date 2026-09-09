@@ -35,6 +35,7 @@ func _ready() -> void:
 	_verifier_pages_et_tri(scene, ec)
 	await _verifier_objets(scene, ec)
 	await _verifier_coffre(scene, ec)
+	await _verifier_depouille(scene, ec)
 	await _verifier_pause(scene, ec)
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
@@ -274,9 +275,9 @@ func _verifier_objets(scene: Node, ec: Node) -> void:
 		fautes.append("  objets : l'arme du sac n'apparaît pas dans l'écran")
 		ec.fermer()
 		return
-	ec.selection = i_obj
-	EcransListe._sur_selection(ec, i_obj)
-	EcransListe._action_principale(ec)
+	# LE CHEMIN DE LA SOURIS, pas celui du clavier : `selectionner` est exactement ce qu'un clic sur une ligne du
+	# sac appelle. C'est la moitié que la sonde d'hier ne parcourait pas — et c'est celle qui était cassée.
+	ec.inventaire_visuel.selectionner(i_obj)
 	await get_tree().process_frame
 	var options := 0
 	var i_equiper := -1
@@ -289,15 +290,101 @@ func _verifier_objets(scene: Node, ec: Node) -> void:
 		fautes.append("  objets : choisir l'arme n'offre AUCUNE option (%d)" % options)
 		ec.fermer()
 		return
-	# 2. ACTIVER « équiper » : l'arme doit passer en main.
-	EcransListe._sur_selection(ec, i_equiper)
-	EcransListe._action_principale(ec)
+	# 2. L'OPTION DOIT AVOIR UNE LIGNE À L'ÉCRAN. C'est le défaut du 2026-09-09 : elle était dans `ec.entrees` avec
+	# sa lettre, mais le panneau visuel ne dessinait que les objets — choisir une arme effaçait les lettres des
+	# lignes et ne mettait rien à la place. Au clavier tout marchait ; à la souris, l'écran était muet.
+	var lignes_option: Array = []
+	for ch in ec.inventaire_visuel.colonne.get_children():
+		if ch is InventaireVisuel.LigneAction:
+			lignes_option.append(ch)
+	if lignes_option.is_empty():
+		fautes.append("  objets : les %d options de l'arme n'ont AUCUNE ligne dans le panneau — rien à cliquer" % options)
+		ec.fermer()
+		return
+	# 3. UN VRAI CLIC sur la ligne « équiper » : l'arme doit passer en main.
+	var clic := InputEventMouseButton.new()
+	clic.button_index = MOUSE_BUTTON_LEFT
+	clic.pressed = true
+	var trouvee := false
+	for ch2 in lignes_option:
+		if int(ch2.index) == i_equiper:
+			ch2._gui_input(clic)
+			trouvee = true
+	if not trouvee:
+		fautes.append("  objets : aucune ligne cliquable ne porte l'option « équiper »")
 	sim.horloge_monde.avancer(3000)
 	await get_tree().process_frame
 	if not (arme.uid in j.equipement.values()):
 		fautes.append("  objets : « équiper » ne met rien en main (options %d)" % options)
 	else:
-		print("  objets : l'arme du sac s'équipe par l'écran (%d options offertes)" % options)
+		print("  objets : l'arme du sac s'équipe AU CLIC, par la ligne de son option (%d options, %d lignes)" % [options, lignes_option.size()])
+	ec.fermer()
+
+
+## FOUILLER UNE DÉPOUILLE (ordre de travail 28 ter). Le chemin entier, celui que la main parcourt : l'option existe
+## sur la tuile du mort, elle ouvre l'écran d'anatomie BRAQUÉ SUR LUI (et pas sur le joueur), et l'option « prélever »
+## y est offerte sur une pièce encore là. C'est exactement ce qui manquait aux coffres avant-hier : une chose peut
+## être entièrement codée et n'avoir aucun chemin depuis la tuile.
+func _verifier_depouille(scene: Node, ec: Node) -> void:
+	var sim = scene.sim
+	var j: Dictionary = scene.joueur()
+	if sim == null or j.is_empty():
+		fautes.append("  dépouille : pas de joueur")
+		return
+	var mort: Dictionary = {}
+	for x in sim.vivants():
+		if x.id != j.id and not Etres.plan_corps(x).is_empty():
+			mort = x
+			break
+	if mort.is_empty():
+		fautes.append("  dépouille : personne à faire tomber")
+		return
+	var ou: Vector2i = sim._tuile_libre_autour(j.pos)
+	if ou.x >= 0:
+		sim.grille.liberer(mort.pos, mort.id)
+		mort.pos = ou
+		sim.grille.placer(mort.id, ou)
+	sim._appliquer_degats(mort, int(mort.sante) + 500, j.id, {})
+	# UNE LAME EN MAIN : sans elle on ne teste que le refus, et le refus est la moitie facile. On depece a la dague
+	# comme a la hache — c'est le premier verbe du monde a accepter plusieurs outils (28 ter).
+	var lame: Dictionary = sim.generer_objet("proto_dague", 1, {}, "commun", 0)
+	if not lame.is_empty() and lame.has("uid"):
+		j.sac.append(str(lame.uid))
+		SimObjets._equiper(sim, j, str(lame.uid), sim.horloge_monde.ticks)
+	var a_option := false
+	for o in scene._options_tuile(mort.pos):
+		if str((o as Dictionary).get("id", "")) == "depouille":
+			a_option = true
+	if not a_option:
+		fautes.append("  dépouille : aucune option sur la tuile d'un mort — on ne peut donc jamais le fouiller")
+		return
+	ec.anatomie_id = str(mort.id)
+	ec.ouvrir("anatomie")
+	await get_tree().process_frame
+	if not ec.anatomie_depouille() or str(ec.anatomie_sujet().get("id", "")) != str(mort.id):
+		fautes.append("  dépouille : l'écran d'anatomie montre le joueur au lieu du mort")
+		ec.fermer()
+		return
+	var prelevable := ""
+	for i in ec.entrees.size():
+		var en: Dictionary = ec.entrees[i]
+		if str(en.get("kind", "")) == "partie" and SimCadavres.prelevable(sim, mort, str(en.get("id", ""))):
+			prelevable = str(en.id)
+			ec.selection = i
+			break
+	if prelevable.is_empty():
+		fautes.append("  dépouille : l'écran ne liste aucune pièce prélevable")
+	elif EcransListe._options_de(ec, ec.entrees[ec.selection]).is_empty():
+		# Sans lame en main, l'absence d'option est NORMALE — mais elle doit alors être expliquée à droite.
+		if not scene._outil_en_main(j, "depecer"):
+			if "" == EcransFeuille.texte_partie(ec, prelevable):
+				fautes.append("  dépouille : ni option ni explication sur la pièce %s" % prelevable)
+			else:
+				print("  dépouille : elle s'ouvre sur le mort, et dit pourquoi on ne peut pas prélever sans lame")
+		else:
+			fautes.append("  dépouille : une lame en main et pas d'option « prélever » sur %s" % prelevable)
+	else:
+		print("  dépouille : elle s'ouvre sur le mort, et « prélever » est offert sur %s" % prelevable)
 	ec.fermer()
 
 

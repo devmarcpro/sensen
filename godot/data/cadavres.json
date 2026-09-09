@@ -1,0 +1,79 @@
+{
+  "_doc": "LES CADAVRES RESTENT, ET SE DEMONTENT (ordre de travail 28 ter, 2026-09-09 ; designer 2026-09-08 : « il va falloir faire en sorte que les cadavres restent, comme ca le joueur peut loot, faire le necromancien, recuperer des membres, des organes »).\nLA POURRITURE NE COUTE RIEN A SIMULER, et c est le point de conception : un stade se DEDUIT du temps ecoule depuis la mort (`mort_tick`), il ne se calcule ni ne se tique. Mille cadavres sur un champ de bataille ne coutent donc pas un pas d horloge — ils vieillissent en etant lus. `jours` est le seuil d entree dans le stade, en jours du monde (planete.cycle.ticks_par_jour).\nCHAQUE STADE DIT TROIS CHOSES, et chacune se voit en jeu : `odeur` multiplie ce que la depouille emet dans le champ d odeur — un mort frais sent peu, un mort gonfle appelle les charognards de loin, des ossements ne sentent plus rien ; `teinte` est la couleur dont le pantin se voile, pour qu on lise l age d une bataille a l oeil ; `preleve` dit si l on peut encore en tirer quelque chose — passe la putrefaction, il n y a plus rien a prendre, et l on ne l apprend pas par un echec mais par l option qui n est plus offerte.\nLES OSSEMENTS NE DISPARAISSENT JAMAIS. C est le dernier stade, et il est sans fin : « le cadavre qui traine est aussi ce qui rend une bataille lisible une heure apres ». Effacer les morts aurait rendu le monde propre et muet.\nLE PRELEVEMENT EST A UN COUP PAR PARTIE. Le jet est seme sur la depouille ET sur la partie, jamais sur le tick : on ne peut donc pas le rejouer en reessayant, et un echec ABIME la piece pour de bon. C est le meme principe que la chasse (`chasse.dd_base`), applique a la table de dissection — sans lui, prelever serait un bouton qu on presse jusqu a reussir.",
+  "stades": [
+    {
+      "id": "frais",
+      "jours": 0.0,
+      "odeur": 0.35,
+      "teinte": [
+        0.9,
+        0.86,
+        0.84
+      ],
+      "preleve": true
+    },
+    {
+      "id": "raide",
+      "jours": 0.25,
+      "odeur": 0.8,
+      "teinte": [
+        0.78,
+        0.76,
+        0.8
+      ],
+      "preleve": true
+    },
+    {
+      "id": "gonfle",
+      "jours": 1.5,
+      "odeur": 1.6,
+      "teinte": [
+        0.66,
+        0.72,
+        0.58
+      ],
+      "preleve": true
+    },
+    {
+      "id": "putrefie",
+      "jours": 5.0,
+      "odeur": 1.9,
+      "teinte": [
+        0.46,
+        0.5,
+        0.38
+      ],
+      "preleve": false
+    },
+    {
+      "id": "ossements",
+      "jours": 20.0,
+      "odeur": 0.0,
+      "teinte": [
+        0.92,
+        0.9,
+        0.82
+      ],
+      "preleve": false
+    }
+  ],
+  "prelevement": {
+    "_doc": "Ce que coute et ce que rend une piece prelevee. `dd_membre` et `dd_organe` sont les difficultes du jet de `competence` : un bras se detache, un coeur se sort proprement ou se creve. `poids_membre` et `poids_organe` sont le poids d une piece prise sur un corps de `sante_reference` points de vie — un membre de troll pese donc plus que le meme membre de lievre, jusqu au facteur `poids_bornes`. `valeur_base` se multiplie par la puissance de la bete, et `mult_vital` dit ce que vaut de plus un organe dont on meurt : c est ce qui fait qu un coeur se vend et qu un pied ne se vend pas.",
+    "ticks": 1500,
+    "competence": "chasse",
+    "xp": 1,
+    "dd_membre": 8,
+    "dd_organe": 12,
+    "item_membre": "membre",
+    "item_organe": "organe",
+    "poids_membre": 3.0,
+    "poids_organe": 0.7,
+    "sante_reference": 40.0,
+    "poids_bornes": [
+      0.3,
+      4.0
+    ],
+    "valeur_base": 8.0,
+    "mult_vital": 3.0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name_key": "item.membre.name",
+  "type": "materiau",
+  "equip_slot": "",
+  "tags": [
+    "materiau",
+    "anatomie",
+    "membre"
+  ],
+  "quantite": 1,
+  "materiau": ""
+}

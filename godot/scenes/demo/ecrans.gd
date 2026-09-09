@@ -39,6 +39,7 @@ var parties_listees: Array = []         # l'écran Charger : {slot, resume} par 
 var minuterie := 0.0
 var pnj_id := ""                     # le PNJ du dialogue / du commerce en cours
 var contenant_pos := Vector2i(-9999, -9999)   # la tuile du coffre ouvert (écran « coffre », 2026-09-08)
+var anatomie_id := ""   # la dépouille que l'écran d'anatomie montre ; vide : le joueur (28 ter, 2026-09-09)
 var replique_key := ""
 
 
@@ -235,6 +236,23 @@ func ouvrir_contexte(t: Vector2i, options: Array) -> void:
 	ouvrir("contexte")
 
 
+## LE SUJET DE L'ÉCRAN D'ANATOMIE (ordre de travail 28 ter) : le joueur d'ordinaire, une **dépouille** quand on la
+## fouille. C'est le même écran braqué sur un autre corps — un corps est un corps, et une table de dissection n'avait
+## pas à être un second écran qui redirait les mêmes lignes.
+func anatomie_sujet() -> Dictionary:
+	if main == null or main.sim == null:
+		return {}
+	if not anatomie_id.is_empty() and main.sim.entites.has(anatomie_id):
+		return main.sim.entites[anatomie_id]
+	return main.joueur()
+
+
+## Vrai quand l'écran montre une dépouille : la moitié de ses lignes en dépendent.
+func anatomie_depouille() -> bool:
+	var sujet := anatomie_sujet()
+	return not sujet.is_empty() and not bool(sujet.get("vivant", true))
+
+
 func est_ouvert() -> bool:
 	return not courant.is_empty()
 
@@ -264,6 +282,7 @@ func ouvrir(nom: String) -> void:
 
 
 func fermer() -> void:
+	anatomie_id = ""   # une dépouille fermée ne suit pas dans l'écran suivant (28 ter)
 	courant = ""
 	panneau.visible = false
 	voile.visible = false

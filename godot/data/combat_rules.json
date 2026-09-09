@@ -1458,13 +1458,21 @@
     "_doc": "Plafond de travail par image (designer 2026-08-31, point 46) : au plus `actions_max_par_image` ACTIONS du monde et `ms_max_par_image` millisecondes, pour qu'aucune action ne gele l'affichage. Le nom disait « ticks » jusqu'au 2026-09-09 et il MENTAIT : le client compte des appels a `sim.pas(\"monde\")`, c'est-a-dire des etres qui agissent, pas des ticks d'horloge — une sonde s'en est servie comme d'une avance en ticks a cause de ce nom."
   },
   "outils_verbes": {
-    "_doc": "Les verbes du monde et l'outil qu'ils exigent en main (designer 2026-09-01, point 52) : sans l'outil, l'option n'apparaît pas.",
+    "_doc": "Les verbes du monde et l'outil qu'ils exigent en main (designer 2026-09-01, point 52) : sans l'outil, l'option n'apparaît pas. | UN VERBE PEUT ACCEPTER PLUSIEURS OUTILS (2026-09-09) : `depecer` en est le premier. On depece a la dague comme a la hache, et n en nommer qu une aurait rendu l option invisible pour la moitie des joueurs — la valeur est donc une chaine OU une liste de fonctionnalites.",
     "creuser": "pioche",
     "terrasser": "pelle",
     "abattre": "hache",
     "cueillir": "faucille",
     "inonder": "seau",
-    "bruler": "torche"
+    "bruler": "torche",
+    "depecer": [
+      "dague",
+      "stylet",
+      "couteau_de_jet",
+      "hache",
+      "hachette_de_jet",
+      "faucille"
+    ]
   },
   "fin_combat": {
     "_doc": "L'écran de fin de combat (designer, point 13) : il s'efface seul au bout de `secondes`, et ne s'affiche pas pour un combat de moins de `ticks_min` ticks sans XP ni niveau gagné.",

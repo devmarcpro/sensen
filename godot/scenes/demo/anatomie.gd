@@ -56,7 +56,7 @@ func rafraichir() -> void:
 	# Demander le joueur à ce moment-là lit `entites` sur rien — `verif_scripts` l'a levé à la seconde même.
 	if ecrans == null or ecrans.main == null or ecrans.main.sim == null:
 		return
-	var j: Dictionary = ecrans.main.joueur()
+	var j: Dictionary = ecrans.anatomie_sujet()   # le joueur, ou la dépouille qu'on fouille (28 ter)
 	if j.is_empty():
 		return
 	var sim = ecrans.main.sim

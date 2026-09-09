@@ -13,8 +13,17 @@ extends RefCounted
 ## Il ne calcule rien : il LIT le plan de corps et l'état des parties, exactement comme le combat les lit.
 ## **L'ordre est celui de l'arbre**, membres d'abord puis organes logés dedans — on ne cherche pas un foie dans une
 ## liste alphabétique, on le cherche dans le torse.
-static func _construire_anatomie(ec: Ecrans, j: Dictionary) -> void:
-	ec.titre.text = ec.tr("ui.ecran.anatomie").format({"nom": ec.tr(j.name_key)})
+static func _construire_anatomie(ec: Ecrans, _j: Dictionary) -> void:
+	# LE SUJET N'EST PLUS FORCÉMENT LE JOUEUR (28 ter, 2026-09-09) : fouiller une dépouille ouvre CET écran-là sur
+	# elle. Tout le reste — le pantin cadré, les pastilles, la colonne de droite — servait déjà.
+	var j: Dictionary = ec.anatomie_sujet()
+	if j.is_empty():
+		return
+	if ec.anatomie_depouille():
+		ec.titre.text = ec.tr("ui.ecran.depouille").format({
+			"nom": ec.tr(j.name_key), "stade": ec.tr("cadavre." + str(SimCadavres.stade(ec.main.sim, j).get("id", "frais")))})
+	else:
+		ec.titre.text = ec.tr("ui.ecran.anatomie").format({"nom": ec.tr(j.name_key)})
 	var plan: Dictionary = Etres.plan_corps(j)
 	if plan.is_empty():
 		ec.liste.add_item(ec.tr("ui.anatomie.sans_plan"))
@@ -45,7 +54,11 @@ static func _construire_anatomie(ec: Ecrans, j: Dictionary) -> void:
 ## est décalé sous le membre qui le loge : c'est la seule chose que l'indentation dit, et elle suffit à lire un corps.
 static func _ligne_partie(ec: Ecrans, j: Dictionary, nom: String, interne: bool) -> void:
 	var intacte := Etres.partie_intacte(j, nom)
+	# PRÉLEVÉE N'EST PAS PERDUE (28 ter) : une pièce qu'on a prise soi-même et un membre arraché au combat laissent
+	# le même trou dans le corps, mais pas la même histoire — et l'écran doit dire laquelle.
 	var cle := "ui.anatomie.perdue" if not intacte else ("ui.anatomie.organe" if interne else "ui.anatomie.membre")
+	if not intacte and nom in SimCadavres.prelevees(j):
+		cle = "ui.anatomie.prelevee"
 	ec.liste.add_item(ec.tr(cle).format({
 		"nom": ec.tr("partie." + nom), "pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
 	ec.entrees.append({"kind": "partie", "id": nom, "texte": ""})
@@ -55,7 +68,9 @@ static func _ligne_partie(ec: Ecrans, j: Dictionary, nom: String, interne: bool)
 ## de coup, le poids qu'elle pèse dans cette zone, ce qu'elle accorde comme emplacement, le sens qu'elle porte et ce
 ## qu'elle loge sont tous dans le plan. L'écran ne fait que les mettre en français.
 static func texte_partie(ec: Ecrans, nom: String) -> String:
-	var j: Dictionary = ec.main.joueur()
+	var j: Dictionary = ec.anatomie_sujet()
+	if j.is_empty():
+		return ""
 	var plan: Dictionary = Etres.plan_corps(j)
 	var p: Dictionary = plan.get("parties", {}).get(nom, {})
 	if p.is_empty():
@@ -63,7 +78,7 @@ static func texte_partie(ec: Ecrans, nom: String) -> String:
 	var l: Array[String] = ["[b]" + ec.tr("partie." + nom) + "[/b]"]
 	var intacte := Etres.partie_intacte(j, nom)
 	if not intacte:
-		l.append(ec.tr("ui.anatomie.d_perdue"))
+		l.append(ec.tr("ui.anatomie.d_prelevee" if nom in SimCadavres.prelevees(j) else "ui.anatomie.d_perdue"))
 	else:
 		l.append(ec.tr("ui.anatomie.d_reserve").format({"pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
 	l.append(ec.tr("ui.anatomie.d_nature").format({
@@ -93,6 +108,16 @@ static func texte_partie(ec: Ecrans, nom: String) -> String:
 			portees.append(ec.tr("partie." + autre))
 		if str(q.get("contenant", "")) == nom:
 			logees.append(ec.tr("partie." + autre))
+	if ec.anatomie_depouille():
+		# UNE OPTION ABSENTE DOIT DIRE POURQUOI. Sans ces deux lignes, une lame oubliée au camp et une chair trop
+		# avancée donneraient exactement le même écran muet — et le joueur conclurait que le prélèvement est cassé.
+		l.append(ec.tr("ui.anatomie.d_stade").format({
+			"stade": ec.tr("cadavre." + str(SimCadavres.stade(ec.main.sim, j).get("id", "frais")))}))
+		if intacte and nom != str(plan.get("racine", "")):
+			if not bool(SimCadavres.stade(ec.main.sim, j).get("preleve", false)):
+				l.append(ec.tr("ui.anatomie.d_trop_tard"))
+			elif not ec.main._outil_en_main(ec.main.joueur(), "depecer"):
+				l.append(ec.tr("ui.anatomie.d_sans_outil"))
 	if not portees.is_empty():
 		l.append(ec.tr("ui.anatomie.d_porte").format({"liste": ", ".join(portees)}))
 	if not logees.is_empty():

@@ -512,10 +512,20 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     c'est le compteur global.*
     **Reste** : les prothèses et les greffes, qui sont du contenu modulant une règle — donc de la grammaire des
     modules, lignes 27-28 ; et la contenance interne (décision 6 ter, toujours ouverte).
-28 ter. **LES CADAVRES RESTENT, ET SE DÉMONTENT** *(designer 2026-09-08 : « il va falloir faire en sorte que les
-    cadavres restent, comme ça le joueur peut loot, faire le nécromancien, récupérer des membres, des organes — pour
-    se les greffer, les vendre, les greffer sur un PNJ, construire une chimère, porter le corps et s'en servir comme
-    projectile »).*
+~~28 ter. **LES CADAVRES RESTENT, ET SE DÉMONTENT**~~ — **FAIT le 2026-09-09** *(designer 2026-09-08 : « il va
+    falloir faire en sorte que les cadavres restent, comme ça le joueur peut loot, faire le nécromancien, récupérer
+    des membres, des organes — pour se les greffer, les vendre, les greffer sur un PNJ, construire une chimère,
+    porter le corps et s'en servir comme projectile »).*
+    **CE QUI EST FAIT** : le cadavre est **dessiné** (il entre dans la liste d'image, `vivants()` gardant son sens
+    partout ailleurs) et **teinté par son âge** ; il est **persisté** (l'écriture ne filtrait déjà pas les morts) ;
+    il est une **cible d'interaction** — l'option « fouiller la dépouille » ouvre l'**écran d'anatomie braqué sur
+    lui**, et non un second écran qui redirait les mêmes lignes ; il **pourrit** en cinq stades ; et l'on y
+    **prélève** membres et organes, qui deviennent des objets paramétriques qu'on porte et qu'on vend.
+    **ET LA POURRITURE NE COÛTE RIEN** : un stade se déduit de `mort_tick`, rien ne se tique. *Ce qui peut se
+    déduire ne se balaie pas.*
+    **Reste de cette ligne** : **greffer** (grammaire des modules, 27-28) et **lancer un corps** (27 bis).
+    ---
+    *L'énoncé d'origine, pour mémoire :*
     **Ce qui existe déjà, et c'est plus que je ne croyais** : un être mort n'est **pas effacé** — `vivant = false`, sa
     tuile est libérée, et il reste dans `sim.entites` avec son corps, son équipement et son sac. Le **Fossoyeur** sait
     déjà en trouver un au sol (`not x.vivant and x.pos == q`) et le relever. La dépouille (`depouille`) fait déjà

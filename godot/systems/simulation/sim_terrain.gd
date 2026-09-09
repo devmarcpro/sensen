@@ -482,7 +482,10 @@ static func _tiquer_odeur(sim: Simulation, tick: int) -> void:
 		for id_m: String in sim.entites.keys():
 			var m: Dictionary = sim.entites[id_m]
 			if not m.get("vivant", true) and sim.grille.dans(m.get("pos", Vector2i(-9999, -9999))):
-				sentir(sim, m.pos, v_dep)
+				# LA POURRITURE SE SENT (28 ter) : un mort frais sent peu, un mort gonflé appelle les charognards de
+				# loin, des ossements ne sentent plus rien. La source était plate — le champ ne disait donc pas
+				# depuis quand on était mort, alors qu'il est justement le sens qui sait remonter le temps.
+				sentir(sim, m.pos, v_dep * SimCadavres.odeur_mult(sim, m))
 	if sim.odeur_actif.is_empty() and sim.odeur_sources.is_empty():
 		return
 	_odeur_dimensionner(sim)

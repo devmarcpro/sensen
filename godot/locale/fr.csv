@@ -89,6 +89,24 @@ journal.telegraphe,{nom} prépare {action} ({ticks} ticks)
 journal.garde,{nom} prend la garde (2 ticks)
 journal.garde_tient,la garde de {nom} absorbe le coup : {avant} → {apres}
 journal.attendre,"{nom} attend (5 ticks, +20 vigueur)"
+item.organe.name,Organe
+item.membre.name,Membre
+nom.partie_de,"{partie} de {creature}"
+option.depouille,Fouiller la dépouille
+ui.choix.prelever,Prélever
+ui.ecran.depouille,"Dépouille de {nom} — {stade}"
+ui.anatomie.prelevee,"  {nom} — prélevée"
+ui.anatomie.d_prelevee,Prélevée sur la dépouille.
+ui.anatomie.d_stade,"État de la dépouille : {stade}."
+ui.anatomie.d_sans_outil,Il faudrait une lame en main pour la prélever.
+ui.anatomie.d_trop_tard,La chair est trop avancée : il n'y a plus rien à en tirer.
+cadavre.frais,fraîche
+cadavre.raide,raidie
+cadavre.gonfle,gonflée
+cadavre.putrefie,putréfiée
+cadavre.ossements,réduite aux ossements
+journal.preleve,"{nom} prélève {partie} sur {def}"
+journal.preleve_rate,"{nom} abîme {partie} en voulant la prélever"
 journal.mort,{nom} tombe.
 journal.engagement,{nom} t'a vu — COMBAT : le temps n'avance plus qu'à l'action
 journal.desengagement,plus d'hostile en vue — le combat est fini

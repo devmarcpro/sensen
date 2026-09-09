@@ -235,6 +235,13 @@ static func _options_de(ec: Ecrans, en: Dictionary) -> Array:
 			return [["ui.choix.entrainer", "defaut"]]
 		"capacite":
 			return [["ui.choix.supprimer_capacite", "defaut"]]
+		"partie":
+			# PRÉLEVER (28 ter) : offert seulement sur une dépouille, sur une pièce encore là, avec une lame en main.
+			# Le pourquoi, quand ce n'est pas offert, est dans la colonne de droite — une option absente est muette.
+			if ec.anatomie_depouille() and SimCadavres.prelevable(ec.main.sim, ec.anatomie_sujet(), str(en.get("id", ""))) \
+					and ec.main._outil_en_main(ec.main.joueur(), "depecer"):
+				return [["ui.choix.prelever", "defaut"]]
+			return []
 	return []
 
 
@@ -740,6 +747,11 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 			ec.main.sim.ordonner(j, str(en.id), "attendre" if str(c_o.get("ordre", "suivre")) == "suivre" else "suivre")
 		"stock":
 			ec.main.sim.retirer_stock(j, str(en.cle))
+		"partie":   # démonter une dépouille : la pièce quitte le corps, réussie ou abîmée (28 ter)
+			ec.main.sim.intention(j.id, {"type": "prelever", "qui": ec.anatomie_id, "partie": str(en.get("id", ""))})
+			ec.choix = {}
+			rafraichir(ec)
+			return
 		"donner", "reprendre":
 			if ec.courant == "coffre":   # un coffre : ranger ou reprendre UN objet (designer 2026-09-08)
 				ec.main.sim.intention(j.id, {"type": "ranger" if str(en.kind) == "donner" else "prendre_un", "objet": str(en.uid), "vers": ec.contenant_pos})

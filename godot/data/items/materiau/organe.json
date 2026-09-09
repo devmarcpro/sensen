@@ -1,0 +1,12 @@
+{
+  "name_key": "item.organe.name",
+  "type": "materiau",
+  "equip_slot": "",
+  "tags": [
+    "materiau",
+    "anatomie",
+    "organe"
+  ],
+  "quantite": 1,
+  "materiau": ""
+}

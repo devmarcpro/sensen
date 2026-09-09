@@ -100,6 +100,7 @@ func _ready() -> void:
 	_lancer("test_evenements")
 	_lancer("test_niveaux")
 	_lancer("test_plan_corps")
+	_lancer("test_cadavres")
 	_lancer("test_paperdoll_et_tutoriels")
 	_lancer("test_materiaux")
 	_lancer("test_recolte")

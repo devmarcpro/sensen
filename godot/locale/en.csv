@@ -43,6 +43,24 @@ journal.attaque_lourde,{att} HEAVY ATTACK on {def} ({zone}): {degats} damage —
 journal.telegraphe,{nom} prepares {action} ({ticks} ticks)
 journal.garde,{nom} takes guard (2 ticks)
 journal.attendre,"{nom} waits (5 ticks, +20 vigor)"
+item.organe.name,Organ
+item.membre.name,Limb
+nom.partie_de,"{creature} {partie}"
+option.depouille,Search the remains
+ui.choix.prelever,Harvest
+ui.ecran.depouille,"Remains of {nom} — {stade}"
+ui.anatomie.prelevee,"  {nom} — harvested"
+ui.anatomie.d_prelevee,Harvested from the remains.
+ui.anatomie.d_stade,"State of the remains: {stade}."
+ui.anatomie.d_sans_outil,A blade in hand would be needed to harvest it.
+ui.anatomie.d_trop_tard,The flesh is too far gone: there is nothing left to take.
+cadavre.frais,fresh
+cadavre.raide,stiff
+cadavre.gonfle,bloated
+cadavre.putrefie,putrid
+cadavre.ossements,reduced to bones
+journal.preleve,"{nom} harvests {partie} from {def}"
+journal.preleve_rate,"{nom} ruins {partie} trying to harvest it"
 journal.mort,{nom} falls.
 journal.engagement,{nom} saw you — COMBAT: time only moves when you act
 journal.desengagement,no hostile in sight — the fight is over

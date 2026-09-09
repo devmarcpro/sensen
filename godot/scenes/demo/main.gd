@@ -1403,6 +1403,11 @@ func _maj_noeuds(delta: float = 0.0) -> void:
 		if n.occulteurs != null:
 			n.occulteurs.position = cible - n.position   # les tuiles redessinées par-dessus lui restent à leur place pendant qu'il glisse
 		n.modulate = _lumiere_tuile(e.pos)   # la lumière de sa tuile (niveau et teinte), comme le décor
+		if not e.get("vivant", true):
+			# L'ÂGE D'UNE DÉPOUILLE SE VOIT (28 ter) : elle se voile de la couleur de son stade, du teint frais aux
+			# ossements blancs. C'est ce qui rend un champ de bataille lisible une heure après — on lit d'un coup
+			# d'œil qui est tombé ce matin et qui pourrit là depuis une semaine.
+			n.modulate *= SimCadavres.teinte(sim, e)
 		n.z_index = _profondeur(e.pos)
 		# Le paperdoll ne se redessine que si ce qu'il montre a changé : deux cents habitants redessinés à chaque image,
 		# c'était le lag en ville (designer 2026-09-05). Le tremblement et l'animation ont leur propre redraw.
@@ -1710,12 +1715,16 @@ func _hotbar(k: int) -> void:
 ## terrasser une pelle, abattre une hache, cueillir une faucille, inonder un seau, brûler une torche.
 ## La table vit dans combat_rules.outils_verbes — aucun verbe n'est écrit en dur ici.
 func _outil_en_main(j: Dictionary, verbe: String) -> bool:
-	var attendu := str(sim.regles.r.get("outils_verbes", {}).get(verbe, ""))
-	if attendu.is_empty():
+	# UN VERBE PEUT ACCEPTER PLUSIEURS OUTILS (28 ter, 2026-09-09) : on dépèce à la dague comme à la hache. N'en
+	# nommer qu'une aurait rendu l'option invisible pour la moitié des joueurs — la donnée est donc une chaîne OU
+	# une liste, et les verbes d'avant n'ont pas bougé d'une lettre.
+	var attendu: Variant = sim.regles.r.get("outils_verbes", {}).get(verbe, "")
+	var liste: Array = (attendu as Array) if attendu is Array else ([str(attendu)] if not str(attendu).is_empty() else [])
+	if liste.is_empty():
 		return true
 	for slot in ["main_principale", "main_secondaire"]:
 		var it: Dictionary = sim.items.get(str(j.get("equipement", {}).get(slot, "")), {})
-		if str(it.get("functionality", "")) == attendu:
+		if str(it.get("functionality", "")) in liste:
 			return true
 	return false
 
@@ -1775,6 +1784,10 @@ func _options_tuile(t: Vector2i) -> Array:
 			if gl.pos == t and str(gl.source) == j.id:
 				res.append({"id": "declencher_glyphe", "cible": t})
 				break
+	# UNE DÉPOUILLE SE FOUILLE (ordre de travail 28 ter) : elle libère sa tuile en mourant, donc on peut se tenir
+	# DESSUS — l'option doit exister à zéro comme à une tuile, et c'est pour cela qu'elle est posée avant le retour.
+	if d <= 1 and not SimCadavres.cadavre_a(sim, t).is_empty():
+		res.append({"id": "depouille", "vers": t})
 	if d != 1:
 		return res
 	var tags: Array = g.contenu_de(t).get("tags", [])
@@ -1894,6 +1907,13 @@ func _executer_option(opt: Dictionary) -> void:
 				_log(tr("journal.pas_escalier"))
 		"dormir":
 			sim.intention(joueur_id, {"type": "dormir", "vers": opt.vers})
+		"depouille":   # la table de dissection : l'écran d'anatomie, braqué sur le mort (28 ter)
+			var mort := SimCadavres.cadavre_a(sim, opt.vers)
+			if mort.is_empty():
+				return
+			ecrans.anatomie_id = str(mort.id)
+			ecrans.ouvrir("anatomie")
+			return
 		"prendre", "caisse", "recolter":
 			# UN MEUBLE CONTENANT S'OUVRE (designer 2026-09-08) : deux volets, comme un échange. Un butin au sol,
 			# lui, se ramasse toujours d'un seul geste — il n'a ni capacité ni nom, rien à y ranger.
@@ -1969,6 +1989,7 @@ func _action_menu(id: String) -> void:
 	var j := joueur()
 	match id:
 		"inventaire", "atelier", "feuille", "anatomie", "registre", "capacites":
+			ecrans.anatomie_id = ""   # par le menu, c'est TOUJOURS son propre corps qu'on regarde (28 ter)
 			ecrans.ouvrir(id)
 		"gestion":
 			if sim.lieu == "camp":
@@ -3499,6 +3520,8 @@ func nom_objet(n: Dictionary) -> String:
 		if not str(n.construction).is_empty():
 			return tr("nom.armure_en").format({"base": base, "construction": tr("construction.%s.nom" % n.construction), "materiau": mat}) + q
 		return tr("nom.arme_en").format({"base": base, "materiau": mat}) + q
+	if n.has("partie"):   # « Cœur de loup », « Bras humain » : une pièce prélevée sur une dépouille (28 ter)
+		return tr("nom.partie_de").format({"partie": tr(str(n.partie)), "creature": tr(str(n.get("de_creature", "")))})
 	if n.has("espece"):   # une pile de matière brute tirée d'une bête
 		return tr("nom.matiere_espece").format({"materiau": base, "creature": tr(str(n.espece))})
 	if n.has("parchemin"):

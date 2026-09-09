@@ -658,6 +658,7 @@ func _tiquer_faim(tick: int) -> void:
 				if int(e.sante) <= 0 and e.vivant:   # mort de faim : la même sortie que la mort au combat
 					e.sante = 0
 					e.vivant = false
+					e["mort_tick"] = horloge_monde.ticks   # elle pourrit comme les autres (28 ter)
 					grille.liberer(e.pos, e.id)
 					EventBus.emettre(&"journal", [&"journal.mort", {"nom": e.name_key}])
 					EventBus.emettre(&"creature_killed", [e.id, e.id])
@@ -1160,6 +1161,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._ramasser(self, e, h.ticks)
 		"porter":
 			ok = porter(e, entites.get(str(i.get("qui", "")), {}), h.ticks) if entites.has(str(i.get("qui", ""))) else false
+		"prelever":   # démonter une dépouille : un membre, un organe (28 ter)
+			ok = SimCadavres.prelever(self, e, entites.get(str(i.get("qui", "")), {}), str(i.get("partie", "")), h.ticks) if entites.has(str(i.get("qui", ""))) else false
 		"reposer":
 			ok = reposer_porte(e, h.ticks)
 		"respawn":
@@ -2271,6 +2274,9 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 				cible.sante = 0
 	if cible.sante <= 0 and cible.vivant:
 		cible.vivant = false
+		# L'HEURE DE LA MORT (ordre de travail 28 ter) : c'est le seul nombre que la pourriture demande. Un stade se
+		# déduit du temps écoulé depuis lui — rien ne se tique, et mille cadavres ne coûtent pas un pas d'horloge.
+		cible["mort_tick"] = horloge_monde.ticks
 		grille.liberer(cible.pos, cible.id)
 		SimTerrain.sonner_de(self, cible.pos, "mort")   # un cri porte plus loin qu'un coup (Émergence — le champ sonore)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])

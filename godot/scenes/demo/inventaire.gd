@@ -127,6 +127,9 @@ func _ordonner() -> void:
 		return (ka > kb) if tri_inverse else (ka < kb))
 	for k in ordre.size():
 		colonne.move_child(ordre[k], k)
+	for ch in colonne.get_children():   # les options et la page restent SOUS le sac, quel que soit le tri
+		if ch is LigneAction or ch is LignePage:
+			colonne.move_child(ch, colonne.get_child_count() - 1)
 
 
 ## Reconstruit depuis `ecrans.entrees` : les slots (kind objet/equipe ou texte « slot vide »), puis le sac.
@@ -166,6 +169,13 @@ func reconstruire() -> void:
 			lignes.append(l)
 		elif kind == "texte" and k < slots_ordre.size():   # un slot vide : la case k correspond à l'ordre des slots de l'écran
 			cases[slots_ordre[k]].index = k
+		elif kind in ["action_objet", "action_inventaire"]:
+			# LES OPTIONS ONT ENFIN UNE LIGNE (designer 2026-09-09 : « impossible d'équiper d'interagir avec les
+			# items dans l'inventaire, je peux même pas changer d'arme »). Elles étaient dans `ec.entrees` avec
+			# leurs lettres, mais `ec.liste` est masquée ici et ce panneau ne dessinait que les objets : choisir un
+			# objet effaçait donc les lettres des lignes (elles passent aux options) sans rien mettre à la place.
+			# Les options n'apparaissaient qu'en petits liens, au bas de la fiche de droite.
+			colonne.add_child(LigneAction.creer(self, k, ecrans.liste.get_item_text(k)))
 		elif kind == "page":   # la dernière lettre : la page suivante (une option = une lettre, designer 2026-09-06)
 			colonne.add_child(LignePage.creer(ecrans, ecrans.liste.get_item_text(k)))
 		k += 1
@@ -302,6 +312,53 @@ class LigneObjet extends Control:
 		elif ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_RIGHT:
 			inventaire.selectionner(index)   # clic droit : les actions de l'objet (designer, point 46)
 			inventaire.ecrans.menu_objet(uid, get_global_mouse_position())
+			accept_event()
+
+
+## UNE OPTION DE L'OBJET CHOISI, dessinée dans le panneau comme une ligne à part entière (designer 2026-09-09).
+## Elle porte sa lettre — la même que celle du clavier —, se survole et se clique. C'est ce qui manquait : les
+## options existaient, elles étaient jouables à la lettre, et elles n'avaient aucune ligne où apparaître.
+class LigneAction extends Control:
+	var inventaire: InventaireVisuel
+	var index := -1
+	var texte := ""
+	var survolee := false
+
+	static func creer(inv: InventaireVisuel, i: int, t: String) -> LigneAction:
+		var l := LigneAction.new()
+		l.inventaire = inv
+		l.index = i
+		l.texte = t
+		return l
+
+	func _ready() -> void:
+		custom_minimum_size = Vector2(0, InventaireVisuel.LIGNE)
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		mouse_entered.connect(func() -> void: survolee = true; queue_redraw())
+		mouse_exited.connect(func() -> void: survolee = false; queue_redraw())
+
+	func _draw() -> void:
+		var r := Rect2(Vector2.ZERO, size)
+		var choisie: bool = inventaire.ecrans.selection == index
+		draw_rect(r, Color(1.0, 0.9, 0.55, 0.16) if choisie else (Color(1, 1, 1, 0.08) if survolee else Color(1, 1, 1, 0.03)))
+		if choisie:
+			draw_rect(r, Color(1.0, 0.9, 0.55, 0.8), false, 1.0)
+		var f := ThemeDB.fallback_font
+		var y := InventaireVisuel.LIGNE * 0.5 + 4.0
+		var lettre := str(inventaire.ecrans.lettres.get(index, ""))
+		var x := 4.0
+		if not lettre.is_empty():
+			draw_string(f, Vector2(x, y), lettre + ")", HORIZONTAL_ALIGNMENT_LEFT, 18, 12, Color(1.0, 0.9, 0.55))
+			x += 18.0
+		draw_string(f, Vector2(x + 4.0, y), texte, HORIZONTAL_ALIGNMENT_LEFT, size.x - x - 8.0, 12, Color(1.0, 0.95, 0.8))
+
+	func _gui_input(ev: InputEvent) -> void:
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+			# UN SEUL CLIC AGIT. Sur un objet il faut un double-clic parce que le premier le CHOISIT ; une option,
+			# elle, n'a rien à choisir — la faire attendre un second clic aurait recréé le même silence.
+			inventaire.ecrans.selection = index
+			EcransListe._action_principale(inventaire.ecrans)
 			accept_event()
 
 

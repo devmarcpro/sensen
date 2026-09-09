@@ -1677,6 +1677,90 @@ func test_plan_corps() -> void:
 	verifier(vus.has("torse") and (vus.has("poumon_D") or vus.has("poumon_G") or vus.has("foie")), "et il atteint parfois un organe — le coup chanceux n'a demandé aucune règle de « critique » (%d parties vues)" % vus.size())
 
 
+## LES CADAVRES RESTENT, ET SE DÉMONTENT (ordre de travail 28 ter). Trois choses à prouver, et elles sont
+## indépendantes : le TEMPS passe sur un mort sans qu'aucune boucle ne le tique, on ne peut PRENDRE que ce qui est
+## encore là et pas la racine du corps, et l'échec est DÉFINITIF — le jet est semé sur la pièce, pas sur l'heure.
+func test_cadavres() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var cible: Dictionary = {}
+	for e in s.vivants():
+		if e.controle != "joueur" and not Etres.plan_corps(e).is_empty():
+			cible = e
+			break
+	verifier(not cible.is_empty(), "l'arène offre un être avec un plan de corps à faire tomber")
+	if cible.is_empty():
+		return
+	s._appliquer_degats(cible, int(cible.sante) + 100, j.id, {})
+	verifier(not cible.vivant and int(cible.get("mort_tick", -1)) == s.horloge_monde.ticks, "un mort note l'HEURE de sa mort — c'est le seul nombre que la pourriture demande")
+	verifier(str(SimCadavres.cadavre_a(s, cible.pos).get("id", "")) == str(cible.id), "et sa dépouille se trouve sur sa tuile, alors qu'elle n'occupe plus la grille")
+
+	# 1. LE TEMPS PASSE SANS QUE RIEN NE LE TIQUE : les stades se déduisent de l'heure de la mort.
+	var jour := int(SimTerrain._cycle(s).get("ticks_par_jour", 2400000))
+	verifier(str(SimCadavres.stade(s, cible).get("id", "")) == "frais", "à la seconde de sa mort, la dépouille est fraîche")
+	var vus: Array[String] = []
+	for k in 25:
+		s.horloge_monde.ticks += jour
+		var st := str(SimCadavres.stade(s, cible).get("id", ""))
+		if not (st in vus):
+			vus.append(st)
+	verifier(vus.size() >= 3 and vus[vus.size() - 1] == "ossements", "vingt-cinq jours la mènent du frais aux ossements, en passant par tous les stades (%s)" % str(vus))
+	# L'ODEUR SUIT LA POURRITURE, et c'est ce qui donne le champ d'odeur aux charognards : un mort gonflé appelle de
+	# loin, des ossements ne sentent plus rien. La source était plate — le champ ne disait pas depuis quand.
+	s.horloge_monde.ticks = int(cible.mort_tick)
+	var o_frais := SimCadavres.odeur_mult(s, cible)
+	s.horloge_monde.ticks = int(cible.mort_tick) + jour * 3
+	var o_gonfle := SimCadavres.odeur_mult(s, cible)
+	s.horloge_monde.ticks = int(cible.mort_tick) + jour * 40
+	verifier(o_gonfle > o_frais and SimCadavres.odeur_mult(s, cible) == 0.0, "elle sent de plus en plus fort, puis plus du tout : des ossements n'appellent personne (%.2f → %.2f → 0)" % [o_frais, o_gonfle])
+
+	# 2. CE QU'ON PEUT PRENDRE. Passé la putréfaction, plus rien — et l'on ne l'apprend pas par un échec.
+	s.horloge_monde.ticks = int(cible.mort_tick)
+	var plan := Etres.plan_corps(cible)
+	var racine := str(plan.racine)
+	verifier(not SimCadavres.prelevable(s, cible, racine), "on ne prélève pas la RACINE du corps : ce torse-là *est* la dépouille")
+	var membre := ""
+	var organe := ""
+	for nom: String in (plan.parties as Dictionary).keys():
+		var p: Dictionary = plan.parties[nom]
+		# ON PREND UNE PIÈCE ENCORE LÀ. Le coup qui a tué a frappé une partie au passage — la première version de ce
+		# test choisissait la tête sans regarder, la trouvait déjà détruite (et le cerveau avec elle, puisqu'un
+		# organe suit son contenant), et accusait le prélèvement d'un défaut qui était le sien.
+		if nom == racine or not Etres.partie_intacte(cible, nom):
+			continue
+		if bool(p.get("interne", false)) and organe.is_empty():
+			organe = nom
+		elif not bool(p.get("interne", false)) and membre.is_empty():
+			membre = nom
+	verifier(not membre.is_empty() and not organe.is_empty(), "la dépouille garde des pièces intactes après le coup qui l'a tuée (%s, %s)" % [membre, organe])
+	if membre.is_empty() or organe.is_empty():
+		return
+	verifier(SimCadavres.prelevable(s, cible, membre) and SimCadavres.prelevable(s, cible, organe), "sur une dépouille fraîche, membres et organes se prélèvent (%s, %s)" % [membre, organe])
+	s.horloge_monde.ticks = int(cible.mort_tick) + jour * 10
+	verifier(not SimCadavres.prelevable(s, cible, membre), "putréfiée, elle n'offre plus rien — l'option disparaît au lieu de faire échouer")
+	s.horloge_monde.ticks = int(cible.mort_tick)
+
+	# 3. PRÉLEVER : la pièce quitte le corps dans TOUS les cas, et une seule fois.
+	j.pos = cible.pos
+	var sac0: int = j.sac.size()
+	verifier(SimCadavres.prelever(s, j, cible, membre, s.horloge_monde.ticks), "on prélève le membre")
+	verifier(not Etres.partie_intacte(cible, membre) and (membre in SimCadavres.prelevees(cible)), "il a quitté le corps, et le corps dit qu'il a été PRÉLEVÉ — pas arraché au combat")
+	verifier(not SimCadavres.prelever(s, j, cible, membre, s.horloge_monde.ticks), "et on ne le prélève pas deux fois")
+	verifier(not SimCadavres.prelevable(s, cible, racine), "la racine reste hors de portée après coup")
+	# Réussi ou abîmé, l'un des deux est arrivé — et s'il est arrivé, l'objet dit quelle pièce et de qui.
+	if j.sac.size() > sac0:
+		var it: Dictionary = s.items[str(j.sac[j.sac.size() - 1])]
+		var n := s.nom_objet(str(it.uid))
+		verifier(str(n.get("partie", "")) == "partie." + membre and not str(n.get("de_creature", "")).is_empty(), "la pièce dans le sac dit LAQUELLE et DE QUI (%s / %s)" % [str(n.get("partie", "")), str(n.get("de_creature", ""))])
+		verifier(float(it.get("poids", 0.0)) > 0.0 and float(it.get("valeur", 0.0)) > 0.0, "elle pèse et elle vaut : un membre se porte et se vend (%.2f kg, %.0f)" % [float(it.get("poids", 0.0)), float(it.get("valeur", 0.0))])
+	# LE JET NE SE REJOUE PAS : semé sur la dépouille et la pièce, jamais sur l'heure. Deux dépouilles différentes
+	# donnent des jets différents ; la MÊME pièce du MÊME mort donnerait toujours le même — c'est ce qui interdit
+	# de recommencer jusqu'à réussir.
+	var g0 := hash([s.graine, "prelever", str(cible.id), membre])
+	s.horloge_monde.ticks += 999999
+	verifier(hash([s.graine, "prelever", str(cible.id), membre]) == g0, "et le jet ne dépend pas de l'heure : réessayer plus tard ne changerait rien")
+
+
 # ---------------------------------------------------------------- Étape 1 : rigs, paperdoll, tutoriels
 
 ## La CARTE DE LUMIÈRE ne se refait plus à chaque tick (2026-09-08, sur « énorme lag en ville quand le joueur se
