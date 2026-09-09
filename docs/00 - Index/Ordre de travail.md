@@ -234,14 +234,22 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     et le test prouve sur un couloir d'une tuile de large que les deux rendent le même chemin et les mêmes
     atteignables à travers l'ami — sans le miroir, l'autre bout reste hors d'atteinte.
 
-26 duodecies. **LE VILLAGEOIS NE REJOINT PAS SON COIN DE PLACE À 21 H.** Constaté par `sonde_ia_pnj` le 2026-09-09,
-    et **vérifié comme antérieur** au chemin qui traverse les amis (en neutralisant `bloque_pour`, le souci persiste
-    à l'identique). Sur la même distance de dix tuiles, le villageois rejoint son **lit** à 23 h et son **poste** à
-    midi : ce n'est donc ni la marche ni la routine en général. La cible de 21 h est la seule qui ne vienne pas de
-    la fiche du villageois mais d'un calcul — `_coin_de_place(v)`, le coin de la place qui lui revient. Deux pistes,
-    dans l'ordre : ce coin tombe-t-il sur une tuile **atteignable** dans le camp synthétique de la sonde, et le test
-    de `tests_villages` (qui, lui, passe) prouve-t-il seulement que `_cible_routine` **désigne** la bonne tuile sans
-    prouver qu'on peut y **aller** ?
+~~26 duodecies. **LE VILLAGEOIS NE REJOINT PAS SON COIN DE PLACE À 21 H.**~~ — **CE N'ÉTAIT PAS UN DÉFAUT DU JEU**
+    (2026-09-09). Le villageois porte `horaires_decalage` = **+2** : c'est un lève-tôt, et à 21 h du monde il en est
+    à 19 h — donc encore à son poste, où il se tient déjà. Sa routine score alors zéro (« arrivé »), et `attendre`
+    l'emporte avec 1,00. **C'est juste.** C'était la sonde qui lui reprochait de ne pas être à une heure qui n'est
+    pas la sienne ; elle règle maintenant l'horloge du monde de façon à ce que **son** heure soit celle qu'on veut
+    éprouver, et la sonde entière est passée de 39 soucis à **rien à signaler**.
+    **MES DEUX HYPOTHÈSES ÉTAIENT FAUSSES, ET C'EST LA LEÇON.** J'avais écrit que le coin de place tombait
+    peut-être sur une tuile inatteignable — un chemin de dix pas y menait —, et que le test de `tests_villages`
+    prouvait peut-être seulement que la routine *désigne* la bonne tuile sans prouver qu'on peut y *aller* — ce test
+    choisit exprès un villageois **sans** ce trait, il prouvait donc exactement la bonne chose. Deviner coûte plus
+    cher que faire parler l'outil : c'est en faisant imprimer à la sonde ce qu'elle **voyait** — la cible visée, la
+    longueur du chemin, ce que la tuile porte, la décision prise et son score, puis la cible que l'IA vise
+    elle-même — que la réponse est tombée en trois essais.
+    **DEUX CHOSES RESTENT, ET ELLES SERVIRONT ENCORE** : l'IA écrit désormais sa décision (`ia_action`, `ia_score`)
+    à chaque choix — sans quoi « il ne va pas vers sa cible » ne se corrige pas, il fait relire le code au hasard ;
+    et une sonde qui signale un souci en dit maintenant la **cause visible**, pas seulement le symptôme.
 
 26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.** La pile est une coïncidence de position ; **porter** est une
     relation — celui qui porte déplace l'autre avec lui. C'est ce que le designer voulait dire par « un PNJ peut

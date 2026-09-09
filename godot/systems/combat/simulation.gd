@@ -4049,6 +4049,11 @@ func _decider_ia(e: Dictionary, tick: int) -> void:
 	# Aggro (designer 2026-08-31, point 48) : une bête qui a une cible hostile en vue ne flâne pas.
 	if e.camp == "hostile" and _profil_offensif(e) and not cible.is_empty() and cible.vivant and SimPnj.ennemis(self, e, cible) and meilleure in ["errer", "routine", "attendre", ""]:
 		meilleure = "poursuivre"
+	# UNE IA QUI DÉCIDE DIT CE QU'ELLE A DÉCIDÉ (2026-09-09). Sans ça, une sonde qui constate « il ne va pas vers sa
+	# cible » ne peut que faire relire le code au hasard : elle ne sait pas s'il a choisi d'errer, de fuir ou
+	# d'attendre. Deux champs, écrits à chaque décision, et rien d'autre ne les lit que le diagnostic.
+	e["ia_action"] = meilleure
+	e["ia_score"] = meilleur_score
 	match meilleure:
 		"attaquer":
 			_ia_attaquer(e, cible, tick)

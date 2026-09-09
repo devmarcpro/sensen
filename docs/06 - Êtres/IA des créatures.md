@@ -162,6 +162,10 @@ Morphologies (12) : les volants ignorent les contraintes de dénivelé
 > [!success] Codé le 2026-09-05, 15 h — la routine un jour de fête (Calendrier)
 > Un jour de fête pour sa culture ([[Un monde réel — villes, PNJ, royaumes et calendrier]], `data/calendrier.json`), la plage « poste » d'un profil qui fait la fête (`fetes: true` dans le profil — le civil, pas le garde) vaut « social » : il tient la place toute la journée (`_cible_routine`), son humeur a monté de `fetes.humeur` au lever du jour. Le garde patrouille comme les autres jours ; la nuit ne change pas. Une lecture pure du calendrier : aucun état sur le PNJ hors `fete_jour` (l'humeur donnée une fois).
 
+> [!success] Codé le 2026-09-09 — **l'IA dit ce qu'elle a décidé** (`ia_action`, `ia_score`)
+> À chaque décision, l'être garde le nom de l'action choisie et son score. Rien d'autre que le diagnostic ne les lit — mais sans eux, un constat comme « il ne va pas vers sa cible » ne se corrige pas : on ne sait pas s'il a choisi d'errer, de fuir ou d'attendre, et il ne reste qu'à relire le code au hasard.
+> **Ce qu'ils ont trouvé le jour même** : le villageois de `sonde_ia_pnj` qui « ne rejoignait pas son coin de place à 21 h » avait décidé `attendre` avec un score de 1,00, alors que `routine` pèse 1,2 dans son profil. Sa routine avait donc scoré **zéro** — il se croyait arrivé. Et c'était vrai : il porte `horaires_decalage` = +2, à 21 h du monde il en est à 19 h, donc encore à son poste. **Le comportement était juste ; c'est la sonde qui l'éprouvait à une heure qui n'était pas la sienne.**
+
 ## Liens
 - **Dépend de** : [[Schéma créature]], [[Data-driven design]], [[Boucle de tick]], [[Hauteur de terrain ±10]]
 - **Alimente** : [[LOD de simulation]], [[Compagnons]], [[Raids et menaces]], [[Lois et infractions]], [[Minimap et brouillard de guerre]]

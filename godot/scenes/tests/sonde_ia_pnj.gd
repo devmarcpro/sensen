@@ -604,8 +604,13 @@ func _camp() -> void:
 	v["poste"] = _libre_a(s, v.pos + Vector2i(5, 0), 0, false) if _libre_a(s, v.pos + Vector2i(5, 0), 0, false) != Vector2i(-1, -1) else _libre_a(s, v.pos, 5, false)
 	v["place"] = _libre_a(s, v.pos + Vector2i(0, 5), 0, false) if _libre_a(s, v.pos + Vector2i(0, 5), 0, false) != Vector2i(-1, -1) else _libre_a(s, v.pos, 6, false)
 	v["lit"] = _libre_a(s, v.pos + Vector2i(-5, 0), 0, false) if _libre_a(s, v.pos + Vector2i(-5, 0), 0, false) != Vector2i(-1, -1) else _libre_a(s, v.pos, 4, false)
+	# LE VILLAGEOIS VIT À SON HEURE, PAS À LA NÔTRE (2026-09-09). Un lève-tôt porte `horaires_decalage` = +2 : à
+	# 21 h du monde, il en est à 19 h et travaille encore à son poste — c'est JUSTE, et c'est la sonde qui avait
+	# tort de lui reprocher de ne pas rejoindre la place. On règle donc l'horloge du monde de façon à ce que SON
+	# heure soit celle qu'on veut éprouver.
+	var decal_v := SimPnj.trait_somme(s, v, "horaires_decalage")
 	for plage in [[12.0, "poste"], [21.0, "place"], [23.0, "lit"]]:
-		_heure(s, float(plage[0]))
+		_heure(s, float(plage[0]) + decal_v)
 		var cible: Vector2i = s._coin_de_place(v) if str(plage[1]) == "place" else v[str(plage[1])]   # sur la place, chacun son coin (Villes B1)
 		var avant := Grille.distance(v.pos, cible)
 		for r in 30:
@@ -613,7 +618,15 @@ func _camp() -> void:
 		var apres := Grille.distance(v.pos, cible)
 		print("camp : à %d h, le villageois va vers %s — de %d à %d tuiles" % [int(plage[0]), str(plage[1]), avant, apres])
 		if apres >= avant and avant > 1:
-			soucis.append("camp : à %d h, le villageois ne va pas vers %s (%d → %d tuiles)" % [int(plage[0]), str(plage[1]), avant, apres])
+			# UNE SONDE DIT POURQUOI, PAS SEULEMENT QUE (2026-09-09). « Il ne va pas vers sa cible » ne se corrige
+			# pas : ce qu'il faut savoir, c'est si la cible est ATTEIGNABLE, ce qu'elle porte, et ce que la routine
+			# a désigné. Sans ça, on relit le code au hasard.
+			var ch_c: Array = s.grille.chemin(v.pos, cible, false, "", false, 0, s.bloque_pour(v))
+			var cont_c: Dictionary = s.grille.contenu_de(cible)
+			soucis.append("camp : à %d h, le villageois ne va pas vers %s (%d → %d tuiles) — cible %s, chemin %d pas, occupée par « %s », contenu « %s », bloque %s, il a décidé « %s » (score %.2f), sa routine à lui vise %s (décalage %.1f h)" % [
+				int(plage[0]), str(plage[1]), avant, apres, str(cible), ch_c.size(), s.grille.occupant(cible),
+				str(cont_c.get("id", "")), str(s.grille.bloque_passage(cible)), str(v.get("ia_action", "?")), float(v.get("ia_score", 0.0)),
+				str(s._cible_routine(v, s.profils_ia.civil)), SimPnj.trait_somme(s, v, "horaires_decalage")])
 
 
 # ---------------------------------------------------------------- 6. en donjon
