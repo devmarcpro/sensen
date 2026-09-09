@@ -261,8 +261,19 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     `test_recolte` a rougi à bon droit : le champ condamnait le contenu existant. **Ce qui a été creusé, pas ce qui a
     été bâti** — le champ ne juge que les tuiles marquées `modifies`, que le jeu tenait déjà.
     **Reste** : la démolition par les PNJ et les royaumes ne nourrit pas encore le champ.
-26. **Le champ sonore** avec `absorption`. **Il ne peut pas s'appeler `bruit`** : le mot désigne déjà le bruit de
-    Perlin partout dans le code. À trancher avant la première ligne.
+~~26. **Le champ sonore** avec `absorption`~~ — **FAIT le 2026-09-09**, le jour où le designer l'a **nommé**
+    (`sonore` ; `bruit` restant au bruit de Perlin). Le mot était libre — deux occurrences, deux commentaires sur
+    « l'onde sonore » du barde, donc une future *source*. `son` a été écarté sur mesure : libre comme identifiant mais
+    présent 367 fois en prose, c'est le possessif français — *un mot qu'on ne peut pas chercher est un mot pris.*
+    **LE SON CONTOURNE** : il suit le plus court chemin sonore, pas une ligne droite — un cri passe par la porte
+    ouverte plutôt qu'à travers le mur. `absorption` (troisième des cinq colonnes, 247 valeurs) dit ce que chaque
+    matière en mange, et **c'est la stat qui diverge le plus des deux autres** : le liège est mou, ne porte rien et
+    étouffe mieux que le granit ; l'acier est dur, porte tout et transmet le son comme un fil ; la neige (95) rend un
+    monde silencieux. **L'IA remonte la pente du champ** sans savoir ce qu'elle a entendu, et la **Discrétion**
+    retranche au volume qu'on ÉMET — se cacher devient un lieu. `test_sonore` écoute à la même distance des deux
+    côtés du même couloir et ne change que la matière du mur.
+    **Reste** : le combat, la mort et les portes ne sonnent pas encore (volumes écrits, pas branchés) ; le champ
+    ignore les couches Z ; et l'**odeur**, l'autre moitié du point 1, n'existe pas.
     *(Note : le module `absorption` existe aussi dans le catalogue des noyaux — il meurt au palier 6, mais tout grep
     sera ambigu pendant les deux chantiers.)*
     **Et une bonne nouvelle mesurée** : le piège annoncé — « bâtie sur le patron de la lumière, elle hériterait du

@@ -16,7 +16,8 @@
     "elasticite": 3,
     "friction": 28,
     "fusion": 801,
-    "portance": 20
+    "portance": 20,
+    "absorption": 45
   },
   "tags": [
     "marin"

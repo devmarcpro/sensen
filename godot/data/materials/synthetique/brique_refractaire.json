@@ -16,7 +16,8 @@
     "elasticite": 3,
     "friction": 50,
     "fusion": 1750,
-    "portance": 58
+    "portance": 58,
+    "absorption": 58
   },
   "tags": [
     "industriel"

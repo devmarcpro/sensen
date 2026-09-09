@@ -16,7 +16,8 @@
     "elasticite": 30,
     "friction": 44,
     "fusion": 9999,
-    "portance": 74
+    "portance": 74,
+    "absorption": 42
   },
   "tags": [
     "organique"

@@ -186,6 +186,24 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce qui reste** : la démolition par les PNJ et les royaumes ne nourrit pas encore le champ — seuls le coup de pioche et l'explosion le font.
 
+> [!success] Codé le 2026-09-09 — **le champ sonore**, celui qui manquait le plus (ordre de travail 26) — `sonore.json`, `SimTerrain.sonner`, `absorption`
+> **Le premier des six dans le classement du designer**, et le dernier à avoir été débloqué : il attendait un **nom**. `bruit` était pris par le bruit de Perlin dans toute la génération ; le designer a tranché `sonore` le 2026-09-09. Le mot était libre — deux occurrences dans tout le code, et ce sont deux commentaires sur « l'onde sonore » du barde, donc une future *source* du champ, pas une collision. `son` a été écarté sur mesure : libre comme identifiant, mais présent **367 fois en prose**, puisque c'est le possessif français. *Un mot qu'on ne peut pas chercher est un mot pris.*
+>
+> **LE SON CONTOURNE, ET C'EST TOUT LE MODÈLE.** Il ne se propage pas en ligne droite comme la vue : il suit le **plus court chemin sonore** depuis sa source. Un cri passe donc par la porte ouverte plutôt qu'à travers le mur, deux pièces mitoyennes s'entendent mal, et un couloir en L porte la voix. C'est ce qui sépare ce champ de la ligne de vue — et c'est exactement ce que la note demandait : **« se cacher devient un lieu, pas un nombre »**.
+> Entrer dans une tuile coûte `pas_cout` de volume, plus l'`absorption` de la matière quand la tuile est pleine. **Aucune matière n'est nommée dans le code** : c'est la stat qui décide.
+>
+> **`absorption` est la troisième des cinq colonnes** — 247 valeurs de 0 à 100, dans l'ordre du monde réel. Et **c'est la stat qui diverge le plus des deux autres**, ce qui la justifie mieux que n'importe quel argument : le **liège** est mou, ne porte rien, et étouffe mieux que le granit ; l'**acier** est dur, porte tout, et transmet le son comme un fil ; la **neige** (95) rend un monde silencieux, ce que chacun a entendu une fois. Le **plomb** est la grande exception métallique — c'est l'écran acoustique du monde réel. `durete` et `portance` n'auraient jamais dit cela.
+>
+> **Ce que l'IA en fait, et le code de décision n'a pas gonflé** : un être sans cible visible qui entend quelque chose chez lui **remonte la pente du champ** vers le plus fort. Il n'a pas besoin de savoir ce qu'il a entendu ni d'où ça vient — le champ le sait pour lui, et le son a contourné les murs tout seul. C'est « la meute qui suit une piste au lieu de voir à travers les murs », en une branche avant l'errance.
+> **La Discrétion cesse d'être un simple facteur sur une portée** : elle retranche au volume qu'on **émet**. Un rôdeur discret creuse moins fort.
+>
+> **Les sources sont celles qui existaient déjà** — un champ remplace, il ne s'ajoute pas : le coup de **pioche**, l'**éboulement** (la plus forte du jeu, et elle vient du champ de support codé le matin même). Le coup, la mort et la porte ont leur volume en données et attendent d'être branchés.
+>
+> **Le contrôle négatif est particulièrement net ici** (`test_sonore`) : on écoute **à la même distance de la même source**, des deux côtés d'un couloir de même géométrie, et l'on ne change **que la matière du mur**. Derrière deux tuiles de granit : rien. Derrière deux tuiles de verre : on entend. Puis on perce le granit, et le son passe par l'ouverture — il contourne.
+> *Une leçon de test au passage* : avec un mur d'**une** tuile, le granit laissait passer exactement 5,0, c'est-à-dire **pile** le seuil d'audibilité. La physique était juste, le test tenait en équilibre sur un fil — et un fil se rompt au premier réglage. Un mur se teste épais.
+>
+> **Ce qui reste** : le combat, la mort et les portes ne sonnent pas encore (leur volume est écrit, pas branché) ; le champ ne connaît pas les couches Z ; et l'**odeur**, l'autre moitié du point 1, n'existe pas.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]

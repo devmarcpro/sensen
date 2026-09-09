@@ -16,7 +16,8 @@
     "elasticite": 18,
     "friction": 22,
     "fusion": 1000,
-    "portance": 36
+    "portance": 36,
+    "absorption": 13
   },
   "tags": [],
   "color": "#E8D98A",

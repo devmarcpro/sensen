@@ -655,6 +655,97 @@ func test_affixes_reveilles() -> void:
 	s.monde.fermer()
 
 
+## LE CHAMP SONORE (ordre de travail 26, 2026-09-09 ; le designer l'a nommé `sonore` le même jour). Le son ne se
+## propage pas en ligne droite comme la vue : il suit le plus court chemin SONORE, contourne, et se fait manger par
+## l'`absorption` de ce qu'il traverse.
+## **Le contrôle négatif est particulièrement net ici** : on écoute à la MÊME distance de la MÊME source, des deux
+## côtés d'un couloir de même géométrie, et l'on ne change QUE la matière du mur.
+func test_sonore() -> void:
+	var cfg: Dictionary = GameData.config("sonore")
+	verifier(not cfg.is_empty() and float(cfg.pas_cout) > 0.0, "les réglages du champ sonore sont en données (%.0f par tuile, seuil %.0f)" % [float(cfg.pas_cout), float(cfg.seuil_audible)])
+	var mats: Dictionary = GameData.catalogues.materials
+	verifier(int(mats.granit.stats.absorption) > int(mats.verre.stats.absorption) * 2, "le granit étouffe bien plus que le verre (%d contre %d)" % [int(mats.granit.stats.absorption), int(mats.verre.stats.absorption)])
+	verifier(int(mats.laine.stats.absorption) > int(mats.granit.stats.absorption) and int(mats.acier.stats.absorption) < int(mats.granit.stats.absorption), "et la laine étouffe mieux que la pierre, l'acier moins bien (%d, %d, %d) — ce que `durete` n'aurait jamais dit" % [int(mats.laine.stats.absorption), int(mats.granit.stats.absorption), int(mats.acier.stats.absorption)])
+	var s := Simulation.new(610)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	var c: Vector2i = Grille.plat(j.pos) + Vector2i(0, 14)
+
+	# Un couloir clos de 21 tuiles, la source au milieu, et un mur qui coupe le côté gauche à une tuile d'elle.
+	var _batir := func(matiere: String) -> void:
+		for dx in range(-11, 12):
+			for dy in range(-1, 2):
+				var t: Vector2i = c + Vector2i(dx, dy)
+				if not g.dans(t):
+					continue
+				if dy == 0 and dx > -11 and dx < 11:
+					g.contenu[g.idx(t)] = 0
+					g.materiaux.erase(g.idx(t))
+				else:
+					g.poser_contenu(t, "mur")
+					g.materiaux[g.idx(t)] = "granit"
+		# LE MUR DE SÉPARATION, en la matière qu'on teste — DEUX tuiles d'épaisseur, et c'est une leçon de test :
+		# avec une seule, le granit laissait passer exactement 5,0, c'est-à-dire PILE le seuil d'audibilité. La
+		# physique était juste ; le test tenait en équilibre sur un fil, et un fil se rompt au premier réglage.
+		for dy in range(-1, 2):
+			for dx2 in [-1, -2]:
+				var m: Vector2i = c + Vector2i(dx2, dy)
+				if g.dans(m):
+					g.poser_contenu(m, "mur")
+					g.materiaux[g.idx(m)] = matiere
+	var droite: Vector2i = c + Vector2i(10, 0)    # à dix tuiles, en terrain libre
+	var gauche: Vector2i = c + Vector2i(-10, 0)   # à dix tuiles AUSSI, mais derrière le mur
+
+	# 1. UN MUR DE GRANIT. On entend à droite, pas à gauche.
+	_batir.call("granit")
+	SimTerrain.sonner(s, c, float(cfg.volumes.pioche))
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(100)
+	var d1 := s.sonore_a(droite)
+	var g1 := s.sonore_a(gauche)
+	verifier(d1 > 0.0, "à dix tuiles en terrain libre, on entend le coup de pioche (%.1f)" % d1)
+	verifier(g1 <= 0.0, "à dix tuiles DE L'AUTRE CÔTÉ, le mur de granit l'étouffe (%.1f)" % g1)
+
+	# 2. LE MÊME MUR EN VERRE. Même géométrie, même distance, même source : on entend.
+	s.carte_sonore.fill(0.0)
+	s.sonore_actif.clear()
+	s.sonore_sources.clear()
+	_batir.call("verre")
+	SimTerrain.sonner(s, c, float(cfg.volumes.pioche))
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(200)
+	var d2 := s.sonore_a(droite)
+	var g2 := s.sonore_a(gauche)
+	verifier(is_equal_approx(d2, d1), "à droite, rien n'a changé (%.1f)" % d2)
+	verifier(g2 > 0.0, "MAIS DERRIÈRE LE VERRE, on entend — seule la matière du mur a changé (%.1f contre %.1f)" % [g2, g1])
+
+	# 3. LA PENTE MÈNE À LA SOURCE. C'est tout ce qu'il faut à une bête : elle n'a pas à savoir ce qu'elle a entendu.
+	var pas: Vector2i = SimTerrain.vers_le_bruit(s, droite)
+	verifier(pas.x > -9000 and Grille.distance(pas, c) < Grille.distance(droite, c), "la pente du champ mène vers la source (%s → %s)" % [str(droite), str(pas)])
+
+	# 4. LE SON CONTOURNE : on perce le mur de granit, et ce qui était inaudible s'entend par l'ouverture.
+	s.carte_sonore.fill(0.0)
+	s.sonore_actif.clear()
+	s.sonore_sources.clear()
+	_batir.call("granit")
+	for dx3 in [-1, -2]:   # on perce les deux tuiles du mur
+		var trou: Vector2i = c + Vector2i(dx3, 0)
+		g.contenu[g.idx(trou)] = 0
+		g.materiaux.erase(g.idx(trou))
+	SimTerrain.sonner(s, c, float(cfg.volumes.pioche))
+	s.sonore_prochain_pas = 0
+	s._tiquer_sonore(300)
+	verifier(s.sonore_a(gauche) > 0.0, "une ouverture dans le mur, et le son passe par elle : il contourne (%.1f)" % s.sonore_a(gauche))
+
+	# 5. LE BRUIT S'EFFACE : un pas de champ sans source, et il ne reste plus rien d'audible.
+	var avant := s.sonore_a(droite)
+	for k in 12:
+		s.sonore_prochain_pas = 0
+		s._tiquer_sonore(400 + k * 10)
+	verifier(s.sonore_a(droite) <= 0.0, "un bruit ne dure pas : il s'efface (%.1f puis %.1f)" % [avant, s.sonore_a(droite)])
+
+
 ## LE CHAMP DE SUPPORT (ordre de travail 25, 2026-09-09) — l'effondrement, « la seule chose qui sépare une mine d'un
 ## gouffre ». Une tuile ouverte est couverte d'un plafond que la roche alentour tient ; la `portance` de cette roche
 ## dit jusqu'où il porte, et au-delà il tombe.

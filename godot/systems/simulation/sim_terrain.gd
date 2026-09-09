@@ -419,6 +419,184 @@ static func _fusion_de(mats: Dictionary, id: String) -> float:
 	return float(mats.get(id, {}).get("stats", {}).get("fusion", 9999))
 
 
+## ---------------------------------------------------------------- le champ sonore (Émergence, 2026-09-09)
+
+## LE CHAMP SONORE — « celui qui manque le plus » selon le classement du designer. Le nom est le sien (2026-09-09) :
+## `bruit` était pris par le bruit de Perlin, `sonore` était libre.
+##
+## **LE SON CONTOURNE, ET C'EST TOUT LE MODÈLE.** Il ne se propage pas en ligne droite comme la vue : il suit le plus
+## court chemin SONORE depuis sa source. Un cri passe donc par la porte ouverte plutôt qu'à travers le mur, et deux
+## pièces mitoyennes s'entendent mal alors qu'un couloir en L porte la voix. C'est ce qui distingue ce champ de la
+## ligne de vue, et c'est ce qui le rend intéressant : **se cacher devient un lieu**, pas un nombre.
+##
+## Entrer dans une tuile coûte `pas_cout` de volume, plus l'`absorption` de la matière (divisée par `absorption_div`)
+## quand la tuile est pleine. Une tenture de laine (94) mange bien plus qu'une porte de bois (45) — et c'est la stat
+## qui décide, aucune matière n'est nommée ici.
+##
+## Le patron est celui de la CHALEUR : les sources s'accumulent, le pas les propage toutes d'un coup, et le champ
+## s'efface de `fondu` à chaque pas — un bruit ne dure pas, il passe.
+static func sonner(sim: Simulation, t: Vector2i, volume: float) -> void:
+	if volume <= 0.0 or not sim.grille.dans(t):
+		return
+	var i := sim.grille.idx(t)
+	sim.sonore_sources[i] = maxf(float(sim.sonore_sources.get(i, 0.0)), volume)
+
+
+## Ce qu'une source vaut, lu en données, et ce que la Discrétion de celui qui la produit lui retranche. C'est ici que
+## se cacher cesse d'être un simple facteur sur une portée de détection : un rôdeur discret creuse moins fort.
+static func sonner_de(sim: Simulation, t: Vector2i, quoi: String, e: Dictionary = {}) -> void:
+	var cfg: Dictionary = GameData.config("sonore")
+	if cfg.is_empty():
+		return
+	var v := float(cfg.get("volumes", {}).get(quoi, 0.0))
+	if not e.is_empty():
+		var n := float(sim.regles.niveau(e.get("competences_eff", {}), "discretion"))
+		v -= n * float(cfg.get("discretion_par_niveau", 0.0))
+	sonner(sim, t, v)
+
+
+## Ce qu'on entend sur une tuile, de 0 à 100.
+static func sonore_a(sim: Simulation, t: Vector2i) -> float:
+	if sim.carte_sonore.is_empty() or not sim.grille.dans(t):
+		return 0.0
+	var i := sim.grille.idx(t)
+	if i < 0 or i >= sim.carte_sonore.size():
+		return 0.0
+	return float(sim.carte_sonore[i])
+
+
+static func _sonore_dimensionner(sim: Simulation) -> void:
+	var n := sim.grille.n_tuiles()
+	if sim.sonore_grille == sim.grille and sim.carte_sonore.size() == n:
+		return
+	sim.sonore_grille = sim.grille
+	sim.carte_sonore = PackedFloat32Array()
+	sim.carte_sonore.resize(n)
+	sim.sonore_actif.clear()
+
+
+## Le pas du champ : ce qui restait s'efface un peu, puis toutes les sources en attente se propagent d'un coup —
+## une seule recherche, à plusieurs départs. Le tas est un tas MAX : on sort toujours le plus fort, donc la première
+## fois qu'une tuile sort du tas, c'est avec le volume le plus élevé qui puisse l'atteindre.
+static func _tiquer_sonore(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("sonore")
+	if cfg.is_empty() or tick < sim.sonore_prochain_pas:
+		return
+	sim.sonore_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 200)))
+	var seuil := float(cfg.get("seuil_audible", 5.0))
+	if not sim.sonore_actif.is_empty():
+		_sonore_dimensionner(sim)
+		var fondu := clampf(float(cfg.get("fondu", 0.5)), 0.0, 1.0)
+		for idx in sim.sonore_actif.keys():
+			var i := int(idx)
+			var v := float(sim.carte_sonore[i]) * (1.0 - fondu)
+			sim.carte_sonore[i] = v
+			if v < seuil:
+				sim.carte_sonore[i] = 0.0
+				sim.sonore_actif.erase(i)
+	if sim.sonore_sources.is_empty():
+		return
+	_sonore_dimensionner(sim)
+	var pas := float(cfg.get("pas_cout", 3.0))
+	var div := maxf(0.1, float(cfg.get("absorption_div", 4.0)))
+	var plafond := int(cfg.get("tuiles_max", 4096))
+	var mats: Dictionary = GameData.catalogues.materials
+	var meilleur := {}
+	var tas: Array[Vector3i] = []
+	var depart: Array = sim.sonore_sources.keys()
+	depart.sort()   # un ordre FIXE : deux exécutions doivent rendre le même champ
+	for idx in depart:
+		var i := int(idx)
+		var v := float(sim.sonore_sources[idx])
+		if v >= seuil:
+			meilleur[i] = v
+			_tas_max_push(tas, Vector3i(i, int(round(v * 100.0)), 0))
+	sim.sonore_sources.clear()
+	var vus := 0
+	while not tas.is_empty() and vus < plafond:
+		var haut: Vector3i = _tas_max_pop(tas)
+		var i0 := haut.x
+		var v0 := float(haut.y) / 100.0
+		if v0 < float(meilleur.get(i0, 0.0)) - 0.001:
+			continue   # une meilleure entrée pour cette tuile est déjà passée
+		vus += 1
+		if float(sim.carte_sonore[i0]) < v0:
+			sim.carte_sonore[i0] = v0
+			sim.sonore_actif[i0] = true
+		var t0 := sim.grille.pos_de(i0)
+		for d in Grille.DIRS:
+			var q: Vector2i = t0 + d
+			if not sim.grille.dans(q):
+				continue
+			var iq := sim.grille.idx(q)
+			var cout := pas
+			if sim.grille.contenu_de(q).get("bloque_passage", false):
+				var mid := str(sim.grille.materiau_de(q))
+				var ab := float(mats.get(mid, {}).get("stats", {}).get("absorption", 50.0))
+				cout += ab / div
+			var vq := v0 - cout
+			if vq < seuil or vq <= float(meilleur.get(iq, 0.0)):
+				continue
+			meilleur[iq] = vq
+			_tas_max_push(tas, Vector3i(iq, int(round(vq * 100.0)), 0))
+
+
+## Un tas MAX minimal — la file de priorité du champ. `y` porte le volume en centièmes, pour rester en entiers.
+static func _tas_max_push(tas: Array[Vector3i], v: Vector3i) -> void:
+	tas.append(v)
+	var i := tas.size() - 1
+	while i > 0:
+		@warning_ignore("integer_division")
+		var p := (i - 1) / 2
+		if tas[p].y >= tas[i].y:
+			break
+		var tmp: Vector3i = tas[p]
+		tas[p] = tas[i]
+		tas[i] = tmp
+		i = p
+
+
+static func _tas_max_pop(tas: Array[Vector3i]) -> Vector3i:
+	var haut: Vector3i = tas[0]
+	var dernier: Vector3i = tas.pop_back()
+	if tas.is_empty():
+		return haut
+	tas[0] = dernier
+	var i := 0
+	while true:
+		var g := i * 2 + 1
+		var d := i * 2 + 2
+		var m := i
+		if g < tas.size() and tas[g].y > tas[m].y:
+			m = g
+		if d < tas.size() and tas[d].y > tas[m].y:
+			m = d
+		if m == i:
+			break
+		var tmp: Vector3i = tas[m]
+		tas[m] = tas[i]
+		tas[i] = tmp
+		i = m
+	return haut
+
+
+## La tuile voisine d'où le bruit vient — celle qui sonne le plus fort. C'est la PENTE du champ, et c'est tout ce
+## qu'il faut à une bête pour remonter à la source : elle n'a pas besoin de savoir ce qu'elle a entendu.
+static func vers_le_bruit(sim: Simulation, t: Vector2i) -> Vector2i:
+	var ici := sonore_a(sim, t)
+	var mieux := ici
+	var but := Vector2i(-9999, -9999)
+	for d in Grille.DIRS:
+		var q: Vector2i = t + d
+		if not sim.grille.dans(q) or sim.grille.bloque_passage(q):
+			continue
+		var v := sonore_a(sim, q)
+		if v > mieux:
+			mieux = v
+			but = q
+	return but
+
+
 ## ---------------------------------------------------------------- le champ de support (Émergence, 2026-09-09)
 
 ## LE CHAMP DE SUPPORT — l'effondrement, « la seule chose qui sépare une mine d'un gouffre ».
@@ -664,6 +842,7 @@ static func _effondrer(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int)
 	sim.grille.materiaux[idx] = mid
 	sim.grille.marquer(t)
 	sim.lumiere_sale = true
+	sonner_de(sim, t, "effondrement")   # un éboulement s'entend de loin — c'est la source la plus forte du jeu
 	EventBus.emettre(&"journal", [&"journal.effondrement", {"x": t.x, "y": t.y}])
 	EventBus.emettre(&"tile_changed", [t])
 	# Ce qui vient de se boucher SOUTIENT désormais : les voisines qui tenaient par miracle sont à revoir.
@@ -1307,6 +1486,7 @@ static func _creuser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) 
 	sim.grille.contenu[sim.grille.idx(vers)] = 0
 	sim.grille.materiaux.erase(sim.grille.idx(vers))
 	support_reexaminer(sim, vers)   # le plafond de la galerie vient de perdre un appui (Émergence — le champ de support)
+	sonner_de(sim, vers, "pioche", e)   # un coup de pioche s'entend (Émergence — le champ sonore)
 	sim.grille.hauteurs[sim.grille.idx(vers)] = sim.grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
 	sim.grille.marquer(vers)
 	if sim.poches_gaz.has(sim.grille.idx(vers)):   # la pioche perce une poche : le gaz s'échappe (Gaz dans le sol)

@@ -16,7 +16,8 @@
     "elasticite": 0,
     "friction": 10,
     "fusion": 0,
-    "portance": 0
+    "portance": 0,
+    "absorption": 12
   },
   "tags": [
     "liquide"

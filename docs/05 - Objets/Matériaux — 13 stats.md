@@ -51,6 +51,11 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 > Cinquante-huit corrections sur quarante-cinq fiches. La courbe du butin par niveau de donjon ne bouge pas.
 
 
+> [!success] Codé le 2026-09-09 — **`absorption` est écrite** : la troisième des cinq, et celle qui justifie le mieux d'avoir des stats séparées (ordre de travail 26)
+> **247 valeurs de 0 à 100**, dans l'ordre du monde réel. Ce que chacun sait sans être acousticien : le **textile** et la **fibre** étouffent le mieux — c'est pour ça qu'on tend des tentures ; la **roche** étouffe par la masse mais réfléchit ; le **métal** et le **verre** sont les pires, ils sonnent — une cloche est en bronze, pas en laine ; le **liquide** ne barre rien, c'est par là que le son passe.
+> **C'est la stat qui diverge le plus de `durete` et de `portance`, et c'est ce qui la justifie** : le **liège** (92) est mou, ne porte rien, et étouffe mieux que le granit (40) ; l'**acier** (10) est dur, porte tout, et transmet le son comme un fil ; la **neige** (95) rend un monde silencieux, ce que chacun a entendu une fois. Le **plomb** (62) est la grande exception métallique — c'est l'écran acoustique du monde réel.
+> **Deux colonnes sur cinq restent à écrire** (`permeabilite`, `alteration`) : la note en dit maintenant **16**.
+
 > [!success] Codé le 2026-09-09 — **`portance` est écrite** : la deuxième des cinq colonnes, et la mine cesse d'être un gouffre (ordre de travail 25)
 > **247 valeurs de 0 à 100**, entrées comme 15e colonne des douze tables. Contrairement à `fusion`, ce n'est **pas** une grandeur du monde réel avec son unité : la résistance en flexion se mesure en mégapascals et un joueur n'en a que faire. C'est la seconde moitié de la règle du 2026-09-02 qui s'applique — **respecter l'ordre du monde réel, pas ses unités**. Ce que le joueur sait : l'acier tient mieux que la fonte, le granit mieux que la craie, la roche mieux que la terre, et le sable ne tient pas du tout.
 > **Deux familles où `durete` trompait, et c'est ce qui justifie une stat séparée** : les **gemmes** sont dures et **cassantes** — un diamant raye tout et se fend d'un coup de marteau, sa portance est moyenne, pas maximale ; le **plomb** et l'**or** sont des métaux **mous**, ils fléchissent sous leur propre poids — le plomb (22) porte moins qu'un chêne (78).

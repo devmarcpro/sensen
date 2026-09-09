@@ -46,7 +46,8 @@
         "elasticite",
         "friction",
         "fusion",
-        "portance"
+        "portance",
+        "absorption"
       ],
       "properties": {
         "durete": {
@@ -112,6 +113,12 @@
           "minimum": 0,
           "maximum": 100,
           "description": "Combien la matiere tient en porte-a-faux avant de ceder, 0-100. Lue par le champ de support : c'est elle qui dit jusqu'ou une galerie s'ouvre avant que le plafond tombe. 0 = ne porte rien."
+        },
+        "absorption": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Ce que la matiere etouffe du son, 0-100. Lue par le champ sonore : elle dit ce qu'il en coute de traverser une tuile. 0 laisse tout passer, 100 etouffe presque tout."
         }
       }
     },

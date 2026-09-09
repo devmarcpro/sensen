@@ -65,6 +65,13 @@ var danger_prochain_pas := 0
 ## seul coup de pioche. Comme la chaleur, ce champ ne balaie jamais la fenêtre — il ne regarde que ce qui a changé.
 var support_a_verifier: Dictionary = {}
 var support_prochain_pas := 0
+## Le champ sonore (Émergence, 2026-09-09, nommé par le designer) : ce qui s'entend, par tuile, de 0 à 100. Jamais
+## sauvegardé — un bruit ne survit pas à une session. `sonore_sources` accumule ce qui a sonné depuis le dernier pas.
+var carte_sonore := PackedFloat32Array()
+var sonore_grille: Grille = null
+var sonore_actif: Dictionary = {}
+var sonore_sources: Dictionary = {}
+var sonore_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
@@ -881,6 +888,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_chaleur(self, tick)
 		SimTerrain._tiquer_danger(self, tick)
 		SimTerrain._tiquer_support(self, tick)
+		SimTerrain._tiquer_sonore(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -4683,6 +4691,21 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 
 ## Errer : un pas au hasard sur une case libre, sans s'éloigner de plus de 12 tuiles de l'ancrage.
 func _ia_errer(e: Dictionary, tick: int) -> void:
+	# L'OUÏE (Émergence — le champ sonore, 2026-09-09). Avant d'errer au hasard, un être écoute : s'il entend
+	# quelque chose chez lui, il REMONTE LA PENTE du champ vers le plus fort. Il n'a pas besoin de savoir ce qu'il
+	# a entendu ni d'où ça vient — le champ le sait pour lui, et le son a contourné les murs tout seul.
+	# C'est ce que la note appelait « la meute qui suit une piste au lieu de voir à travers les murs ».
+	var cfg_s: Dictionary = GameData.config("sonore")
+	if not cfg_s.is_empty() and int(e.get("sourd_jusqu_a", 0)) <= tick:
+		var enq: Dictionary = cfg_s.get("enquete", {})
+		if sonore_a(e.pos) >= float(enq.get("seuil", 12.0)):
+			var vers: Vector2i = SimTerrain.vers_le_bruit(self, e.pos)
+			if vers.x > -9000:
+				e["sourd_jusqu_a"] = tick + int(enq.get("pause_ticks", 600))
+				EventBus.emettre(&"journal", [&"journal.entend", {"nom": e.name_key}])
+				_ia_pas_vers(e, vers, tick, "")
+				return
+
 	# On tirait une case ADJACENTE au hasard a chaque tick. Une marche au hasard ne s'eloigne que d'une
 	# dizaine de tuiles en cent pas : un etre ne se promenait pas, il TREMBLAIT SUR PLACE — un garde ne
 	# quittait jamais sa salle, un cerf ne traversait jamais sa clairiere (designer 2026-09-03, point 77).
@@ -5101,6 +5124,14 @@ func _tiquer_danger(tick: int) -> void:
 
 func _tiquer_support(tick: int) -> void:
 	SimTerrain._tiquer_support(self, tick)
+
+
+func _tiquer_sonore(tick: int) -> void:
+	SimTerrain._tiquer_sonore(self, tick)
+
+
+func sonore_a(t: Vector2i) -> float:
+	return SimTerrain.sonore_a(self, t)
 
 func chaleur_a(t: Vector2i) -> float:
 	return SimTerrain.chaleur_a(self, t)

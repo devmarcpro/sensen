@@ -16,7 +16,8 @@
     "elasticite": 3,
     "friction": 14,
     "fusion": 0,
-    "portance": 0
+    "portance": 0,
+    "absorption": 20
   },
   "tags": [
     "animal"

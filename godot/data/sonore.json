@@ -1,0 +1,21 @@
+{
+  "_doc": "LE CHAMP SONORE (Emergence — les champs partages, ordre de travail 26, 2026-09-09 ; le designer l a nomme `sonore` le meme jour, `bruit` etant pris par le bruit de Perlin). Ce qui s entend, par tuile, de 0 a 100. LE SON CONTOURNE : il ne se propage pas en ligne droite comme la vue, il suit le plus court chemin SONORE, si bien qu un cri passe par la porte ouverte plutot qu a travers le mur. Entrer dans une tuile coute `pas_cout` de volume, plus l `absorption` de la matiere divisee par `absorption_div` quand la tuile est pleine — une tenture de laine (94) mange bien plus qu une porte de bois (45). En dessous de `seuil_audible` le son n existe plus. `fondu` : la part du volume qui s efface a chaque pas du champ — un bruit ne dure pas, il passe. `volumes` : ce que vaut chaque source, et rien n est invente — la pioche, l eboulement, le coup, la mort. `discretion_par_niveau` : ce qu un niveau de Discretion retranche au volume qu on emet — c est ainsi que se cacher devient un LIEU et pas seulement un nombre. `enquete` : ce qu il faut entendre chez soi pour aller voir, l etre remontant alors la pente du champ vers le plus fort.",
+  "periode_ticks": 200,
+  "pas_cout": 3.0,
+  "absorption_div": 4.0,
+  "seuil_audible": 5.0,
+  "fondu": 0.5,
+  "tuiles_max": 4096,
+  "volumes": {
+    "pioche": 45.0,
+    "effondrement": 100.0,
+    "coup": 35.0,
+    "mort": 60.0,
+    "porte": 25.0
+  },
+  "discretion_par_niveau": 2.0,
+  "enquete": {
+    "seuil": 12.0,
+    "pause_ticks": 600
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "required": [
+    "periode_ticks",
+    "pas_cout",
+    "absorption_div",
+    "seuil_audible",
+    "fondu",
+    "volumes"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "periode_ticks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pas_cout": {
+      "type": "number",
+      "minimum": 0
+    },
+    "absorption_div": {
+      "type": "number",
+      "minimum": 0.1
+    },
+    "seuil_audible": {
+      "type": "number",
+      "minimum": 0
+    },
+    "fondu": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "tuiles_max": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "volumes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "discretion_par_niveau": {
+      "type": "number",
+      "minimum": 0
+    },
+    "enquete": {
+      "type": "object",
+      "properties": {
+        "seuil": {
+          "type": "number"
+        },
+        "pause_ticks": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
