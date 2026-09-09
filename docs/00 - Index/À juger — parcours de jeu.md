@@ -766,3 +766,23 @@ Le soir a ajouté trois systèmes de contenu réel ([[Gaz dans le sol]], [[Agric
 4. **Les transformations.** Trois laits pour deux fromages, deux céréales pour deux farines, trois olives pour une huile — des proportions de cuisine, pas d'économie. L'alambic tient lieu de cuve pour la bière et le vin : faut-il une station **cuve** (et un **moulin** pour la farine — la ville en a un, le joueur moud à la cuisine) ?
 5. **Ce qui n'est pas fait, et que le monde réel demande ensuite** : *(la conservation compte depuis le 2026-09-07, 21 h 15 — les denrées pourrissent au grenier et les conserves tiennent)* les maladies des bêtes et des plantes, le pâturage tuile à tuile, la pêche, les ruches (le miel existe, rien ne le produit), les arbres fruitiers hauts.
 
+## 2026-09-09 — La faune tourne : une vue de face qu'on n'avait pas, et qui est plus pauvre qu'un profil
+
+Les six rigs ont une profondeur depuis hier soir ; ce matin, les quatre rigs animaux ont été **réécrits en espace du
+corps** ([[Ordre de travail]], ligne 26 septies). Ils tournent donc pour de bon, et ça change ce que tu vois.
+
+`capture.tscn -- --pantins quadrupede` (ou `arachnide`, `serpentin`, `volant`) dessine les huit angles côte à côte
+sur fond neutre — c'est la seule façon de juger une profondeur, une capture de jeu ne montrant jamais qu'un angle.
+
+1. **Un quadrupède vu de face est un tronc court et quatre pattes.** C'est géométriquement juste : un corps de vingt
+   unités couché vers la caméra ne fait plus que dix pixels à l'écran, l'isométrie écrasant la profondeur de moitié.
+   C'est aussi **plus pauvre qu'un profil**, et avant hier tous les animaux étaient dessinés de profil quelle que
+   soit leur direction. La question est donc : préfères-tu un animal qui **tourne** (juste, parfois pauvre) ou un
+   animal **toujours de profil** (faux, toujours lisible) ? Si c'est le second, `lacet_actif: false` sur le rig
+   suffit — un booléen par rig, dans `tools/gen_rigs.py`, rien d'autre à toucher.
+2. **La tête se détache au N.** À 180 degrés, la tête est au bout du corps le plus éloigné de nous : elle monte de
+   dix pixels et le cou, qui n'est pas dessiné, ne comble pas l'écart. Avec un sprite ça se lira ; avec des
+   rectangles, ça flotte. Faut-il un segment « cou » visible sur les rigs animaux ?
+3. **L'épaisseur des corps.** Un segment est maintenant un cylindre à section elliptique : le torse humain fait 9 de
+   large et 6 d'épaisseur, le corps d'un quadrupède 8 de large et 9 de haut. Ces chiffres sont plausibles, pas
+   mesurés — un torse de profil te paraît-il trop mince, trop épais ?

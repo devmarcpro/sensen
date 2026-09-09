@@ -22,13 +22,16 @@ de CHACUN des six rigs — de la profondeur simulée, que la vraie calcule. Il n
 sert qu'à DÉPARTAGER deux segments à la même profondeur (un serpent à plat, une méduse), et huit `orientations` qui
 ne disent plus que le lacet du corps et la vue de la tête.
 
-Les rigs animaux séparaient leurs membres gauche/droite par un décalage EN TRAVERS (donc vertical à l'écran) :
-c'était de la profondeur déguisée. Elle est passée en profondeur vraie, à la même valeur apparente — et c'est elle
-qui trie désormais les pattes proches devant les pattes lointaines.
+`lacet_actif` : tous les rigs sauf l'amorphe tournent pour de bon depuis le 2026-09-09. Les rigs animaux étaient
+écrits comme des dessins de PROFIL — leur axe long était l'axe `x` de l'écran — et le lacet les aurait couchés dans
+la profondeur à toutes les orientations, y compris celle où ils étaient justes. Réécrits en espace du corps, leur axe
+long est l'axe de PROFONDEUR : à lacet nul le museau vient vers la caméra (une vue de face, gratuite), à 90 degrés le
+corps se remet à l'horizontale et l'on retrouve exactement le profil d'avant. L'amorphe garde `false` : une masse
+n'a pas d'orientation, et la faire tourner ne ferait que l'amincir.
 
-`lacet_actif` : les rigs ANIMAUX sont encore écrits dans le plan de l'écran (un quadrupède est dessiné de profil,
-pas de face), donc leur faire subir un lacet les réduirait à un moignon. Ils gardent `false` jusqu'à leur réécriture
-en espace du corps ; l'humanoïde, lui, est debout et tourne pour de bon.
+`epaisseur` : un segment est un cylindre à section elliptique, pas un ruban — `largeur` d'un côté à l'autre,
+`epaisseur` de l'avant à l'arrière. Un torse vu de profil fait son épaisseur ; omise, elle vaut
+`largeur × styles.sprites.epaisseur_defaut`.
 
 Unités : pixels d'écran à l'échelle de la tuile. Les sprites viennent remplacer les rectangles ; le rig, lui, est
 la donnée — pas le dessin.
@@ -51,11 +54,16 @@ ORIENTATIONS = {
 }
 
 
-def seg(parent, ancrage, longueur, largeur, angle=90, ancrages=None, zone=None, profondeur=0.0):
+def seg(parent, ancrage, longueur, largeur, angle=90, ancrages=None, zone=None, profondeur=0.0, epaisseur=None):
+    # `epaisseur` : la mesure DE L'AVANT À L'ARRIÈRE. Un segment est un cylindre à section elliptique, pas un
+    # ruban — un torse vu de profil fait son épaisseur, pas une fraction arbitraire de sa largeur. Omise, elle
+    # vaut `largeur × styles.sprites.epaisseur_defaut`.
     d = {"parent": parent, "ancrage": ancrage, "longueur": longueur, "largeur": largeur,
          "angle": angle, "ancrages": ancrages or {}, "zone": zone}
     if profondeur:
         d["profondeur"] = profondeur
+    if epaisseur is not None:
+        d["epaisseur"] = epaisseur
     return d
 
 
@@ -78,9 +86,9 @@ H = {
     "hauteur_pieds": 13,
     "lacet_actif": True,
     "segments": {
-        "bassin": seg(None, None, 5, 8, -90, {"taille": [5, 0, 0], "hanche_G": [0, -2.5, -1], "hanche_D": [0, 2.5, -1]}, "torse"),
-        "torse": seg("bassin", "taille", 9, 9, -90, {"cou": [9, 0, -1], "epaule_G": [7, -5, -1.5], "epaule_D": [7, 5, -1.5], "dos": [3, 0, 2]}, "torse"),
-        "tete": seg("torse", "cou", 8, 8, -90, {}, "tete"),
+        "bassin": seg(None, None, 5, 8, -90, {"taille": [5, 0, 0], "hanche_G": [0, -2.5, -1], "hanche_D": [0, 2.5, -1]}, "torse", epaisseur=6),
+        "torse": seg("bassin", "taille", 9, 9, -90, {"cou": [9, 0, -1], "epaule_G": [7, -5, -1.5], "epaule_D": [7, 5, -1.5], "dos": [3, 0, 2]}, "torse", epaisseur=6),
+        "tete": seg("torse", "cou", 8, 8, -90, {}, "tete", epaisseur=8),   # une tête est aussi profonde que large
         "bras_haut_G": seg("torse", "epaule_G", 8, 3, 100, {"coude": [8, 0, 0]}, "bras", 8),
         "bras_haut_D": seg("torse", "epaule_D", 8, 3, 80, {"coude": [8, 0, 0]}, "bras", 8),
         "bras_bas_G": seg("bras_haut_G", "coude", 7, 3, 95, {"poignet": [7, 0, 0]}, "bras", 6),
@@ -115,19 +123,23 @@ Q = {
     "name_key": "rig.quadrupede.name",
     "racine": "torse",
     "hauteur_pieds": 10,
-    "lacet_actif": False,   # écrit dans le plan de l'écran (de profil) : à réécrire en espace du corps
+    "lacet_actif": True,
     "segments": {
-        "torse": seg(None, None, 20, 8, 0, {"cou": [20, -3, 0], "epaule_AV_G": [17, 0, -4], "epaule_AV_D": [17, 0, 4],
-                                            "epaule_AR_G": [3, 0, -4], "epaule_AR_D": [3, 0, 4], "dos": [10, -4, 0]}, "torse"),
-        "tete": seg("torse", "cou", 7, 6, -20, {}, "tete"),
-        "patte_AV_G": seg("torse", "epaule_AV_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes"),
-        "patte_AV_D": seg("torse", "epaule_AV_D", 6, 2.5, 85, {"pied": [6, 0, 0]}, "jambes"),
-        "patte_AR_G": seg("torse", "epaule_AR_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes"),
-        "patte_AR_D": seg("torse", "epaule_AR_D", 6, 2.5, 85, {"pied": [6, 0, 0]}, "jambes"),
-        "pied_AV_G": seg("patte_AV_G", "pied", 4, 2.5, 90, {}, "pieds"),
-        "pied_AV_D": seg("patte_AV_D", "pied", 4, 2.5, 90, {}, "pieds"),
-        "pied_AR_G": seg("patte_AR_G", "pied", 4, 2.5, 90, {}, "pieds"),
-        "pied_AR_D": seg("patte_AR_D", "pied", 4, 2.5, 90, {}, "pieds"),
+        # LE CORPS EST COUCHE LE LONG DE L'AXE DE PROFONDEUR (2026-09-09) : `angle` -90 met l'axe de largeur a
+        # l'horizontale, `profondeur` 90 couche le corps. A lacet nul, le museau vient vers la camera — une vue de
+        # face, qu'on n'avait pas ; a 90 degres, le corps se remet a l'horizontale et l'on retrouve le profil d'avant.
+        "torse": seg(None, None, 20, 8, -90, {"cou": [20, 0, 3], "epaule_AV_G": [17, 3, 0], "epaule_AV_D": [17, -3, 0],
+                                              "epaule_AR_G": [3, 3, 0], "epaule_AR_D": [3, -3, 0], "dos": [10, 0, 4]},
+                     "torse", 90, epaisseur=9),
+        "tete": seg("torse", "cou", 7, 6, -90, {}, "tete", 70, epaisseur=6),
+        "patte_AV_G": seg("torse", "epaule_AV_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
+        "patte_AV_D": seg("torse", "epaule_AV_D", 6, 2.5, 85, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
+        "patte_AR_G": seg("torse", "epaule_AR_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
+        "patte_AR_D": seg("torse", "epaule_AR_D", 6, 2.5, 85, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
+        "pied_AV_G": seg("patte_AV_G", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
+        "pied_AV_D": seg("patte_AV_D", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
+        "pied_AR_G": seg("patte_AR_G", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
+        "pied_AR_D": seg("patte_AR_D", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
     },
     "ordre": ["patte_AR_D", "pied_AR_D", "patte_AV_D", "pied_AV_D", "torse", "patte_AR_G", "pied_AR_G", "patte_AV_G", "pied_AV_G", "tete"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"], "selle": ["torse"]},
@@ -140,12 +152,16 @@ V = {
     "name_key": "rig.volant.name",
     "racine": "torse",
     "hauteur_pieds": 18,
-    "lacet_actif": False,
+    "lacet_actif": True,
     "segments": {
-        "torse": seg(None, None, 10, 6, 0, {"cou": [10, -1, 0], "aile_G": [5, 0, -4], "aile_D": [5, 0, 4]}, "torse"),
-        "tete": seg("torse", "cou", 4, 4, -10, {}, "tete"),
-        "aile_G": seg("torse", "aile_G", 14, 5, 150, {}, "bras"),
-        "aile_D": seg("torse", "aile_D", 14, 5, -150, {}, "bras"),
+        # Le corps couche vers la camera (2026-09-09) ; les ailes, elles, s'ouvrent dans le PLAN FRONTAL — a lacet
+        # nul on voit l'oiseau de face, ailes deployees ; a 90 degres elles se raccourcissent d'elles-memes, ce qui
+        # est exactement ce qu'on voit d'un oiseau de profil.
+        "torse": seg(None, None, 10, 6, -90, {"cou": [10, 0, 1], "aile_G": [5, 3, 0], "aile_D": [5, -3, 0]},
+                     "torse", 90, epaisseur=6),
+        "tete": seg("torse", "cou", 4, 4, -90, {}, "tete", 70, epaisseur=4),
+        "aile_G": seg("torse", "aile_G", 14, 5, 200, {}, "bras", epaisseur=1.5),
+        "aile_D": seg("torse", "aile_D", 14, 5, -20, {}, "bras", epaisseur=1.5),
     },
     "ordre": ["aile_D", "torse", "tete", "aile_G"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"]},
@@ -158,20 +174,24 @@ A = {
     "name_key": "rig.arachnide.name",
     "racine": "torse",
     "hauteur_pieds": 6,
-    "lacet_actif": False,
+    "lacet_actif": True,
     "segments": {
-        "torse": seg(None, None, 12, 9, 0, {"cou": [12, -1, 0],
-                                            "p1G": [3, 0, -6], "p2G": [6, 0, -6], "p3G": [9, 0, -6], "p4G": [11, 0, -6],
-                                            "p1D": [3, 0, 6], "p2D": [6, 0, 6], "p3D": [9, 0, 6], "p4D": [11, 0, 6]}, "torse"),
-        "tete": seg("torse", "cou", 5, 4, -15, {}, "tete"),
-        "patte_1G": seg("torse", "p1G", 7, 1.8, 60, {}, "jambes"),
-        "patte_2G": seg("torse", "p2G", 7, 1.8, 82, {}, "jambes"),
-        "patte_3G": seg("torse", "p3G", 7, 1.8, 104, {}, "jambes"),
-        "patte_4G": seg("torse", "p4G", 7, 1.8, 126, {}, "jambes"),
-        "patte_1D": seg("torse", "p1D", 7, 1.8, -60, {}, "jambes"),
-        "patte_2D": seg("torse", "p2D", 7, 1.8, -82, {}, "jambes"),
-        "patte_3D": seg("torse", "p3D", 7, 1.8, -104, {}, "jambes"),
-        "patte_4D": seg("torse", "p4D", 7, 1.8, -126, {}, "jambes"),
+        # Le corps couche vers la camera ; les huit pattes s'ouvrent dans le plan frontal, quatre a gauche et quatre
+        # a droite. Leur ecart LE LONG du corps (3, 6, 9, 11) est desormais un ecart EN PROFONDEUR : les pattes avant
+        # sont les plus proches de nous et se dessinent donc en dernier, sans qu'on l'ecrive nulle part.
+        "torse": seg(None, None, 12, 9, -90, {"cou": [12, 0, 1],
+                                              "p1G": [3, 4, 0], "p2G": [6, 4, 0], "p3G": [9, 4, 0], "p4G": [11, 4, 0],
+                                              "p1D": [3, -4, 0], "p2D": [6, -4, 0], "p3D": [9, -4, 0], "p4D": [11, -4, 0]},
+                     "torse", 90, epaisseur=7),
+        "tete": seg("torse", "cou", 5, 4, -90, {}, "tete", 70, epaisseur=4),
+        "patte_1G": seg("torse", "p1G", 7, 1.8, 100, {}, "jambes", epaisseur=1.8),
+        "patte_2G": seg("torse", "p2G", 7, 1.8, 120, {}, "jambes", epaisseur=1.8),
+        "patte_3G": seg("torse", "p3G", 7, 1.8, 140, {}, "jambes", epaisseur=1.8),
+        "patte_4G": seg("torse", "p4G", 7, 1.8, 160, {}, "jambes", epaisseur=1.8),
+        "patte_1D": seg("torse", "p1D", 7, 1.8, 80, {}, "jambes", epaisseur=1.8),
+        "patte_2D": seg("torse", "p2D", 7, 1.8, 60, {}, "jambes", epaisseur=1.8),
+        "patte_3D": seg("torse", "p3D", 7, 1.8, 40, {}, "jambes", epaisseur=1.8),
+        "patte_4D": seg("torse", "p4D", 7, 1.8, 20, {}, "jambes", epaisseur=1.8),
     },
     "ordre": ["patte_1D", "patte_2D", "patte_3D", "patte_4D", "torse", "patte_1G", "patte_2G", "patte_3G", "patte_4G", "tete"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"]},
@@ -184,13 +204,16 @@ S = {
     "name_key": "rig.serpentin.name",
     "racine": "torse",
     "hauteur_pieds": 2,
-    "lacet_actif": False,
+    "lacet_actif": True,
     "segments": {
-        "torse": seg(None, None, 10, 6, 0, {"cou": [10, -1, 0], "q1": [0, 0, 0]}, "torse"),
-        "tete": seg("torse", "cou", 6, 5, -10, {}, "tete"),
-        "c1": seg("torse", "q1", 8, 5, 150, {"q2": [8, 0, 0]}, "torse"),
-        "c2": seg("c1", "q2", 7, 4, -52, {"q3": [7, 0, 0]}, "torse"),
-        "c3": seg("c2", "q3", 6, 3, 52, {}, "torse"),
+        # Le corps vient vers la camera ; la queue ondule dans le plan HORIZONTAL (x, z) et non plus dans celui de
+        # l'ecran : `angle` 0 pose la direction dans ce plan, `profondeur` la fait tourner. Un serpent love se voit
+        # donc en plongee, comme le reste du monde, au lieu d'onduler verticalement comme un ressort.
+        "torse": seg(None, None, 10, 6, -90, {"cou": [10, 0, 1], "q1": [0, 0, 0]}, "torse", 90, epaisseur=6),
+        "tete": seg("torse", "cou", 6, 5, -90, {}, "tete", 70, epaisseur=5),
+        "c1": seg("torse", "q1", 8, 5, 0, {"q2": [8, 0, 0]}, "torse", -120, epaisseur=5),
+        "c2": seg("c1", "q2", 7, 4, 0, {"q3": [7, 0, 0]}, "torse", -60, epaisseur=4),
+        "c3": seg("c2", "q3", 6, 3, 0, {}, "torse", -120, epaisseur=3),
     },
     "ordre": ["c3", "c2", "c1", "torse", "tete"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"]},

@@ -183,6 +183,11 @@ Aucune ne figure dans la palette des matériaux ([[Palette de couleurs des maté
 > **Ce que ça ouvre** : les huit angles au lieu de trois, et une pose qui peut dire `[angle, profondeur]` — un bras qui part en arrière, que la 2D ne savait pas exprimer. `capture.tscn -- --pantins` dessine la planche des huit angles côte à côte : c'est le seul moyen de juger une profondeur, une capture de jeu ne montrant jamais qu'un angle.
 > **Ce qui reste** : les rigs animaux gardent `lacet_actif: false` (voir [[Ordre de travail]], ligne 26 septies).
 
+> [!success] Codé le 2026-09-09 — **toute la faune tourne, et un segment a une épaisseur** (boucle autonome, ordre de travail 26 septies et 26 octies)
+> **Les rigs animaux en espace du corps.** Le quadrupède, l'arachnide, le serpentin et le volant étaient des dessins de profil : leur axe long était l'axe `x` de l'écran. Leur axe long est désormais l'axe de **profondeur** — à lacet nul le museau vient vers la caméra, à 90 degrés on retrouve exactement le profil d'avant. Trois conséquences qui ne coûtent rien : une **vue de face** et une **vue de dos** gratuites pour toute la faune ; l'écart des pattes le long du corps devient un écart de profondeur, donc les pattes avant se dessinent devant les arrière **sans ordre écrit** ; et le serpent ondule dans le plan **horizontal**, vu en plongée comme le reste du monde.
+> **Un segment est un cylindre, pas un ruban.** La profondeur avait laissé un chiffre magique : `largeur × largeur_min_profil` pour un segment vu de tranche. Un corps a deux mesures de travers — `largeur` d'une épaule à l'autre, `epaisseur` de la poitrine au dos — et la silhouette à l'écran est la projection de cette ellipse : `sqrt((largeur·u)² + (epaisseur·v)²)`. Un torse de profil fait son épaisseur. `largeur_min_profil` n'est plus qu'un plancher absolu (0,12) pour qu'un segment vu de bout ne devienne jamais un trait ; `epaisseur` omise vaut `largeur × styles.sprites.epaisseur_defaut`.
+> **L'outil** : `capture.tscn -- --pantins [rig]` dessine les huit angles de n'importe quel rig côte à côte.
+
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Direction artistique]], [[Décisions d'architecture]]
 - **Alimente** : [[Schéma créature]], [[Apparence — données et équipement]], [[Équipement — 14 slots]], [[Armure par zone et constructions]], [[Monstres rares]]

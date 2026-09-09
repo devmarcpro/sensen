@@ -260,50 +260,26 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     tournent pas encore. Les réécrire en espace du corps leur donnerait, comme à l'humanoïde, une vue de face et une
     vue de dos gratuites. **C'est la ligne 26 septies.**
 
-26 septies. **LES RIGS ANIMAUX EN ESPACE DU CORPS.** Le quadrupède, l'arachnide, le serpentin et le volant sont
-    écrits comme des dessins de profil : leur axe long est l'axe `x` de l'écran, et leur séparation gauche/droite
-    était un décalage vertical. Ce décalage est déjà passé en **profondeur vraie** (c'est lui qui trie les pattes
-    proches devant les lointaines), mais leur axe long, lui, est toujours un axe d'écran : leur faire subir le lacet
-    les réduirait à un moignon. Les réécrire, c'est poser leur corps le long de l'axe `z` et laisser le lacet faire
-    le reste — une vue de face et une vue de dos gratuites pour toute la faune.
+~~26 septies. **LES RIGS ANIMAUX EN ESPACE DU CORPS**~~ — **FAIT le 2026-09-09** (boucle autonome). Le quadrupède,
+    l'arachnide, le serpentin et le volant étaient écrits comme des **dessins de profil** : leur axe long était l'axe
+    `x` de l'écran, et leur séparation gauche/droite un décalage vertical. Réécrits, leur axe long est l'axe de
+    **profondeur** : à lacet nul le museau vient vers la caméra — une vue de face qu'on n'avait pas —, à 90 degrés le
+    corps se remet à l'horizontale et l'on retrouve exactement le profil d'avant. Leur écart gauche/droite redevient
+    ce qu'il est, un écart le long de l'axe des épaules, que le lacet transforme en profondeur tout seul ; et l'écart
+    des pattes **le long** du corps devient un écart de profondeur, si bien que les pattes avant se dessinent devant
+    les pattes arrière sans qu'on l'écrive. Le serpent ondule désormais dans le plan **horizontal**, vu en plongée
+    comme le reste du monde, au lieu d'onduler verticalement comme un ressort. L'amorphe garde `lacet_actif: false` :
+    une masse n'a pas d'orientation, et la faire tourner ne ferait que l'amincir.
+    **Ce qui est à ton œil** : un quadrupède vu de face est un tronc court avec quatre pattes — c'est juste, et c'est
+    plus pauvre qu'un profil. La planche des huit angles est dans [[À juger — parcours de jeu]] ; si la vue de face
+    ne te plaît pas, `lacet_actif: false` sur un rig le rend immobile, et c'est **un booléen par rig**, rien d'autre.
 
-26 quinquies. **LE CORPS BOUGE** — glissement, marche, une pose par état, et les mains tournées *(designer 2026-09-08 :
-    « j'aimerais que les déplacements soient plus fluides, qu'il y ait des animations de déplacement, que tu fasses
-    des poses dédiées pour chaque état (repos, marche, dormir, mort etc.) et — très technique — que les mains soient
-    tournées de façon à ce que l'arme équipée soit à 45 degrés vers l'extérieur »).*
-    **Ce qui existe** : le paperdoll **glisse** déjà d'une tuile à l'autre (`position.lerp(cible, k)`), le système de
-    **poses** existe en entier — `poses.json` déclare repos, marche, attaque, sort, garde, sommeil, mort, et
-    `_pose_action` choisit déjà la bonne selon l'état (mort, dort, garde, attaque) —, et l'animation par **pivots**
-    fonctionne (une frappe fait tourner le bras, `frapper()`).
-    **Ce qui manque, et c'est du contenu autant que du code** : (a) les poses **ne sont pas écrites** — un être neuf
-    a `poses = {}` et rien ne s'applique ; « marche » n'est même pas branchée dans `_pose_action` ; (b) le glissement
-    est un `lerp` par image, donc une **décélération asymptotique** — il n'arrive jamais tout à fait, ce qui donne
-    exactement l'impression de flottement que le designer décrit ; une marche va à **vitesse constante** et arrive
-    quand l'action finit ; (c) rien ne fait **alterner les jambes** ; (d) la main tient l'arme dans l'axe du bras,
-    là où elle devrait la présenter à **45° vers l'extérieur**.
-    **Le point le plus rentable est le (b)** : passer d'un lerp à une interpolation qui arrive à l'échéance de
-    l'action rend le déplacement lisible sans dessiner une seule pose.
-
-~~26 sexies. **LES TEXTURES DES TUILES SE FONDENT ENTRE ELLES**~~ — **FAIT le 2026-09-08 au soir** *(designer :
-    « rajouter de quoi fondre les textures des tuiles entre elles », puis « une tuile a une texture que je fais et
-    une teinte celle du matériau »).*
-    **Ce que j'avais écrit le matin et qui était faux** : que la couleur par sommet était libre pour une matière
-    peinte, puisque le shader la remplaçait par la texture. Le designer dit le contraire — une tuile porte SA texture
-    ET la teinte de sa matière. La texture est donc désormais **modulée** par la teinte (`teinte_matiere_peinte`,
-    et `teinte_matiere_normalisee` ramène la teinte à sa plus haute composante pour qu'elle colore sans assombrir).
-    **En prime, c'est ce qui rend le fondu intéressant** : une seule texture « terre » sert la terre, l'argile et le
-    sable, chacune avec sa couleur.
-    **Le fondu** : après le sol d'un morceau, on repose sur chaque tuile de bordure **un triangle par voisin de
-    matière différente**, du centre du losange vers l'arête partagée, avec la matière DU VOISIN et une opacité qui
-    va de zéro au centre à `fondu_tuiles_force` sur l'arête. Le voisin déborde en fondu ; la limite cesse d'être un
-    trait qui suit la grille.
-    **Ce que ça coûte** : un triangle par arête qui change de matière — aucun sur une grande plage uniforme, quatre
-    au plus sur une tuile isolée —, et **une seule commande de dessin** pour tout le morceau, parce que le style
-    d'une matière voyage dans les UV et non dans un uniforme. La fusion des morceaux de terrain n'est pas touchée :
-    c'est une passe qui s'ajoute, pas une passe qui remplace. *J'avais annoncé le contraire le matin (« la fusion
-    tombe sur les bordures ») : c'était vrai de la route que j'avais imaginée, pas de celle qu'on a prise.*
-    **Ce qui reste** : les faces des blocs et des murs ne se fondent pas — seul le SOL le fait. Une frange sur une
-    paroi demande de connaître le voisin par la face, ce qui n'est pas la même géométrie. À rouvrir si ça se voit.
+26 octies. **UN SEGMENT A UNE ÉPAISSEUR** — *fait le 2026-09-09, dans la foulée.* La profondeur avait laissé un
+    chiffre magique : un segment vu de tranche gardait `largeur × 0,35`, une borne posée pour qu'un bras ne devienne
+    pas un trait. C'était un manque de modèle — un corps a **deux** mesures de travers, d'une épaule à l'autre et de
+    la poitrine au dos. Un segment est désormais un **cylindre à section elliptique** (`largeur`, `epaisseur`) et sa
+    silhouette est la projection de cette ellipse : un torse vu de profil fait son épaisseur, pas une fraction
+    arbitraire de sa largeur. La borne ne sert plus que de plancher absolu (0,12).
 
 ## Palier 6 — les 236 contenus meurent, la grammaire reste
 

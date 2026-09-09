@@ -2,56 +2,60 @@
  "name_key": "rig.quadrupede.name",
  "racine": "torse",
  "hauteur_pieds": 10,
- "lacet_actif": false,
+ "lacet_actif": true,
  "segments": {
   "torse": {
    "parent": null,
    "ancrage": null,
    "longueur": 20,
    "largeur": 8,
-   "angle": 0,
+   "angle": -90,
    "ancrages": {
     "cou": [
      20,
-     -3,
-     0
+     0,
+     3
     ],
     "epaule_AV_G": [
      17,
-     0,
-     -4
+     3,
+     0
     ],
     "epaule_AV_D": [
      17,
-     0,
-     4
+     -3,
+     0
     ],
     "epaule_AR_G": [
      3,
-     0,
-     -4
+     3,
+     0
     ],
     "epaule_AR_D": [
      3,
-     0,
-     4
+     -3,
+     0
     ],
     "dos": [
      10,
-     -4,
-     0
+     0,
+     4
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": 90,
+   "epaisseur": 9
   },
   "tete": {
    "parent": "torse",
    "ancrage": "cou",
    "longueur": 7,
    "largeur": 6,
-   "angle": -20,
+   "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "profondeur": 70,
+   "epaisseur": 6
   },
   "patte_AV_G": {
    "parent": "torse",
@@ -66,7 +70,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 2.5
   },
   "patte_AV_D": {
    "parent": "torse",
@@ -81,7 +86,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 2.5
   },
   "patte_AR_G": {
    "parent": "torse",
@@ -96,7 +102,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 2.5
   },
   "patte_AR_D": {
    "parent": "torse",
@@ -111,7 +118,8 @@
      0
     ]
    },
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 2.5
   },
   "pied_AV_G": {
    "parent": "patte_AV_G",
@@ -120,7 +128,9 @@
    "largeur": 2.5,
    "angle": 90,
    "ancrages": {},
-   "zone": "pieds"
+   "zone": "pieds",
+   "profondeur": 35,
+   "epaisseur": 2.5
   },
   "pied_AV_D": {
    "parent": "patte_AV_D",
@@ -129,7 +139,9 @@
    "largeur": 2.5,
    "angle": 90,
    "ancrages": {},
-   "zone": "pieds"
+   "zone": "pieds",
+   "profondeur": 35,
+   "epaisseur": 2.5
   },
   "pied_AR_G": {
    "parent": "patte_AR_G",
@@ -138,7 +150,9 @@
    "largeur": 2.5,
    "angle": 90,
    "ancrages": {},
-   "zone": "pieds"
+   "zone": "pieds",
+   "profondeur": 35,
+   "epaisseur": 2.5
   },
   "pied_AR_D": {
    "parent": "patte_AR_D",
@@ -147,7 +161,9 @@
    "largeur": 2.5,
    "angle": 90,
    "ancrages": {},
-   "zone": "pieds"
+   "zone": "pieds",
+   "profondeur": 35,
+   "epaisseur": 2.5
   }
  },
  "ordre": [

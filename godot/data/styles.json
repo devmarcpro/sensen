@@ -301,14 +301,15 @@
         ]
       }
     },
-    "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code. `arme_angle_deg` (designer 2026-09-08) : la main ne présente plus l'arme dans l'axe du bras mais inclinée de tant de degrés VERS L'EXTÉRIEUR — la droite vers la droite, la gauche vers la gauche.`picto_tenu_unites` doublee le 2026-09-08 a la demande du designer (« augmente la taille des armes portees », x2 puis x1,5 a la relecture) : de 14 a 21 unites de rig. Le corps venait d'etre recale sur les proportions du rig, ce qui a rendu l'arme petite a cote. LA PROFONDEUR DU PANTIN (designer 2026-09-08) : `profondeur_ecran` est ce qu'une unité de profondeur VERS LE FOND fait à l'écran — l'isométrie l'écrase de moitié et la fait monter ; `largeur_min_profil` est ce qu'un segment vu de tranche garde de sa largeur, pour qu'un bras s'amincisse sans devenir un trait.",
+    "_doc": "Les sprites d'objets du designer (Direction artistique, 2026-09-05) : dossier res:// ou le jeu cherche <id sans craft_/proto_>.png, composants/<id>.png, matieres/<forme>.png ; absent = pictogramme par code. `arme_angle_deg` (designer 2026-09-08) : la main ne présente plus l'arme dans l'axe du bras mais inclinée de tant de degrés VERS L'EXTÉRIEUR — la droite vers la droite, la gauche vers la gauche.`picto_tenu_unites` doublee le 2026-09-08 a la demande du designer (« augmente la taille des armes portees », x2 puis x1,5 a la relecture) : de 14 a 21 unites de rig. Le corps venait d'etre recale sur les proportions du rig, ce qui a rendu l'arme petite a cote. LA PROFONDEUR DU PANTIN (designer 2026-09-08) : `profondeur_ecran` est ce qu'une unité de profondeur VERS LE FOND fait à l'écran — l'isométrie l'écrase de moitié et la fait monter ; `largeur_min_profil` est ce qu'un segment vu de tranche garde de sa largeur, pour qu'un bras s'amincisse sans devenir un trait. UN SEGMENT EST UN CYLINDRE (2026-09-09) : `epaisseur_defaut` est l'épaisseur d'un segment qui ne la déclare pas, en part de sa largeur — un corps a DEUX mesures de travers, d'une épaule à l'autre et de la poitrine au dos, et c'est la projection de cette ellipse qui donne sa silhouette à chaque angle. `largeur_min_profil` n'est plus qu'un plancher absolu (un segment vu de bout ne devient jamais un trait), pas une règle de profil.",
     "dossier": "res://assets/objets",
     "arme_angle_deg": 45.0,
     "profondeur_ecran": [
       0.0,
       -0.5
     ],
-    "largeur_min_profil": 0.35
+    "largeur_min_profil": 0.12,
+    "epaisseur_defaut": 0.7
   },
   "coups": {
     "_doc": "Le retour d'un coup recu (designer 2026-09-05, 13 h : « quand quelqu'un recoit des degats, un tremblement du personnage et un leger clignotement rouge ») : secousse_px = amplitude du tremblement en pixels, secousse_s = sa duree, rouge = la teinte du clignotement, rouge_s = sa duree.",

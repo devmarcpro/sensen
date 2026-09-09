@@ -66,6 +66,10 @@
       "type": "number",
       "minimum": -180,
       "maximum": 180
+     },
+     "epaisseur": {
+      "type": "number",
+      "minimum": 0
      }
     }
    }

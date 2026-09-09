@@ -27,7 +27,8 @@
      -1
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "epaisseur": 6
   },
   "torse": {
    "parent": "bassin",
@@ -57,7 +58,8 @@
      2
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "epaisseur": 6
   },
   "tete": {
    "parent": "torse",
@@ -66,7 +68,8 @@
    "largeur": 8,
    "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "epaisseur": 8
   },
   "bras_haut_G": {
    "parent": "torse",

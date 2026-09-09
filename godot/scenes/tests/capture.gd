@@ -747,6 +747,12 @@ func _ready() -> void:
 	# ne montre jamais qu'un angle, et l'orientation d'un être en jeu ne se commande pas.
 	if "--pantins" in args and scene != null and scene.sim != null:
 		var jp: Dictionary = scene.joueur()
+		# --pantins [rig] : par defaut la silhouette du joueur, sinon celle qu'on nomme (quadrupede, arachnide,
+		# serpentin, volant, amorphe) — la planche sert a juger TOUS les rigs, pas seulement l'humanoide.
+		var rig_p := str(jp.corps.get("silhouette", "humanoide"))
+		for i_r in args.size():
+			if args[i_r] == "--pantins" and i_r + 1 < args.size() and not str(args[i_r + 1]).begins_with("--"):
+				rig_p = str(args[i_r + 1])
 		var banc := Node2D.new()
 		banc.z_index = 4095
 		add_child(banc)
@@ -765,7 +771,7 @@ func _ready() -> void:
 			var copie: Dictionary = jp.duplicate(true)
 			copie["orientation"] = dirs[i_p]
 			var pd := Paperdoll.new()
-			pd.configurer(copie, GameData.entree("rigs", str(jp.corps.get("silhouette", "humanoide"))),
+			pd.configurer(copie, GameData.entree("rigs", rig_p),
 				scene.sim.items, scene.sim.fonctionnalites, GameData.config("palette_materiaux"))
 			pd.position = Vector2(90.0 + float(i_p) * 145.0, 460.0)
 			pd.scale = Vector2(ech, ech)
@@ -774,7 +780,7 @@ func _ready() -> void:
 			etiq.text = "%s  (%d°)" % [str(noms[i_p]), roundi(rad_to_deg(atan2(float(dirs[i_p].x - dirs[i_p].y), float(dirs[i_p].x + dirs[i_p].y))))]
 			etiq.position = Vector2(60.0 + float(i_p) * 145.0, 500.0)
 			couche.add_child(etiq)
-		print("pantins : huit orientations du rig %s" % str(jp.corps.get("silhouette", "humanoide")))
+		print("pantins : huit orientations du rig %s" % rig_p)
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 

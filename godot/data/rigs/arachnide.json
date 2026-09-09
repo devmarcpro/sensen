@@ -2,143 +2,155 @@
  "name_key": "rig.arachnide.name",
  "racine": "torse",
  "hauteur_pieds": 6,
- "lacet_actif": false,
+ "lacet_actif": true,
  "segments": {
   "torse": {
    "parent": null,
    "ancrage": null,
    "longueur": 12,
    "largeur": 9,
-   "angle": 0,
+   "angle": -90,
    "ancrages": {
     "cou": [
      12,
-     -1,
-     0
+     0,
+     1
     ],
     "p1G": [
      3,
-     0,
-     -6
+     4,
+     0
     ],
     "p2G": [
      6,
-     0,
-     -6
+     4,
+     0
     ],
     "p3G": [
      9,
-     0,
-     -6
+     4,
+     0
     ],
     "p4G": [
      11,
-     0,
-     -6
+     4,
+     0
     ],
     "p1D": [
      3,
-     0,
-     6
+     -4,
+     0
     ],
     "p2D": [
      6,
-     0,
-     6
+     -4,
+     0
     ],
     "p3D": [
      9,
-     0,
-     6
+     -4,
+     0
     ],
     "p4D": [
      11,
-     0,
-     6
+     -4,
+     0
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": 90,
+   "epaisseur": 7
   },
   "tete": {
    "parent": "torse",
    "ancrage": "cou",
    "longueur": 5,
    "largeur": 4,
-   "angle": -15,
+   "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "profondeur": 70,
+   "epaisseur": 4
   },
   "patte_1G": {
    "parent": "torse",
    "ancrage": "p1G",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": 60,
+   "angle": 100,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_2G": {
    "parent": "torse",
    "ancrage": "p2G",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": 82,
+   "angle": 120,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_3G": {
    "parent": "torse",
    "ancrage": "p3G",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": 104,
+   "angle": 140,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_4G": {
    "parent": "torse",
    "ancrage": "p4G",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": 126,
+   "angle": 160,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_1D": {
    "parent": "torse",
    "ancrage": "p1D",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": -60,
+   "angle": 80,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_2D": {
    "parent": "torse",
    "ancrage": "p2D",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": -82,
+   "angle": 60,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_3D": {
    "parent": "torse",
    "ancrage": "p3D",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": -104,
+   "angle": 40,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   },
   "patte_4D": {
    "parent": "torse",
    "ancrage": "p4D",
    "longueur": 7,
    "largeur": 1.8,
-   "angle": -126,
+   "angle": 20,
    "ancrages": {},
-   "zone": "jambes"
+   "zone": "jambes",
+   "epaisseur": 1.8
   }
  },
  "ordre": [

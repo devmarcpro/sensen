@@ -2,59 +2,65 @@
  "name_key": "rig.volant.name",
  "racine": "torse",
  "hauteur_pieds": 18,
- "lacet_actif": false,
+ "lacet_actif": true,
  "segments": {
   "torse": {
    "parent": null,
    "ancrage": null,
    "longueur": 10,
    "largeur": 6,
-   "angle": 0,
+   "angle": -90,
    "ancrages": {
     "cou": [
      10,
-     -1,
-     0
+     0,
+     1
     ],
     "aile_G": [
      5,
-     0,
-     -4
+     3,
+     0
     ],
     "aile_D": [
      5,
-     0,
-     4
+     -3,
+     0
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": 90,
+   "epaisseur": 6
   },
   "tete": {
    "parent": "torse",
    "ancrage": "cou",
    "longueur": 4,
    "largeur": 4,
-   "angle": -10,
+   "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "profondeur": 70,
+   "epaisseur": 4
   },
   "aile_G": {
    "parent": "torse",
    "ancrage": "aile_G",
    "longueur": 14,
    "largeur": 5,
-   "angle": 150,
+   "angle": 200,
    "ancrages": {},
-   "zone": "bras"
+   "zone": "bras",
+   "epaisseur": 1.5
   },
   "aile_D": {
    "parent": "torse",
    "ancrage": "aile_D",
    "longueur": 14,
    "largeur": 5,
-   "angle": -150,
+   "angle": -20,
    "ancrages": {},
-   "zone": "bras"
+   "zone": "bras",
+   "epaisseur": 1.5
   }
  },
  "ordre": [

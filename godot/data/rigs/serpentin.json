@@ -2,19 +2,19 @@
  "name_key": "rig.serpentin.name",
  "racine": "torse",
  "hauteur_pieds": 2,
- "lacet_actif": false,
+ "lacet_actif": true,
  "segments": {
   "torse": {
    "parent": null,
    "ancrage": null,
    "longueur": 10,
    "largeur": 6,
-   "angle": 0,
+   "angle": -90,
    "ancrages": {
     "cou": [
      10,
-     -1,
-     0
+     0,
+     1
     ],
     "q1": [
      0,
@@ -22,23 +22,27 @@
      0
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": 90,
+   "epaisseur": 6
   },
   "tete": {
    "parent": "torse",
    "ancrage": "cou",
    "longueur": 6,
    "largeur": 5,
-   "angle": -10,
+   "angle": -90,
    "ancrages": {},
-   "zone": "tete"
+   "zone": "tete",
+   "profondeur": 70,
+   "epaisseur": 5
   },
   "c1": {
    "parent": "torse",
    "ancrage": "q1",
    "longueur": 8,
    "largeur": 5,
-   "angle": 150,
+   "angle": 0,
    "ancrages": {
     "q2": [
      8,
@@ -46,14 +50,16 @@
      0
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": -120,
+   "epaisseur": 5
   },
   "c2": {
    "parent": "c1",
    "ancrage": "q2",
    "longueur": 7,
    "largeur": 4,
-   "angle": -52,
+   "angle": 0,
    "ancrages": {
     "q3": [
      7,
@@ -61,16 +67,20 @@
      0
     ]
    },
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": -60,
+   "epaisseur": 4
   },
   "c3": {
    "parent": "c2",
    "ancrage": "q3",
    "longueur": 6,
    "largeur": 3,
-   "angle": 52,
+   "angle": 0,
    "ancrages": {},
-   "zone": "torse"
+   "zone": "torse",
+   "profondeur": -120,
+   "epaisseur": 3
   }
  },
  "ordre": [

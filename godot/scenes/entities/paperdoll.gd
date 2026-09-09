@@ -34,7 +34,8 @@ var _pose_marche: Dictionary = {}     # l'oscillation du pas (designer 2026-09-0
 var avancement := -1.0                # 0 → 1 pendant un pas, −1 à l'arrêt ; le client la règle à chaque image
 var _lacet := 0.0                     # le lacet du corps, en radians (la profondeur, designer 2026-09-08)
 var _prof_ecran := Vector2(0.0, -0.5) # ce qu'une unité de profondeur (vers le FOND) fait à l'écran
-var _largeur_min := 0.35              # ce qu'un segment vu de tranche garde de sa largeur : il s'amincit, il ne disparaît pas
+var _largeur_min := 0.12              # le plancher absolu : un segment ne devient jamais un trait, même vu de bout
+var _epaisseur_defaut := 0.7          # l'épaisseur d'un segment qui ne la déclare pas, en part de sa largeur
 var _monde_dessine: Dictionary = {}   # dernier placement des segments — l'écran de pose y clique (point 68)
 var _echelle_dessin := 1.0
 var _peint: Dictionary = {}
@@ -132,7 +133,8 @@ func _dessiner_etre() -> void:
 		_lacet = atan2(float(o_e.x - o_e.y), float(o_e.x + o_e.y))
 	var st_pd: Dictionary = GameData.config("styles").get("sprites", {})
 	_prof_ecran = Vector2(float(st_pd.get("profondeur_ecran", [0.0, -0.5])[0]), float(st_pd.get("profondeur_ecran", [0.0, -0.5])[1]))
-	_largeur_min = float(st_pd.get("largeur_min_profil", 0.35))
+	_largeur_min = float(st_pd.get("largeur_min_profil", 0.12))
+	_epaisseur_defaut = float(st_pd.get("epaisseur_defaut", 0.7))
 	_ap = e.get("apparence", {})
 	_pose_courante = _pose_action()
 	_vue_tete = str(_orientation_proche().get("vue_tete", "face"))
@@ -392,15 +394,21 @@ func _placer(nom: String, origine3: Vector3, herite: Vector2) -> Dictionary:
 	perp3 = _tourner(perp3, c, sn)
 	var norm3 := dir3.cross(perp3)
 	var lg := float(s.largeur)
+	var ep := float(s.get("epaisseur", lg * _epaisseur_defaut))
 	if not nom.begins_with("tete"):
 		lg *= _carrure
-	# À l'écran : la direction se raccourcit d'elle-même quand le segment plonge vers nous (c'est la profondeur qui
-	# se voit), mais la LARGEUR reste face à la caméra — un membre vu de tranche s'amincit, il ne devient pas un
-	# trait. On garde donc l'axe de largeur perpendiculaire à l'écran et on ne foreshortene que sa mesure.
+		ep *= _carrure
+	# À l'écran, la direction se raccourcit d'elle-même quand le segment plonge vers nous : c'est la profondeur qui
+	# se voit. La mesure DE TRAVERS, elle, vient de ce qu'un segment est un CYLINDRE et non un ruban : `largeur`
+	# d'un côté à l'autre, `epaisseur` de l'avant à l'arrière. Sa silhouette est la projection de cette ellipse sur
+	# la perpendiculaire de l'écran — un torse de profil fait son épaisseur, pas une fraction arbitraire de sa
+	# largeur. L'axe de largeur, lui, reste face à la caméra : sinon un bras vu de tranche deviendrait un trait.
 	var d2 := _projeter(dir3)
 	var u := d2.normalized() if d2.length() > 0.0001 else Vector2.RIGHT
 	var perp2 := Vector2(-u.y, u.x)
-	var lg_vue := lg * clampf(absf(_projeter(perp3).dot(perp2)), _largeur_min, 1.0)
+	var e_lg := lg * _projeter(perp3).dot(perp2)
+	var e_ep := ep * _projeter(norm3).dot(perp2)
+	var lg_vue := maxf(sqrt(e_lg * e_lg + e_ep * e_ep), lg * _largeur_min)
 	return {"origine": _projeter(origine3), "direction": d2, "perp": perp2,
 		"longueur": float(s.longueur), "largeur": lg_vue,
 		"origine3": origine3, "dir3": dir3, "perp3": perp3, "norm3": norm3,
