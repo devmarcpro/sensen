@@ -780,8 +780,9 @@ func _ready() -> void:
 			etiq.text = "%s  (%d°)" % [str(noms[i_p]), roundi(rad_to_deg(atan2(float(dirs[i_p].x - dirs[i_p].y), float(dirs[i_p].x + dirs[i_p].y))))]
 			etiq.position = Vector2(60.0 + float(i_p) * 145.0, 500.0)
 			couche.add_child(etiq)
-		# On dessine les HUIT orientations de grille, mais le rig n'en déclare qu'un certain nombre (quatre depuis le
-		# 2026-09-09) : deux colonnes identiques disent qu'une direction de marche se cale sur la même vue qu'une
+		# On dessine les HUIT orientations de grille, mais le rig n'en déclare qu'un certain nombre : le banc les
+		# cale dessus et l'affiche. Depuis le 2026-09-09 il n'en déclare qu'UNE — le personnage est toujours de face,
+		# et les huit directions de marche rendent donc la même vue. C'est voulu.
 		# autre. C'est exactement ce qu'il faut voir pour juger un jeu de sprites dessinés à la main.
 		print("pantins : les huit directions de marche du rig %s, calées sur ses %d orientations déclarées (%s)" % [
 			rig_p, int(GameData.entree("rigs", rig_p).get("orientations", {}).size()),

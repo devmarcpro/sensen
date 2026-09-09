@@ -179,14 +179,6 @@
   "S": {
    "lacet": 0,
    "vue_tete": "face"
-  },
-  "E": {
-   "lacet": 90,
-   "vue_tete": "profil"
-  },
-  "W": {
-   "lacet": -90,
-   "vue_tete": "profil"
   }
  }
 }

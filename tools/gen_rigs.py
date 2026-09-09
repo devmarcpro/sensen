@@ -42,21 +42,18 @@ import io, json, os
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "godot", "data", "rigs"))
 
-# TROIS ORIENTATIONS (designer 2026-09-09 : « on va faire 3 orientations pour les personnages, droite gauche et de
-# face ») : le lacet du corps en degrés (0 = face à la caméra, +90 = vers la droite de l'écran) et la vue de la tête,
-# qui choisit les planches du visage. Pas de vue de dos — un personnage qui s'éloigne montre un profil.
+# UNE SEULE ORIENTATION (designer 2026-09-09 : « retire toutes les orientations du personnage, je veux qu'il soit
+# uniquement de face »). Le personnage est toujours vu de face, quel que soit son déplacement.
 #
-# C'est CETTE TABLE qui décide combien de vues existent : le paperdoll cale le lacet continu qu'il tire de la grille
-# sur l'orientation déclarée dont le REGARD, à l'écran, ressemble le plus à son mouvement. Y rajouter le dos (N 180)
-# ou les quatre trois-quarts (SE 45, NE 135, NW −135, SW −45) suffirait à les rendre, sans toucher une ligne de code.
+# C'est CETTE TABLE qui décide combien de vues existent, et rien d'autre : le paperdoll cale le lacet continu qu'il
+# tire de la grille sur l'orientation déclarée dont le REGARD, à l'écran, ressemble le plus à son mouvement. Avec une
+# seule entrée, ce calage rend toujours la même — le lacet vaut 0, le corps ne tourne jamais, la tête garde sa vue de
+# face. Aucune ligne de code n'a eu à changer pour passer de trois vues à une.
 #
-# L'ORDRE COMPTE, et c'est le seul endroit où il compte : un pas droit vers le haut de l'écran (s'éloigner) est à
-# égalité parfaite entre les deux profils — aucun des deux ne regarde de ce côté. À égalité, c'est la PREMIÈRE
-# déclarée qui gagne. Mettre `W` avant `E` ferait donc regarder à gauche plutôt qu'à droite en s'éloignant.
+# Y remettre les profils (E 90, W −90), le dos (N 180) ou les quatre trois-quarts (SE 45, NE 135, NW −135, SW −45)
+# est une édition de cette table, ici, et rien de plus.
 ORIENTATIONS = {
-    "S": {"lacet": 0,  "vue_tete": "face"},
-    "E": {"lacet": 90, "vue_tete": "profil"},
-    "W": {"lacet": -90, "vue_tete": "profil"},
+    "S": {"lacet": 0, "vue_tete": "face"},
 }
 
 
