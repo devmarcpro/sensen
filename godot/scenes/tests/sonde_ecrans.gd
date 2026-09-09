@@ -36,6 +36,7 @@ func _ready() -> void:
 	await _verifier_objets(scene, ec)
 	await _verifier_coffre(scene, ec)
 	await _verifier_depouille(scene, ec)
+	await _verifier_menu_contexte(scene, ec)
 	await _verifier_pause(scene, ec)
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
@@ -319,6 +320,64 @@ func _verifier_objets(scene: Node, ec: Node) -> void:
 	else:
 		print("  objets : l'arme du sac s'équipe AU CLIC, par la ligne de son option (%d options, %d lignes)" % [options, lignes_option.size()])
 	ec.fermer()
+
+
+## LA PETITE FENÊTRE DU CLIC DROIT (designer 2026-09-09 : « je veux que le menu qui s'affiche quand on fait clique
+## droit n'importe où soit une petite fenêtre qui s'affiche là où on a cliqué avec les options, plusieurs pages si
+## nécessaire »). On parcourt ce que la main parcourt : le clic droit, la fenêtre au point cliqué, la lettre qui
+## joue une ligne, Échap qui ferme. Et deux choses qu'un écran plein cadre n'avait jamais à prouver — elle **tient
+## dans l'écran** même ouverte au coin, et elle **pagine** quand une tuile offre plus d'options qu'une page.
+func _verifier_menu_contexte(scene: Node, _ec: Node) -> void:
+	var sim = scene.sim
+	var j: Dictionary = scene.joueur()
+	var menu = scene.menu_contexte
+	if sim == null or j.is_empty() or menu == null:
+		fautes.append("  menu : pas de joueur ou pas de fenêtre")
+		return
+	var t: Vector2i = sim._tuile_libre_autour(j.pos)
+	if t.x < 0:
+		fautes.append("  menu : aucune tuile libre")
+		return
+	sim.grille.poser_meuble(sim.grille.idx(t), "coffre")
+	var ou := Vector2(240.0, 180.0)
+	scene._contexte(t, ou)
+	await get_tree().process_frame
+	if not menu.visible or menu.options.is_empty():
+		fautes.append("  menu : le clic droit sur un coffre n'ouvre aucune fenêtre")
+		sim.grille.vider_meubles(sim.grille.idx(t))
+		return
+	if menu.position.distance_to(ou) > 2.0:
+		fautes.append("  menu : la fenêtre ne s'ouvre pas au point cliqué (%s pour %s)" % [str(menu.position), str(ou)])
+	# ELLE TIENT DANS L'ÉCRAN, même ouverte au coin : c'est ce qu'un panneau plein cadre n'avait jamais à prouver.
+	var ecran: Vector2 = menu.get_viewport_rect().size
+	scene._contexte(t, ecran - Vector2(4.0, 4.0))
+	await get_tree().process_frame
+	if menu.position.x + menu.size.x > ecran.x + 1.0 or menu.position.y + menu.size.y > ecran.y + 1.0:
+		fautes.append("  menu : ouverte au coin, la fenêtre sort de l'écran (%s + %s > %s)" % [str(menu.position), str(menu.size), str(ecran)])
+	# ELLE PAGINE : on lui donne plus d'options qu'une page, la dernière ligne doit être « z) ».
+	var par_page: int = menu._lignes_par_page()
+	var beaucoup: Array = []
+	for k in par_page + 3:
+		beaucoup.append({"id": "deplacer", "vers": t})
+	menu.ouvrir(beaucoup, ou, "essai")
+	await get_tree().process_frame
+	var derniere: String = str(menu._boutons[menu._boutons.size() - 1].text) if menu._boutons.size() > 0 else ""
+	if menu._boutons.size() != par_page + 1 or not derniere.begins_with("z)"):
+		fautes.append("  menu : %d options sur %d par page ne donnent pas de page suivante (%d lignes, « %s »)" % [beaucoup.size(), par_page, menu._boutons.size(), derniere])
+	else:
+		menu._prendre(-1)   # z) : la page suivante montre les trois restantes, plus sa propre ligne de page
+		if menu._boutons.size() != 4:
+			fautes.append("  menu : la seconde page montre %d lignes au lieu de 3 + la ligne de page" % menu._boutons.size())
+	# UNE LETTRE JOUE SA LIGNE, et la fenêtre se referme derrière.
+	scene._contexte(t, ou)
+	await get_tree().process_frame
+	var n_opts: int = menu.options.size()
+	menu._prendre(0)
+	if menu.visible:
+		fautes.append("  menu : prendre une option ne referme pas la fenêtre")
+	else:
+		print("  menu : la fenêtre s'ouvre au point cliqué, tient dans l'écran, pagine et se referme (%d options)" % n_opts)
+	sim.grille.vider_meubles(sim.grille.idx(t))
 
 
 ## FOUILLER UNE DÉPOUILLE (ordre de travail 28 ter). Le chemin entier, celui que la main parcourt : l'option existe

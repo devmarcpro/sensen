@@ -3,7 +3,7 @@
   "name_key": "pnj.humain_couturier.name",
   "skeleton_template": "humanoide",
   "race": "humain",
-  "classe": "Le Vent",
+  "classe": "placeholder",
   "fonction": "couturier",
   "role": "resident",
   "nom": {

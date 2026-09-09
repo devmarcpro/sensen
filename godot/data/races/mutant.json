@@ -1,0 +1,33 @@
+{
+  "name_key": "race.mutant.name",
+  "bonus_stats": {
+    "endurance": 2,
+    "volonte": 1,
+    "charisme": -3
+  },
+  "xp_mult": 1.15,
+  "base_potentials": {
+    "_defaut": 92,
+    "survie": 120,
+    "alchimie": 115,
+    "negoce": 60,
+    "eloquence": 50
+  },
+  "talent": null,
+  "lifespan": 55,
+  "tags": [
+    "humanoide",
+    "mutant"
+  ],
+  "apparence": {
+    "echelle": 1.02,
+    "carrure": "athletique",
+    "tete": "difforme",
+    "yeux": "multiples",
+    "bouche": "tordue",
+    "oreilles": "asymetriques",
+    "teinte_peau": "#7c8a5a",
+    "teinte_cheveux": "#4d4433",
+    "pilosite": "legere"
+  }
+}

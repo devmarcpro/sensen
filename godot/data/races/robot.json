@@ -1,0 +1,33 @@
+{
+  "name_key": "race.robot.name",
+  "bonus_stats": {
+    "endurance": 3,
+    "force": 1,
+    "charisme": -3
+  },
+  "xp_mult": 0.9,
+  "base_potentials": {
+    "_defaut": 80,
+    "ingenierie": 130,
+    "forge": 115,
+    "eloquence": 40,
+    "survie": 60
+  },
+  "talent": null,
+  "lifespan": 200,
+  "tags": [
+    "humanoide",
+    "construit"
+  ],
+  "apparence": {
+    "echelle": 1.04,
+    "carrure": "trapue",
+    "tete": "plaque",
+    "yeux": "optiques",
+    "bouche": "grille",
+    "oreilles": "capteurs",
+    "teinte_peau": "#8d9298",
+    "teinte_cheveux": "#3a3f45",
+    "pilosite": "aucune"
+  }
+}

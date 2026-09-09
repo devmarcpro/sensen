@@ -90,6 +90,10 @@ Race et classe **s'additionnent** : le plancher final est la moyenne des deux va
 > **Le déséquilibre est hérité, pas inventé** : cinq sous-classes pour le rôdeur et le mage, **une seule** pour l'érudit. C'est la répartition qui existait déjà dans les données ; la ranger l'a simplement rendue visible. Reste au designer de décider s'il faut la corriger ou l'assumer.
 > **`verif_classes.tscn` garde la structure** : elle échoue si une sous-classe ne relève d'aucune classe — elle serait injouable à la création — ou si une classe n'a aucune sous-classe, ce qui serait un nom vide dans le menu.
 
+
+> [!warning] Les dix-neuf classes ont été retirées le 2026-09-09 (designer : « retire tout les classes, laisse juste un place holder »)
+> Il reste **une** classe, `placeholder`, qui porte le seul kit de départ du jeu. Le catalogue complet — kits, compétences, potentiels, capacités, hotbars, classes mères — est conservé mot pour mot dans [[Talents et classes — le catalogue mis de côté]]. Les six **classes mères** restent et mènent toutes au placeholder ; les `classes_possibles` des fonctions de village aussi.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]], [[Les trois axes — race, classe, fonction]]
 - **Alimente** : [[Talents de classe]], [[Potentiel]], [[Début de partie]], [[Fonctions]]

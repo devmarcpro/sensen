@@ -8,8 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "le_creuset",
-    "la_paume"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 40,

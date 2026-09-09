@@ -284,6 +284,30 @@ classe.le_sceau.name,The Seal
 classe.le_souffle.name,The Breath
 classe.le_vent.name,The Wind
 race.insectoide.name,Insectoid
+race.homme_bete.name,Beastfolk
+race.robot.name,Robot
+race.nautique.name,Seafolk
+race.mutant.name,Mutant
+race.daemon.name,Daemon
+ui.apparence.val.museau,muzzle
+ui.apparence.val.plaque,plated
+ui.apparence.val.ecailleuse,scaled
+ui.apparence.val.difforme,misshapen
+ui.apparence.val.cornue,horned
+ui.apparence.val.poilues,furred
+ui.apparence.val.capteurs,sensors
+ui.apparence.val.nageoires,fins
+ui.apparence.val.asymetriques,asymmetric
+ui.apparence.val.fauves,feral
+ui.apparence.val.optiques,optics
+ui.apparence.val.globuleux,bulging
+ui.apparence.val.multiples,multiple
+ui.apparence.val.braise,ember
+ui.apparence.val.crocs,fangs
+ui.apparence.val.grille,grille
+ui.apparence.val.branchies,gills
+ui.apparence.val.tordue,twisted
+ui.apparence.val.ardente,burning
 ui.apparence.val.insectoide,insectoid
 ui.apparence.val.mandibules,mandibles
 ui.apparence.val.antennes,antennae
@@ -1330,6 +1354,9 @@ talent.breche.name,Breach
 talent.breche.desc,"Two paired portals, repositionable; max mana −30 %."
 talent.chaine_d_amorces.name,Chain of Primers
 talent.chaine_d_amorces.desc,"An explosion primes the bombs in its radius — yours too."
+classe.placeholder.name,Adventurer (placeholder)
+talent.placeholder.name,Talent (placeholder)
+talent.placeholder.desc,"A seat kept warm. The twenty-six former talents live in the note « Talents et classes — le catalogue mis de côté »."
 talent.carapace.name,Carapace
 talent.carapace.desc,"Chitin that shields everywhere: +3 armour on every zone, but −15 max stamina."
 talent.chair_de_mana.name,Mana Flesh

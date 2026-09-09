@@ -1,0 +1,33 @@
+{
+  "name_key": "race.daemon.name",
+  "bonus_stats": {
+    "volonte": 3,
+    "charisme": 1,
+    "endurance": -1
+  },
+  "xp_mult": 1.05,
+  "base_potentials": {
+    "_defaut": 88,
+    "eloquence": 125,
+    "occultisme": 130,
+    "survie": 70,
+    "artisanat": 65
+  },
+  "talent": null,
+  "lifespan": 300,
+  "tags": [
+    "humanoide",
+    "daemon"
+  ],
+  "apparence": {
+    "echelle": 1.08,
+    "carrure": "athletique",
+    "tete": "cornue",
+    "yeux": "braise",
+    "bouche": "ardente",
+    "oreilles": "pointues",
+    "teinte_peau": "#8c3a2e",
+    "teinte_cheveux": "#20161a",
+    "pilosite": "aucune"
+  }
+}

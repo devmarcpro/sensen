@@ -3,7 +3,7 @@
   "name_key": "pnj.humain_aventurier.name",
   "skeleton_template": "humanoide",
   "race": "humain",
-  "classe": "Le Souffle",
+  "classe": "placeholder",
   "fonction": "aventurier",
   "role": "sauvage",
   "nom": {

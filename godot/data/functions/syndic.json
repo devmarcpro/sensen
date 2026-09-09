@@ -5,8 +5,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_balance",
-    "le_souffle"
+    "placeholder"
   ],
   "leadership": false,
   "tags": [],

@@ -116,6 +116,7 @@ var zoom := 2.0   # le zoom de départ ; la valeur vraie vient de styles.vue.zoo
 
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
+var menu_contexte: MenuContexte   # le clic droit : une petite fenêtre au point cliqué (designer 2026-09-09)
 var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
 var chrono: Dictionary = {}        # étape de l'image → ms cumulées (la capture les lit : le lag en ville, designer 2026-09-05)
 var tour_hud := 0
@@ -468,6 +469,10 @@ func _ready() -> void:
 	hud_ecran = HudEcran.new()
 	hud_ecran.main = self
 	$CanvasLayer.add_child(hud_ecran)
+	menu_contexte = MenuContexte.new()   # la petite fenêtre du clic droit (designer 2026-09-09)
+	menu_contexte.main = self
+	menu_contexte.sur_choix = func(opt: Dictionary) -> void: _executer_option(opt)
+	$CanvasLayer.add_child(menu_contexte)
 	volet = VoletLateral.new()
 	volet.main = self
 	$CanvasLayer.add_child(volet)
@@ -1177,7 +1182,7 @@ func _process_corps(delta: float) -> void:
 	# reçues en événement — aucune garde posée dans les écrans ne pouvait les arrêter, et comme le designer a décidé
 	# « une option = une lettre », les quatre touches de marche SONT quatre lettres d'option. Taper « D » pour choisir
 	# une option faisait marcher le personnage sous le panneau.
-	if ecrans.est_ouvert():
+	if ecrans.est_ouvert() or (menu_contexte != null and menu_contexte.visible):
 		sim.horloge_monde.active = false
 		_maj_noeuds(delta)   # les nœuds finissent de se poser : on fige un monde au repos, pas un monde en plein pas
 		return
@@ -1561,9 +1566,14 @@ func _unhandled_input(ev: InputEvent) -> void:
 					_hotbar(posmod(hotbar_sel + (-1 if haut else 1), n))
 			return
 		elif ev.button_index == MOUSE_BUTTON_LEFT and not j.is_empty() and j.vivant:
+			if menu_contexte.visible:   # un clic ailleurs ferme le menu, et ne fait que ça
+				menu_contexte.fermer()
+				return
 			_clic(_tuile_sous(get_local_mouse_position()), lourde_armee)
 		elif ev.button_index == MOUSE_BUTTON_RIGHT and not j.is_empty() and j.vivant:
-			_contexte(_tuile_sous(get_local_mouse_position()))
+			# La fenêtre s'ouvre où pointe la souris, en coordonnées d'écran — pas de monde : elle est sur la couche
+			# d'interface, qui ne bouge pas avec la caméra.
+			_contexte(_tuile_sous(get_local_mouse_position()), get_viewport().get_mouse_position())
 	elif ev is InputEventKey and ev.pressed and not ev.echo:
 		if ecrans.est_ouvert() and ecrans.courant == "composer" and ecrans.composeur.nom.has_focus():
 			return   # on tape le nom du sort : les lettres vont au champ, pas au jeu
@@ -1973,15 +1983,21 @@ func _interagir() -> void:
 	_executer_option(candidates[0])
 
 
-## Clic droit : toutes les options de la tuile, dans une liste.
-func _contexte(t: Vector2i) -> void:
+## CLIC DROIT : LES OPTIONS DE LA TUILE, DANS UNE PETITE FENÊTRE POSÉE AU POINT CLIQUÉ (designer 2026-09-09).
+## C'était un écran plein cadre — panneau entier, colonne de détail, voile noir — pour trois options qui tiennent
+## dans un timbre-poste, et qui couvrait justement la tuile qu'on venait de désigner.
+func _contexte(t: Vector2i, ou: Vector2) -> void:
 	var j := joueur()
 	if j.is_empty() or t.x < 0:
 		return
 	var options: Array = _options_tuile(t)
 	if Grille.distance(j.pos, t) >= 1 and sim.grille.occupant(t).is_empty():
 		options.append({"id": "deplacer", "vers": t})
-	ecrans.ouvrir_contexte(t, options)
+	if options.is_empty():
+		menu_contexte.fermer()
+		_log(tr("ui.contexte.aucune"))
+		return
+	menu_contexte.ouvrir(options, ou, tr("ui.ecran.contexte").format({"x": t.x, "y": t.y}))
 
 
 ## Le menu (Tab) : écrans et actions générales.

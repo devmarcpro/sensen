@@ -50,8 +50,6 @@ static func rafraichir(ec: Ecrans) -> void:
 			EcransGestion._construire_capacites(ec, j)
 		"composer":
 			EcransGestion._construire_composer(ec, j)
-		"contexte":
-			EcransCreation._construire_contexte(ec, j)
 		"registre":
 			EcransGestion._construire_registre(ec, j)
 		"assigner":
@@ -659,7 +657,7 @@ static func _detail_de(ec: Ecrans, en: Dictionary) -> void:
 			var it_c: Dictionary = ec.main.sim.items.get(str(en.uid), {})
 			ec.penta_objet.visible = not ec.main.sim.inconnu(it_c)
 			ec.penta_objet.montrer({"elements": ec.main.sim.vecteur_objet(it_c)})
-		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "contexte", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "mort", "aide", "monde", "options", "charger_slot":
+		"option", "quete", "cellule", "resident", "stock", "fonction", "voisin", "competence_entrainer", "menu", "capacite", "nouvelle_capacite", "module_composer", "triche", "triche_catalogue", "triche_item", "titre", "mort", "aide", "monde", "options", "charger_slot":
 			ec.detail.text = str(en.get("texte", ""))
 		"creation":
 			ec.detail.text = EcransCreation._detail_creation(ec, str(en.id))
@@ -838,10 +836,6 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 			return
 		"module_composer":   # Entrée ajoute (même déjà présent : la séquence se cumule) ; Suppr / Retour arrière retire
 			ec.sequence_composee.append(str(en.module))
-		"contexte":
-			ec.fermer()
-			ec.main._executer_option(en.opt)
-			return
 		"triche":
 			ec.main.sim.triche(j, str(en.id))
 		"triche_catalogue":

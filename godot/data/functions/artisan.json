@@ -8,10 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_braise",
-    "le_creuset",
-    "la_paume",
-    "le_souffle"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 60,

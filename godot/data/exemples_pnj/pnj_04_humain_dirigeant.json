@@ -3,7 +3,7 @@
   "name_key": "pnj.humain_dirigeant.name",
   "skeleton_template": "humanoide",
   "race": "humain",
-  "classe": "La Balance",
+  "classe": "placeholder",
   "fonction": "dirigeant",
   "role": "resident",
   "nom": {

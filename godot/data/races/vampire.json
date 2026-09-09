@@ -8,7 +8,7 @@
   "base_potentials": {
     "_defaut": 90
   },
-  "talent": "soif_de_sang",
+  "talent": null,
   "lifespan": 80,
   "tags": [
     "cache",

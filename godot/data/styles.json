@@ -326,5 +326,10 @@
   },
   "tempo": {
     "glissement_s": 0.22
+  },
+  "menu_contexte": {
+    "_doc": "LA PETITE FENETRE DU CLIC DROIT (designer 2026-09-09). `largeur` en pixels ; `lignes_par_page` borne le nombre d options avant qu une page « z) » n apparaisse — c est ce qui garde la fenetre petite quand une tuile en offre douze.",
+    "largeur": 210.0,
+    "lignes_par_page": 8
   }
 }

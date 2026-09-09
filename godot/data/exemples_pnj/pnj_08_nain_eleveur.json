@@ -3,7 +3,7 @@
   "name_key": "pnj.nain_eleveur.name",
   "skeleton_template": "humanoide",
   "race": "nain",
-  "classe": "La Trace",
+  "classe": "placeholder",
   "fonction": "eleveur",
   "role": "resident",
   "nom": {

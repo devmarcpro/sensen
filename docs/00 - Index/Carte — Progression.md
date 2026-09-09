@@ -6,7 +6,7 @@ statut: décidé
 etape: 4
 ---
 
-Tout progresse par l'usage, sans plafond, régulé par le potentiel. Ni arbre de talents, ni points à attribuer. 17 notes.
+Tout progresse par l'usage, sans plafond, régulé par le potentiel. Ni arbre de talents, ni points à attribuer. 18 notes.
 
 **Le moteur**
 - **[[Progression par l'usage]]** — la courbe unique de toutes les compétences : `base_xp × (N+1)^1.6`. Polynomiale, jamais absurde.

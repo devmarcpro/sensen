@@ -300,7 +300,7 @@ func test_camp() -> void:
 	var cfg63: Dictionary = GameData.config("poses")
 	verifier(cfg63.get("actions", []).size() >= 5, "les actions posables sont en données (%d)" % cfg63.get("actions", []).size())
 	var prog63 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var p63 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog63)
+	var p63 := Etres.creer_personnage("creature.aventurier.name", "humain", "placeholder", {}, 1000, prog63)
 	verifier(p63.has("poses"), "le personnage porte ses poses")
 	p63.poses = {"attaque": {"bras_haut_d": 40.0}, "repos": {"tete": 5.0}}
 	var inst63 := Etres.instancier("essai63", p63.duplicate(true), Vector2i.ZERO, "joueur", s.regles, s.items)
@@ -766,7 +766,7 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(races41_ok, "chaque race déclare une apparence dont les loci sont au catalogue")
 	verifier(silhouettes41.size() >= 4, "les races ne se ressemblent pas : %d silhouettes distinctes" % silhouettes41.size())
 	var prog41 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {}, 1000, prog41)
+	var nain41 := Etres.creer_personnage("creature.aventurier.name", "nain", "placeholder", {}, 1000, prog41)
 	verifier(float(nain41.get("apparence", {}).get("echelle", 1.0)) < 1.0 and str(nain41.apparence.get("pilosite", "aucune")) != "aucune", "le nain naît court et poilu, sans une ligne de code par race")
 
 	# Réglages du monde (2026-08-31, point 49) : les options surchargent la config, le monde reste fini
@@ -803,9 +803,9 @@ func test_donjon_temps_a_l_action() -> void:
 				if GameData.entree("modules", str(m47)).is_empty():
 					classes_ok = false
 	verifier(classes_ok, "chaque classe déclare trois capacités assemblables et son loadout")
-	var perso47 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog47)
+	var perso47 := Etres.creer_personnage("creature.aventurier.name", "humain", "placeholder", {}, 1000, prog47)
 	var attendus47 := {}
-	for cap47b in GameData.entree("classes", "le_sabre").capacites:
+	for cap47b in GameData.entree("classes", "placeholder").capacites:
 		for m47b in cap47b.modules:
 			attendus47[str(m47b)] = true
 	for m47c in perso47.get("modules_connus", []):
@@ -828,8 +828,8 @@ func test_donjon_temps_a_l_action() -> void:
 	# Stats tirées aux dés (designer, point 48) : sans tirage, la base de repli ; avec, elle s'applique
 	var cfg48: Dictionary = GameData.config("creation")
 	verifier(str(cfg48.get("stats_des", "")).contains("d"), "les stats de base sont une notation de dés (%s)" % str(cfg48.get("stats_des", "")))
-	var tire48 := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog47, {"force": 8, "dexterite": 3, "endurance": 3, "volonte": 3, "perception": 3, "charisme": 3})
-	verifier(int(tire48.corps.stats.force) == 8 + int(GameData.entree("classes", "le_sabre").bonus_stats.get("force", 0)), "le dé de Force devient la base, bonus de classe en plus")
+	var tire48 := Etres.creer_personnage("creature.aventurier.name", "humain", "placeholder", {}, 1000, prog47, {"force": 8, "dexterite": 3, "endurance": 3, "volonte": 3, "perception": 3, "charisme": 3})
+	verifier(int(tire48.corps.stats.force) == 8 + int(GameData.entree("classes", "placeholder").bonus_stats.get("force", 0)), "le dé de Force devient la base, bonus de classe en plus")
 	verifier(not bool(GameData.config("combat_rules").modules.get("tout_au_depart", false)), "plus de kit complet de modules au départ : les livres font le reste")
 
 	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
@@ -1881,14 +1881,31 @@ func test_progression() -> void:
 	verifier(GameData.catalogues.competences.has("chasse") and GameData.catalogues.competences.has("recuperation"), "Chasse et Récupération sont au catalogue")
 	var humain := GameData.entree("races", "humain")
 	var nain := GameData.entree("races", "nain")
-	var sabre := GameData.entree("classes", "le_sabre")
-	var souffle := GameData.entree("classes", "le_souffle")
-	verifier(prog.potentiel_base("forge", nain, souffle, {}) == 100, "Nain Souffle : Forge 100 (moyenne de 120 et du défaut 80)")
-	verifier(prog.potentiel_base("epee", humain, sabre, {}) == 105, "Humain Sabre : Épée 105 (moyenne de 90 et 120)")
-	verifier(prog.potentiel_base("magie_feu", nain, sabre, {}) == 60, "Nain Sabre : magie 60 (accord des deux)")
+	var classe := GameData.entree("classes", "placeholder")
+	# LA RÈGLE, PAS LE CONTENU (2026-09-09). Ces trois lignes codaient en dur les nombres de classes qui n'existent
+	# plus (« le_souffle », « le Sabre » et leurs potentiels). Ce qu'elles prouvent vraiment, c'est que le potentiel
+	# de base est la MOYENNE de ce que la race et la classe accordent — l'attendu se calcule donc depuis les fiches,
+	# et changer un catalogue ne fait plus rougir un test qui ne parle pas de lui.
+	var moyenne := func(comp: String, r: Dictionary, c: Dictionary) -> int:
+		# La table se lit comme la règle la lit : la compétence, sinon sa FAMILLE, sinon le défaut. L'oublier faisait
+		# attendre 80 pour magie_feu là où le nain déclare un potentiel de famille.
+		var fam := str(GameData.catalogues.competences.get(comp, {}).get("famille", ""))
+		var de := func(t: Dictionary) -> int:
+			if t.has(comp):
+				return int(t[comp])
+			if not fam.is_empty() and t.has(fam):
+				return int(t[fam])
+			return int(t.get("_defaut", 80))
+		var vr: int = de.call(r.get("base_potentials", {}))
+		var vc: int = de.call(c.get("base_potentials", {}))
+		return vr if vr == vc else int(round((float(vr) + float(vc)) / 2.0))
+	for essai in [["forge", nain], ["epee", humain], ["magie_feu", nain]]:
+		var comp_e := str(essai[0])
+		var race_e: Dictionary = essai[1]
+		verifier(prog.potentiel_base(comp_e, race_e, classe, {}) == moyenne.call(comp_e, race_e, classe), "potentiel de base = moyenne race/classe (%s : %d)" % [comp_e, moyenne.call(comp_e, race_e, classe)])
 	var signe := prog.signe(1004)
 	verifier(signe.element == "eau" and signe.animal == "singe", "année 1004 : Eau-Singe (cycles de 5 et de 12)")
-	verifier(prog.potentiel_base("lecture", humain, sabre, signe) == 95, "le Singe donne +10 en Lecture (moyenne 85 → 95)")
+	verifier(prog.potentiel_base("lecture", humain, classe, signe) == moyenne.call("lecture", humain, classe) + 10, "le Singe donne +10 en Lecture (%d → %d)" % [moyenne.call("lecture", humain, classe), moyenne.call("lecture", humain, classe) + 10])
 	# Un être qui gagne de l'XP : niveau, potentiel qui baisse, stat associée
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
@@ -1923,14 +1940,32 @@ func test_progression() -> void:
 	s.intention(j.id, {"type": "attaquer", "cible": loup.id, "lourde": false})
 	verifier(float(j.xp_competences.get("tranchant", 0.0)) > 0.0 and float(j.xp_competences.get("element_metal", 0.0)) > 0.0 and float(loup.xp_competences.get("encaissement", 0.0)) > 0.0, "XP versée à l'arme, au type, à l'élément ; Encaissement au défenseur")
 	# Création de personnage : 30 points, bonus de race et de classe, kit, potentiels
-	var fiche := Etres.creer_personnage("creature.aventurier.name", "nain", "le_sabre", {"force": 10, "endurance": 10, "volonte": 10}, 1000, prog)
-	verifier(fiche.corps.stats.force == 5 + 10 + 1 + 2 and fiche.corps.stats.endurance == 5 + 10 + 2 + 1 and fiche.corps.stats.charisme == 5, "stats : base 5 + points + race + classe")
-	verifier("craft_epee" in fiche.equipement and fiche.competences.get("epee", 0) == 5 and fiche.potentiels_base.forge == 100, "kit du Sabre, Épée 5, potentiel de Forge nain+sabre = 100")
+	var fiche := Etres.creer_personnage("creature.aventurier.name", "nain", "placeholder", {"force": 10, "endurance": 10, "volonte": 10}, 1000, prog)
+	# LA MÊME RÈGLE POUR LES STATS : base, plus les points dépensés, plus le bonus de race, plus celui de classe.
+	var bs_r: Dictionary = nain.get("bonus_stats", {})
+	var bs_c: Dictionary = classe.get("bonus_stats", {})
+	var attendu_stat := func(nom: String, points: int) -> int:
+		return 5 + points + int(bs_r.get(nom, 0)) + int(bs_c.get(nom, 0))
+	verifier(int(fiche.corps.stats.force) == attendu_stat.call("force", 10) and int(fiche.corps.stats.endurance) == attendu_stat.call("endurance", 10) and int(fiche.corps.stats.charisme) == attendu_stat.call("charisme", 0), "stats : base 5 + points + race + classe (For %d)" % int(fiche.corps.stats.force))
+	var kit: Array = classe.get("equipement", [])
+	var comp_kit: Dictionary = classe.get("competences", {})
+	var sans_kit: Array = []
+	for it_k in kit:
+		if not (str(it_k) in fiche.equipement):
+			sans_kit.append(str(it_k))
+	var comp_ok := true
+	for ck: String in comp_kit.keys():
+		if int(fiche.competences.get(ck, 0)) != int(comp_kit[ck]):
+			comp_ok = false
+	verifier(sans_kit.is_empty() and comp_ok and int(fiche.potentiels_base.forge) == moyenne.call("forge", nain, classe), "le kit de la classe est porté, ses compétences sont là, le potentiel de Forge est la moyenne (%d)" % int(fiche.potentiels_base.forge))
 	var p := Simulation.new(5)
 	p.fiche_joueur = fiche
 	p.charger_arene("plaine_au_talus")
 	var jp := joueur_de(p)
-	verifier(jp.race == "nain" and jp.sante_max == 20 + 18 * 4 and "detection_filons" in jp.tags_acquis, "le personnage créé entre en jeu : PV 92, Œil de la pierre")
+	# LES TAGS DE TALENT ONT DISPARU AVEC LES TALENTS (2026-09-09) : « detection_filons » venait de l'Œil de la
+	# pierre, talent du nain. La ligne prouve ce qui reste vrai — le personnage créé entre en jeu tel qu'il a été
+	# créé, race comprise, et sa santé suit son endurance.
+	verifier(jp.race == "nain" and int(jp.sante_max) == 20 + int(jp.stats_eff.endurance) * 4, "le personnage créé entre en jeu : %s, PV %d pour End %d" % [str(jp.race), int(jp.sante_max), int(jp.stats_eff.endurance)])
 	# Mort et pénalité : respawn au point d'entrée, PV pleins, sac écrémé à 10 %, équipement gardé
 	var o := p.generer_objet("proto_dague", 1)
 	p.donner(jp, o.uid)

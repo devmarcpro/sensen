@@ -228,7 +228,7 @@ func test_grilles_possedees() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
 	var prog := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
-	var fiche := Etres.creer_personnage("creature.aventurier.name", "humain", "le_sabre", {}, 1000, prog)
+	var fiche := Etres.creer_personnage("creature.aventurier.name", "humain", "placeholder", {}, 1000, prog)
 	verifier((fiche.grilles as Array).size() >= 2 and str(fiche.grille_active) == str(fiche.grilles[0]), "Le Sabre part avec la grille de sa voie et la poche, et compose sur la première (%s)" % str(fiche.grilles))
 	var voie_sabre: String = str(GameData.catalogues.grilles[str(fiche.grilles[0])].get("voie", ""))
 	verifier(voie_sabre == "force", "la grille de départ du Sabre est celle du guerrier (%s)" % voie_sabre)

@@ -69,6 +69,10 @@ Le mouton jouable **est** le mouton ultime. Et ses limitations sont le contenu :
 > [!success] Codé le 2026-08-29 — la source maudite et l'autel du rituel
 > Les deux voies d'entrée que le tableau annonçait et que rien ne posait dans le monde. Deux **meubles de donjon**, jamais fabricables, posés par le générateur dans les étages profonds (`donjon.meubles_rituels`, à partir de l'étage `etage_min` = 4, un au plus par étage, dans une salle qui n'est ni l'entrée ni l'escalier) : la **source maudite** (`source_maudite`, luisante) — *Boire* (clic droit) : on devient **vampire** sur-le-champ, la source se tarit ; et l'**autel du rituel** (`autel_rituel`) — *Accomplir le rituel* : on devient **lycanthrope**, l'autel se brise. Décisions : les deux sont **à usage unique** (le meuble disparaît), **refusés à qui porte déjà une race cachée** (on ne se cumule pas), et **sans avertissement** — c'est une malédiction qu'on choisit de toucher, le journal la nomme après coup ; ils **n'apparaissent pas au camp** (rien ne les fabrique) pour que la transformation reste une trouvaille de donjon.
 
+
+> [!warning] Les talents ont été retirés le 2026-09-09 (designer : « retire tout les talents, laisse juste un place holder »)
+> Plus aucune race n'en porte. Les vingt-six fiches sont dans [[Talents et classes — le catalogue mis de côté]], **avec leurs nombres**. Ce qui a été gardé exprès : les blocs `combat_rules.talents` et les branches de code qui les lisent — un talent est une *fiche* (ce que le joueur obtient) et un *mécanisme* (ce qu'il fait). La fiche est partie ; le mécanisme dort et se rebranche d'une ligne.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Races]], [[Blocs de l'être]]
 - **Alimente** : [[Talents de classe]], [[Ouvert — Changer de personnage]], [[Schéma créature]]

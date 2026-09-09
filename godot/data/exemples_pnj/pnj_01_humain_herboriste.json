@@ -3,7 +3,7 @@
   "name_key": "pnj.humain_herboriste.name",
   "skeleton_template": "humanoide",
   "race": "humain",
-  "classe": "La Trace",
+  "classe": "placeholder",
   "fonction": "herboriste",
   "role": "resident",
   "nom": {

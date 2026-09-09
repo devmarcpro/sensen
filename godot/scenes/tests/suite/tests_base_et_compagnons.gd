@@ -371,7 +371,16 @@ func test_classes_des_pnj() -> void:
 			hors_pool += 1
 	verifier(sans == 0 and hors_pool == 0, "%d artisans : tous ont une classe, toutes visibles viennent du pool (%d sans, %d hors pool)" % [n, sans, hors_pool])
 	var part := float(cachees) / float(n)
-	verifier(part > chance * 0.4 and part < chance * 2.5, "les classes cachées sont rares : %.1f %% pour %.0f %% attendus" % [part * 100.0, chance * 100.0])
+	# LE CATALOGUE PEUT N EN AVOIR AUCUNE (2026-09-09 : les dix-neuf classes sont parquées, il ne reste que le
+	# placeholder). Exiger un pourcentage sur une population vide ne prouverait rien : le test dit alors ce qui est.
+	var a_des_cachees := false
+	for cid_c: String in GameData.catalogues.classes.keys():
+		if bool(GameData.entree("classes", cid_c).get("cachee", false)):
+			a_des_cachees = true
+	if a_des_cachees:
+		verifier(part > chance * 0.4 and part < chance * 2.5, "les classes cachées sont rares : %.1f %% pour %.0f %% attendus" % [part * 100.0, chance * 100.0])
+	else:
+		verifier(cachees == 0, "aucune classe cachée au catalogue : personne n en porte (%d)" % cachees)
 	verifier(not (GameData.entree("functions", "aventurier").classes_possibles as Array).any(func(c: String) -> bool: return bool(GameData.entree("classes", c).get("cachee", false))), "aucun pool ne contient de classe cachée")
 	for f in ["eleveur", "cuisinier", "couturier", "transporteur"]:
 		verifier(GameData.catalogues.functions.has(f), "la fonction %s du catalogue de la note existe en données" % f)

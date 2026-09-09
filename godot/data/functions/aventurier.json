@@ -8,14 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_braise",
-    "le_creuset",
-    "la_paume",
-    "le_souffle",
-    "la_balance",
-    "le_vent",
-    "le_sabre",
-    "la_trace"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 30,

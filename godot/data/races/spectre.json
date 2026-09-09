@@ -7,7 +7,7 @@
   "base_potentials": {
     "_defaut": 90
   },
-  "talent": "sans_chair",
+  "talent": null,
   "lifespan": 80,
   "tags": [
     "cache",

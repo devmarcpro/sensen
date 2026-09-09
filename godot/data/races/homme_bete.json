@@ -1,0 +1,34 @@
+{
+  "name_key": "race.homme_bete.name",
+  "bonus_stats": {
+    "force": 2,
+    "perception": 2,
+    "charisme": -2
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "athletisme": 125,
+    "pistage": 130,
+    "survie": 120,
+    "eloquence": 55,
+    "negoce": 60
+  },
+  "talent": null,
+  "lifespan": 60,
+  "tags": [
+    "humanoide",
+    "bete"
+  ],
+  "apparence": {
+    "echelle": 1.06,
+    "carrure": "large",
+    "tete": "museau",
+    "yeux": "fauves",
+    "bouche": "crocs",
+    "oreilles": "poilues",
+    "teinte_peau": "#8a6a3c",
+    "teinte_cheveux": "#4a3120",
+    "pilosite": "fournie"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name_key": "race.nautique.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "endurance": 1,
+    "force": -1
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 88,
+    "nage": 150,
+    "peche": 130,
+    "survie": 110,
+    "equitation": 50
+  },
+  "talent": null,
+  "lifespan": 90,
+  "tags": [
+    "humanoide",
+    "nautique"
+  ],
+  "apparence": {
+    "echelle": 0.98,
+    "carrure": "mince",
+    "tete": "ecailleuse",
+    "yeux": "globuleux",
+    "bouche": "branchies",
+    "oreilles": "nageoires",
+    "teinte_peau": "#3f7d86",
+    "teinte_cheveux": "#1f4a52",
+    "pilosite": "aucune"
+  }
+}

@@ -694,6 +694,14 @@ func _ready() -> void:
 					scene.ecrans.choix = en_c.duplicate()
 					EcransListe.rafraichir(scene.ecrans)
 					break
+		# LA PETITE FENÊTRE DU CLIC DROIT SE JUGE À L'ŒIL (designer 2026-09-09) : `--clic-droit` l'ouvre sur une
+		# tuile voisine du joueur, au milieu de l'écran. Une sonde prouve qu'elle tient dans le cadre ; elle ne dit
+		# pas si elle est lisible.
+		if args[i2] == "--clic-droit":
+			var j_cd: Dictionary = scene.joueur()
+			if not j_cd.is_empty():
+				var t_cd: Vector2i = scene.sim._tuile_libre_autour(j_cd.pos)
+				scene._contexte(t_cd if t_cd.x >= 0 else j_cd.pos, get_viewport().get_visible_rect().size * 0.45)
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])
 	for il in args.size():   # --ligne N : la N-ième ligne de la liste sélectionnée, son détail à droite (2026-09-04)

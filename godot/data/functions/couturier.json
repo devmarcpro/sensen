@@ -8,8 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_braise",
-    "le_vent"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 40,

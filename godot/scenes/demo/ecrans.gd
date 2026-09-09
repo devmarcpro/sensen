@@ -226,14 +226,6 @@ func _dimensionner() -> void:
 var sequence_composee: Array = []   # la séquence en cours de composition (écran composer)
 var crans_composes: Array = []      # le cran de chaque pièce de cette séquence, dans le même ordre (designer 2026-09-04)
 var triche_categorie := ""   # menu de triche : le catalogue en cours de parcours
-var contexte_tuile := Vector2i(-1, -1)   # clic droit : la tuile et ses options
-var contexte_options: Array = []
-
-
-func ouvrir_contexte(t: Vector2i, options: Array) -> void:
-	contexte_tuile = t
-	contexte_options = options
-	ouvrir("contexte")
 
 
 ## LE SUJET DE L'ÉCRAN D'ANATOMIE (ordre de travail 28 ter) : le joueur d'ordinaire, une **dépouille** quand on la

@@ -14,7 +14,7 @@
     "forge": 60,
     "encaissement": 60
   },
-  "talent": "chair_de_mana",
+  "talent": null,
   "lifespan": 350,
   "tags": [
     "humanoide"

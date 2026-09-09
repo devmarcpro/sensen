@@ -131,7 +131,7 @@ func test_talents() -> void:
 	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
 	verifier(GameData.catalogues.talents.size() >= 11, "onze talents en données (%d)" % GameData.catalogues.talents.size())
 	# Le Sabre : un changement d'arme gratuit par chaîne.
-	j.classe = "le_sabre"
+	j.classe = "placeholder"
 	verifier(s.a_talent(j, "ratelier_vivant"), "Le Sabre porte Râtelier vivant")
 	var autre := ""
 	for uid in j.ratelier:
@@ -146,7 +146,7 @@ func test_talents() -> void:
 	# La Balance : +1 place d'escorte.
 	j.classe = "la_balance"
 	var places_b := s.places_escorte(j)
-	j.classe = "le_sabre"
+	j.classe = "placeholder"
 	verifier(places_b == s.places_escorte(j) + 1, "Œil du prix : +1 place d'escorte")
 	# L'Elfe : la surchauffe coûte de l'endurance, pas de santé.
 	j.race = "elfe"
@@ -202,7 +202,7 @@ func test_reforge_et_fiole() -> void:
 	s.attente[j.id] = true
 	verifier(s.intention(j.id, {"type": "reforger", "objet": epee.uid, "composant": lame.uid}), "reforger l'épée avec une lame de cuivre")
 	verifier(epee.composants.tete.materiau == "cuivre" and epee.materiau == "cuivre" and epee.affixes.size() == n_aff and not (lame.uid in j.sac), "la lame remplacée, le matériau suit, les affixes tiennent (%d), le composant consommé" % epee.affixes.size())
-	j.classe = "le_sabre"
+	j.classe = "placeholder"
 	var lame2 := s.generer_objet("composant", 1, {}, "commun", 0)
 	lame2.composant = "lame_longue"
 	lame2.materiau = "fer"

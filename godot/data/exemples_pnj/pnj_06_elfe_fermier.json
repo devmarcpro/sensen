@@ -3,7 +3,7 @@
   "name_key": "pnj.elfe_fermier.name",
   "skeleton_template": "humanoide",
   "race": "elfe",
-  "classe": "Le Vent",
+  "classe": "placeholder",
   "fonction": "fermier",
   "role": "resident",
   "nom": {

@@ -59,6 +59,16 @@ La **maturité** (22 % de l'espérance) est le plancher d'âge de toute fonction
 > [!success] Codé — trace ajoutée le 2026-09-04
 > `data/races/` : bonus de départ, talent de race (`talents.chair_de_mana`, `deux_queues`…), niveaux de départ par compétence ; les trois races cachées (vampire, spectre, lycanthrope) sont codées avec l'incarnation.
 
+> [!important] Demandé par le designer le 2026-09-09 : **« les races: humain, insectoide, homme bête, robot, nautiques (hommes poissons), mutant, daemon »**
+> **Cinq manquaient au catalogue**, et elles y sont : **homme-bête**, **robot**, **nautique**, **mutant**, **daemon** — chacune avec ses bonus de stats, ses potentiels, son espérance de vie et son visage. Dix-neuf traits de visage neufs (têtes, oreilles, yeux, bouches) ont été **ajoutés en fin** de leurs loci, parce que l'index d'une valeur est celui de sa case de planche : l'insérer au milieu changerait le visage de tous les personnages déjà sauvegardés.
+> **Aucune ne porte de talent**, et c'est volontaire : le designer a fait retirer talents et classes le même jour ([[Talents et classes — le catalogue mis de côté]]). Les cinq talents qui étaient dessinés pour elles — le flair de l'homme-bête, le châssis du robot, les branchies du nautique, la chair instable du mutant, le sang de soufre du daemon — sont conservés dans cette note-là, avec le système existant auquel chacun devait s'accrocher.
+> **UNE QUESTION RESTE OUVERTE, et elle n'est pas à moi** : la liste ne dit pas si elle **remplace** ou si elle **ajoute**. **Elfe**, **Nain**, **Vampire** et **Spectre** sont donc toujours au catalogue. Effacer quatre races — leurs cultures de nommage, leurs apparences, ce qui les cite dans les royaumes — n'est pas réversible, et cela se demande.
+> **Le lycanthrope reste distinct de l'homme-bête** : l'un est un homme qu'une malédiction change (une race *cachée*, qu'on devient), l'autre est un **peuple** qu'on choisit à la création.
+
+> [!bug] Un défaut trouvé en donnant un visage à ces cinq races (2026-09-09)
+> Ajouter dix-neuf valeurs de locus demandait des dessins. Relancer `tools/gen_planches_substitution.py` a reposé un `00_substitution.png` dans **chaque** dossier — y compris ceux où le designer avait déjà mis ses propres cases. Or `Planches` concatène les PNG d'un dossier **dans l'ordre des noms**, et l'index d'une variante est sa place dans cette concaténation : « 00_substitution.png » se range entre « 00_ronde.png » et « 01_ovale.png », et sa planche de onze cases **décalait de onze rangs tout ce qui suit**. *Chaque visage sauvegardé aurait changé de tête, sans erreur et sans message.*
+> Le générateur **regarde désormais ce que le dossier contient** : garni de cases individuelles, il n'écrit qu'**une case par valeur manquante**, numérotée à sa place (`06_museau.png`) ; vide, il repose la planche entière comme avant. Un dossier de **membre** n'est jamais touché s'il porte déjà un dessin — l'index y est la carrure, et `posmod` la ramène à la seule case présente.
+
 ## Liens
 - **Dépend de** : [[Création de personnage]]
 - **Alimente** : [[Potentiel]], [[Stats de personnage]], [[Génération des royaumes PNJ]], [[Cultures de nommage]], [[Âge des PNJ]]

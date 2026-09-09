@@ -1,58 +1,45 @@
 {
-  "_doc": "Classe et SOUS-CLASSE (designer 2026-09-03). Une classe mere par stat — comme il y a une famille d'armes par stat — et les dix-neuf classes historiques deviennent ses sous-classes. Le tri suit la stat dominante que chaque sous-classe declarait deja dans `bonus_stats` : il ne decide rien, il rend visible ce qui y etait ecrit. Le desequilibre est donc HERITE, pas invente : la sentinelle n'a que deux sous-classes et l'erudit une seule, quand le rodeur et le mage en ont cinq.",
+  "_doc": "Classe et SOUS-CLASSE (designer 2026-09-03). Une classe mere par stat — comme il y a une famille d'armes par stat — et les dix-neuf classes historiques deviennent ses sous-classes. Le tri suit la stat dominante que chaque sous-classe declarait deja dans `bonus_stats` : il ne decide rien, il rend visible ce qui y etait ecrit. Le desequilibre est donc HERITE, pas invente : la sentinelle n'a que deux sous-classes et l'erudit une seule, quand le rodeur et le mage en ont cinq. | 2026-09-09 : les dix-neuf sous-classes sont parties (designer : « retire tout les classes, laisse juste un place holder ») ; les six axes restent, et mènent tous au placeholder. Le catalogue d origine est dans la note « Talents et classes — le catalogue mis de cote ».",
   "guerrier": {
     "name_key": "classe_mere.guerrier.name",
     "stat": "force",
     "sous_classes": [
-      "l_ecarlate",
-      "le_porteur",
-      "le_sabre",
-      "la_braise"
+      "placeholder"
     ]
   },
   "rodeur": {
     "name_key": "classe_mere.rodeur.name",
     "stat": "dexterite",
     "sous_classes": [
-      "l_ombre",
-      "la_meche",
-      "le_masque"
+      "placeholder"
     ]
   },
   "mage": {
     "name_key": "classe_mere.mage.name",
     "stat": "volonte",
     "sous_classes": [
-      "la_paume",
-      "le_fossoyeur",
-      "le_passeur",
-      "le_sablier",
-      "le_souffle"
+      "placeholder"
     ]
   },
   "sentinelle": {
     "name_key": "classe_mere.sentinelle.name",
     "stat": "endurance",
     "sous_classes": [
-      "le_vent",
-      "le_sceau"
+      "placeholder"
     ]
   },
   "erudit": {
     "name_key": "classe_mere.erudit.name",
     "stat": "perception",
     "sous_classes": [
-      "l_engrenage",
-      "la_trace",
-      "le_creuset"
+      "placeholder"
     ]
   },
   "meneur": {
     "name_key": "classe_mere.meneur.name",
     "stat": "charisme",
     "sous_classes": [
-      "la_balance",
-      "le_rieur"
+      "placeholder"
     ]
   }
 }

@@ -5,7 +5,7 @@
   "base_potentials": {
     "_defaut": 90
   },
-  "talent": "polyvalent",
+  "talent": null,
   "lifespan": 80,
   "tags": [
     "humanoide"

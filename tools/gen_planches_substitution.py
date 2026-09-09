@@ -131,6 +131,31 @@ def ecrire_png(chemin, cases):
 
 # ---------------------------------------------------------------- les membres : une pilule de la longueur de la case
 
+## POSER LES CASES SANS DECALER LES INDEX (2026-09-09). `Planches` concatene les PNG d un dossier DANS L ORDRE DES
+## NOMS : l index d une variante est sa place dans cette concatenation. Une planche `00_substitution.png` posee dans
+## un dossier qui a deja ses cases individuelles se range entre `00_x.png` et `01_y.png` et decale TOUT ce qui suit —
+## chaque visage sauvegarde change de tete, sans erreur et sans message. Le generateur regarde donc d abord :
+##   · dossier VIDE (ou n ayant que l ancienne planche) : on repose la planche entiere, comme avant ;
+##   · dossier DEJA GARNI de cases individuelles : on n ecrit QUE les valeurs manquantes, une par fichier, numerotees
+##     a leur place — c est la convention du designer, et elle garde les index exacts.
+## Rend le nombre de fichiers ecrits.
+def poser(dossier, valeurs, cases):
+    existants = []
+    if os.path.isdir(dossier):
+        existants = [f for f in os.listdir(dossier) if f.endswith(".png") and f != "00_substitution.png"]
+    if not existants:
+        ecrire_png(os.path.join(dossier, "00_substitution.png"), cases)
+        return 1
+    n = 0
+    for i, v in enumerate(valeurs):
+        nom = "%02d_%s.png" % (i, v)
+        if any(f.endswith("_%s.png" % v) for f in existants):
+            continue
+        ecrire_png(os.path.join(dossier, nom), [cases[i]])
+        n += 1
+    return n
+
+
 def planches_membres(c, rig, facteurs):
     carrures = lire_json("apparence.json")["loci"]
     ordre_carrure = next(l["valeurs"] for l in carrures if l["id"] == "carrure")
@@ -152,7 +177,14 @@ def planches_membres(c, rig, facteurs):
             t.pilule(c / 2.0, c / 2.0, max(4.0, w), c - 1.0, 0.92)
             t.pilule(c / 2.0, c / 2.0, max(2.0, w - 4.0), c - 5.0, 1.0)   # un liseré : la pilule se lit une fois teintée
             cases.append(t.rgba())
-        ecrire_png(os.path.join(ASSETS, "membres", base, "00_substitution.png"), cases)
+        # UN MEMBRE N EST PAS UN VISAGE : son dossier ne porte qu UN dessin (l index y est la carrure, et
+        # `posmod` la ramene a la seule case presente). On n y pose donc la planche des cinq carrures QUE si le
+        # dossier est vide — y ajouter des cases decalerait ce que le designer a mis.
+        dossier_m = os.path.join(ASSETS, "membres", base)
+        if os.path.isdir(dossier_m) and [f for f in os.listdir(dossier_m) if f.endswith(".png")]:
+            print("  membres/%-11s deja garni : on ne touche a rien" % base)
+            continue
+        ecrire_png(os.path.join(dossier_m, "00_substitution.png"), cases)
         print("  membres/%-11s %d variante(s) (carrure), pilule %.0f × %d" % (base, len(cases), la, lo))
 
 
@@ -286,9 +318,10 @@ def planches_visage(c, app, facteurs):
         if locus.get("universel", False):
             continue   # la carrure et la taille ne sont pas des traits du visage
         trait = locus["id"]
+        dossier = os.path.join(ASSETS, "visage", trait)
         cases = [case(trait, v) for v in locus["valeurs"]]
-        ecrire_png(os.path.join(ASSETS, "visage", trait, "00_substitution.png"), cases)
-        print("  visage/%-13s %d variante(s) : %s" % (trait, len(cases), ", ".join(locus["valeurs"])))
+        n = poser(dossier, locus["valeurs"], cases)
+        print("  visage/%-13s %d variante(s), %d ecrite(s) : %s" % (trait, len(cases), n, ", ".join(locus["valeurs"])))
 
 
 def main():

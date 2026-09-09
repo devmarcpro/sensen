@@ -110,6 +110,10 @@ Et trois statuts nouveaux ([[Statuts]]) : **Dissimulé**, **Saisi**, **Retardé*
 > [!success] Codé le 2026-08-29 — les pièges de L'Ombre, enfin distincts
 > Le tableau promet à **L'Ombre** que « ses pièges ne sont pas visibles » ; il ne se passait rien, parce qu'**aucun glyphe n'était visible pour l'IA** : tout le monde marchait dessus sans le voir, et le talent n'ajoutait rien. Désormais un glyphe posé est **une marque au sol que l'IA évite** (`Grille.dangers`, la même liste que le feu et la lave : les chemins la contournent, un être qui se retrouve dessus en sort) — **sauf** s'il a été posé par quelqu'un qui porte **Dissimulation** : celui-là reste invisible, et l'ennemi marche dedans. Décisions : la marque disparaît quand le glyphe se déclenche ou expire (et seulement si aucun feu ni lave n'occupe la tuile) ; le **joueur**, lui, voit tous les glyphes à l'écran, y compris les siens dissimulés — cacher au joueur ce qu'il a posé lui-même serait une punition, pas une mécanique ; et un glyphe dissimulé **ne protège pas** son poseur du sien (il se déclenche pour quiconque entre, comme avant).
 
+
+> [!warning] Les talents ont été retirés le 2026-09-09 (designer : « retire tout les talents, laisse juste un place holder »)
+> Le catalogue est dans [[Talents et classes — le catalogue mis de côté]]. Quatorze tests de la suite, qui éprouvaient chacun un talent, sont **en sommeil** et non supprimés : ils se rallument le jour où un talent les redemande.
+
 ## Liens
 - **Dépend de** : [[Les trois axes — race, classe, fonction]], [[Classes]], [[Structure compétences-modules-slots]], [[Vocabulaire des modules — six axes]]
 - **Alimente** : [[Fonctions]], [[Création de personnage]], [[Schéma créature]], [[Statuts]]

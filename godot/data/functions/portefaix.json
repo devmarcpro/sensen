@@ -8,8 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_braise",
-    "le_roc"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 12,

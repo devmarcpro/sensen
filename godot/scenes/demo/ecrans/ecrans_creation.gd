@@ -643,18 +643,6 @@ static func _construire_triche_liste(ec: Ecrans, _j: Dictionary) -> void:
 		ec.entrees.append({"kind": "triche_item", "id": str(id), "texte": nom})
 
 
-## Le clic droit : toutes les options de la tuile visée.
-static func _construire_contexte(ec: Ecrans, _j: Dictionary) -> void:
-	ec.titre.text = ec.tr("ui.ecran.contexte").format({"x": ec.contexte_tuile.x, "y": ec.contexte_tuile.y})
-	if ec.contexte_options.is_empty():
-		ec.liste.add_item(ec.tr("ui.contexte.aucune"), null, false)
-		ec.entrees.append({"kind": "texte", "texte": ""})
-		return
-	for opt in ec.contexte_options:
-		ec.liste.add_item(ec.tr("option." + str(opt.id)))
-		ec.entrees.append({"kind": "contexte", "opt": opt, "texte": ""})
-
-
 ## Le type d'un périmètre à dessiner (Gestion de base, 2026-09-04) : on choisit, l'écran se ferme, deux clics dessinent.
 static func _construire_perimetre(ec: Ecrans, _j: Dictionary) -> void:
 	ec.titre.text = ec.tr("ui.perimetre.titre")

@@ -9,7 +9,12 @@
         "carree",
         "allongee",
         "en_coeur",
-        "insectoide"
+        "insectoide",
+        "museau",
+        "plaque",
+        "ecailleuse",
+        "difforme",
+        "cornue"
       ],
       "universel": false
     },
@@ -20,7 +25,11 @@
         "pointues",
         "longues",
         "collees",
-        "antennes"
+        "antennes",
+        "poilues",
+        "capteurs",
+        "nageoires",
+        "asymetriques"
       ],
       "universel": false
     },
@@ -32,7 +41,12 @@
         "grands",
         "en_amande",
         "tombants",
-        "insectoide"
+        "insectoide",
+        "fauves",
+        "optiques",
+        "globuleux",
+        "multiples",
+        "braise"
       ],
       "universel": false
     },
@@ -54,7 +68,12 @@
         "large",
         "sourire",
         "boudeuse",
-        "mandibules"
+        "mandibules",
+        "crocs",
+        "grille",
+        "branchies",
+        "tordue",
+        "ardente"
       ],
       "universel": false
     },

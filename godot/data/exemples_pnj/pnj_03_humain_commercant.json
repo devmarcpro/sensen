@@ -3,7 +3,7 @@
   "name_key": "pnj.humain_commercant.name",
   "skeleton_template": "humanoide",
   "race": "humain",
-  "classe": "Le Vent",
+  "classe": "placeholder",
   "fonction": "commercant",
   "role": "resident",
   "nom": {

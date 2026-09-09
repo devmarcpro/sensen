@@ -306,6 +306,12 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **Pourquoi ça a tenu trois jours** : en arène, l'origine de dessin est sous les pieds du joueur — l'erreur y vaut zéro. Le défaut n'apparaît qu'avec une **fenêtre de monde**, c'est-à-dire au camp et en ville.
 > **Le correctif** : la bulle est placée ET dessinée en pixels d'écran (`draw_set_transform_matrix` avec l'inverse de la transformation de canvas). Effet de bord voulu : elle ne grossit plus avec le zoom, ce qui comptait depuis que le zoom monte à ×12.
 
+> [!success] Codé le 2026-09-09 — **le clic droit ouvre une petite fenêtre, là où l'on a cliqué** (designer : « je veux que le menu qui s'affiche quand on fait clique droit n'importe où soit une petite fenêtre qui s'affiche là où on a cliqué avec les options, plusieurs pages si nécessaire »)
+> **Ce qu'il y avait** : le clic droit ouvrait l'**écran plein cadre** — panneau entier, colonne de détail, voile noir — pour trois options qui tiennent dans un timbre-poste. Il couvrait justement la tuile qu'on venait de désigner, et il fallait le fermer pour revoir ce qu'on avait sous les yeux.
+> **Ce qu'il y a** : une fenêtre de la taille de son contenu, posée au **point cliqué**, qui garde toutes les conventions du dépôt — **une option = une lettre**, `z)` pour la page suivante, flèches et Entrée, Échap pour fermer — et se joue indifféremment à la souris ou au clavier. Le monde s'arrête derrière elle, comme derrière un écran : c'est ce que faisait celui qu'elle remplace.
+> **L'écran « contexte » a été RETIRÉ, pas laissé dormant** : plus un seul appel ne l'ouvrait. Garder un écran que rien n'atteint, c'est exactement ce que le dépôt vient de se faire reprendre deux fois en deux jours — la roue de couleur écrite et injoignable, les options d'objet sans ligne à l'écran. *Ce qui n'a pas de chemin n'existe pas.*
+> **Et la sonde a levé un défaut à la seconde même** : la fenêtre se recalait sur une taille **estimée** (« largeur minimale, plus vingt pixels par ligne »). Une option au libellé long élargit le bouton bien au-delà du minimum — ouverte au coin bas-droit, la fenêtre sortait de l'écran de cinquante pixels. On demande désormais sa taille au panneau (`get_combined_minimum_size`) au lieu de la deviner.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

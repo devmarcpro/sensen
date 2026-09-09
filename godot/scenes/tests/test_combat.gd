@@ -22,7 +22,16 @@ var _lances: Array[String] = []   # ce que la suite a lancé : un test défini m
 ## simplement plus lancés, et le garde-fou « un test défini et jamais lancé est un échec » les laisse passer.
 const DESACTIVES: Array[String] = ["test_capacites", "test_liaisons", "test_glyphes_terrain", "test_glyphes_visibles",
 	"test_grille_sort", "test_element_module", "test_composer_capacites", "test_charges_de_modules",
-	"test_creation_de_sorts"]
+	"test_creation_de_sorts",
+	# EN SOMMEIL DEPUIS LE 2026-09-09 (designer : « retire tout les talents, laisse juste un place holder, idem pour
+	# les classes »). Ces quatorze tests éprouvent chacun UN talent de race ou de classe, et il n'y a plus ni l'un ni
+	# l'autre au catalogue : ils ne testeraient plus rien. **Ils ne sont pas supprimés** — le mécanisme qu'ils
+	# vérifient est toujours dans le code, endormi faute de porteur, et le catalogue d'origine est dans la note
+	# « Talents et classes — le catalogue mis de côté ». Le jour où un talent est redéfini, on rallume la ligne qui
+	# lui correspond. *Un test qu'on éteint en disant pourquoi vaut mieux qu'un test qu'on efface.*
+	"test_talents", "test_reforge_et_fiole", "test_communion", "test_ombre_et_rieur", "test_ecarlate_et_porteur",
+	"test_passeur_et_sablier", "test_masque_et_sceau", "test_fossoyeur_et_engrenage", "test_vampire", "test_spectre",
+	"test_lycanthrope", "test_incarnation", "test_armes_fantomes", "test_empoigne", "test_bombes"]
 
 
 ## Les fichiers de la suite (découpée le 2026-09-06 : `tools/fragmenter_tests.py`), chacun un domaine ; les tests y sont tels quels.
@@ -139,26 +148,26 @@ func _ready() -> void:
 	_lancer("test_routes")
 	_lancer("test_habitat_pnj")
 	_lancer("test_artefacts")
-	_lancer("test_talents")
-	_lancer("test_reforge_et_fiole")
-	_lancer("test_communion")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_talents")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_reforge_et_fiole")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_communion")
 	_lancer("test_lumiere")
 	_lancer("test_palier_industriel")
 	_lancer("test_betail")
-	_lancer("test_ombre_et_rieur")
-	_lancer("test_ecarlate_et_porteur")
-	_lancer("test_passeur_et_sablier")
-	_lancer("test_masque_et_sceau")
-	_lancer("test_fossoyeur_et_engrenage")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_ombre_et_rieur")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_ecarlate_et_porteur")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_passeur_et_sablier")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_masque_et_sceau")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_fossoyeur_et_engrenage")
 	_lancer("test_propagation_lumiere")
 	_lancer("test_aciers_allies")
-	_lancer("test_vampire")
-	_lancer("test_spectre")
-	_lancer("test_lycanthrope")
-	_lancer("test_incarnation")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_vampire")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_spectre")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_lycanthrope")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_incarnation")
 	_lancer("test_terrasser")
-	_lancer("test_empoigne")
-	_lancer("test_armes_fantomes")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_empoigne")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : _lancer("test_armes_fantomes")
 	_lancer("test_cataclysme")
 	_lancer("test_vecteur_lieu")
 	_lancer("test_effets_equipement")
@@ -212,7 +221,7 @@ func _ready() -> void:
 	_lancer("test_index_monde")
 	_lancer("test_sauvegarde_terrain")
 	_lancer("test_uniques_artefacts")
-	_lancer("test_bombes")
+	# EN SOMMEIL (talents et classes parqués, 2026-09-09) : il éprouve « Chaîne d'amorces », talent de La Mèche : _lancer("test_bombes")
 	# DÉSACTIVÉ : _lancer("test_grille_sort")
 	# DÉSACTIVÉ : _lancer("test_element_module")
 	_lancer("test_flottabilite")

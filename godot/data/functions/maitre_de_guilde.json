@@ -8,10 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "la_balance",
-    "le_sabre",
-    "le_souffle",
-    "la_paume"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 2000,

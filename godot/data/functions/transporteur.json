@@ -8,8 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "le_vent",
-    "la_balance"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 50,

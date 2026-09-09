@@ -8,8 +8,7 @@
     "22-6": "lit"
   },
   "classes_possibles": [
-    "le_sabre",
-    "la_trace"
+    "placeholder"
   ],
   "leadership": false,
   "portefeuille": 60,

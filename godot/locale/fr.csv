@@ -381,6 +381,30 @@ competence.element_metal.name,Métal (élément)
 competence.element_eau.name,Eau (élément)
 race.humain.name,Humain
 race.insectoide.name,Insectoïde
+race.homme_bete.name,Homme-bête
+race.robot.name,Robot
+race.nautique.name,Nautique
+race.mutant.name,Mutant
+race.daemon.name,Daemon
+ui.apparence.val.museau,museau
+ui.apparence.val.plaque,plaquée
+ui.apparence.val.ecailleuse,écailleuse
+ui.apparence.val.difforme,difforme
+ui.apparence.val.cornue,cornue
+ui.apparence.val.poilues,poilues
+ui.apparence.val.capteurs,capteurs
+ui.apparence.val.nageoires,nageoires
+ui.apparence.val.asymetriques,asymétriques
+ui.apparence.val.fauves,fauves
+ui.apparence.val.optiques,optiques
+ui.apparence.val.globuleux,globuleux
+ui.apparence.val.multiples,multiples
+ui.apparence.val.braise,de braise
+ui.apparence.val.crocs,crocs
+ui.apparence.val.grille,grille
+ui.apparence.val.branchies,branchies
+ui.apparence.val.tordue,tordue
+ui.apparence.val.ardente,ardente
 ui.apparence.val.insectoide,insectoïde
 ui.apparence.val.mandibules,mandibules
 ui.apparence.val.antennes,antennes
@@ -892,6 +916,9 @@ talent.sans_maitre.name,Sans maître
 talent.sans_maitre.desc,"Commence sans talent ; apprend celui d'un PNJ (relation ≥ 75) et peut en changer."
 talent.polyvalent.name,Polyvalent
 talent.polyvalent.desc,"Porte deux talents de classe : le sien et un appris."
+classe.placeholder.name,Aventurier (à définir)
+talent.placeholder.name,Talent (à définir)
+talent.placeholder.desc,"Une place gardée au chaud. Les vingt-six talents d'avant sont dans la note « Talents et classes — le catalogue mis de côté »."
 talent.carapace.name,Carapace
 talent.carapace.desc,"Une chitine qui protège partout : +3 d'armure sur toutes les zones, mais −15 d'endurance maximale."
 talent.chair_de_mana.name,Chair de mana
