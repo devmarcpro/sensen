@@ -1,0 +1,32 @@
+{
+  "name_key": "race.insectoide.name",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 2,
+    "charisme": -2
+  },
+  "base_potentials": {
+    "_defaut": 85,
+    "discretion": 120,
+    "athletisme": 110,
+    "negoce": 60,
+    "eloquence": 55
+  },
+  "talent": "carapace",
+  "lifespan": 45,
+  "tags": [
+    "humanoide",
+    "insectoide"
+  ],
+  "apparence": {
+    "echelle": 0.96,
+    "carrure": "mince",
+    "tete": "insectoide",
+    "yeux": "insectoide",
+    "bouche": "mandibules",
+    "oreilles": "antennes",
+    "teinte_peau": "#5c6b3f",
+    "teinte_cheveux": "#2b2b22",
+    "pilosite": "aucune"
+  }
+}
