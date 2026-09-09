@@ -1,0 +1,14 @@
+{
+  "_doc": "LE CHAMP DE SUPPORT (Emergence — les champs partages, ordre de travail 25, 2026-09-09). Le modele est celui de Dwarf Fortress, adapte a une grille par etage : une tuile OUVERTE est couverte par un plafond que la roche alentour tient. `portee_base` + `portee_par_portance` x la `portance` du plafond donne la distance maximale (Chebyshev) entre une tuile ouverte et le soutien le plus proche ; au-dela, le plafond tombe. Aucune portee n est ecrite matiere par matiere : c est la stat qui decide, et c est tout l interet. Le granit (85) tient six tuiles, la terre (10) une et demie, le sable (2) rien — une galerie de granit s ouvre donc sur douze tuiles de large, la meme dans la terre s effondre a trois. OU IL Y A UN PLAFOND (2026-09-09, sur demande du designer) : le champ ne joue plus « en mine » — c est une question physique, pas un interrupteur. Sous terre (mine ou donjon creuse) toute tuile ouverte a de la pierre au-dessus ; a la couche d un etage (z >= 1) la tuile ou l on marche EST un plancher, qui tient par du plein juste dessous ou par un mur de sa couche a portee ; a ciel ouvert il n y a rien a faire tomber. Un plancher qui cede devient de l air, ce qui s y tenait chute d un niveau, et LE PLANCHER DU DESSUS est remis en question — c est la propagation que le modele reclame. `soutiens` : ce qui tient un plafond en plus de la roche — l ETAI, un meuble qui ne bloque pas le passage, ce qui fait d etayer un geste par le chemin qui existe deja. L effondrement remet un mur du materiau du plafond (donc rediggable) et blesse qui se tenait la ; si l occupant ne peut pas s echapper, la tuile reste ouverte et le plafond grogne — il tombera au pas suivant. LE MUR D ETAGE tient par son GROUPE : un ensemble de tuiles pleines d une meme couche tient si l une d elles au moins repose sur du plein juste dessous. Un mur tenu par son voisin, lui-meme tenu par le premier, se porterait sinon a jamais. `composante_max` borne ce parcours : au-dela, le groupe est tenu pour ancre — une falaise n a pas a etre parcourue pour qu on sache qu elle tient, et sans cette borne un champ incremental redeviendrait un balayage.",
+  "periode_ticks": 1000,
+  "portee_base": 1.0,
+  "portee_par_portance": 0.06,
+  "portance_defaut": 60,
+  "contenu_effondre": "mur",
+  "soutiens_meubles": [
+    "etai"
+  ],
+  "degats_des": "3d6",
+  "degats_min": 1,
+  "composante_max": 512
+}

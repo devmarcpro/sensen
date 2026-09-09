@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "required": [
+    "periode_ticks",
+    "portee_base",
+    "portee_par_portance",
+    "contenu_effondre",
+    "degats_des"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "periode_ticks": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "portee_base": {
+      "type": "number",
+      "minimum": 0
+    },
+    "portee_par_portance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "portance_defaut": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "contenu_effondre": {
+      "type": "string"
+    },
+    "soutiens_meubles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "degats_des": {
+      "type": "string"
+    },
+    "degats_min": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "composante_max": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

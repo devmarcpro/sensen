@@ -15,7 +15,8 @@
     "transparence": 6,
     "elasticite": 30,
     "friction": 32,
-    "fusion": 9999
+    "fusion": 9999,
+    "portance": 52
   },
   "tags": [
     "carapace"

@@ -15,7 +15,8 @@
     "transparence": 6,
     "elasticite": 88,
     "friction": 70,
-    "fusion": 9999
+    "fusion": 9999,
+    "portance": 4
   },
   "tags": [
     "marin",

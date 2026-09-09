@@ -233,7 +233,34 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Il est ici, juste après le danger, et pas plus bas** : le danger vient de rendre les nuages visibles à l'IA, ce
     champ les rend *mobiles* — c'est la suite directe, et le grisou qui monte est ce qui fait qu'une mine se joue.
 
-25. **Le champ de support** avec `portance` — l'effondrement, la seule chose qui sépare une mine d'un gouffre.
+~~25. **Le champ de support** avec `portance`~~ — **FAIT le 2026-09-09.** `portance` est la **deuxième** des cinq
+    colonnes : 247 valeurs de 0 à 100, dans l'ordre du monde réel et non dans ses unités (les gemmes sont dures et
+    **cassantes**, le plomb et l'or sont **mous** — c'est là que `durete` trompait, et c'est ce qui justifie une stat
+    séparée). Le champ lit cette stat et rien d'autre : `portee_base + portee_par_portance × portance` dit jusqu'où un
+    plafond porte — granit six tuiles, terre une et demie, sable rien. Aucune portée n'est écrite matière par matière.
+    **Étayer est devenu un geste sans une ligne d'interface neuve** : l'`etai` est un meuble, il se fabrique à
+    l'établi, il ne bloque pas le passage et il porte.
+    **Deux choix qui ne se voient qu'en écrivant** : l'éboulement pose un mur **destructible** (une galerie bouchée se
+    rouvre à la pioche), et un occupant n'est jamais enfermé dans la pierre — on le blesse, on le pousse, et faute de
+    place le plafond **grogne** en attendant. `test_support` prouve par un **contrôle négatif** : la même galerie, au
+    même endroit, ne change que la matière — le granit tient, la terre tombe.
+    **Les deux manques annoncés ont été comblés le jour même** (designer : « fais le nécessaire alors »). Le verrou
+    « en mine » est devenu une **question physique** — *y a-t-il quelque chose au-dessus ?* : sous terre oui, à la
+    couche d'un étage la tuile où l'on marche EST un plancher, à ciel ouvert il n'y a rien à faire tomber. Et la
+    **troisième dimension** est là : un plancher tient par du plein dessous ou par un mur de sa couche à portée, et
+    il a fallu une règle de plus pour que la propagation soit vraie — le **mur** d'étage, qui ne peut pas se juger
+    localement (deux murs se porteraient mutuellement à jamais) : c'est le **groupe** qui tient, s'il repose quelque
+    part sur du plein, le parcours borné par `composante_max`. **Abattre les murs du bas fait tomber l'étage, et
+    celui du dessus avec** — `test_support_etages` le compte.
+    **Deux trouvailles en sortant de la mine** : « ce qui soutient » se lisait *bloque le passage*, or l'AIR d'une
+    couche bloque le passage sans rien porter — un plancher se serait cru tenu par le vide ; et la première version
+    du test a rougi **à bon droit**, un arbre du terrain portant le plancher par en dessous. *Quand une géométrie est
+    le sujet d'un test, elle se pose entièrement à la main.*
+    **Une règle a manqué et c'est un test qui l'a dite** : en sortant de la mine, la portée s'est mise à juger les
+    salles que le GÉNÉRATEUR avait taillées — un coup de pioche dans une ruine faisait tomber un hall de dix tuiles.
+    `test_recolte` a rougi à bon droit : le champ condamnait le contenu existant. **Ce qui a été creusé, pas ce qui a
+    été bâti** — le champ ne juge que les tuiles marquées `modifies`, que le jeu tenait déjà.
+    **Reste** : la démolition par les PNJ et les royaumes ne nourrit pas encore le champ.
 26. **Le champ sonore** avec `absorption`. **Il ne peut pas s'appeler `bruit`** : le mot désigne déjà le bruit de
     Perlin partout dans le code. À trancher avant la première ligne.
     *(Note : le module `absorption` existe aussi dans le catalogue des noyaux — il meurt au palier 6, mais tout grep

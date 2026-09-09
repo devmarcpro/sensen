@@ -15,7 +15,8 @@
     "transparence": 0,
     "elasticite": 55,
     "friction": 55,
-    "fusion": 9999
+    "fusion": 9999,
+    "portance": 38
   },
   "tags": [
     "organique",

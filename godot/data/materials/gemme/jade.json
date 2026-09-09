@@ -15,7 +15,8 @@
     "transparence": 40,
     "elasticite": 25,
     "friction": 34,
-    "fusion": 1000
+    "fusion": 1000,
+    "portance": 72
   },
   "tags": [],
   "color": "#3D9B6B",

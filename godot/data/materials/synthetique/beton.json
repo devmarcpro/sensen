@@ -15,7 +15,8 @@
     "transparence": 0,
     "elasticite": 3,
     "friction": 50,
-    "fusion": 1500
+    "fusion": 1500,
+    "portance": 82
   },
   "tags": [
     "industriel"

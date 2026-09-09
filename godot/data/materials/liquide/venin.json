@@ -15,7 +15,8 @@
     "transparence": 35,
     "elasticite": 2,
     "friction": 15,
-    "fusion": 0
+    "fusion": 0,
+    "portance": 0
   },
   "tags": [
     "toxique"

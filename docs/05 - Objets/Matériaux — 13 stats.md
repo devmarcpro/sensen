@@ -51,6 +51,12 @@ Le choix du matériau dans un craft est donc un **arbitrage multidimensionnel**,
 > Cinquante-huit corrections sur quarante-cinq fiches. La courbe du butin par niveau de donjon ne bouge pas.
 
 
+> [!success] Codé le 2026-09-09 — **`portance` est écrite** : la deuxième des cinq colonnes, et la mine cesse d'être un gouffre (ordre de travail 25)
+> **247 valeurs de 0 à 100**, entrées comme 15e colonne des douze tables. Contrairement à `fusion`, ce n'est **pas** une grandeur du monde réel avec son unité : la résistance en flexion se mesure en mégapascals et un joueur n'en a que faire. C'est la seconde moitié de la règle du 2026-09-02 qui s'applique — **respecter l'ordre du monde réel, pas ses unités**. Ce que le joueur sait : l'acier tient mieux que la fonte, le granit mieux que la craie, la roche mieux que la terre, et le sable ne tient pas du tout.
+> **Deux familles où `durete` trompait, et c'est ce qui justifie une stat séparée** : les **gemmes** sont dures et **cassantes** — un diamant raye tout et se fend d'un coup de marteau, sa portance est moyenne, pas maximale ; le **plomb** et l'**or** sont des métaux **mous**, ils fléchissent sous leur propre poids — le plomb (22) porte moins qu'un chêne (78).
+> **Ce que le champ en fait** : `portee_base + portee_par_portance × portance` donne la distance qu'une tuile ouverte peut avoir jusqu'à son soutien le plus proche. Granit six tuiles, terre une et demie, sable rien. Voir [[Émergence — les champs partagés]].
+> **Trois colonnes sur cinq restent à écrire** (`absorption`, `permeabilite`, `alteration`) : la note en dit maintenant **15**.
+
 > [!success] Codé le 2026-09-09 — **`fusion` est écrite** : la première des cinq colonnes, et la chaleur ne sait plus seulement brûler (ordre de travail 23)
 > **247 matières, 247 points de fusion, en degrés réels.** La colonne `Fus` est entrée dans les douze tables — la table fait foi, `gen_materials.py` la transcrit, `verif_generateurs.py` prouve qu'il reproduit les 247 fiches champ par champ. Il n'y avait plus rien à débloquer : la note disait « après la remise en accord des catalogues », et cette remise est faite depuis le palier 2 — **les tables et les fiches se correspondent 247 pour 247**. J'ai mesuré avant de croire la note.
 >

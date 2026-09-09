@@ -419,6 +419,257 @@ static func _fusion_de(mats: Dictionary, id: String) -> float:
 	return float(mats.get(id, {}).get("stats", {}).get("fusion", 9999))
 
 
+## ---------------------------------------------------------------- le champ de support (Émergence, 2026-09-09)
+
+## LE CHAMP DE SUPPORT — l'effondrement, « la seule chose qui sépare une mine d'un gouffre ».
+## Le modèle est celui que la note a tranché, celui de Dwarf Fortress, adapté à une grille par étage : une tuile
+## OUVERTE est couverte d'un plafond que la roche alentour tient. La `portance` de cette roche dit jusqu'où le
+## plafond porte ; au-delà, il tombe.
+## **Aucune portée n'est écrite matière par matière** — `portee_base + portee_par_portance × portance` et c'est tout.
+## C'est la stat qui décide : le granit (85) tient six tuiles, la terre (10) une et demie, le sable (2) rien. Une
+## galerie de granit s'ouvre donc sur douze tuiles de large, la même dans la terre s'effondre à trois.
+## **Le patron est celui de la CHALEUR, pas celui de la lumière** — la note le dit en toutes lettres : on ne balaie
+## jamais la fenêtre, on ne regarde que ce qu'un coup de pioche vient de changer, et ses environs à portée.
+static func _tiquer_support(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("support")
+	if cfg.is_empty() or tick < sim.support_prochain_pas:
+		return
+	sim.support_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 1000)))
+	if sim.support_a_verifier.is_empty():
+		return
+	var a_voir: Array = sim.support_a_verifier.keys()
+	sim.support_a_verifier.clear()
+	a_voir.sort()   # un ordre FIXE : deux exécutions doivent donner le même éboulement
+	for idx in a_voir:
+		var t := sim.grille.pos_de(int(idx))
+		if Grille.z_de(t) >= 1:
+			_verifier_plancher(sim, t, cfg, tick)
+		else:
+			_verifier_plafond(sim, t, cfg, tick)
+
+
+## Ce qu'un coup de pioche — ou une explosion — met en question : les tuiles à portée dans SA couche, puisque leur
+## soutien le plus proche vient peut-être de disparaître, ET la tuile juste au-dessus, dont le plancher reposait
+## peut-être sur celle qu'on vient d'ouvrir. C'est le seul endroit qui alimente le champ.
+static func support_reexaminer(sim: Simulation, t: Vector2i) -> void:
+	var cfg: Dictionary = GameData.config("support")
+	if cfg.is_empty():
+		return
+	var r := int(ceil(_portee_max(sim, t, cfg))) + 1
+	for dy in range(-r, r + 1):
+		for dx in range(-r, r + 1):
+			var q: Vector2i = t + Vector2i(dx, dy)
+			# À l'étage, les tuiles PLEINES entrent aussi dans la file : un mur qui perd son appui tombe, et c'est
+			# lui qui porte le plancher. Sous terre, seules les tuiles ouvertes ont un plafond à perdre.
+			if sim.grille.dans(q) and _a_un_plafond(sim, q) and (Grille.z_de(q) >= 1 or not _soutient(sim, q, cfg)):
+				sim.support_a_verifier[sim.grille.idx(q)] = true
+	# LA TROISIÈME DIMENSION : ce qu'on vient d'ouvrir ne porte plus ce qui était dessus.
+	var haut: Vector2i = t + Vector2i(0, Grille.BANDE_Z)
+	if Grille.z_de(t) + 1 < sim.grille.couches and sim.grille.dans(haut):
+		sim.support_a_verifier[sim.grille.idx(haut)] = true
+
+
+## Y A-T-IL SEULEMENT QUELQUE CHOSE AU-DESSUS ? (2026-09-09, sur demande du designer : le champ ne jouait qu'en mine.)
+## Il ne s'agit pas d'un interrupteur mais d'une question physique, et c'est elle qui remplace l'ancien verrou :
+##   · SOUS TERRE (une mine, un donjon creusé), toute tuile ouverte a de la pierre au-dessus d'elle ;
+##   · À LA COUCHE D'UN ÉTAGE (z ≥ 1), la tuile où l'on marche EST un plancher : il tient ou il tombe ;
+##   · À CIEL OUVERT, il n'y a rien à faire tomber. Ce n'est pas une limite du champ, c'est le ciel.
+static func _a_un_plafond(sim: Simulation, t: Vector2i) -> bool:
+	if Grille.z_de(t) >= 1:
+		return true
+	return sim.lieu == "donjon"
+
+
+## La portée du plafond au-dessus d'une tuile, en tuiles. La matière est celle du soutien le plus proche — c'est lui
+## qui tient —, à défaut celle des murs de l'étage.
+static func _portee_max(sim: Simulation, t: Vector2i, cfg: Dictionary) -> float:
+	var mid := str(sim.grille.materiau_de(t))
+	if mid.is_empty():
+		mid = str(sim.grille.materiau_defaut)
+	var st: Dictionary = GameData.catalogues.materials.get(mid, {}).get("stats", {})
+	var por := float(st.get("portance", float(cfg.get("portance_defaut", 60))))
+	return float(cfg.get("portee_base", 1.0)) + float(cfg.get("portee_par_portance", 0.06)) * por
+
+
+## Ce qui tient un plafond : une tuile pleine, ou un ÉTAI. L'étai ne bloque pas le passage — étayer une galerie ne
+## doit pas la fermer — mais il porte, et c'est ce qui fait d'« étayer » un geste plutôt qu'une décoration.
+static func _soutient(sim: Simulation, t: Vector2i, cfg: Dictionary) -> bool:
+	if not sim.grille.dans(t):
+		return true   # le bord de la fenêtre est de la roche : il tient
+	# SOLIDE, ET NON « BLOQUE LE PASSAGE » (2026-09-09, en sortant de la mine). Les deux se confondaient tant que le
+	# champ ne jouait que sous terre ; à la couche d'un étage ils divergent, et gravement : l'AIR hors des bâtiments
+	# (`vide`) bloque le passage — on n'y marche pas — sans rien porter du tout. Un plancher se serait cru tenu par le
+	# vide. Ce qui porte, c'est ce qui est plein : `solide`.
+	if "solide" in sim.grille.contenu_de(t).get("tags", []):
+		return true
+	var soutiens: Array = cfg.get("soutiens_meubles", [])
+	if soutiens.is_empty():
+		return false
+	for m in sim.grille.meubles_de(sim.grille.idx(t)):
+		if str(m) in soutiens:
+			return true
+	return false
+
+
+## Le plafond d'une tuile ouverte tient-il encore ? On cherche le soutien le plus proche en anneaux ; s'il n'y en a
+## aucun à portée, il tombe. C'est borné par la portée elle-même : rien ne parcourt la fenêtre.
+static func _verifier_plafond(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int) -> void:
+	if not sim.grille.dans(t) or not _a_un_plafond(sim, t) or _soutient(sim, t, cfg):
+		return
+	# CE QUI A ÉTÉ CREUSÉ, PAS CE QUI A ÉTÉ BÂTI (2026-09-09, et c'est un test qui me l'a appris). En sortant de la
+	# mine, la règle de portée s'est mise à juger les salles que le GÉNÉRATEUR avait taillées : un coup de pioche
+	# dans une ruine faisait tomber le plafond d'un hall large de dix tuiles, creusé bien avant qu'on arrive.
+	# **Une voûte qui tient depuis des siècles a été bâtie pour tenir** ; la galerie que tu ouvres est ton affaire.
+	# `modifies` dit exactement cela — la tuile a changé depuis la construction du lieu — et il est déjà persisté.
+	if not sim.grille.modifies.has(sim.grille.idx(t)):
+		return
+	var r_max := int(floor(_portee_max(sim, t, cfg)))
+	for r in range(1, r_max + 1):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				if _soutient(sim, t + Vector2i(dx, dy), cfg):
+					return
+	_effondrer(sim, t, cfg, tick)
+
+
+## LE PLANCHER D'ÉTAGE (2026-09-09) — l'autre moitié de ce que le modèle demandait : « et se propage à ce qu'elle
+## portait ». À la couche z ≥ 1, la tuile où l'on marche est un plancher. Il tient de deux façons, et il suffit d'une :
+##   · **par en dessous** — du plein juste sous lui, un pilier, un mur du rez-de-chaussée qui monte ;
+##   · **par le côté** — un mur de sa propre couche, à portée de la matière, exactement comme un plafond de roche.
+## Sinon il tombe. **Abattre les murs d'une maison fait tomber son étage** : personne n'a écrit cette scène.
+static func _verifier_plancher(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int) -> void:
+	if not sim.grille.dans(t):
+		return
+	if _soutient(sim, t, cfg):
+		_verifier_mur(sim, t, cfg, tick)   # une tuile PLEINE d'étage a sa propre question : sur quoi repose-t-elle ?
+		return
+	if _soutient(sim, t - Vector2i(0, Grille.BANDE_Z), cfg):
+		return   # il repose sur du plein : rien ne le fera tomber
+	var r_max := int(floor(_portee_max(sim, t, cfg)))
+	for r in range(1, r_max + 1):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				if _soutient(sim, t + Vector2i(dx, dy), cfg):
+					return
+	_effondrer_plancher(sim, t, cfg, tick)
+
+
+## LE MUR D'ÉTAGE — et c'est lui qui rend la PROPAGATION vraie. Un plancher tenu par des murs qui ne reposent sur
+## rien serait une maison suspendue en l'air : « se propage à ce qu'elle portait » demande que le mur du dessus tombe
+## quand celui du dessous disparaît.
+## **La règle ne peut pas être locale**, et c'est le piège de ce genre de champ : un mur tenu par son voisin, lui-même
+## tenu par le premier, se porterait mutuellement à jamais. Ce qui compte est donc le GROUPE : un ensemble de tuiles
+## pleines d'une même couche tient si **l'une d'elles au moins** repose sur du plein juste dessous. C'est un ancrage,
+## pas un voisinage.
+## Le parcours est **borné** par `composante_max` : au-delà, on tient le groupe pour ancré. Ce n'est pas une
+## approximation honteuse mais une décision — une falaise ou un pan de ville entier n'a pas à être parcouru pour
+## qu'on sache qu'elle tient, et sans cette borne un champ incrémental redeviendrait un balayage.
+static func _verifier_mur(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int) -> void:
+	if Grille.z_de(t) < 1 or "solide" not in sim.grille.contenu_de(t).get("tags", []):
+		return
+	var plafond := int(cfg.get("composante_max", 512))
+	var vus := {sim.grille.idx(t): true}
+	var file: Array[Vector2i] = [t]
+	var tete := 0
+	while tete < file.size():
+		var c: Vector2i = file[tete]
+		tete += 1
+		if _soutient(sim, c - Vector2i(0, Grille.BANDE_Z), cfg):
+			return   # le groupe est ancré : il repose sur du plein
+		if vus.size() >= plafond:
+			return   # trop grand pour être en l'air : on le tient pour ancré
+		for d in Grille.DIRS:
+			var q: Vector2i = c + d
+			if not sim.grille.dans(q) or vus.has(sim.grille.idx(q)):
+				continue
+			if "solide" in sim.grille.contenu_de(q).get("tags", []):
+				vus[sim.grille.idx(q)] = true
+				file.append(q)
+	# Rien sous aucune de ces tuiles : le pan tombe. On ne fait tomber QUE celle qu'on examinait — les autres sont
+	# déjà dans la file, et chacune posera la même question, ce qui fait la propagation sans récursion.
+	for i in vus.keys():
+		sim.support_a_verifier[int(i)] = true
+	sim.support_a_verifier.erase(sim.grille.idx(t))
+	sim.grille.poser_contenu(t, "vide")
+	sim.grille.materiaux.erase(sim.grille.idx(t))
+	sim.grille.marquer(t)
+	sim.lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.mur_effondre", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+	support_reexaminer(sim, t)
+
+
+## Le plancher cède : la tuile devient de l'air, ce qui s'y tenait CHUTE d'un niveau — les dégâts de chute existent
+## déjà, on ne réinvente rien —, et LE PLANCHER DU DESSUS EST REMIS EN QUESTION. C'est la propagation que le modèle
+## réclamait : un étage qui tombe emporte celui qu'il portait.
+static func _effondrer_plancher(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int) -> void:
+	var bas: Vector2i = t - Vector2i(0, Grille.BANDE_Z)
+	var occ := sim.grille.occupant(t)
+	if not occ.is_empty() and sim.entites.has(occ):
+		var e: Dictionary = sim.entites[occ]
+		var d := maxi(int(cfg.get("degats_min", 1)), sim.grille.degats_chute(1))
+		EventBus.emettre(&"journal", [&"journal.plancher_cede", {"nom": e.name_key, "degats": d}])
+		if d > 0:
+			sim._appliquer_degats(e, d, "effondrement", {"type": "effondrement"})
+		if sim.grille.dans(bas) and not sim.grille.bloque_passage(bas) and sim.grille.occupant(bas).is_empty():
+			sim.grille.liberer(t, e.id)
+			e.pos = bas
+			sim.grille.placer(e.id, bas)
+		else:
+			sim.support_a_verifier[sim.grille.idx(t)] = true   # rien où tomber : le plancher tient encore un pas
+			return
+	sim.grille.poser_contenu(t, "vide")
+	sim.grille.materiaux.erase(sim.grille.idx(t))
+	sim.grille.marquer(t)
+	sim.lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.plancher_effondre", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+	support_reexaminer(sim, t)   # ce qui reposait sur ce plancher-là tombe à son tour
+
+
+## L'effondrement : le plafond tombe, il blesse qui se tenait là, et il bouche la galerie d'un mur du matériau de
+## l'étage — DESTRUCTIBLE, donc la galerie se rouvre à la pioche, elle n'est pas perdue.
+## **Un occupant ne peut pas se retrouver dans la pierre** : on le blesse, puis on le pousse vers une tuile ouverte
+## voisine. S'il n'y en a aucune, la tuile reste ouverte et le plafond grogne — il tombera au pas suivant. C'est plus
+## juste qu'un mur posé sur quelqu'un, et ça donne une seconde à celui qui court.
+static func _effondrer(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int) -> void:
+	var idx := sim.grille.idx(t)
+	var occ := sim.grille.occupant(t)
+	if not occ.is_empty() and sim.entites.has(occ):
+		var e: Dictionary = sim.entites[occ]
+		var d := maxi(int(cfg.get("degats_min", 1)), sim.des.jet(str(cfg.get("degats_des", "3d6"))))
+		EventBus.emettre(&"journal", [&"journal.effondrement_blesse", {"nom": e.name_key, "degats": d}])
+		sim._appliquer_degats(e, d, "effondrement", {"type": "effondrement"})
+		if e.vivant:
+			var fuite := Vector2i(-9999, -9999)
+			for dd in Grille.DIRS:
+				var q: Vector2i = t + dd
+				if sim.grille.dans(q) and not sim.grille.bloque_passage(q) and sim.grille.occupant(q).is_empty():
+					fuite = q
+					break
+			if fuite.x == -9999:
+				sim.support_a_verifier[idx] = true   # le plafond grogne : il tombera quand la place sera libre
+				return
+			sim.grille.liberer(t, e.id)
+			e.pos = fuite
+			sim.grille.placer(e.id, fuite)
+	var mid := str(sim.grille.materiau_de(t))
+	if mid.is_empty():
+		mid = str(sim.grille.materiau_defaut)
+	sim.grille.poser_contenu(t, str(cfg.get("contenu_effondre", "mur")))
+	sim.grille.materiaux[idx] = mid
+	sim.grille.marquer(t)
+	sim.lumiere_sale = true
+	EventBus.emettre(&"journal", [&"journal.effondrement", {"x": t.x, "y": t.y}])
+	EventBus.emettre(&"tile_changed", [t])
+	# Ce qui vient de se boucher SOUTIENT désormais : les voisines qui tenaient par miracle sont à revoir.
+	support_reexaminer(sim, t)
+
+
 ## ---------------------------------------------------------------- le champ de danger (Émergence, 2026-09-08)
 
 ## Ce que vaut un nuage, lu sur la fiche du gaz : des dégâts ou une explosion valent le maximum, un statut vaut moins,
@@ -1055,6 +1306,7 @@ static func _creuser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) 
 		sim.mines_creusees[cle_m] = deja
 	sim.grille.contenu[sim.grille.idx(vers)] = 0
 	sim.grille.materiaux.erase(sim.grille.idx(vers))
+	support_reexaminer(sim, vers)   # le plafond de la galerie vient de perdre un appui (Émergence — le champ de support)
 	sim.grille.hauteurs[sim.grille.idx(vers)] = sim.grille.h(e.pos)   # la brèche est au niveau de celui qui creuse
 	sim.grille.marquer(vers)
 	if sim.poches_gaz.has(sim.grille.idx(vers)):   # la pioche perce une poche : le gaz s'échappe (Gaz dans le sol)

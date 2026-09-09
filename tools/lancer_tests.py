@@ -11,7 +11,7 @@ Les SONDES avaient deja ce garde-fou (`balayer_sondes.py` compte les SCRIPT ERRO
 qu'on attendrait. Cet outil le rend a la suite : il refuse toute *SCRIPT ERROR*, *Parse Error* ou *Compilation
 failed*, exige la ligne de bilan, et rend un code de sortie non nul des qu'il manque quelque chose.
 
-    python tools/lancer_tests.py [--seul fragment] [--sortie CHEMIN]
+    python tools/lancer_tests.py [--seul fragment] [--sortie CHEMIN] [--quand-meme]
 
 `GODOT` dans l'environnement designe l'executable ; sinon celui du poste.
 """
@@ -30,7 +30,12 @@ MOTIFS = ("SCRIPT ERROR", "Parse Error", "Compilation failed")
 def main():
     args = sys.argv[1:]
     fragment = ""
-    sortie = os.path.join(RACINE, "build", "tests.txt")
+    # UN FICHIER PAR RUN, ET UN SEUL GODOT (2026-09-09, appris a mes depens). La sortie s appelait `build/tests.txt`
+    # pour tout le monde : deux lancements simultanes ecrivaient DANS LE MEME FICHIER, et j y ai lu des echecs qui
+    # venaient d un autre run. Un outil de verification qui melange deux resultats est pire qu absent — il fait
+    # chercher un defaut qui n existe pas. Le nom porte donc le PID, et le dernier resultat est aussi recopie dans
+    # `build/tests.txt` pour rester facile a trouver.
+    sortie = os.path.join(RACINE, "build", "tests_%d.txt" % os.getpid())
     for i, a in enumerate(args):
         if a == "--seul" and i + 1 < len(args):
             fragment = args[i + 1]
@@ -39,6 +44,18 @@ def main():
     dossier = os.path.dirname(os.path.abspath(sortie))
     if not os.path.isdir(dossier):
         os.makedirs(dossier)
+
+    # Le projet n autorise qu UNE instance de Godot a la fois (deux se marchent sur le cache d import et sur les
+    # `user://`). L outil le fait respecter au lieu de l esperer.
+    if "--quand-meme" not in args:
+        try:
+            liste = subprocess.run(["tasklist"], capture_output=True, text=True, timeout=30).stdout.lower()
+            if "godot" in liste:
+                print("REFUS : un Godot tourne deja. Le projet n en veut qu un a la fois — attends-le, ou passe")
+                print("        --quand-meme si tu sais ce que tu fais.")
+                return 3
+        except Exception:
+            pass   # pas de tasklist : on ne bloque pas pour autant
 
     cmd = [GODOT, "--headless", "--path", os.path.join(RACINE, "godot"), "res://scenes/tests/test_combat.tscn"]
     if fragment:
@@ -96,6 +113,10 @@ def main():
     for e in erreurs:
         print("  ERREUR DE SCRIPT : %s" % e)
 
+    try:
+        io.open(os.path.join(RACINE, "build", "tests.txt"), "w", encoding="utf-8", errors="replace").write(texte)
+    except Exception:
+        pass
     print("LA SUITE : %.0f s, code %s, %d erreur(s) de script — sortie dans %s" % (time.time() - t0, code, len(erreurs), sortie))
     if not bilan:
         print("LA SUITE : pas de ligne de bilan — la suite n'est pas allee au bout.")

@@ -45,7 +45,8 @@
         "transparence",
         "elasticite",
         "friction",
-        "fusion"
+        "fusion",
+        "portance"
       ],
       "properties": {
         "durete": {
@@ -105,6 +106,12 @@
           "minimum": -273,
           "maximum": 9999,
           "description": "Temperature en degres Celsius ou la matiere change d'etat ; negative pour un liquide (son point de congelation) ; 9999 = elle ne fond pas."
+        },
+        "portance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Combien la matiere tient en porte-a-faux avant de ceder, 0-100. Lue par le champ de support : c'est elle qui dit jusqu'ou une galerie s'ouvre avant que le plafond tombe. 0 = ne porte rien."
         }
       }
     },

@@ -389,6 +389,7 @@ meuble.chaise.name,Chair
 meuble.cheminee.name,Fireplace
 meuble.clayette.name,Silkworm tray
 meuble.coffre.name,Chest
+meuble.etai.name,Pit prop
 meuble.enclos.name,Pen
 meuble.etal_de_vente.name,Market stall
 meuble.garde_manger.name,Pantry
@@ -1950,6 +1951,11 @@ journal.jette,"{nom} drops {objet}"
 journal.lame_empoisonnee,"{nom}: the blade poisons {cible}"
 journal.lance,"{nom} throws {cible} ({degats})"
 journal.lave_brule,"{nom} touches the lava ({degats})"
+journal.mur_effondre,"a section of wall gives way ({x},{y})"
+journal.plancher_cede,"{nom} falls through the floor: {degats} damage"
+journal.plancher_effondre,"the upper floor gives way ({x},{y})"
+journal.effondrement,"the ceiling caves in ({x},{y})"
+journal.effondrement_blesse,"{nom} is caught in the cave-in: {degats} damage"
 journal.lave_figee,"the lava cools where it meets the water ({x},{y})"
 journal.sol_cuit,"the heat bakes the ground: {avant} becomes {apres} ({x},{y})"
 journal.filon_fondu,"the vein runs: {avant} yields its {apres} ({x},{y})"

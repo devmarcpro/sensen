@@ -61,6 +61,10 @@ var chaleur_grille: Grille = null   # la grille dont la carte est dimensionnée 
 # danger d'un feu posé sur la même tuile.
 var danger_champ: Dictionary = {}
 var danger_prochain_pas := 0
+## Le champ de support (Émergence, 2026-09-09) : les tuiles ouvertes dont le plafond est à revoir, alimentées par le
+## seul coup de pioche. Comme la chaleur, ce champ ne balaie jamais la fenêtre — il ne regarde que ce qui a changé.
+var support_a_verifier: Dictionary = {}
+var support_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
@@ -313,6 +317,7 @@ func _exploser(b: Dictionary) -> void:
 					grille.contenu[grille.idx(t)] = 0
 					grille.materiaux.erase(grille.idx(t))
 					grille.marquer(t)
+					SimTerrain.support_reexaminer(self, t)   # abattre un mur met en question ce qu'il portait
 					tuiles += 1
 					if not mat.is_empty() and des.reel() < float(bc.chance_drop):
 						var brut: Dictionary = SimObjets.generer_objet(self, "materiau_brut", 1, {}, "commun", 0)
@@ -875,6 +880,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		SimTerrain._tiquer_gaz(self, tick)
 		SimTerrain._tiquer_chaleur(self, tick)
 		SimTerrain._tiquer_danger(self, tick)
+		SimTerrain._tiquer_support(self, tick)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -5091,6 +5097,10 @@ func _tiquer_chaleur(tick: int) -> void:
 
 func _tiquer_danger(tick: int) -> void:
 	SimTerrain._tiquer_danger(self, tick)
+
+
+func _tiquer_support(tick: int) -> void:
+	SimTerrain._tiquer_support(self, tick)
 
 func chaleur_a(t: Vector2i) -> float:
 	return SimTerrain.chaleur_a(self, t)

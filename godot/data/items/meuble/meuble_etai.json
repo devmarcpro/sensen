@@ -1,0 +1,21 @@
+{
+  "name_key": "meuble.etai.name",
+  "type": "meuble",
+  "equip_slot": "",
+  "meuble": "etai",
+  "tags": [
+    "meuble",
+    "posable"
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 2
+      }
+    ]
+  }
+}

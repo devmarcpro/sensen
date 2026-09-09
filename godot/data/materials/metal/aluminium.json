@@ -15,7 +15,8 @@
     "transparence": 0,
     "elasticite": 18,
     "friction": 22,
-    "fusion": 660
+    "fusion": 660,
+    "portance": 60
   },
   "tags": [],
   "color": "#CED3D6",

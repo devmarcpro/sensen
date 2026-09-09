@@ -15,7 +15,8 @@
     "transparence": 0,
     "elasticite": 10,
     "friction": 5,
-    "fusion": 60
+    "fusion": 60,
+    "portance": 0
   },
   "tags": [
     "liquide"

@@ -655,6 +655,151 @@ func test_affixes_reveilles() -> void:
 	s.monde.fermer()
 
 
+## LE CHAMP DE SUPPORT (ordre de travail 25, 2026-09-09) — l'effondrement, « la seule chose qui sépare une mine d'un
+## gouffre ». Une tuile ouverte est couverte d'un plafond que la roche alentour tient ; la `portance` de cette roche
+## dit jusqu'où il porte, et au-delà il tombe.
+## **La preuve est un contrôle négatif**, comme pour la fusion : voir une galerie s'effondrer ne prouverait rien — une
+## règle « toute galerie de rayon 3 tombe » le ferait aussi. Le test creuse donc DEUX FOIS la même galerie, au même
+## endroit, à la même taille, et ne change QUE la matière de l'étage.
+func test_support() -> void:
+	var cfg: Dictionary = GameData.config("support")
+	verifier(not cfg.is_empty() and float(cfg.portee_par_portance) > 0.0, "les réglages du support sont en données (portée %.1f + %.2f par point)" % [float(cfg.portee_base), float(cfg.portee_par_portance)])
+	var mats: Dictionary = GameData.catalogues.materials
+	verifier(int(mats.granit.stats.portance) > int(mats.terre.stats.portance) * 4, "le granit porte bien plus que la terre (%d contre %d)" % [int(mats.granit.stats.portance), int(mats.terre.stats.portance)])
+	var s := Simulation.new(608)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s.monde.claims[s.monde.cellule_de(j.pos)] = {"role": "base"}
+	j.vigueur = int(j.vigueur_max)
+	verifier(s.creuser_un_puits(j, 0), "le puits s'ouvre : on est dans une mine")
+	verifier(bool(s.donjon.get("mine", false)), "l'étage est bien une mine — le champ ne s'applique nulle part ailleurs")
+
+	# La galerie : un disque de rayon 3 autour d'un point, creusé À LA MAIN pour que la mesure soit exacte.
+	var centre: Vector2i = j.pos + Vector2i(12, 0)
+	var _ouvrir := func(rayon: int) -> void:
+		for dy in range(-rayon, rayon + 1):
+			for dx in range(-rayon, rayon + 1):
+				var q: Vector2i = centre + Vector2i(dx, dy)
+				if s.grille.dans(q) and maxi(absi(dx), absi(dy)) <= rayon:
+					s.grille.contenu[s.grille.idx(q)] = 0
+					s.grille.materiaux.erase(s.grille.idx(q))
+	var _plein := func() -> void:
+		for dy in range(-6, 7):
+			for dx in range(-6, 7):
+				var q: Vector2i = centre + Vector2i(dx, dy)
+				if s.grille.dans(q):
+					s.grille.poser_contenu(q, "mur")
+		s.support_a_verifier.clear()
+	var _ouvert := func(t: Vector2i) -> bool:
+		return not s.grille.contenu_de(t).get("bloque_passage", false)
+
+	# 1. DANS LE GRANIT (portance 85, portée 6,1) : le centre est à 4 tuiles de la roche, la galerie tient.
+	_plein.call()
+	s.grille.materiau_defaut = "granit"
+	_ouvrir.call(3)
+	SimTerrain.support_reexaminer(s, centre)
+	s.support_prochain_pas = 0
+	s._tiquer_support(100)
+	verifier(_ouvert.call(centre), "dans le granit, une galerie de rayon 3 tient (portée %.1f tuiles)" % (float(cfg.portee_base) + float(cfg.portee_par_portance) * float(mats.granit.stats.portance)))
+
+	# 2. LA MÊME GALERIE DANS LA TERRE (portance 10, portée 1,6) : le plafond tombe. Seule la matière a changé.
+	_plein.call()
+	s.grille.materiau_defaut = "terre"
+	_ouvrir.call(3)
+	SimTerrain.support_reexaminer(s, centre)
+	s.support_prochain_pas = 0
+	s._tiquer_support(200)
+	verifier(not _ouvert.call(centre), "LA MÊME galerie dans la terre s'effondre — la portée vient de la fiche, pas du code (portée %.1f)" % (float(cfg.portee_base) + float(cfg.portee_par_portance) * float(mats.terre.stats.portance)))
+	verifier(s.grille.contenu_de(centre).get("tags", []).has("destructible"), "ce que l'éboulement pose se rouvre à la pioche : la galerie n'est pas perdue")
+
+	# 3. UN ÉTAI, ET ELLE TIENT. Étayer est un geste : l'étai ne bloque pas le passage et porte le plafond.
+	_plein.call()
+	s.grille.materiau_defaut = "terre"
+	_ouvrir.call(3)
+	s.grille.poser_meuble(s.grille.idx(centre), "etai")
+	SimTerrain.support_reexaminer(s, centre)
+	s.support_prochain_pas = 0
+	s._tiquer_support(300)
+	var voisin: Vector2i = centre + Vector2i(1, 0)
+	verifier(_ouvert.call(voisin), "un étai au milieu tient le plafond de sa voisine (%s)" % str(voisin))
+	verifier(not GameData.entree("meubles", "etai").get("bloque_passage", true), "et l'étai ne ferme pas la galerie : on marche entre ses montants")
+
+
+## LA TROISIÈME DIMENSION (designer 2026-09-09 : « fais le nécessaire alors »). Le modèle disait « et se propage à ce
+## qu'elle portait » ; le champ ne connaissait qu'une couche. Ce test bâtit une maison de deux étages à la main, abat
+## les murs du rez-de-chaussée, et regarde tomber ce qu'ils portaient.
+func test_support_etages() -> void:
+	var cfg: Dictionary = GameData.config("support")
+	var s := Simulation.new(609)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	g.poser_couches(3)
+	g.materiau_defaut = "granit"   # portée 6,1 : la pièce tient largement tant que ses murs sont debout
+	verifier(g.couches >= 3, "la fenêtre porte trois couches : le sol et deux étages")
+
+	# Une pièce de 5 × 5 : des murs sur son pourtour aux couches 1 ET 2, un plancher libre au milieu de chacune.
+	var coin: Vector2i = Grille.plat(j.pos) + Vector2i(10, 10)
+	var centre1: Vector2i = Grille.en_couche(coin + Vector2i(2, 2), 1)
+	var centre2: Vector2i = Grille.en_couche(coin + Vector2i(2, 2), 2)
+	for z in [1, 2]:
+		for y in 5:
+			for x in 5:
+				var t: Vector2i = Grille.en_couche(coin + Vector2i(x, y), z)
+				if not g.dans(t):
+					continue
+				var bord: bool = (x == 0 or y == 0 or x == 4 or y == 4)
+				g.poser_contenu(t, "mur_construit" if bord else "vide")
+				if bord:
+					g.materiaux[g.idx(t)] = "granit"
+				else:
+					g.contenu[g.idx(t)] = 0   # le plancher : une tuile où l'on marche
+	# Les murs du REZ-DE-CHAUSSÉE : ce sont eux qui portent l'étage 1. Et l'INTÉRIEUR du rez-de-chaussée est vidé
+	# explicitement : le terrain du camp y met parfois un arbre ou un rocher, qui sont pleins — le plancher du
+	# dessus se serait trouvé porté PAR EN DESSOUS, et la maison abattue serait restée debout pour une raison juste
+	# mais étrangère à ce qu'on mesure. (C'est ce qui a fait rougir ce test au premier essai.)
+	for y in 5:
+		for x in 5:
+			var t0: Vector2i = coin + Vector2i(x, y)
+			if not g.dans(t0):
+				continue
+			if x == 0 or y == 0 or x == 4 or y == 4:
+				g.poser_contenu(t0, "mur_construit")
+				g.materiaux[g.idx(t0)] = "granit"
+			else:
+				g.contenu[g.idx(t0)] = 0
+				g.materiaux.erase(g.idx(t0))
+
+	# 1. LA MAISON DEBOUT : rien ne tombe. Le contrôle négatif est ici — c'est la même géométrie qu'au point 2.
+	SimTerrain.support_reexaminer(s, Grille.en_couche(coin + Vector2i(2, 2), 0))
+	s.support_prochain_pas = 0
+	s._tiquer_support(100)
+	var _ouvert := func(t: Vector2i) -> bool: return not g.contenu_de(t).get("bloque_passage", false)
+	verifier(_ouvert.call(centre1) and _ouvert.call(centre2), "la maison debout : les deux planchers tiennent")
+
+	# 2. ON ABAT LES MURS DU BAS. Les murs du haut ne reposent plus sur rien, les planchers non plus.
+	for y in 5:
+		for x in 5:
+			var t0: Vector2i = coin + Vector2i(x, y)
+			if g.dans(t0) and (x == 0 or y == 0 or x == 4 or y == 4):
+				g.contenu[g.idx(t0)] = 0
+				g.materiaux.erase(g.idx(t0))
+				SimTerrain.support_reexaminer(s, t0)
+	for k in 6:   # plusieurs pas : un pan qui tombe en met d'autres en question — c'est la propagation
+		s.support_prochain_pas = 0
+		s._tiquer_support(200 + k * 10)
+	verifier(not _ouvert.call(centre1), "les murs du bas abattus, le plancher du premier étage cède")
+	verifier(not _ouvert.call(centre2), "ET CELUI DU SECOND AVEC — l'effondrement se propage à ce que le pan portait")
+	var murs_debout := 0
+	for y in 5:
+		for x in 5:
+			var t2: Vector2i = Grille.en_couche(coin + Vector2i(x, y), 2)
+			if g.dans(t2) and "solide" in g.contenu_de(t2).get("tags", []):
+				murs_debout += 1
+	verifier(murs_debout == 0, "et il ne reste pas un mur du second en l'air (%d debout)" % murs_debout)
+	verifier(int(cfg.get("composante_max", 0)) > 0, "la borne du parcours de groupe est en données (%d tuiles)" % int(cfg.get("composante_max", 0)))
+
+
 ## LA FUSION (ordre de travail 23, 2026-09-09) — la chaleur ne sait plus seulement BRÛLER. Une matière change d'état
 ## quand la chaleur atteint SON point de fusion, lu sur sa fiche en degrés réels : le gypse rend du plâtre à 150 °C,
 ## le calcaire de la chaux à 825, la malachite son cuivre à 200, l'hématite tient jusqu'à 1565.

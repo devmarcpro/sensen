@@ -15,7 +15,8 @@
     "transparence": 10,
     "elasticite": 80,
     "friction": 50,
-    "fusion": 9999
+    "fusion": 9999,
+    "portance": 12
   },
   "tags": [
     "animal"

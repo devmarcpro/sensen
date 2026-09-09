@@ -4,7 +4,7 @@
     python tools/gen_materials.py
 
 Sources (la note fait foi, jamais ce script) :
-  - les tables des 12 catalogues (14 stats, colonnes Dur…Fus) — « la table fait foi » ;
+  - les tables des 12 catalogues (15 stats, colonnes Dur…Por) — « la table fait foi » ;
   - la palette (data/palette_materiaux.json, transcrite de Palette de couleurs des matériaux) ;
   - les surcharges Wu Xing (docs: Décision — Surcharges Wu Xing des matériaux) ;
   - les catégories (data/material_categories.json : outil, compétence, station).
@@ -27,7 +27,7 @@ LOCALE = os.path.join(RACINE, "godot", "locale", "fr.csv")
 NE_FOND_PAS = 9999
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
          "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
-         "fusion"]
+         "fusion", "portance"]
 # fichier de catalogue → catégorie (Catégories de matériaux : 11 catégories figées)
 CATALOGUES = {
     "Bois": "bois", "Métaux": "metal", "Roches": "roche", "Minéraux": "mineral", "Gemmes": "gemme",
@@ -118,10 +118,10 @@ for fichier, cat in CATALOGUES.items():
         if not ligne.startswith("|") or ligne.startswith("|---") or ligne.startswith("| Matériau"):
             continue
         cellules = [c.strip() for c in ligne.strip().strip("|").split("|")]
-        if len(cellules) < 15:
+        if len(cellules) < 16:
             continue
         nom = cellules[0].replace("**", "").strip()
-        valeurs = cellules[1:15]
+        valeurs = cellules[1:16]
         stats = {}
         for cle, v in zip(STATS, valeurs):
             # Un tiret vaut zero partout — sauf pour `fusion`, ou il veut dire « ne fond pas » : 9999, que rien
