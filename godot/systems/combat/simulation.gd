@@ -671,10 +671,75 @@ func poids_de(e: Dictionary) -> Dictionary:
 		total += regles.poids_objet(items.get(uid, {}), fonctionnalites)
 	for slot in e.equipement.keys():
 		total += regles.poids_objet(items.get(e.equipement[slot], {}), fonctionnalites)
+	total += poids_porte(e)   # ce qu'on porte pèse (Porter n'est pas être au même endroit, 2026-09-09)
 	var cap := regles.capacite_poids(e.stats_eff) + float(e.get("mecaniques", {}).get("capacite_poids", {}).get("n", 0))
 	if SimTalents.a_talent(self, e, "sans_chair"):   # le Spectre : capacité fixe
 		cap = float(regles.r.talents.sans_chair.capacite_poids)
 	return {"poids": total, "capacite": cap, "facteur": regles.facteur_surcharge(total, cap)}
+
+
+## ---------------------------------------------------------------- porter (ordre de travail 26 decies, 2026-09-09)
+
+## PORTER N'EST PAS ÊTRE AU MÊME ENDROIT. La **pile** est une coïncidence de position — trois êtres sur une tuile,
+## chacun libre de partir quand il veut. **Porter est une relation** : celui qui porte déplace l'autre avec lui, et
+## l'autre cesse d'occuper une tuile à lui. La file attendait le corps et les cadavres, « parce que porter un corps
+## est le premier usage qu'on en fera » ; le corps est un plan de parties depuis ce matin.
+## Trois conséquences, et ce sont elles la relation : le porté **suit**, il **n'occupe plus** de tuile — on ne le
+## vise pas, on ne le contourne pas —, et il **pèse** sur la charge de qui le porte.
+func porter(e: Dictionary, cible: Dictionary, tick: int) -> bool:
+	if not e.vivant or e.has("porte") or cible.id == e.id or cible.get("porte_par", "") != "":
+		return false
+	if Grille.distance(e.pos, cible.pos) > 1 or Grille.z_de(e.pos) != Grille.z_de(cible.pos):
+		return false
+	# QUI PEUT ÊTRE PORTÉ : un mort, toujours. Un vivant seulement s'il est du même camp ET hors de combat — on
+	# n'emporte pas un ennemi conscient sur l'épaule, et un allié qui se bat n'a pas envie qu'on le soulève.
+	if cible.vivant and (str(cible.camp) != str(e.camp) or en_combat(cible) or en_combat(e)):
+		EventBus.emettre(&"journal", [&"journal.porter_refuse", {"nom": cible.name_key}])
+		return false
+	grille.liberer(cible.pos, cible.id)
+	cible["porte_par"] = e.id
+	cible.pos = e.pos
+	e["porte"] = cible.id
+	e.compteur = tick + int(regles.r.deplacement.get("porter", {}).get("ticks", 900))
+	EventBus.emettre(&"journal", [&"journal.porte", {"nom": e.name_key, "def": cible.name_key}])
+	return true
+
+
+## Reposer à terre celui qu'on portait, sur une tuile libre à côté — à défaut sur la sienne, un corps ne se dissout
+## pas. **Le nom n'est pas `deposer`** : ce verbe était déjà pris par le dépôt de ressources dans un stock, et le
+## compilateur me l'a dit à la seconde. Deux sens sous un même nom, c'est la collision que le Vocabulaire refuse.
+func reposer_porte(e: Dictionary, tick: int) -> bool:
+	var id_p := str(e.get("porte", ""))
+	if id_p.is_empty() or not entites.has(id_p):
+		e.erase("porte")
+		return false
+	var cible: Dictionary = entites[id_p]
+	var ou := _tuile_libre_autour(e.pos)
+	if ou.x < 0:
+		ou = e.pos
+	cible.erase("porte_par")
+	cible.pos = ou
+	grille.placer(cible.id, ou)
+	e.erase("porte")
+	e.compteur = tick + int(regles.r.deplacement.get("porter", {}).get("ticks", 900))
+	EventBus.emettre(&"journal", [&"journal.depose", {"nom": e.name_key, "def": cible.name_key}])
+	return true
+
+
+## Ce que pèse celui qu'on porte : un corps à vide, plus ce que sa carrure ajoute — un colosse est plus lourd —,
+## plus tout ce qu'il a sur lui. C'est ce qui fait qu'emporter un mort ralentit vraiment.
+func poids_porte(e: Dictionary) -> float:
+	var id_p := str(e.get("porte", ""))
+	if id_p.is_empty() or not entites.has(id_p):
+		return 0.0
+	var c: Dictionary = entites[id_p]
+	var p: Dictionary = regles.r.deplacement.get("porter", {})
+	var t := float(p.get("poids_base", 60.0)) + float(c.get("stats_eff", {}).get("endurance", 5)) * float(p.get("poids_par_endurance", 2.0))
+	for uid in c.get("sac", []):
+		t += regles.poids_objet(items.get(uid, {}), fonctionnalites)
+	for slot in (c.get("equipement", {}) as Dictionary).keys():
+		t += regles.poids_objet(items.get(c.equipement[slot], {}), fonctionnalites)
+	return t
 
 
 ## L'eau refuse un être en surcharge (Eau et liquides) : le pathfinding doit le savoir,
@@ -1093,6 +1158,10 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._equiper(self, e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
 			ok = SimObjets._ramasser(self, e, h.ticks)
+		"porter":
+			ok = porter(e, entites.get(str(i.get("qui", "")), {}), h.ticks) if entites.has(str(i.get("qui", ""))) else false
+		"reposer":
+			ok = reposer_porte(e, h.ticks)
 		"respawn":
 			ok = SimObjets._respawn(self, e)
 		"sertir":
@@ -1360,6 +1429,8 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.pos = vers
 	grille.placer(e.id, vers)
 	SimTerrain.tracer(self, e, vers)   # on laisse une odeur là où l'on passe (Émergence — le champ d'odeur)
+	if e.has("porte") and entites.has(str(e.porte)):   # ce qu'on porte suit, sans chemin ni décision propre
+		entites[str(e.porte)].pos = vers
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
 	if e.controle == "joueur":   # surcharge (Armures et poids porté) : sur les ticks d'Athlétisme, jamais sur une stat
 		ticks_dep = ceili(float(ticks_dep) * poids_de(e).facteur)

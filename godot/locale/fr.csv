@@ -583,6 +583,8 @@ partie.torse,Torse
 journal.partie_perdue,"{nom} perd : {partie}"
 journal.partie_vitale,"{partie} de {nom} est détruit — il s'effondre"
 journal.flaire,"{nom} flaire une piste et la suit"
+journal.depose,"{nom} dépose {def}"
+journal.porter_refuse,"{nom} ne se laisse pas porter"
 journal.effondrement,"le plafond s'effondre ({x},{y})"
 journal.effondrement_blesse,"{nom} est pris sous l'éboulement : {degats} dégâts"
 journal.lave_figee,"la lave se fige au contact de l'eau ({x},{y})"

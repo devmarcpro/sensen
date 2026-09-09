@@ -338,10 +338,18 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     à chaque choix — sans quoi « il ne va pas vers sa cible » ne se corrige pas, il fait relire le code au hasard ;
     et une sonde qui signale un souci en dit maintenant la **cause visible**, pas seulement le symptôme.
 
-26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.** La pile est une coïncidence de position ; **porter** est une
-    relation — celui qui porte déplace l'autre avec lui. C'est ce que le designer voulait dire par « un PNJ peut
-    porter un PNJ ». La relation se range avec le corps (ligne 28 bis) et les cadavres (28 ter), parce que porter un
-    corps est le premier usage qu'on en fera. **Non codée.**
+~~26 decies. **PORTER N'EST PAS ÊTRE AU MÊME ENDROIT.**~~ — **FAIT le 2026-09-09.** La ligne attendait le corps
+    (28 bis) « parce que porter un corps est le premier usage qu'on en fera » ; le corps est un plan de parties
+    depuis le matin même, donc la relation a pu s'écrire.
+    **Trois conséquences, et ce sont elles qui FONT la relation** : le porté **suit** à la tuile près, sans chemin ni
+    décision propre ; il **n'occupe plus** de tuile — on ne le vise pas, on ne le contourne pas ; et il **pèse** —
+    la charge du joueur passe de 11 à 91 quand il hisse un corps, et l'eau le refuse comme n'importe quelle
+    surcharge. Un cadavre est le fardeau le plus lourd qu'on puisse tenir.
+    **Qui peut être porté** : un mort, toujours ; un vivant seulement s'il est de son camp ET hors de combat — on
+    n'emporte pas un ennemi conscient sur l'épaule.
+    *Le compilateur a attrapé une collision de vocabulaire en deux secondes* : `deposer` était déjà pris (il dépose
+    des ressources dans un stock), et deux sens sous un même nom sont exactement ce que [[Vocabulaire]] refuse — le
+    verbe qui repose un corps s'appelle donc `reposer_porte`.
 
 ~~26 undecies. **LES MEUBLES S'EMPILENT AUSSI**~~ — **FAIT le 2026-09-09** *(designer 2026-09-08 : « on peut aussi
     mettre des meubles les uns sur les autres »).* Le même remède que pour les êtres, écrit et prouvé la veille :

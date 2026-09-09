@@ -2060,6 +2060,8 @@ partie.torse,Torso
 journal.partie_perdue,"{nom} loses: {partie}"
 journal.partie_vitale,"{nom}'s {partie} is destroyed — they collapse"
 journal.flaire,"{nom} catches a scent and follows it"
+journal.depose,"{nom} sets {def} down"
+journal.porter_refuse,"{nom} will not be carried"
 journal.effondrement,"the ceiling caves in ({x},{y})"
 journal.effondrement_blesse,"{nom} is caught in the cave-in: {degats} damage"
 journal.lave_figee,"the lava cools where it meets the water ({x},{y})"

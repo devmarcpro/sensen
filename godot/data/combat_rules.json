@@ -33,7 +33,13 @@
     },
     "pile_max": 3,
     "danger_refus": 100,
-    "danger_cout_par_grade": 100
+    "danger_cout_par_grade": 100,
+    "porter": {
+      "_doc": "PORTER (ordre de travail 26 decies, 2026-09-09) : une RELATION, pas une pile. Le porte suit le porteur, n occupe plus de tuile, et PESE. `poids_base` est ce que pese un corps a vide ; `poids_par_endurance` ce que sa carrure ajoute — un colosse est plus lourd a porter. `ticks` est le temps qu il faut pour le charger ou le deposer. Un MORT se porte toujours ; un vivant seulement s il est du meme camp ET hors de combat, parce qu on n emporte pas un ennemi conscient sur l epaule.",
+      "poids_base": 60.0,
+      "poids_par_endurance": 2.0,
+      "ticks": 900
+    }
   },
   "actions": {
     "_doc": "Boucle de tick · Attaque lourde et télégraphe · Décision — Vocabulaire d'attaque des créatures",

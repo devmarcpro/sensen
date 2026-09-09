@@ -386,6 +386,44 @@ func _comparer_noyau(g: Grille, nom: String, n: int) -> void:
 ## même case, un PNJ peut porter un PNJ qui porte un PNJ »). Ce test prouve les quatre règles : on monte sur un ami,
 ## `occupant` reste le SOMMET (les cent quatre-vingts lecteurs de la grille lisent ça), celui du dessous peut partir
 ## sans emporter celui du dessus, et un ennemi ne s'escalade pas.
+## PORTER N'EST PAS ÊTRE AU MÊME ENDROIT (ordre de travail 26 decies, 2026-09-09). La **pile** est une coïncidence
+## de position — trois êtres sur une tuile, chacun libre de partir. **Porter est une relation** : l'un déplace
+## l'autre, et l'autre cesse d'occuper une tuile à lui.
+## Ce test tient les trois conséquences qui FONT la relation : le porté suit, il n'occupe plus, et il pèse.
+func test_porter() -> void:
+	var p: Dictionary = GameData.config("combat_rules").deplacement.get("porter", {})
+	verifier(not p.is_empty() and float(p.poids_base) > 0.0, "ce que pèse un corps est en données (%.0f + %.0f par point d'endurance)" % [float(p.poids_base), float(p.poids_par_endurance)])
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var autres: Array = s.vivants().filter(func(x: Dictionary) -> bool: return x.id != j.id)
+	verifier(not autres.is_empty(), "l'arène a quelqu'un d'autre")
+	var mort: Dictionary = autres[0]
+	# UN ENNEMI CONSCIENT NE SE PORTE PAS : on ne l'emporte pas sur l'épaule.
+	var colle := s._tuile_libre_autour(j.pos)
+	s.grille.liberer(mort.pos, mort.id)
+	mort.pos = colle
+	s.grille.placer(mort.id, colle)
+	verifier(not s.porter(j, mort, 0), "un ennemi conscient refuse d'être porté")
+	# UN MORT, TOUJOURS.
+	mort.vivant = false
+	s.grille.liberer(mort.pos, mort.id)
+	s.grille.placer(mort.id, colle)
+	var poids0: float = s.poids_de(j).poids
+	verifier(s.porter(j, mort, 0), "un mort se charge sur l'épaule")
+	verifier(str(mort.get("porte_par", "")) == j.id and str(j.get("porte", "")) == mort.id, "la relation se lit des deux côtés")
+	verifier(s.grille.occupant(colle).is_empty(), "et il N'OCCUPE PLUS sa tuile : on ne le vise pas, on ne le contourne pas")
+	verifier(s.poids_de(j).poids > poids0, "il PÈSE sur la charge de qui le porte (%.0f → %.0f)" % [poids0, s.poids_de(j).poids])
+	# IL SUIT, sans chemin ni décision propre.
+	var vers := s._tuile_libre_autour(j.pos)
+	var avant_j: Vector2i = j.pos
+	verifier(s._deplacer(j, vers, 10) and j.pos != avant_j, "le porteur avance")
+	verifier(mort.pos == j.pos, "et le porté suit, à la tuile près — c'est cela, la relation")
+	# ON LE REPOSE, et il redevient une chose du monde.
+	verifier(s.reposer_porte(j, 20), "on le repose")
+	verifier(not j.has("porte") and not mort.has("porte_par") and s.grille.occupant(mort.pos) == mort.id, "il occupe de nouveau une tuile, et la charge retombe")
+	verifier(is_equal_approx(s.poids_de(j).poids, poids0), "le porteur retrouve son poids (%.0f)" % s.poids_de(j).poids)
+
+
 func test_pile_sur_une_tuile() -> void:
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
