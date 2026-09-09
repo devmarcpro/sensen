@@ -208,7 +208,20 @@ class CaseApparence extends Button:
 		var dossier := "visage/" + locus
 		var idx := Planches.index_locus(locus, valeur)
 		if Planches.variantes(dossier) > 0 and idx >= 0:
-			Planches.dessiner(self, dossier, idx, r.grow(-3.0))
+			# UNE PIÈCE SE MONTRE À SA PLACE (designer 2026-09-09, les marqueurs de visage). Un sprite de PIÈCE —
+			# un œil, une oreille — est dessiné au centre de sa case et posé par le jeu sur chaque ancre. La
+			# vignette le montrait donc comme un point au milieu du carré, et l'on choisissait ses yeux à l'aveugle.
+			# Elle applique maintenant les mêmes ancres que le visage : deux yeux, deux oreilles.
+			var cadre := r.grow(-3.0)
+			var siens: Array = Planches.marqueurs(dossier, idx).get(locus, [])
+			var places: Array = [Vector2.ZERO]
+			if not siens.is_empty():
+				places = []
+				var k := cadre.size / float(Planches.case())
+				for a in Planches.ancres_defaut(locus):
+					places.append(((a as Vector2) - (siens[0] as Vector2)) * k)
+			for d_p in places:
+				Planches.dessiner(self, dossier, idx, Rect2(cadre.position + d_p, cadre.size))
 		else:
 			# Pas de planche pour ce locus (la carrure, la taille) : on écrit le mot, faute d'image à montrer.
 			var f := get_theme_default_font()

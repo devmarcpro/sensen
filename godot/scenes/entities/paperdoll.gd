@@ -561,9 +561,49 @@ func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vect
 	var local := Transform2D(p * k, -d * k, c - p * (cote * 0.5) + d * (cote * 0.5))
 	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
 	var cc := float(Planches.case())
-	Planches.dessiner(self, dossier, maxi(0, Planches.index_locus(trait_id, valeur)), Rect2(0, 0, cc, cc), teinte)
+	var idx := maxi(0, Planches.index_locus(trait_id, valeur))
+	for decalage in _places_trait(trait_id, dossier, idx):
+		Planches.dessiner(self, dossier, idx, Rect2(decalage, Vector2(cc, cc)), teinte)
 	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 	return true
+
+
+## OÙ POSER UN TRAIT, ET COMBIEN DE FOIS (designer 2026-09-09 : « avoir sur chaque forme de visage des marqueurs pour
+## les autres éléments… une couleur par élément… le sprite de l'élément correspondant est centré sur le pixel »).
+##
+## **Trois règles, et elles se lisent d'un trait :**
+## · **Les ancres d'un élément** sont les marqueurs que la case de TÊTE porte pour lui ; à défaut, les ancres par
+##   défaut des données — là où le visage les a toujours portés.
+## · Une case de trait qui porte **son propre marqueur** est une **pièce** : dessinée UNE FOIS PAR ANCRE, calée pour
+##   que son marqueur tombe dessus. C'est ainsi qu'un seul œil dessiné sert aux deux yeux.
+## · Une case sans marqueur est un **visage entier**, comme avant : dessinée une fois, translatée du déplacement
+##   MOYEN des ancres. Une tête sans marqueurs ne translate rien — le comportement d'avant, à l'octet près.
+##
+## Rend la liste des décalages, en pixels de case.
+func _places_trait(trait_id: String, dossier: String, idx: int) -> Array:
+	if trait_id == "tete":
+		return [Vector2.ZERO]   # la tête EST la case : rien à ancrer sur elle-même
+	var defaut: Array = Planches.ancres_defaut(trait_id)
+	var idx_tete := maxi(0, Planches.index_locus("tete", str(_ap.get("tete", "ronde"))))
+	var ancres: Array = Planches.marqueurs("visage/tete", idx_tete).get(trait_id, [])
+	if ancres.is_empty():
+		ancres = defaut
+	if ancres.is_empty():
+		return [Vector2.ZERO]
+	var siens: Array = Planches.marqueurs(dossier, idx).get(trait_id, [])
+	if not siens.is_empty():
+		var propre: Vector2 = siens[0]   # une pièce n'a qu'un point d'attache : le premier suffit
+		var res: Array = []
+		for a in ancres:
+			res.append(a - propre)
+		return res
+	# Un visage entier : on le déplace du mouvement moyen des ancres, et de rien du tout si la tête est muette.
+	if defaut.is_empty() or defaut.size() != ancres.size():
+		return [Vector2.ZERO]
+	var somme := Vector2.ZERO
+	for i in ancres.size():
+		somme += (ancres[i] as Vector2) - (defaut[i] as Vector2)
+	return [somme / float(ancres.size())]
 
 
 func _angle_arme() -> float:

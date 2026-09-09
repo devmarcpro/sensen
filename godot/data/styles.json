@@ -245,7 +245,114 @@
   "planches": {
     "_doc": "Les planches de sprites (designer 2026-09-06, 20 h 50) : un dossier par membre, par trait du visage, par objet, sous assets/ ; chaque PNG y est une case de `case` px ou une planche de cases ; le jeu assemble le dossier au premier usage (Planches). visage_boite : le cote de la case d'un trait du visage, en rayons de tete.",
     "case": 64,
-    "visage_boite": 2.6
+    "visage_boite": 2.6,
+    "marqueurs": {
+      "_doc": "UNE COULEUR PAR ELEMENT (designer 2026-09-09). Un pixel de cette couleur, pose sur une case de planche de visage, dit OU va l element. Les planches se dessinent en nuances de gris — une couleur franche ne peut donc etre que volontaire, et le jeu l EFFACE du dessin apres l avoir lue : elle ne se voit jamais en jeu. Deux pixels de la meme couleur (les deux yeux, les deux oreilles) donnent deux ancres, et la piece est dessinee deux fois.",
+      "yeux": "#ff0000",
+      "nez": "#00ff00",
+      "bouche": "#0000ff",
+      "oreilles": "#ffff00",
+      "cheveux": "#ff00ff",
+      "pilosite": "#00ffff",
+      "sourcils": "#ff8000",
+      "barbe": "#8000ff",
+      "machoire": "#00ff80",
+      "menton": "#ff0080",
+      "pommettes": "#80ff00",
+      "implantation": "#0080ff"
+    },
+    "marqueur_tolerance": 0.06,
+    "ancres": {
+      "_doc": "OU VA CHAQUE ELEMENT QUAND LA TETE NE LE DIT PAS. En RAYONS DE TETE, depuis le centre de la case (x vers la droite, y vers le bas) — la meme unite que le reste du visage, si bien que changer `visage_boite` ne les fausse pas. Le generateur y pose ses marqueurs et le jeu s en sert de repli : une tete sans marqueurs place donc ses traits exactement comme avant.",
+      "yeux": [
+        [
+          -0.42,
+          -0.15
+        ],
+        [
+          0.42,
+          -0.15
+        ]
+      ],
+      "nez": [
+        [
+          0.0,
+          -0.05
+        ]
+      ],
+      "bouche": [
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "oreilles": [
+        [
+          -0.9,
+          0.0
+        ],
+        [
+          0.9,
+          0.0
+        ]
+      ],
+      "cheveux": [
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "pilosite": [
+        [
+          0.0,
+          0.55
+        ]
+      ],
+      "sourcils": [
+        [
+          -0.42,
+          -0.42
+        ],
+        [
+          0.42,
+          -0.42
+        ]
+      ],
+      "barbe": [
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "machoire": [
+        [
+          0.0,
+          0.55
+        ]
+      ],
+      "menton": [
+        [
+          0.0,
+          0.85
+        ]
+      ],
+      "pommettes": [
+        [
+          -0.62,
+          0.0
+        ],
+        [
+          0.62,
+          0.0
+        ]
+      ],
+      "implantation": [
+        [
+          0.0,
+          -0.6
+        ]
+      ]
+    }
   },
   "sprites": {
     "px_par_unite": 8,

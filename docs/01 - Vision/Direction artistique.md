@@ -141,6 +141,22 @@ Comment le jeu se donne à voir : isométrique, tuiles teintées, billboards pap
 > **Où les poser** : `assets/membres/<segment sans côté>/` pour les membres, `assets/visage/<trait>/` pour les traits. Un dossier est une planche ; ses PNG se lisent dans l'ordre de leurs noms, numérotés, et **l'index d'une variante ne bouge pas quand on en ajoute** — on ajoute donc toujours EN FIN, jamais au milieu (pour un trait du visage, cet index est celui de la valeur dans `apparence.json`, et l'insérer au milieu changerait le visage de tous les personnages sauvegardés).
 
 
+> [!success] Codé le 2026-09-09 — **les marqueurs de visage** (designer : « pour les sprites de visage, pour permettre de meilleurs assemblages, avoir sur chaque forme de visage des marqueurs pour les autres éléments (yeux bouche nez etc)… une couleur par élément… le sprite de l'élément correspondant est centré sur le pixel », puis « plutôt par forme de visage le sprite et un autre fichier correspondant qui est juste les points ? »)
+> **L'idée marche parce que les planches sont en nuances de gris** : une couleur franche ne peut être que volontaire. Un pixel rouge dit « l'œil va ici », et une tête à museau descend sa bouche au bout du museau **sans qu'aucune règle ne connaisse le mot « museau »**.
+>
+> **LA CONVENTION, EN DEUX FICHIERS** *(la seconde idée du designer, et elle est meilleure que la première)* : `06_museau.png` porte le dessin, `06_museau.points.png` porte les points — transparent partout sauf ses quelques pixels. L'artiste ne met **rien** dans son sprite : plus de pixel à ne pas recouvrir, plus de couleur à ne pas mélanger, plus de risque qu'un aplat de rouge sombre passe pour un marqueur. Le calque se regarde et se corrige seul, et on peut le refaire sans toucher au dessin.
+> *Les marqueurs posés dans le dessin lui-même restent lus (et effacés au chargement) : ce qui existe ne casse pas. Le calque est le chemin recommandé, pas le seul.*
+>
+> **LE PIÈGE, ET IL EST EXACTEMENT CELUI DES PLANCHES** : `Planches` concatène les PNG **dans l'ordre des noms**. Laissé dans la liste, `06_museau.points.png` se rangerait entre deux dessins et décalerait d'un rang tout ce qui suit — chaque visage sauvegardé changerait de tête, sans erreur et sans message. Le chargeur l'écarte **avant** de numéroter, `verif_sprites` ne le compte pas, et un test compte les cases de chaque locus pour le prouver.
+>
+> **TROIS RÈGLES DE PLACEMENT, et elles se lisent d'un trait**
+> 1. **Les ancres d'un élément** sont les marqueurs que la case de TÊTE porte pour lui ; à défaut, les **ancres par défaut** de `styles.planches.ancres` — là où le visage les a toujours portés, écrites en **rayons de tête** pour qu'un changement de `visage_boite` ne les fausse pas.
+> 2. Une case de trait qui porte **son propre marqueur** est une **pièce** : dessinée **une fois par ancre**, calée pour que son marqueur tombe dessus. *Un seul œil dessiné sert aux deux yeux*, et une tête peut les écarter comme elle veut.
+> 3. Une case **sans** marqueur est un **visage entier**, comme avant : dessinée une fois, translatée du déplacement moyen des ancres. Une tête sans marqueurs ne translate rien — **le comportement d'avant, à l'octet près.**
+>
+> **Une couleur par élément** (`styles.planches.marqueurs`) : yeux `#ff0000`, nez `#00ff00`, bouche `#0000ff`, oreilles `#ffff00`, cheveux `#ff00ff`, pilosité `#00ffff`, sourcils, barbe, mâchoire, menton, pommettes, implantation. Deux pixels de la même couleur (les deux yeux) donnent deux ancres.
+> **Et la vignette de l'écran d'apparence applique les mêmes ancres** : une pièce y apparaissait comme un point au milieu du carré, et l'on choisissait ses yeux à l'aveugle.
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Piliers d'inspiration]]
 - **Alimente** : [[Squelette modulaire et points d'attache]], [[Écrans d'interface]], [[Palette de couleurs des matériaux]]

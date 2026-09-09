@@ -1906,6 +1906,67 @@ func test_planches() -> void:
 	Planches.vider()
 
 
+## LES MARQUEURS DE VISAGE (designer 2026-09-09 : « avoir sur chaque forme de visage des marqueurs pour les autres
+## éléments… une couleur par élément… le sprite de l'élément correspondant est centré sur le pixel »).
+## Quatre choses à prouver, et la troisième est celle qu'on oublierait : le marqueur **ne se voit pas**.
+func test_marqueurs_visage() -> void:
+	var st: Dictionary = GameData.config("styles").get("planches", {})
+	var table: Dictionary = st.get("marqueurs", {})
+	verifier(table.has("yeux") and table.has("bouche"), "chaque élément du visage a SA couleur de marqueur (%d)" % table.size())
+	# 1. LES ANCRES PAR DÉFAUT sont là où le visage les a toujours portés : deux yeux, une bouche.
+	verifier(Planches.ancres_defaut("yeux").size() == 2 and Planches.ancres_defaut("bouche").size() == 1, "les ancres par défaut : deux yeux, une bouche")
+	var c := float(Planches.case())
+	var oeil_g: Vector2 = Planches.ancres_defaut("yeux")[0]
+	verifier(oeil_g.x < c * 0.5 and oeil_g.y < c * 0.5, "l'œil gauche est à gauche et au-dessus du centre (%s)" % str(oeil_g))
+	# 2. UNE TÊTE MARQUÉE dit où vont les autres éléments — et une tête à museau ne les met pas où une tête ronde les met.
+	var i_museau := Planches.index_locus("tete", "museau")
+	var mk: Dictionary = Planches.marqueurs("visage/tete", maxi(0, i_museau))
+	verifier(mk.has("yeux") and (mk.yeux as Array).size() == 2 and mk.has("bouche"), "la tête « museau » porte ses marqueurs (%s)" % str(mk.keys()))
+	if mk.has("bouche"):
+		verifier(float((mk.bouche as Array)[0].y) > float(Planches.ancres_defaut("bouche")[0].y), "et sa bouche est PLUS BAS que la bouche par défaut : au bout du museau (%.1f contre %.1f)" % [float((mk.bouche as Array)[0].y), float(Planches.ancres_defaut("bouche")[0].y)])
+	# 3. LE MARQUEUR NE SE VOIT PAS. C'est ce qu'on oublierait de vérifier, et ce serait un pixel rouge en plein
+	# front. Le chargement le lit puis l'efface : aucune case de visage ne garde de couleur saturée.
+	# On cherche les COULEURS DE MARQUEUR, pas « toute couleur » : une planche dessinée à la main a le droit d'avoir
+	# du rouge sombre dans un œil ou du châtain dans des cheveux, et le premier jet de ce test l'accusait d'être un
+	# marqueur oublié. *Un test trop large accuse le contenu au lieu de la règle.*
+	var restants := 0
+	var tol := float(st.get("marqueur_tolerance", 0.06))
+	for dossier in ["visage/tete", "visage/yeux", "visage/bouche", "visage/oreilles"]:
+		var img: Image = Planches.image(dossier)
+		if img == null:
+			continue
+		for y in img.get_height():
+			for x in img.get_width():
+				var px := img.get_pixel(x, y)
+				if px.a < 0.5:
+					continue
+				for element: String in table.keys():
+					var col := Color.html(str(table[element]))
+					if absf(px.r - col.r) <= tol and absf(px.g - col.g) <= tol and absf(px.b - col.b) <= tol:
+						restants += 1
+						break
+	verifier(restants == 0, "aucun marqueur ne survit au chargement : il ne se voit jamais en jeu (%d pixel(s))" % restants)
+	# 4. UNE PIÈCE PORTE LE SIEN, AU CENTRE : c'est lui que le jeu fera tomber sur chaque ancre, si bien qu'un seul
+	# œil dessiné sert aux deux yeux.
+	var i_fauves := Planches.index_locus("yeux", "fauves")
+	var mp: Dictionary = Planches.marqueurs("visage/yeux", maxi(0, i_fauves))
+	if i_fauves >= 0:
+		verifier(mp.has("yeux") and (mp.yeux as Array).size() == 1, "l'œil « fauve » est une PIÈCE : un seul marqueur, le sien (%s)" % str(mp.keys()))
+	# Et une planche que le designer a dessinée sans marqueur reste un visage entier : rien ne l'y oblige.
+	var i_points := Planches.index_locus("yeux", "points")
+	verifier(Planches.marqueurs("visage/yeux", maxi(0, i_points)).is_empty(), "une planche sans marqueur reste un visage entier — le marquage est un CHOIX, pas une obligation")
+	# 5. LE CALQUE DES POINTS N'EST PAS UNE CASE (designer 2026-09-09 : « le sprite et un autre fichier
+	# correspondant qui est juste les points »). C'est LE piège de cette convention : laissé dans la liste des
+	# fichiers, `06_museau.points.png` se rangerait entre deux dessins et décalerait d'un rang tout ce qui suit —
+	# chaque visage sauvegardé changerait de tête, sans erreur et sans message. Le compte le prouve.
+	for locus_v in GameData.config("apparence").get("loci", []):
+		var lid := str((locus_v as Dictionary).id)
+		var n_v: int = (locus_v as Dictionary).valeurs.size()
+		var n_p := Planches.variantes("visage/" + lid)
+		if n_p > 0:
+			verifier(n_p == n_v, "visage/%s : %d cases pour %d valeurs — un calque de points ne compte pas pour une case" % [lid, n_p, n_v])
+
+
 ## Les passes de dessin par le noyau (file 114, 2026-09-06) : le brouillard et les toits en tableaux de triangles — le noyau
 ## C++ rend les mêmes tableaux que PassesGD (points, couleurs, UV, végétaux), sur une fenêtre de ville, de jour et de nuit,
 ## avec et sans champ de vue, au sol et à l'étage.

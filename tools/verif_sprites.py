@@ -107,6 +107,8 @@ def planches():
             continue
         cases = 0
         for png in sorted(glob.glob(os.path.join(dossier, "*.png"))):
+            if png.endswith(".points.png"):
+                continue   # un calque de points n est pas une case : il ne se compte ni ne se dessine
             t = taille_png(png)
             if t is None or t[0] % case != 0 or t[1] % case != 0 or t[0] == 0:
                 print("  planche %s/%s : %s fait %s, pas un multiple de %d" % (famille, nom, os.path.basename(png), t, case))

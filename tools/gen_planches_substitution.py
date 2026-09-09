@@ -36,6 +36,7 @@ class Toile:
         self.c = c
         self.cov = [[0.0] * c for _ in range(c)]   # couverture 0..1 (alpha)
         self.val = [[1.0] * c for _ in range(c)]   # gris 0..1
+        self.marques = {}   # (x, y) -> (r, g, b) : les marqueurs de couleur, poses par-dessus tout a la fin
 
     def forme(self, dedans, gris=1.0):
         c, n = self.c, SS
@@ -105,7 +106,17 @@ class Toile:
                    or (x - cx) ** 2 + (y - (cy - h / 2.0 + r)) ** 2 <= r * r
                    or (x - cx) ** 2 + (y - (cy + h / 2.0 - r)) ** 2 <= r * r, gris)
 
+    def marqueur(self, x, y, hexa):
+        """UN PIXEL DE COULEUR FRANCHE (designer 2026-09-09) : il dit ou va un element du visage. Le jeu le lit puis
+        l EFFACE — il ne se voit jamais. Il se pose APRES le dessin, exactement sur son pixel, sans anticrenelage :
+        une couleur moyennee avec du gris ne serait plus reconnaissable."""
+        xi, yi = int(round(x)), int(round(y))
+        if 0 <= xi < self.c and 0 <= yi < self.c:
+            self.marques[(xi, yi)] = (int(hexa[1:3], 16), int(hexa[3:5], 16), int(hexa[5:7], 16))
+
     def rgba(self):
+        """LE DESSIN SEUL, sans un pixel de couleur : les points vivent dans leur propre fichier (designer
+        2026-09-09, « le sprite et un autre fichier correspondant qui est juste les points »)."""
         out = []
         for y in range(self.c):
             row = []
@@ -113,6 +124,23 @@ class Toile:
                 v = int(round(255 * self.val[y][x]))
                 a = int(round(255 * min(1.0, self.cov[y][x])))
                 row += [v, v, v, a]
+            out.append(row)
+        return out
+
+    def points(self):
+        """LE CALQUE DES POINTS : transparent partout, sauf les quelques pixels de couleur. Rend None s il n y en a
+        aucun — inutile d ecrire un fichier vide a cote de chaque dessin."""
+        if not self.marques:
+            return None
+        out = []
+        for y in range(self.c):
+            row = []
+            for x in range(self.c):
+                if (x, y) in self.marques:
+                    r, g, b = self.marques[(x, y)]
+                    row += [r, g, b, 255]
+                else:
+                    row += [0, 0, 0, 0]
             out.append(row)
         return out
 
@@ -139,12 +167,19 @@ def ecrire_png(chemin, cases):
 ##   · dossier DEJA GARNI de cases individuelles : on n ecrit QUE les valeurs manquantes, une par fichier, numerotees
 ##     a leur place — c est la convention du designer, et elle garde les index exacts.
 ## Rend le nombre de fichiers ecrits.
-def poser(dossier, valeurs, cases):
+def poser(dossier, valeurs, cases, calques=None):
     existants = []
     if os.path.isdir(dossier):
-        existants = [f for f in os.listdir(dossier) if f.endswith(".png") and f != "00_substitution.png"]
+        # UN CALQUE DE POINTS N EST PAS UNE CASE : il ne compte pas comme « le dossier est deja garni », et sa
+        # presence ne doit pas faire croire qu une valeur a deja son dessin.
+        existants = [f for f in os.listdir(dossier)
+                     if f.endswith(".png") and not f.endswith(".points.png") and f != "00_substitution.png"]
     if not existants:
         ecrire_png(os.path.join(dossier, "00_substitution.png"), cases)
+        if calques and any(c is not None for c in calques):
+            vide = [[0, 0, 0, 0] * len(cases[0]) // 4 for _ in cases[0]]
+            ecrire_png(os.path.join(dossier, "00_substitution.points.png"),
+                       [c if c is not None else vide for c in calques])
         return 1
     n = 0
     for i, v in enumerate(valeurs):
@@ -152,6 +187,8 @@ def poser(dossier, valeurs, cases):
         if any(f.endswith("_%s.png" % v) for f in existants):
             continue
         ecrire_png(os.path.join(dossier, nom), [cases[i]])
+        if calques and calques[i] is not None:
+            ecrire_png(os.path.join(dossier, "%02d_%s.points.png" % (i, v)), [calques[i]])
         n += 1
     return n
 
@@ -181,7 +218,7 @@ def planches_membres(c, rig, facteurs):
         # `posmod` la ramene a la seule case presente). On n y pose donc la planche des cinq carrures QUE si le
         # dossier est vide — y ajouter des cases decalerait ce que le designer a mis.
         dossier_m = os.path.join(ASSETS, "membres", base)
-        if os.path.isdir(dossier_m) and [f for f in os.listdir(dossier_m) if f.endswith(".png")]:
+        if os.path.isdir(dossier_m) and [f for f in os.listdir(dossier_m) if f.endswith(".png") and not f.endswith(".points.png")]:
             print("  membres/%-11s deja garni : on ne touche a rien" % base)
             continue
         ecrire_png(os.path.join(dossier_m, "00_substitution.png"), cases)
@@ -197,9 +234,39 @@ def planches_visage(c, app, facteurs):
     haut = lambda k: cy - r * k   # k rayons vers le haut
     droite = lambda k: cx + r * k
 
-    def case(trait, valeur):
+    # LES ELEMENTS DESSINES COMME UNE PIECE (designer 2026-09-09). Une piece est UN oeil, UNE oreille, UN nez :
+    # dessinee au centre de sa case, avec son marqueur au centre, elle est ensuite posee par le jeu sur CHAQUE ancre
+    # que la tete declare. Un seul dessin sert donc aux deux yeux, et une tete peut les ecarter comme elle veut.
+    # Les grands traits (cheveux, barbe, machoire) restent des visages entiers : ils s etendent sur tout le crane et
+    # n ont pas d ancre unique.
+    PIECES = ("yeux", "oreilles", "nez", "bouche", "sourcils", "pommettes")
+    # LES ANCRES PROPRES A UNE FORME DE TETE, en rayons depuis le centre de la case (x vers la droite, y vers le
+    # bas). Elles REMPLACENT les ancres par defaut pour cette forme-la : c est ici qu une tete a museau descend sa
+    # bouche au bout du museau et qu une tete difforme desaligne ses yeux — le jeu, lui, ne connait aucun de ces mots.
+    FORMES = {
+        "museau":     {"yeux": [(-0.36, -0.24), (0.36, -0.24)], "nez": [(0.0, 0.40)], "bouche": [(0.0, 0.82)]},
+        "plaque":     {"yeux": [(-0.55, -0.05), (0.55, -0.05)], "bouche": [(0.0, 0.60)]},
+        "ecailleuse": {"yeux": [(-0.62, -0.28), (0.62, -0.28)], "bouche": [(0.0, 0.55)], "oreilles": [(-1.02, 0.15), (1.02, 0.15)]},
+        "difforme":   {"yeux": [(-0.52, -0.34), (0.28, -0.02)], "nez": [(0.10, 0.10)], "bouche": [(0.14, 0.58)], "oreilles": [(-0.95, -0.18), (0.88, 0.28)]},
+        "cornue":     {"yeux": [(-0.44, -0.28), (0.44, -0.28)], "bouche": [(0.0, 0.55)]},
+    }
+
+    def marquer_tete(t, valeur):
+        """Les marqueurs d une case de TETE : la ou vont les autres elements, sur CETTE forme-la."""
+        table = lire_json("styles.json").get("planches", {})
+        couleurs = table.get("marqueurs", {})
+        ancres = table.get("ancres", {})
+        propre = FORMES.get(valeur, {})
+        for element, hexa in couleurs.items():
+            if element.startswith("_"):
+                continue
+            points = propre.get(element, ancres.get(element, []))
+            for a in points:
+                t.marqueur(cx + float(a[0]) * r, cy + float(a[1]) * r, str(hexa))
+
+    def case(trait, valeur, piece=False):
         t = Toile(c)
-        ecart = 0.42 * r
+        ecart = 0.0 if piece else 0.42 * r
         if trait == "tete":
             f = float(facteurs["tete"].get(valeur, 1.0))
             if valeur == "ronde":
@@ -213,9 +280,32 @@ def planches_visage(c, app, facteurs):
             elif valeur == "en_coeur":
                 t.cercle(cx, cy - r * 0.1, r)
                 t.polygone([(droite(-0.75), cy + r * 0.35), (droite(0.75), cy + r * 0.35), (cx, cy + r * 1.1)])
+            # LES CINQ FORMES DES RACES DU 2026-09-09. Sans branche a elles, elles sortaient VIDES — une case
+            # blanche que le jeu dessinait consciencieusement. Chacune est aussi la demonstration des marqueurs :
+            # le museau porte sa bouche au bout, les plaques ecartent les yeux, le difforme les desaligne.
+            elif valeur == "museau":
+                t.cercle(cx, cy - r * 0.15, r * 0.92)
+                t.polygone([(droite(-0.42), cy + r * 0.05), (droite(0.42), cy + r * 0.05), (droite(0.26), cy + r * 1.0), (droite(-0.26), cy + r * 1.0)])
+                t.cercle(cx, cy + r * 0.95, r * 0.28)
+            elif valeur == "plaque":
+                t.pilule(cx, cy, r * 1.8, r * 1.95)
+                t.segment(droite(-0.8), haut(0.35), droite(0.8), haut(0.35), r * 0.06, 0.55)
+                t.segment(droite(-0.8), cy + r * 0.3, droite(0.8), cy + r * 0.3, r * 0.06, 0.55)
+            elif valeur == "ecailleuse":
+                t.ellipse(cx, cy, r * 1.02, r * 0.94)
+                for k_e in range(3):
+                    t.arc(cx, cy + r * (0.15 * k_e - 0.1), r * (0.35 + 0.22 * k_e), r * 0.045, math.pi * 1.15, math.pi * 1.85, 0.6)
+            elif valeur == "difforme":
+                t.cercle(cx - r * 0.08, cy - r * 0.05, r * 0.95)
+                t.cercle(cx + r * 0.42, cy + r * 0.28, r * 0.48)
+                t.cercle(cx - r * 0.35, cy - r * 0.5, r * 0.3)
+            elif valeur == "cornue":
+                t.cercle(cx, cy, r * 0.96)
+                for cote_c in (-1, 1):
+                    t.segment(cx + r * 0.6 * cote_c, haut(0.62), cx + r * 1.05 * cote_c, haut(1.35), r * 0.11)
         elif trait == "yeux":
-            for cote in (-1, 1):
-                ox, oy = cx + ecart * cote, haut(0.15)
+            for cote in ((1,) if piece else (-1, 1)):
+                ox, oy = cx + ecart * cote, (cy if piece else haut(0.15))
                 if valeur == "grands":
                     t.cercle(ox, oy, r * 0.2)
                 elif valeur == "en_amande":
@@ -227,7 +317,7 @@ def planches_visage(c, app, facteurs):
                 else:
                     t.cercle(ox, oy, r * 0.12)
         elif trait == "nez":
-            hx, hy = cx, haut(0.05)
+            hx, hy = cx, (cy - r * 0.18 if piece else haut(0.05))
             if valeur == "fin":
                 t.segment(hx, hy, hx, hy + r * 0.3, r * 0.03)
             elif valeur == "busque":
@@ -240,7 +330,7 @@ def planches_visage(c, app, facteurs):
             else:
                 t.segment(hx, hy, hx, hy + r * 0.35, r * 0.045)
         elif trait == "bouche":
-            by = cy + r * 0.5
+            by = (cy if piece else cy + r * 0.5)
             demi = r * (0.3 if valeur == "large" else 0.18)
             if valeur == "boudeuse":
                 t.arc(cx, by + r * 0.24, r * 0.3, r * 0.045, math.pi * 1.2, math.pi * 1.8)
@@ -265,8 +355,8 @@ def planches_visage(c, app, facteurs):
                         t.segment(cx + r * 0.8 * cote, haut(0.2), cx + r * 1.1 * cote, cy + r * 1.6, r * 0.11)
         elif trait == "sourcils":
             if valeur != "aucun":
-                for cote in (-1, 1):
-                    ox, oy = cx + ecart * cote, haut(0.42)
+                for cote in ((1,) if piece else (-1, 1)):
+                    ox, oy = cx + ecart * cote, (cy if piece else haut(0.42))
                     t.segment(ox - r * 0.16, oy, ox + r * 0.16, oy, r * (0.08 if valeur == "epais" else 0.04))
         elif trait == "barbe":
             lg = float(facteurs["barbe"].get(valeur, 0.0)) / 8.0 * r   # en unités de rig, la tête fait 8 : ramené au rayon
@@ -274,8 +364,8 @@ def planches_visage(c, app, facteurs):
                 t.polygone([(droite(-0.8), cy + r * 0.1), (droite(0.8), cy + r * 0.1), (droite(0.35), cy + r + lg), (droite(-0.35), cy + r + lg)])
         elif trait == "oreilles":
             lg = float(facteurs["oreilles"].get(valeur, 0.0)) / 8.0 * r
-            for cote in (-1, 1):
-                bx = cx + r * 0.9 * cote
+            for cote in ((1,) if piece else (-1, 1)):
+                bx = (cx if piece else cx + r * 0.9 * cote)
                 if lg > 0:
                     t.polygone([(bx, cy + r * 0.2), (bx, cy - r * 0.2), (bx + lg * cote, cy - lg * 0.6)])
                 else:
@@ -290,9 +380,9 @@ def planches_visage(c, app, facteurs):
                 t.segment(cx, cy + r * 0.78, cx, cy + r * 0.95, r * 0.04)
         elif trait == "pommettes":
             if valeur in ("hautes", "saillantes"):
-                for cote in (-1, 1):
-                    ox = cx + r * 0.62 * cote
-                    oy = haut(0.05) if valeur == "hautes" else cy + r * 0.02
+                for cote in ((1,) if piece else (-1, 1)):
+                    ox = (cx if piece else cx + r * 0.62 * cote)
+                    oy = cy if piece else (haut(0.05) if valeur == "hautes" else cy + r * 0.02)
                     t.segment(ox, oy - r * 0.12, ox, oy + r * 0.12, r * (0.05 if valeur == "saillantes" else 0.03))
         elif trait == "implantation":
             if valeur == "en_pointe":
@@ -312,15 +402,25 @@ def planches_visage(c, app, facteurs):
                 t.segment(droite(0.5), haut(0.5), droite(0.25), cy + r * 0.45, r * 0.04)
             elif valeur == "tatouage":
                 t.anneau(droite(-0.45), haut(0.05), r * 0.24, r * 0.04)
-        return t.rgba()
+        # LE MARQUEUR DE LA CASE. Une TETE porte ceux des autres elements ; une PIECE porte le sien, au centre —
+        # c est lui que le jeu fera tomber sur chaque ancre.
+        if trait == "tete":
+            marquer_tete(t, valeur)
+        elif piece:
+            hexa = lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get(trait, "")
+            if hexa:
+                t.marqueur(cx, cy, str(hexa))
+        return t
 
     for locus in app["loci"]:
         if locus.get("universel", False):
             continue   # la carrure et la taille ne sont pas des traits du visage
         trait = locus["id"]
         dossier = os.path.join(ASSETS, "visage", trait)
-        cases = [case(trait, v) for v in locus["valeurs"]]
-        n = poser(dossier, locus["valeurs"], cases)
+        toiles = [case(trait, v, trait in PIECES) for v in locus["valeurs"]]
+        cases = [t.rgba() for t in toiles]
+        calques = [t.points() for t in toiles]
+        n = poser(dossier, locus["valeurs"], cases, calques)
         print("  visage/%-13s %d variante(s), %d ecrite(s) : %s" % (trait, len(cases), n, ", ".join(locus["valeurs"])))
 
 
