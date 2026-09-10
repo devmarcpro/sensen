@@ -53,6 +53,8 @@ var foudre_heure := -1   # la dernière heure d'orage où la foudre a frappé (M
 var evapo_heure := -1   # la dernière heure de canicule où les flaques ont baissé
 var peremption_heure := -1   # la dernière heure où le butin de mort périmé a été balayé (Mort et pénalité)
 var eau_active: Dictionary = {}   # idx → true : tuiles de liquide à propager (Eau et liquides)
+var sources_eau: Dictionary = {}  # idx → tick de fin : une nappe percée alimente sous PRESSION tant qu'elle dure (32)
+var erosion: Dictionary = {}      # idx → usure du lit, puis `true` quand la tuile a cédé — une seule fois (32)
 var feux: Dictionary = {}   # idx → {reste} : tuiles en feu (Météo : le feu de tuile)
 # Le champ de chaleur (Émergence — les champs partagés) : en degrés, sur la couche 0 de la fenêtre, jamais
 # sauvegardé — il se reconstruit de ses sources comme la carte de lumière. `chaleur_active` le rend incrémental :

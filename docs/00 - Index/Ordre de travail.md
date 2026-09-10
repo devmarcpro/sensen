@@ -647,9 +647,22 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     stats existantes ; celle-ci ne le peut pas — la perméabilité est affaire de GRAIN, pas de densité, et
     l'argile et le sable ont chez nous la même densité. Une trentaine de matières dont la perméabilité est le
     trait définissant portent donc leur valeur en clair. C'est du contenu, pas du code en dur.
-    **RESTENT** : la **pression** (une nappe qui jaillit quand on la perce) et l'**érosion** (une eau qui use
-    ce qu'elle traverse) — les deux demandent que l'automate porte une CHARGE, là où il ne connaît qu'un
-    niveau par tuile.
+    ~~**RESTENT** : la **pression** et l'**érosion**~~ — **FAITES le 2026-09-09 au soir**, et la ligne 32 est
+    entière. **J'avais écrit qu'elles demandaient une CHARGE** ; c'était vrai d'une charge *générale* — un automate
+    où chaque tuile porte une pression et la transmet — et **faux des deux effets qu'on voulait**. *Mieux vaut les
+    avoir simples que les attendre parfaits.*
+    **LA PRESSION VIENT DE LA PROFONDEUR** : percer une poche posait un niveau 8 sur la brèche — un robinet, comme
+    la note le disait en toutes lettres. La poche percée est désormais une **source** qui alimente d'autant plus
+    longtemps qu'on l'a trouvée bas : elle inonde la galerie au lieu de mouiller une dalle, et elle **s'épuise**.
+    **L'ÉROSION** : une eau qui *court* use ce qu'elle traverse, à la vitesse de l'`alteration` du sol — le même
+    `alteration` que la ruine et que l'usure des objets, pour la troisième fois de la journée. Un ruisseau creuse
+    son lit. **Elle est bornée à UN niveau par tuile, exprès** : sans ce garde-fou, un ruisseau creuserait un canyon
+    sans fond et personne ne s'en apercevrait avant que le monde ne soit troué. Hors des claims seulement — ce qu'on
+    entretient ne s'use pas.
+    **ET LE TEST A LEVÉ DEUX FAUTES EN DEUX PASSES** : la garde de l'automate ne regardait que les tuiles *actives*,
+    si bien qu'une nappe percée sur une grille sèche n'alimentait jamais (*un état neuf doit entrer dans TOUTES les
+    gardes qui décident si l'on tourne*) ; et le niveau 8 est celui d'une **source**, que `_poser_eau` refuse parce
+    qu'il sert à l'écoulement et borne à 7.
 
 ## Palier 8 — les nombres cessent de mentir
 

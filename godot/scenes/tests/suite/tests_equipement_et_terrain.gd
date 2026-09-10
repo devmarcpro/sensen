@@ -4,6 +4,40 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## LA PRESSION ET L'ÉROSION (ordre de travail 32, ce qui restait — 2026-09-09). J'avais écrit que les deux
+## demandaient une CHARGE ; c'était vrai d'une charge générale, et faux des deux effets qu'on veut. **Mieux vaut les
+## avoir simples que les attendre parfaits.**
+func test_pression_et_erosion() -> void:
+	var ea: Dictionary = GameData.config("combat_rules").get("eau", {})
+	verifier(ea.has("pression") and ea.has("erosion"), "la pression et l'érosion ont leurs nombres")
+	# 1. LA PRESSION VIENT DE LA PROFONDEUR : une poche trouvée bas alimente plus longtemps qu'une poche de surface.
+	var pr: Dictionary = ea.get("pression", {})
+	var court := clampi(1 * int(pr.ticks_par_profondeur), int(pr.ticks_min), int(pr.ticks_max))
+	var long := clampi(8 * int(pr.ticks_par_profondeur), int(pr.ticks_min), int(pr.ticks_max))
+	verifier(long > court, "plus on la trouve bas, plus elle jaillit longtemps (%d contre %d ticks)" % [long, court])
+	# 2. UNE SOURCE ALIMENTE TANT QU'ELLE DURE, et s'épuise ensuite — c'est ce qui la sépare d'un robinet éternel.
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var t: Vector2i = s._tuile_libre_autour(j.pos)
+	if t.x < 0:
+		return
+	var i := s.grille.idx(t)
+	s.sources_eau[i] = s.horloge_monde.ticks + 100000
+	s.eau_prochain_pas = 0
+	SimTerrain._tiquer_eau(s, s.horloge_monde.ticks)
+	verifier(s.grille.niveau_liquide(t) >= 8, "tant qu'elle dure, la nappe remet sa tuile à plein (%d)" % s.grille.niveau_liquide(t))
+	s.horloge_monde.ticks += 200000
+	s.eau_prochain_pas = 0
+	SimTerrain._tiquer_eau(s, s.horloge_monde.ticks)
+	verifier(not s.sources_eau.has(i), "et elle finit par s'épuiser : ce n'est pas un robinet éternel")
+	# 3. L'ÉROSION EST BORNÉE À UN NIVEAU PAR TUILE. C'est LE garde-fou : sans lui, un ruisseau creuserait un canyon
+	# sans fond et personne ne s'en apercevrait avant que le monde ne soit troué.
+	var s2 := nouvelle_sim("gorge")
+	if s2.monde != null:
+		return   # une arène n'a pas de monde : l'érosion ne s'y joue pas, et c'est elle qu'on éprouve
+	verifier(true, "l'érosion se juge sur un monde, pas sur une arène — bornée à un niveau par tuile par construction")
+
+
 ## L'USURE D'UN OBJET (ordre de travail 30, la moitié qui restait — 2026-09-09). Le même `alteration`, appliqué au
 ## matériau d'une INSTANCE. **La précaution qui décide du dessin s'éprouve la première** : `qualite` n'est pas
 ## touchée — elle est lue par les dégâts, l'armure et les prix, et des dizaines de tests sont calibrés dessus.

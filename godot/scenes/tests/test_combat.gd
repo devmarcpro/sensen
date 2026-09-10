@@ -116,6 +116,7 @@ func _ready() -> void:
 	_lancer("test_temps_long")
 	_lancer("test_infiltration")
 	_lancer("test_usure")
+	_lancer("test_pression_et_erosion")
 	_lancer("test_paperdoll_et_tutoriels")
 	_lancer("test_materiaux")
 	_lancer("test_recolte")

@@ -29,12 +29,31 @@ static func _reveiller_eau_autour(sim: Simulation, t: Vector2i) -> void:
 
 ## L'automate d'eau (Eau et liquides) : chaque tuile active verse vers ses quatre voisines.
 static func _tiquer_eau(sim: Simulation, tick: int) -> void:
-	if sim.eau_active.is_empty() or tick < sim.eau_prochain_pas:
+	# UNE SOURCE SEULE SUFFIT A REVEILLER L'AUTOMATE (ordre de travail 32) : la garde ne regardait que les tuiles
+	# actives, si bien qu'une nappe percée sur une grille sèche n'alimentait jamais — le test l'a dit au premier
+	# essai. *Un état neuf doit entrer dans TOUTES les gardes qui décident si l'on tourne.*
+	if (sim.eau_active.is_empty() and sim.sources_eau.is_empty()) or tick < sim.eau_prochain_pas:
 		return
 	var ea: Dictionary = sim.regles.r.get("eau", {})
 	sim.eau_prochain_pas = tick + int(ea.get("periode_ticks", 5))
 	var budget := int(ea.get("tuiles_par_pas", 64))
 	var portee := int(ea.get("portee", 7))
+	# LES SOURCES SOUS PRESSION D'ABORD (ordre de travail 32) : tant qu'une nappe percée dure, elle remet sa tuile
+	# à plein et la réveille. C'est ce qui fait la différence entre une flaque et une galerie qui se remplit.
+	for idx_s in sim.sources_eau.keys().duplicate():
+		if tick >= int(sim.sources_eau[idx_s]):
+			sim.sources_eau.erase(idx_s)
+			continue
+		var ts := sim.grille.pos_de(int(idx_s))
+		if sim.grille.dans(ts):
+			# LE NIVEAU 8 EST CELUI D'UNE SOURCE, et `_poser_eau` le refuse : il borne à 7, parce qu'il sert à
+			# l'ÉCOULEMENT. Une nappe sous pression n'est pas un écoulement — elle se pose comme la brèche l'a
+			# posée. Le test l'a montré en lisant 6 là où il attendait 8.
+			sim.grille.poser_contenu(ts, "eau")
+			sim.grille.poser_eau(int(idx_s), 8)
+			sim.grille.marquer(ts)
+			sim.eau_active[int(idx_s)] = true
+			sim.lumiere_sale = true
 	for idx in sim.eau_active.keys():
 		if budget <= 0:
 			break
@@ -60,6 +79,7 @@ static func _tiquer_eau(sim: Simulation, tick: int) -> void:
 			continue
 		if niveau <= 1:
 			continue
+		_eroder(sim, t)   # ce qui court use ce qu'il traverse (ordre de travail 32)
 		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var q: Vector2i = t + dd
 			if not sim.grille.dans(q) or sim.grille.bloque_passage(q) or sim.grille.meubles.has(sim.grille.idx(q)):
@@ -72,6 +92,37 @@ static func _tiquer_eau(sim: Simulation, tick: int) -> void:
 			if cible <= 0 or sim.grille.niveau_liquide(q) >= cible:
 				continue
 			_poser_eau(sim, q, cible)
+
+
+## UN RUISSEAU CREUSE SON LIT (ordre de travail 32, 2026-09-09) : une eau qui COURT use ce qu'elle traverse, à la
+## vitesse de l'`alteration` du sol — le même `alteration` que la ruine et que l'usure des objets, pour la troisième
+## fois de la journée.
+##
+## **ELLE EST BORNÉE À UN NIVEAU PAR TUILE, EXPRÈS.** Sans ce garde-fou, un ruisseau creuserait un canyon sans fond
+## et personne ne s'en apercevrait avant que le monde ne soit troué : une tuile qui a cédé est marquée, et elle ne
+## cède pas deux fois. **Hors des claims seulement** — ce qu'on entretient ne s'use pas.
+static func _eroder(sim: Simulation, t: Vector2i) -> void:
+	var er: Dictionary = sim.regles.r.get("eau", {}).get("erosion", {})
+	if er.is_empty() or sim.monde == null:
+		return
+	var i := sim.grille.idx(t)
+	if sim.erosion.get(i, 0.0) is bool:
+		return   # elle a déjà cédé une fois : c'est tout ce qu'on lui demande
+	if sim.monde.claims.has(SimCamp._cell_de(sim, t)):
+		return
+	var mat := str(sim.grille.materiau_sol(t))
+	var alt := float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("alteration", 50))
+	var v := float(sim.erosion.get(i, 0.0)) + float(er.get("par_pas", 0.004)) * alt / 50.0
+	if v < float(er.get("seuil", 1.0)):
+		sim.erosion[i] = v
+		return
+	sim.erosion[i] = true
+	_memoriser_terrain(sim, t)   # le monde saura le rendre, à la vitesse de sa matière (temps long)
+	sim.grille.hauteurs[i] = sim.grille.h(t) - 1
+	sim.grille.marquer(t)
+	sim.lumiere_sale = true
+	EventBus.emettre(&"tile_changed", [t])
+	EventBus.emettre(&"journal", [&"journal.erosion", {"x": t.x, "y": t.y}])
 
 
 ## CE QUE LE FOND D'UNE FLAQUE BOIT À CHAQUE PAS (ordre de travail 32, 2026-09-09) : zéro s'il la retient, et
@@ -379,6 +430,13 @@ static func _liberer_sous_sol(sim: Simulation, breche: Vector2i, genre: String, 
 			sim.grille.marquer(breche)
 			sim.eau_active[i] = true
 			sim.lumiere_sale = true
+			# ELLE EST SOUS PRESSION, ET LA PRESSION VIENT DE LA PROFONDEUR (ordre de travail 32, 2026-09-09).
+			# Poser un niveau 8 sur la brèche faisait un ROBINET — la note le disait en toutes lettres. La poche
+			# percée est une SOURCE : elle alimente d'autant plus longtemps qu'on l'a trouvée bas, elle inonde la
+			# galerie au lieu de mouiller une dalle, et elle finit par s'épuiser.
+			var pr: Dictionary = sim.regles.r.get("eau", {}).get("pression", {})
+			var prof := maxi(1, int(sim.donjon.get("profondeur", int(sim.donjon.get("etage", 1)))))
+			sim.sources_eau[i] = tick + clampi(prof * int(pr.get("ticks_par_profondeur", 12000)), int(pr.get("ticks_min", 6000)), int(pr.get("ticks_max", 240000)))
 			EventBus.emettre(&"journal", [&"journal.nappe_percee", {"x": breche.x, "y": breche.y}])
 		"geode":
 			var c: Dictionary = cfg.get("geodes", {})
