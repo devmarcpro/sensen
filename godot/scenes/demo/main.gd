@@ -117,6 +117,7 @@ var zoom := 2.0   # le zoom de départ ; la valeur vraie vient de styles.vue.zoo
 var terrain: Terrain              # couche statique : les tuiles, dessinées une fois (perf É0)
 var hud: Hud                      # couche au-dessus des êtres : barres, garde, télégraphes, jauges
 var menu_contexte: MenuContexte   # le clic droit : une petite fenêtre au point cliqué (designer 2026-09-09)
+var bandeau: BandeauJournal        # la dernière ligne du journal, en grand et par-dessus tout (ordre de travail 39)
 var hud_ecran: HudEcran           # le HUD fixe à l'écran : compas-horloge, pentagramme, barres, hotbar (Écrans d'interface)
 var chrono: Dictionary = {}        # étape de l'image → ms cumulées (la capture les lit : le lag en ville, designer 2026-09-05)
 var tour_hud := 0
@@ -476,6 +477,8 @@ func _ready() -> void:
 	volet = VoletLateral.new()
 	volet.main = self
 	$CanvasLayer.add_child(volet)
+	bandeau = BandeauJournal.new()   # le refus visible (ordre de travail 39) : sa propre couche, au-dessus des écrans
+	add_child(bandeau)
 	chargement = ColorRect.new()   # l'écran de chargement : par-dessus tout, fermé par défaut
 	chargement.color = Color(0.02, 0.02, 0.03, 1.0)
 	chargement.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -970,6 +973,11 @@ var _cumul_fois := 0
 
 
 func _log(t: String) -> void:
+	# ET ON LE MONTRE (ordre de travail 39, 2026-09-09). Le journal du bas est recouvert par le moindre panneau : un
+	# refus s'y écrivait pour personne. Le bandeau passe par-dessus tout, y compris un écran ouvert — et c'est
+	# précisément le cas où le joueur ne voyait rien. *Un message qu'on ne peut pas voir n'a pas été dit.*
+	if bandeau != null:
+		bandeau.montrer(t)
 	journal.append(t)
 	if journal.size() > 9:
 		journal.pop_front()
@@ -3286,12 +3294,25 @@ func _maj_ui() -> void:
 			+ " · " + tr("ui.or").format({"n": int(j.get("or", 0))}) + " · " + tr("ui.faim").format({"faim": int(j.get("faim", 100))}) + " · " + tr("ui.soif").format({"soif": int(j.get("soif", 100))}) + " · " + tr("ui.poids").format({"poids": "%.0f" % pd.poids, "capacite": "%.0f" % pd.capacite, "surcharge": tr("ui.poids.surcharge").format({"facteur": "%.1f" % pd.facteur}) if pd.facteur > 1.0 else ""}))
 		var nd := sim.progression.niveaux_derives(j)
 		lignes.append("  " + tr("ui.niveaux").format({"combat": "%.1f" % nd.combat, "general": "%.1f" % nd.general}))
+		# LA RÉPUTATION À L'ÉCRAN (ordre de travail 38, 2026-09-09) : village, royaume, globale — et ce que les
+		# FACTIONS en pensent, qui était jusqu'ici entièrement invisible, sauf par le ton d'un PNJ.
+		var rep_txt := _texte_reputation(j)
+		if not rep_txt.is_empty():
+			lignes.append("  " + rep_txt)
 		var hb: Array[String] = []
 		var ent := hotbar_entrees(j)
 		for k in ent.size():
 			var ch: String = str((k + 1) % 10)
 			hb.append(tr("ui.hotbar.selection").format({"k": ch, "nom": ent[k].nom}) if k == hotbar_sel else "%s %s" % [ch, ent[k].nom])
 		lignes.append("  " + tr("ui.hotbar").format({"liste": " · ".join(hb)}))
+		# LE COÛT DE CE QU'ON S'APPRÊTE À LANCER (ordre de travail 37, 2026-09-09). Le déficit se paie en points de
+		# vie, et c'est écrit dans les règles depuis longtemps — mais le joueur ne l'apprenait qu'APRÈS, par une
+		# ligne de journal, une fois les PV partis. *Un coût qu'on découvre en le payant n'est pas un coût, c'est
+		# une punition.*
+		if hotbar_sel < ent.size() and str(ent[hotbar_sel].get("type", "")) == "capacite":
+			var cout_txt := _texte_cout_capacite(j, sim.plan_capacite(j, int(ent[hotbar_sel].ref)))
+			if not cout_txt.is_empty():
+				lignes.append("  " + cout_txt)
 		if visee >= 0:
 			var plan := sim.plan_capacite(j, visee)
 			lignes.append("  " + tr("ui.capacite.visee").format({"nom": tr(plan.name_key)}))
@@ -3428,6 +3449,66 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 
 func g_h(p: Vector2i) -> int:
 	return sim.grille.h(p)
+
+
+## CE QUE COÛTE LA CAPACITÉ CHOISIE, ET CE QU'ELLE COÛTERA EN PLUS (ordre de travail 37, 2026-09-09).
+## Les règles disent depuis longtemps que le déficit se paie en points de vie — mana en surchauffe, endurance en
+## épuisement, sang-froid rompu. Le joueur, lui, ne l'apprenait qu'après coup, par une ligne de journal que le
+## panneau recouvre. **Il le lit maintenant avant de lancer**, et c'est toute la ligne.
+func _texte_cout_capacite(j: Dictionary, plan: Dictionary) -> String:
+	var monnaie := str(plan.get("monnaie", ""))
+	var cout := int(plan.get("ressource", 0))
+	if monnaie.is_empty() or cout <= 0:
+		return ""
+	var reserve := 0
+	var mult := 0.0
+	match monnaie:
+		"mana":
+			reserve = int(j.get("mana", 0))
+			mult = float(sim.regles.r.mana.get("surchauffe_mult", 2))
+		"vigueur":
+			reserve = int(j.get("vigueur", 0))
+			mult = float(sim.regles.r.vigueur.get("epuisement_mult", 1))
+		"sang_froid":
+			reserve = int(j.get("sang_froid", 0))
+			mult = float(sim.regles.r.get("sang_froid", {}).get("epuisement_mult", 2))
+		_:
+			return ""
+	var txt := tr("ui.cout.capacite").format({"n": cout, "monnaie": tr("monnaie." + monnaie), "reserve": reserve})
+	var deficit := maxi(0, cout - reserve)
+	if deficit > 0:
+		txt += tr("ui.cout.deficit").format({"n": deficit, "pv": maxi(1, roundi(float(deficit) * mult))})
+	return txt
+
+
+## LA RÉPUTATION, EN UNE LIGNE (ordre de travail 38, 2026-09-09) : le village où l'on se tient, son royaume, la
+## réputation globale — et **ce que les factions en pensent**, qui n'existait à l'écran nulle part. La rumeur du
+## 2026-09-09 était audible par le ton d'un PNJ ; elle a maintenant son chiffre.
+func _texte_reputation(j: Dictionary) -> String:
+	var reps: Dictionary = j.get("reputations", {})
+	var bouts: Array[String] = []
+	var vil: Dictionary = sim.village_a(j.pos) if sim.lieu == "camp" and sim.monde != null else {}
+	var nom_v := str(vil.get("nom", ""))
+	if not nom_v.is_empty() and reps.has(nom_v):
+		bouts.append(tr("ui.reputation.village").format({"nom": nom_v, "n": int(reps[nom_v])}))
+	if sim.monde != null:
+		var roy: Dictionary = sim.monde.surface.royaume_de(sim._cell_de(j.pos))
+		if not roy.is_empty():
+			var op := SimRumeur.opinion_royaume(sim, roy, j)
+			bouts.append(tr("ui.reputation.royaume").format({"nom": str(roy.get("nom", roy.get("id", ""))), "n": int(reps.get(str(roy.get("id", "")), 0)) + op}))
+	bouts.append(tr("ui.reputation.globale").format({"n": int(reps.get("_globale", 0))}))
+	# CE QUE LES FACTIONS EN PENSENT : seules celles qui ont un avis se montrent, sans quoi la ligne serait un mur
+	# de zéros. C'est la rumeur du soir qui devient lisible.
+	if sim.monde != null and not (sim.monde.faits as Array).is_empty():
+		var cell := sim._cell_de(j.pos)
+		var av: Array[String] = []
+		for fid: String in GameData.catalogues.get("factions", {}).keys():
+			var v := SimRumeur.reputation(sim, fid, str(j.id), cell, sim.horloge_monde.ticks)
+			if v != 0:
+				av.append("%s %+d" % [tr(GameData.entree("factions", fid).get("name_key", fid)), v])
+		if not av.is_empty():
+			bouts.append(tr("ui.reputation.factions").format({"liste": " · ".join(av)}))
+	return tr("ui.reputation").format({"liste": " · ".join(bouts)})
 
 
 ## L'infobulle exhaustive d'une capacité : forme, portée, coûts, dés — calculés pour le porteur.

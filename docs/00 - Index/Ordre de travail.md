@@ -695,9 +695,19 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 fonction qui met en forme le coût d'une capacité et sa chaîne traduite existent depuis longtemps, personne ne les
 appelle.
 
-37. **Le coût d'une capacité, écrit au moment de la lancer** (le déficit se paie en points de vie).
-38. **La réputation à l'écran** — village, royaume, globale.
-39. **Le refus visible** : aujourd'hui il part au journal, que le panneau recouvre.
+~~37. **Le coût d'une capacité, écrit au moment de la lancer**~~ — **FAIT le 2026-09-09**. Le déficit se paie en
+    points de vie depuis longtemps, et le joueur ne l'apprenait qu'APRÈS, par une ligne de journal, une fois les PV
+    partis. Il se lit maintenant sur la ligne de la hotbar : *« coût 40 mana (il t'en reste 5) — il t'en manque 35 :
+    70 PV »*. **Un coût qu'on découvre en le payant n'est pas un coût, c'est une punition.**
+~~38. **La réputation à l'écran**~~ — **FAITE le 2026-09-09** : village, royaume, globale — **et ce que les factions
+    en pensent**, qui n'existait à l'écran nulle part. Seules celles qui ont un avis se montrent, sans quoi la ligne
+    serait un mur de zéros. *La rumeur du soir devient lisible.*
+~~39. **Le refus visible**~~ — **FAIT le 2026-09-09**. Un bandeau reprend la dernière ligne du journal, en grand, au
+    centre bas, et s'efface en quelques secondes. **Il est sur sa PROPRE couche, au-dessus des écrans** — et c'est
+    la sonde qui l'a exigé : le premier jet était un `Control` du HUD, or les écrans sont un `CanvasLayer` à
+    `layer = 10` qui passe par-dessus toute cette couche quel que soit l'ordre où on l'a monté. Le bandeau serait
+    donc resté **sous le panneau**, c'est-à-dire exactement le défaut que la ligne corrige. *Un message qu'on ne
+    peut pas voir n'a pas été dit.*
 
 ## Palier 10 — ce qui existe et qu'on ne verra jamais
 

@@ -1050,6 +1050,13 @@ ui.menu.registre,Breeding register
 ui.menu.sauvegarder,Save
 ui.modules_connus,modules known {n}
 ui.munitions,arrows {n}
+ui.cout.capacite,"cost {n} {monnaie} ({reserve} left)"
+ui.cout.deficit," — you are {n} short: {pv} HP"
+ui.reputation,"standing: {liste}"
+ui.reputation.village,"{nom} {n}"
+ui.reputation.royaume,"kingdom {nom} {n}"
+ui.reputation.globale,"everywhere {n}"
+ui.reputation.factions,"they say of you: {liste}"
 ui.niveaux,combat level {combat} · general {general}
 ui.objet.arme,"weapon: {des} {type} · {ticks} ticks · range {portee}"
 ui.objet.armure,"armour: {zone} · {construction} · composite hardness {durete} · construction level {niveau}"
@@ -3491,6 +3498,27 @@ hud.compagnons,companions
 hud.compagnon_hors_vue,out of sight
 hud.compagnon_mort,down
 ui.menu.volet,Side panel: show / hide (F4)
+volet.corps,BODY
+volet.corps_sans_plan,(no body plan)
+volet.en_main,IN HAND
+volet.pv,"HP {n}/{max}"
+volet.vig,"Sta {n}/{max}"
+volet.mana,"Man {n}/{max}"
+volet.sf,"Cmp {n}/{max}"
+volet.mal.faim,"HUNGRY ({n})"
+volet.mal.soif,"THIRSTY ({n})"
+volet.mal.charge,"ENCUMBERED {poids}/{capacite}"
+volet.usure," — worn {n} %"
+partie.court.torse,Torso
+partie.court.tete,Head
+partie.court.bras_D,R arm
+partie.court.bras_G,L arm
+partie.court.main_D,R hand
+partie.court.main_G,L hand
+partie.court.jambe_D,R leg
+partie.court.jambe_G,L leg
+partie.court.pied_D,R foot
+partie.court.pied_G,L foot
 volet.monde,WORLD
 volet.personnage,CHARACTER
 volet.compagnons,COMPANIONS
@@ -3773,6 +3801,7 @@ motif.poing.name,the fist
 motif.cercle_brise.name,the broken circle
 motif.chardon.name,the thistle
 motif.vent.name,the wind
+on_raconte,(gossip)
 rumeur_royaume,(rumour)
 meuble.escalier.name,stairs
 journal.monte_etage,{nom} goes up to floor {etage}

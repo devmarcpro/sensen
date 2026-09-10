@@ -419,6 +419,13 @@ classe.la_paume.name,La Paume
 classe.le_creuset.name,Le Creuset
 classe.le_vent.name,Le Vent
 journal.niveau,{nom} : {competence} passe au niveau {niveau} (potentiel {potentiel})
+ui.cout.capacite,"coût {n} {monnaie} (il t'en reste {reserve})"
+ui.cout.deficit," — il t'en manque {n} : {pv} PV"
+ui.reputation,"réputation : {liste}"
+ui.reputation.village,"{nom} {n}"
+ui.reputation.royaume,"royaume {nom} {n}"
+ui.reputation.globale,"partout {n}"
+ui.reputation.factions,"on dit de toi : {liste}"
 ui.niveaux,niveau de combat {combat} · général {general}
 ui.fin.niveaux,  niveaux gagnés : {liste}
 ui.feuille,=== FEUILLE ===
@@ -3562,6 +3569,27 @@ hud.compagnons,compagnons
 hud.compagnon_hors_vue,hors de vue
 hud.compagnon_mort,à terre
 ui.menu.volet,Volet latéral : afficher / masquer (F4)
+volet.corps,CORPS
+volet.corps_sans_plan,(pas de plan de corps)
+volet.en_main,EN MAIN
+volet.pv,"PV {n}/{max}"
+volet.vig,"Vig {n}/{max}"
+volet.mana,"Man {n}/{max}"
+volet.sf,"SF {n}/{max}"
+volet.mal.faim,"AFFAMÉ ({n})"
+volet.mal.soif,"ASSOIFFÉ ({n})"
+volet.mal.charge,"SURCHARGÉ {poids}/{capacite}"
+volet.usure," — usé {n} %"
+partie.court.torse,Torse
+partie.court.tete,Tête
+partie.court.bras_D,Bras D
+partie.court.bras_G,Bras G
+partie.court.main_D,Main D
+partie.court.main_G,Main G
+partie.court.jambe_D,Jbe D
+partie.court.jambe_G,Jbe G
+partie.court.pied_D,Pied D
+partie.court.pied_G,Pied G
 volet.monde,MONDE
 volet.personnage,PERSONNAGE
 volet.compagnons,COMPAGNONS
@@ -3844,6 +3872,7 @@ motif.poing.name,le poing
 motif.cercle_brise.name,le cercle brisé
 motif.chardon.name,le chardon
 motif.vent.name,le vent
+on_raconte,(on raconte)
 rumeur_royaume,(rumeur)
 meuble.escalier.name,escalier
 journal.monte_etage,{nom} monte à l’étage {etage}

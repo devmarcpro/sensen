@@ -312,6 +312,13 @@ Inventaire+équipement (avec poids), Craft (recettes des stations à portée, [[
 > **L'écran « contexte » a été RETIRÉ, pas laissé dormant** : plus un seul appel ne l'ouvrait. Garder un écran que rien n'atteint, c'est exactement ce que le dépôt vient de se faire reprendre deux fois en deux jours — la roue de couleur écrite et injoignable, les options d'objet sans ligne à l'écran. *Ce qui n'a pas de chemin n'existe pas.*
 > **Et la sonde a levé un défaut à la seconde même** : la fenêtre se recalait sur une taille **estimée** (« largeur minimale, plus vingt pixels par ligne »). Une option au libellé long élargit le bouton bien au-delà du minimum — ouverte au coin bas-droit, la fenêtre sortait de l'écran de cinquante pixels. On demande désormais sa taille au panneau (`get_combined_minimum_size`) au lieu de la deviner.
 
+> [!success] Refait le 2026-09-10 — **le volet latéral, à la manière de Cataclysm** (designer : « j'aimerais qu'on refasse le volet latéral pour qu'il soit plus comme celui de Cataclysm Dark Days Ahead »)
+> **Ce qui fait le volet de Cataclysm n'est pas son esthétique, c'est sa méthode**, et c'est elle qu'on emprunte — pas la police à chasse fixe ni le fond noir pur, qui seraient copier l'habit au lieu du geste.
+> 1. **LE CORPS PAR PARTIES, EN HAUT, AVANT TOUT LE RESTE.** C'est sa signature — et nous l'avions depuis le 2026-09-09 sans que cela apparaisse *nulle part* hors de l'écran d'anatomie. Dix membres externes, deux colonnes, chacun avec sa réserve ; une partie perdue se voit absente au lieu d'être silencieusement omise. *Les organes n'y sont pas : un volet qui montre tout ne montre rien.*
+> 2. **LA COULEUR EST L'ÉTAT** — plein, entamé, blessé, grave, perdu. On ne *lit* pas ce volet, on le **balaie**.
+> 3. **ON N'AFFICHE QUE CE QUI COMPTE.** `AFFAMÉ`, `ASSOIFFÉ`, `SURCHARGÉ` et les statuts n'apparaissent **que** quand c'est vrai. *Une ligne permanente « Faim 100/100 » ne dit rien ; une ligne qui apparaît quand on a faim dit tout.*
+> 4. **DES BLOCS COURTS ET DENSES** : six stats en deux lignes abrégées, jauges deux par ligne, et un bloc **EN MAIN** qui réunit l'arme (avec son usure), la capacité armée et son coût, et la réputation.
+
 ## Liens
 - **Dépend de** : [[Direction artistique]], [[Localisation]]
 - **Alimente** : [[Combat tactique sur grille]], [[Craft compositionnel]], [[Habitat des PNJ]], [[Entretien et taxes]]

@@ -37,6 +37,7 @@ func _ready() -> void:
 	await _verifier_coffre(scene, ec)
 	await _verifier_depouille(scene, ec)
 	await _verifier_menu_contexte(scene, ec)
+	_verifier_palier9(scene, ec)
 	await _verifier_pause(scene, ec)
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
@@ -320,6 +321,49 @@ func _verifier_objets(scene: Node, ec: Node) -> void:
 	else:
 		print("  objets : l'arme du sac s'équipe AU CLIC, par la ligne de son option (%d options, %d lignes)" % [options, lignes_option.size()])
 	ec.fermer()
+
+
+## LE JEU MONTRE CE QU'IL SAIT (ordre de travail 37, 38, 39 — 2026-09-09). Trois choses que le jeu savait et ne
+## disait pas : ce que coûte la capacité qu'on s'apprête à lancer, ce que le monde pense de nous, et POURQUOI un
+## geste vient d'être refusé. La sonde vérifie qu'elles ont chacune un chemin jusqu'à l'écran.
+func _verifier_palier9(scene: Node, _ec: Node) -> void:
+	var j: Dictionary = scene.joueur()
+	if j.is_empty():
+		fautes.append("  palier 9 : pas de joueur")
+		return
+	# 37. LE COÛT, ET LE DÉFICIT AVANT DE LE PAYER. On vide la réserve : la ligne doit annoncer les PV.
+	var plan := {"monnaie": "mana", "ressource": 40}
+	j["mana"] = 40
+	var plein: String = scene._texte_cout_capacite(j, plan)
+	j["mana"] = 5
+	var vide: String = scene._texte_cout_capacite(j, plan)
+	if plein.is_empty() or vide.is_empty():
+		fautes.append("  palier 9 : le coût d'une capacité ne s'écrit pas")
+	elif vide == plein or not vide.contains("PV"):
+		fautes.append("  palier 9 : le déficit ne s'annonce pas AVANT de le payer (« %s »)" % vide)
+	else:
+		print("  coût : le déficit s'annonce avant d'être payé (« %s »)" % vide.strip_edges())
+	# 38. LA RÉPUTATION A UNE LIGNE.
+	var rep: String = scene._texte_reputation(j)
+	if rep.is_empty():
+		fautes.append("  palier 9 : la réputation ne s'écrit nulle part")
+	else:
+		print("  réputation : elle a sa ligne (« %s »)" % rep.left(60))
+	# 39. LE REFUS EST VISIBLE, ET AU-DESSUS DES ÉCRANS. C'est tout l'objet de la ligne : le journal du bas est
+	# recouvert par le moindre panneau.
+	if scene.bandeau == null:
+		fautes.append("  palier 9 : aucun bandeau de journal")
+		return
+	scene._log("essai de refus")
+	if scene.bandeau.texte != "essai de refus" or scene.bandeau.reste <= 0.0:
+		fautes.append("  palier 9 : le bandeau ne reprend pas la ligne du journal")
+	elif int(scene.bandeau.layer) <= int(scene.ecrans.layer):
+		# LA COUCHE, PAS L'ORDRE DES ENFANTS : les écrans sont un `CanvasLayer` à `layer = 10`, qui passe par-dessus
+		# toute la couche du HUD quel que soit l'ordre où on l'a monté. Le premier jet du bandeau était un `Control`
+		# du HUD — il serait resté sous le panneau, c'est-à-dire exactement le défaut que la ligne 39 corrige.
+		fautes.append("  palier 9 : le bandeau est sur une couche INFÉRIEURE aux écrans (%d ≤ %d) — le panneau le recouvrirait, comme le journal" % [int(scene.bandeau.layer), int(scene.ecrans.layer)])
+	else:
+		print("  refus : le bandeau montre la ligne, et il passe par-dessus les écrans")
 
 
 ## LA PETITE FENÊTRE DU CLIC DROIT (designer 2026-09-09 : « je veux que le menu qui s'affiche quand on fait clique
