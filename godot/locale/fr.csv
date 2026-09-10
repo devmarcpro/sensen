@@ -1680,6 +1680,11 @@ ui.ecran.inventaire,"INVENTAIRE — {n} objet(s) dans le sac"
 ui.ecran.sac,sac
 ui.ecran.slot_vide,(emplacement vide)
 ui.ecran.equiper,Équiper / retirer (E)
+ui.ecran.reparer,Réparer
+journal.objet_use,"{objet} ne vaut plus grand-chose : il faudrait le remettre en état"
+journal.repare,"{objet} est remis en état (usure {usure} %)"
+journal.reparer_station,"Il faudrait un atelier pour cela ({station})"
+journal.reparer_matiere,"Il faudrait de quoi le réparer : {materiau}"
 ui.ecran.jeter,Jeter (J)
 ui.ecran.lire,Lire (L)
 ui.ecran.sertir,Sertir (T)

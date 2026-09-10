@@ -734,6 +734,25 @@ func boire(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	return true
 
 
+## CE QU'UN GESTE PREND À UN OBJET (ordre de travail 30, 2026-09-09). Trois gestes usent, et ce sont les trois où
+## la matière travaille : frapper, encaisser, creuser. Rien d'autre ne s'use — un manteau porté ne se troue pas
+## parce que le temps passe, il se troue parce qu'on a pris un coup dedans.
+func user_objet(uid: String, geste: String) -> void:
+	var it: Dictionary = items.get(uid, {})
+	if it.is_empty():
+		return
+	var pas := regles.usure_du_geste(it, geste)
+	if pas <= 0.0:
+		return
+	var plafond := float(regles.r.get("usure", {}).get("usure_max", 0.5))
+	var avant := float(it.get("usure", 0.0))
+	it["usure"] = minf(plafond, avant + pas)
+	# LE JOUEUR DOIT L'APPRENDRE AUTREMENT QU'EN PERDANT UN COMBAT : le journal le dit une fois, au moment où
+	# l'objet atteint le plancher. Un mécanisme qu'on ne peut pas voir venir n'est pas une règle, c'est un piège.
+	if avant < plafond and float(it.usure) >= plafond:
+		EventBus.emettre(&"journal", [&"journal.objet_use", {"objet": SimObjets.nom_objet(self, uid)}])
+
+
 ## Le poids porté et la capacité d'un être (Armures et poids porté).
 func poids_de(e: Dictionary) -> Dictionary:
 	var total := 0.0
@@ -1245,6 +1264,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._respawn(self, e)
 		"sertir":
 			ok = SimObjets._sertir(self, e, str(i.get("objet", "")), str(i.get("gemme", "")), h.ticks)
+		"reparer":   # remettre un objet en état : sa matière, à une station de sa recette (ordre de travail 30)
+			ok = SimObjets._reparer(self, e, str(i.get("objet", "")), h.ticks)
 		"lire":
 			ok = SimObjets._lire(self, e, str(i.get("objet", "")), h.ticks)
 		"fabriquer":
@@ -2325,6 +2346,16 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	# que soit sa source, et c'est donc ici que le monde l'entend.
 	if degats > 0:
 		SimTerrain.sonner_de(self, cible.pos, "coup")
+	# L'ARME S'ÉMOUSSE ET L'ARMURE SE TROUE (ordre de travail 30). C'est ici que tout coup passe, quelle que soit sa
+	# source : c'est donc ici que la matière travaille, des deux côtés à la fois.
+	if degats > 0:
+		var att_u: Dictionary = entites.get(source, {})
+		if not att_u.is_empty():
+			user_objet(str(att_u.get("equipement", {}).get("main_principale", "")), "par_coup")
+		var slot_touche := str(detail.get("slot", ""))
+		if slot_touche.is_empty():
+			slot_touche = "cuirasse"
+		user_objet(str(cible.get("equipement", {}).get(slot_touche, "")), "par_encaisse")
 	if degats > 0:
 		_monter_aggro(cible, source, float(degats) * float(regles.r.get("ia", {}).get("aggro_par_degat", 1.0)), true)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])

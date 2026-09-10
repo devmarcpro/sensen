@@ -926,6 +926,11 @@ ui.ecran.feuille,SHEET — {nom}
 ui.ecran.gestion,"TERRITORY — {n} cells · {pnj} residents · treasury {tresor} gold · debt {dette} · forecast {prev} gold/week"
 ui.ecran.incarner,Take control
 ui.ecran.inventaire,"INVENTORY — {n} item(s) in the bag"
+ui.ecran.reparer,Repair
+journal.objet_use,"{objet} is barely worth carrying: it needs mending"
+journal.repare,"{objet} is mended (wear {usure} %)"
+journal.reparer_station,"That would take a workshop ({station})"
+journal.reparer_matiere,"That would take something to mend it with: {materiau}"
 ui.ecran.jeter,Drop (J)
 ui.ecran.lire,Read (L)
 ui.ecran.livrer,Deliver the order (Z)

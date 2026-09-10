@@ -190,6 +190,32 @@ func zone_de_coup(h_attaquant: int, h_cible: int) -> Dictionary:
 
 
 ## armure_zone = dureté/4 × qualité × (1 + niveau/100) × matrice[construction][type]
+## LA QUALITÉ DONT ON SE SERT VRAIMENT (ordre de travail 30, 2026-09-09) : celle de l'objet, moins ce que l'usage
+## lui a pris. **`qualite` n'est pas touchée** — elle est lue par les dégâts, par l'armure et par les prix, et des
+## dizaines de tests sont calibrés dessus. L'usure est un champ à part, à zéro par défaut : un objet qui n'a jamais
+## servi passe ici sans rien perdre, à la virgule près.
+func qualite_utile(it: Dictionary) -> float:
+	var u := clampf(float(it.get("usure", 0.0)), 0.0, float(r.get("usure", {}).get("usure_max", 0.5)))
+	return float(it.get("qualite", 1.0)) * (1.0 - u)
+
+
+## CE QU'UN USAGE PREND À UN OBJET : le pas de base du geste, à la vitesse de l'`alteration` de sa matière. Une lame
+## de fer s'émousse ; une lame d'or serait ridicule, mais elle ne s'abîmerait pas.
+func usure_du_geste(it: Dictionary, geste: String) -> float:
+	var us: Dictionary = r.get("usure", {})
+	var base := float(us.get(geste, 0.0))
+	if base <= 0.0 or it.is_empty():
+		return 0.0
+	var mat := str(it.get("materiau", ""))
+	if mat.is_empty():
+		for sc in (it.get("composants", {}) as Dictionary).keys():   # un objet assemblé s'use par sa pièce maîtresse
+			mat = str((it.composants[sc] as Dictionary).get("materiau", ""))
+			if not mat.is_empty():
+				break
+	var alt := float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("alteration", 50))
+	return base * alt / 50.0
+
+
 func armure_piece(piece: Dictionary, type_degats: String) -> float:
 	if piece.is_empty():
 		return 0.0
@@ -197,7 +223,7 @@ func armure_piece(piece: Dictionary, type_degats: String) -> float:
 	var facteur: float = float(mat.get(type_degats, 1.0))
 	if type_degats == "magique" and not mat.has("magique"):   # « magique » : un type à part entière (2026-08-30) ; à défaut d'une colonne, contondant × magie_facteur
 		facteur = float(mat.get("contondant", 1.0)) * float(r.armure.get("magie_facteur", 0.5))
-	return float(piece.durete_composite) / float(r.armure.durete_div) * float(piece.qualite) \
+	return float(piece.durete_composite) / float(r.armure.durete_div) * qualite_utile(piece) \
 		* (1.0 + float(piece.get("niveau_construction", 0)) / 100.0) * facteur
 
 
@@ -217,7 +243,7 @@ func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: De
 	var jet := des.jet(fonct.degats_des, des_bonus)
 	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
 	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
-	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * float(arme.get("qualite", 1.0)) * facteur_competences(competences, fonct, vecteur)
+	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * qualite_utile(arme) * facteur_competences(competences, fonct, vecteur)
 	var distance := portee_de(fonct).y > 1 and int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
 	var bruts := float(jet) * mult + float(stat)
@@ -244,7 +270,7 @@ func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lou
 	var f := Des.fourchette(fonct.degats_des)
 	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
 	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
-	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * float(arme.get("qualite", 1.0)) * facteur_competences(competences, fonct, vecteur)
+	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * qualite_utile(arme) * facteur_competences(competences, fonct, vecteur)
 	var distance := int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
 	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.vigueur.a_zero_degats_mult) if vigueur_a_zero else 1.0) * k_ext

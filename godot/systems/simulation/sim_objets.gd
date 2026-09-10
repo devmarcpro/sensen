@@ -607,6 +607,42 @@ static func nom_objet(sim: Simulation, uid: String) -> Dictionary:
 	return res
 
 
+## REMETTRE UN OBJET EN ÉTAT (ordre de travail 30, 2026-09-09). Un mécanisme qui ne fait que dégrader est un impôt,
+## pas une règle : il faut un chemin de retour. Une unité de la matière de l'objet, à une station de sa recette, et
+## l'usure retombe de `reparer.rend` — on ne rend jamais un objet NEUF, on le maintient. *L'entretien est un geste,
+## le remplacement en est un autre.*
+static func _reparer(sim: Simulation, e: Dictionary, uid: String, tick: int) -> bool:
+	var it: Dictionary = sim.items.get(uid, {})
+	var us: Dictionary = sim.regles.r.get("usure", {}).get("reparer", {})
+	if it.is_empty() or us.is_empty() or float(it.get("usure", 0.0)) <= 0.0:
+		return false
+	if not (uid in e.sac or uid in e.equipement.values()):
+		return false
+	var def: Dictionary = GameData.catalogues.items.get(str(it.get("base", "")), {})
+	var station := str(def.get("recipe", {}).get("station", ""))
+	if not station.is_empty() and not SimFabrication.stations_de(sim, e).has(station):
+		EventBus.emettre(&"journal", [&"journal.reparer_station", {"station": station}])
+		return false
+	# LA MATIÈRE DE L'OBJET, PAS UNE MONNAIE : on répare une lame de fer avec du fer.
+	var mat := str(it.get("materiau", ""))
+	if mat.is_empty():
+		for sc in (it.get("composants", {}) as Dictionary).keys():
+			mat = str((it.composants[sc] as Dictionary).get("materiau", ""))
+			if not mat.is_empty():
+				break
+	var pile: Dictionary = SimTerrain._pile(sim, e, mat, "brut")
+	if mat.is_empty() or pile.is_empty() or int(pile.get("quantite", 0)) < int(us.get("quantite", 1)):
+		EventBus.emettre(&"journal", [&"journal.reparer_matiere", {"materiau": GameData.catalogues.materials.get(mat, {}).get("name_key", mat)}])
+		return false
+	pile.quantite = int(pile.quantite) - int(us.get("quantite", 1))
+	if int(pile.quantite) <= 0:
+		e.sac.erase(str(pile.uid))
+	it["usure"] = maxf(0.0, float(it.usure) - float(us.get("rend", 0.35)))
+	e.compteur = tick + int(us.get("ticks", 1800))
+	EventBus.emettre(&"journal", [&"journal.repare", {"objet": nom_objet(sim, uid), "usure": int(round(float(it.usure) * 100.0))}])
+	return true
+
+
 ## Le Wu Xing d'un objet (designer 2026-09-01, point 65) : son vecteur propre s'il en a un, sinon
 ## celui de la MATIÈRE dont il est fait — un objet assemblé agrège les matériaux de ses composants.
 ## Tout objet a donc un élément à montrer, et l'inventaire n'a plus de case vide.

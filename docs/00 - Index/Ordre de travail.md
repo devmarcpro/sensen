@@ -609,9 +609,18 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     dit à quelle vitesse le monde la remet. **Et le délai ne se tique pas** : la modification porte l'heure où
     elle a été faite, et la passe hebdomadaire compare — même économie que la pourriture d'une dépouille et
     que la rumeur. *Ce qui peut se déduire ne se balaie pas.*
-    **RESTE L'USURE D'UN OBJET** : une lame qui s'émousse et une armure qui se troue demandent que la qualité
-    d'une instance baisse à l'usage — c'est le même `alteration`, appliqué au matériau d'un objet plutôt qu'à
-    celui d'une tuile, et cela touche au combat, donc à des nombres calibrés.
+    ~~**RESTE L'USURE D'UN OBJET**~~ — **FAITE le 2026-09-09 au soir**, et la ligne 30 est entière.
+    **LA PRÉCAUTION A DÉCIDÉ DU DESSIN** : `qualite` est lue par les dégâts, par l'armure et par les prix, et des
+    dizaines de tests sont calibrés dessus. On n'y touche donc PAS. L'usure est un **champ à part**, à zéro par
+    défaut, et une seule fonction — `qualite_utile` — combine les deux au moment de s'en servir : *un objet qui n'a
+    jamais servi se comporte exactement comme avant, à la virgule près.*
+    **TROIS GESTES USENT**, et ce sont les trois où la matière travaille : frapper (l'arme), encaisser (la pièce
+    d'armure touchée), creuser (l'outil). Rien d'autre — un manteau porté ne se troue pas parce que le temps passe.
+    La vitesse vient de l'`alteration` du matériau : *une lame de fer s'émousse, une lame d'or serait ridicule mais
+    ne s'abîmerait pas* — la même stat qui dit pourquoi l'or vaut cher.
+    **ET IL Y A UN CHEMIN DE RETOUR** : un mécanisme qui ne fait que dégrader est un impôt, pas une règle. Une unité
+    de la matière de l'objet, à une station de sa recette, et l'usure retombe — *on ne rend jamais un objet NEUF, on
+    le maintient.* Le plafond tient l'autre bout : un objet usé est mauvais, il n'est jamais inutile.
 31. **Les besoins au-delà de la faim** : ~~soif~~, sommeil, peur qui dure (aucun bloqueur non plus).
     ~~**L'HYDRATATION**~~ — **FAITE le 2026-09-09 au soir** *(designer : « on rajoutera l'hydratation aussi »).*
     Elle est la faim avec des nombres plus courts — trois semaines sans manger, trois jours sans boire —, les deux

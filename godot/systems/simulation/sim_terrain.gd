@@ -1670,6 +1670,7 @@ static func _creuser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) 
 	elif sim.poches_sous_sol.has(sim.grille.idx(vers)):   # la nappe, la géode, le magma
 		_liberer_sous_sol(sim, vers, str(sim.poches_sous_sol[sim.grille.idx(vers)]), tick)
 	e.vigueur = maxi(0, int(e.vigueur) - int(cr.vigueur))
+	sim.user_objet(str(e.get("equipement", {}).get("main_principale", "")), "par_geste")   # la pioche s'arrondit (ordre de travail 30)
 	e.compteur = tick + sim._ticks_avec_statuts(e, ticks)
 	if recolte:
 		var rr2: Dictionary = sim.regles.r.recolte

@@ -1968,5 +1968,17 @@
     "_doc": "LE TEMPS LONG (ordre de travail 30, 2026-09-09) : ce qu on fait au monde hors de ses claims ne dure pas — mais cela dure LONGTEMPS quand la matiere resiste. `ruine_ticks_base` est le delai d une matiere de reference (alteration 50) ; le delai reel est `ruine_ticks_base * (100 - alteration) / 50`, si bien qu un mur de granit (alteration 5) tient pres de deux fois la reference et qu un toit de chaume (alteration 88) s en va en un quart. C EST CE QUI EST DEBOUT QUI DECIDE : un mur bati resiste par SA matiere, pas par celle qu il a remplacee ; a defaut, c est la matiere RETIREE qui dit a quelle vitesse le monde la remet.\nLe delai ne se tique pas : la modification porte l heure ou elle a ete faite, et la passe hebdomadaire compare. Meme economie que la pourriture d une depouille.",
     "ruine_ticks_base": 36000000,
     "alteration_defaut": 50
+  },
+  "usure": {
+    "_doc": "L USURE D UN OBJET (ordre de travail 30, 2026-09-09). Le meme `alteration` que la ruine, applique au materiau d une INSTANCE : une lame s emousse, une armure se troue, une pioche s arrondit.\nELLE EST UN CHAMP A PART, ET C EST DELIBERE : `qualite` est lue par les degats, par l armure et par les prix, et des dizaines de tests sont calibres dessus. `qualite_utile` combine les deux au moment de s en servir, si bien qu un objet qui n a jamais servi se comporte exactement comme avant.\n`par_coup`, `par_encaisse` et `par_geste` sont ce qu un usage ajoute pour une matiere d alteration 50 ; la vitesse reelle suit l alteration du materiau de l objet. `usure_max` borne la perte : un objet use est mauvais, il n est JAMAIS inutile — sans quoi le joueur passerait sa partie a remplacer ce qu il aime. `reparer` dit ce que coute une remise en etat : une unite de la matiere de l objet, a une station de sa recette, et l usure retombe de `reparer.rend`.",
+    "par_coup": 0.0016,
+    "par_encaisse": 0.0012,
+    "par_geste": 0.0022,
+    "usure_max": 0.5,
+    "reparer": {
+      "rend": 0.35,
+      "ticks": 1800,
+      "quantite": 1
+    }
   }
 }

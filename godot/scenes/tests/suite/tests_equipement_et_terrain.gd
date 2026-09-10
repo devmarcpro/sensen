@@ -4,6 +4,41 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## L'USURE D'UN OBJET (ordre de travail 30, la moitié qui restait — 2026-09-09). Le même `alteration`, appliqué au
+## matériau d'une INSTANCE. **La précaution qui décide du dessin s'éprouve la première** : `qualite` n'est pas
+## touchée — elle est lue par les dégâts, l'armure et les prix, et des dizaines de tests sont calibrés dessus.
+func test_usure() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var us: Dictionary = s.regles.r.get("usure", {})
+	verifier(not us.is_empty(), "l'usure a ses nombres en données")
+	var arme := s.generer_objet("proto_epee_courte", 1, {}, "commun", 0)
+	if arme.is_empty():
+		return
+	# 1. UN OBJET NEUF SE COMPORTE EXACTEMENT COMME AVANT. C'est ce qui protège les nombres déjà calibrés.
+	verifier(is_equal_approx(s.regles.qualite_utile(arme), float(arme.get("qualite", 1.0))), "un objet qui n'a jamais servi ne perd rien (%.3f)" % s.regles.qualite_utile(arme))
+	# 2. L'USAGE PREND, À LA VITESSE DE LA MATIÈRE. Une lame de fer s'émousse ; une lame d'or ne s'abîmerait pas.
+	var fer := arme.duplicate(true)
+	fer["materiau"] = "fer"
+	var or_ := arme.duplicate(true)
+	or_["materiau"] = "or"
+	verifier(s.regles.usure_du_geste(fer, "par_coup") > s.regles.usure_du_geste(or_, "par_coup"), "le fer s'use plus vite que l'or (%.5f contre %.5f) — et c'est la même stat qui dit pourquoi l'or vaut cher" % [s.regles.usure_du_geste(fer, "par_coup"), s.regles.usure_du_geste(or_, "par_coup")])
+	# 3. LE PLAFOND TIENT : un objet usé est mauvais, il n'est JAMAIS inutile.
+	s.items[str(arme.uid)]["materiau"] = "fer"
+	for k in 5000:
+		s.user_objet(str(arme.uid), "par_coup")
+	var plafond := float(us.get("usure_max", 0.5))
+	verifier(is_equal_approx(float(s.items[str(arme.uid)].usure), plafond), "l'usure s'arrête au plafond (%.2f)" % float(s.items[str(arme.uid)].usure))
+	verifier(s.regles.qualite_utile(s.items[str(arme.uid)]) > 0.0, "et l'objet vaut encore quelque chose : %.3f" % s.regles.qualite_utile(s.items[str(arme.uid)]))
+	# 4. IL Y A UN CHEMIN DE RETOUR. Un mécanisme qui ne fait que dégrader est un impôt, pas une règle.
+	j.sac.append(str(arme.uid))
+	var avant := float(s.items[str(arme.uid)].usure)
+	verifier(not SimObjets._reparer(s, j, str(arme.uid), 0), "sans la matière, on ne répare pas")
+	SimTerrain._donner_materiau(s, j, "fer", 3)
+	var ok_r := SimObjets._reparer(s, j, str(arme.uid), 0)
+	verifier(ok_r and float(s.items[str(arme.uid)].usure) < avant, "avec du fer en sac, la lame se remet en état (%.2f → %.2f)" % [avant, float(s.items[str(arme.uid)].usure)])
+
+
 ## L'EAU QUI PÈSE — première moitié : **elle s'infiltre** (ordre de travail 32, 2026-09-09). Un creux était jusqu'ici
 ## un bassin PARFAIT quel que soit son fond : on tenait un étang sur du sable. La quinzième colonne, `permeabilite`,
 ## lui donne sa raison — et fait d'un bassin un ouvrage.
