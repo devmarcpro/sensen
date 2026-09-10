@@ -597,6 +597,45 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Ce qui reste** : les ROYAUMES ne
     portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
     moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
+29 ter. **LES SOUS-RACES, ET CHACUNE SA SOUS-FACTION** *(designer 2026-09-10 : « sous classes (homme bêtes =
+    homme chats, hommes chiens, etc.), chacun a sa sous faction »).* **Noté, pas codé.**
+    **CE QUI EXISTE DÉJÀ, ET C'EST PRESQUE TOUT LE MÉCANISME** : `SimRumeur.factions_de` DÉRIVE déjà une faction
+    d'espèce (`espece:<id>`) sans qu'aucun fichier ne la déclare, et la réputation est une **somme sur toutes les
+    factions dont on est membre**. Une sous-faction par sous-race est exactement le même tour, avec un `parent` en
+    plus.
+    **LE POINT DE CONCEPTION, ET IL EST LÀ** : une sous-faction doit **hériter** de sa mère, sinon on obtient des
+    factions isolées qui ne se parlent pas. Un homme-chat appartient à `race:homme_chat` **et** à `race:homme_bete`
+    **et** aux factions idéologiques ; ce qui offense les hommes-bêtes l'offense, et ce qui touche les chats
+    l'offense **plus**. La somme sait déjà additionner des appartenances multiples — il n'y a rien à réécrire.
+    **CE QUE ÇA COÛTE VRAIMENT** : un `parent` sur la fiche de race, quelques lignes dans `factions_de`, et **du
+    contenu** — un fichier par sous-race, avec ses bonus, son espérance de vie et surtout **son visage**. C'est là
+    qu'est le vrai prix : un homme-chat veut son museau court et ses oreilles pointues, un homme-chien son museau
+    long et ses oreilles tombantes. Les marqueurs de visage du 2026-09-09 rendent ce travail possible sans code ;
+    **il reste du dessin**, et le dessin est au designer.
+    **CE QUE ÇA OUVRE** : une politique interne aux peuples. Chasser un cerf fâche les cerfs ; frapper un
+    homme-chat fâchera les chats plus fort que les hommes-bêtes en général, et un village d'hommes-chiens s'en
+    souviendra autrement qu'un village mêlé.
+
+29 quater. **LES VILLES SONT VRAIMENT VIVANTES** *(designer 2026-09-10 : « les villes sont vraiment vivantes, par
+    exemple les villes cyberjunkie sont en chaos constant, les PNJ se jettent des bouteilles d'alcool, se battent,
+    se droguent »).* **Noté, pas codé.**
+    **CE N'EST PAS UNE IA NOUVELLE, ET C'EST CE QUI LA REND ABORDABLE.** Un PNJ suit déjà une routine à trois
+    plages — `poste`, `social`, `lit` — tirée de sa fonction, décalée par ses traits, suspendue les jours de fête.
+    Une ville en chaos n'est pas un autre cerveau : c'est un **caractère de ville** qui (1) **repondère** ces
+    plages — beaucoup de `social`, peu de `poste` — et (2) **débloque une poignée d'actes** que personne ne fait
+    aujourd'hui : boire, jeter une bouteille, se battre entre civils, se droguer.
+    **ET LES CONSÉQUENCES SONT DÉJÀ ÉCRITES**, ce qui est le meilleur argument pour cette ligne : une rixe est un
+    fait `frapper_civil`, donc taguée `sang_verse` et `ordre_trouble`. Une ville où l'on se bat tout le temps est
+    donc une ville **que les gens d'armes détestent et que le Cercle du soufre adore**, sans une règle de plus. Le
+    système de rumeur et de factions du 2026-09-09 se paie ici.
+    **UNE DÉPENDANCE NETTE** : « se droguer » demande les **drogues** de la ligne 28 quater. Sans elles, une ville
+    cyberjunkie n'est qu'un générateur de bagarres — la moitié de l'image manque.
+    **UNE QUESTION DE REGISTRE, ET ELLE N'EST PAS À MOI** : « cyberjunkie » suppose un registre technologique. Le
+    monde a déjà des **robots** et un palier industriel, donc ce n'est pas une rupture — mais cela décide de ce à
+    quoi une ville peut ressembler, et jusqu'où va le mélange. *Voir [[Décisions en attente]].*
+    **CE QU'IL FAUDRAIT EN DONNÉES** : un `caractere` par village (paisible, laborieux, chaotique, dévot…), ses
+    poids de routine, ses actes permis, et ce qu'il fait aux prix et à la garde. Le reste existe.
+
 ~~30. **Le temps long** — usure, ruine, repousse — avec `alteration`.~~ — **LA RUINE ET LA REPOUSSE FAITES le
     2026-09-09** ; **l'usure d'un objet reste**.
     **CE QUI N'ALLAIT PAS, ET QUI N'ÉTAIT PAS UN MANQUE MAIS UNE FAUTE** : la repousse existait déjà — chaque
