@@ -3656,6 +3656,22 @@ souhait.miel.name,honey
 dialogue.souhait_realise.text,"I will not forget what you gave me. Ever."
 dialogue.opinion.aime,"{nom}? A good heart. I like them."
 dialogue.opinion.n_aime_pas,"Do not talk to me about {nom}. We do not get along."
+dialogue.on_raconte,"People have been talking, lately…"
+dialogue.on_raconte.prefixe,"They say {qui} {fait}. {ton}"
+dialogue.on_raconte.rien,Nothing ever happens around here.
+dialogue.on_raconte.quelqu_un,someone
+dialogue.on_raconte.toi,you
+dialogue.on_raconte.blame,That is not done.
+dialogue.on_raconte.approuve,We could use more of that.
+dialogue.on_raconte.neutre,None of my business.
+fait.tuer_civil,killed someone
+fait.frapper_civil,raised a hand to someone
+fait.tuer_bete,killed a beast
+fait.tuer_bete_paisible,slaughtered a beast that asked for nothing
+fait.abattre_arbre,felled a tree
+fait.creuser_roche,cut into the rock
+fait.voler,stole
+fait.quete_rendue,did a good turn
 dialogue.opinion.personne,"The folk here? I know them all, and miss none."
 ui.ecran.offrir,Offer a gift
 ui.ecran.offrir_objet,Offer: {objet}

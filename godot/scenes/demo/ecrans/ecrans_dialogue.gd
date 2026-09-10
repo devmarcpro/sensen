@@ -248,6 +248,40 @@ static func _option(ec: Ecrans, opt: String) -> void:
 			ec.fermer()
 
 
+## CE QU'ON RACONTE ICI, ET CE QUE CELUI QUI PARLE EN PENSE (ordre de travail 29, 2026-09-09).
+## Le fait le plus frais qui soit arrivé jusqu'à cette cellule — jamais un fait dont le PNJ est lui-même l'auteur, et
+## jamais un fait dont la nouvelle n'est pas encore là : la fraîcheur le dit déjà, il suffit de la respecter.
+## **Le ton vient des valeurs de ses factions**, pas d'une table de phrases : la même somme qui décide de sa relation
+## décide de son indignation. C'est ce qui rend le système audible sans l'écrire deux fois.
+static func texte_on_raconte(ec: Ecrans, pnj: Dictionary) -> String:
+	var sim = ec.main.sim
+	if sim == null or sim.monde == null:
+		return ec.tr("dialogue.on_raconte.rien")
+	var connus: Array = SimRumeur.connus(sim, sim.monde.cellule_de(pnj.get("pos", Vector2i.ZERO)), sim.horloge_monde.ticks)
+	for c in connus:
+		var fait: Dictionary = c.fait
+		if str(fait.auteur) == str(pnj.id):
+			continue   # on ne se raconte pas soi-même
+		var qui := ec.tr("dialogue.on_raconte.quelqu_un")
+		if str(fait.auteur) == str(ec.main.joueur().get("id", "")):
+			qui = ec.tr("dialogue.on_raconte.toi")
+		elif sim.entites.has(str(fait.auteur)):
+			qui = ec.tr(str(sim.entites[str(fait.auteur)].name_key))
+		# CE QU'IL EN PENSE : la somme de ce que ses factions valent à ce fait-là, et rien d'autre.
+		var jugement := 0.0
+		for fid in SimRumeur.factions_de(pnj):
+			for tag in fait.tags:
+				jugement += SimRumeur.valeur_de(str(fid), str(tag))
+		var ton := "dialogue.on_raconte.neutre"
+		if jugement < -0.5:
+			ton = "dialogue.on_raconte.blame"
+		elif jugement > 0.5:
+			ton = "dialogue.on_raconte.approuve"
+		return ec.tr("dialogue.on_raconte.prefixe").format({
+			"qui": qui, "fait": ec.tr("fait." + str(fait.acte)), "ton": ec.tr(ton)})
+	return ec.tr("dialogue.on_raconte.rien")
+
+
 ## La fiche d'un PNJ, révélée par paliers de relation (L'information comme récompense).
 ## La réplique d'un PNJ telle qu'elle s'affiche : une clé, ou « histoire » / « opinion » que le client compose.
 static func texte_replique(ec: Ecrans, pnj: Dictionary) -> String:
@@ -264,6 +298,12 @@ static func texte_replique(ec: Ecrans, pnj: Dictionary) -> String:
 			if pr[k] is String and str(pr[k]).contains("."):
 				pr[k] = ec.tr(str(pr[k]))
 		return ec.tr("dialogue.rumeur_royaume.prefixe").format({"rumeur": ec.tr(str(ev.cle)).format(pr)})
+	# LE PNJ COLPORTE (ordre de travail 29, 2026-09-09). La rumeur existait et personne ne pouvait l'entendre : un
+	# joueur voyait un garde le regarder de travers sans jamais apprendre pourquoi. Le PNJ raconte maintenant le
+	# fait le plus FRAIS arrivé jusqu'ici — et il dit ce que SA faction en pense. Trois tons pour un même fait : le
+	# bûcheron s'indigne de l'arbre abattu, le garde hausse les épaules, le Cercle du soufre s'en amuse.
+	if ec.replique_key == "on_raconte":
+		return texte_on_raconte(ec, pnj)
 	if ec.replique_key == "opinion":
 		var ops: Dictionary = pnj.get("social", {}).get("opinions", {})
 		for autre in ops.keys():

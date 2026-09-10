@@ -1,0 +1,11 @@
+{
+  "text_key": "on_raconte",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 6
+}

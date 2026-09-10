@@ -3727,6 +3727,22 @@ souhait.miel.name,du miel
 dialogue.souhait_realise.text,"Je n’oublierai pas ce que vous m’avez offert. Jamais."
 dialogue.opinion.aime,"{nom} ? Un brave cœur. Je l’aime bien."
 dialogue.opinion.n_aime_pas,"Ne me parlez pas de {nom}. Nous ne nous entendons pas."
+dialogue.on_raconte,"On raconte des choses, ces temps-ci…"
+dialogue.on_raconte.prefixe,"On raconte que {qui} {fait}. {ton}"
+dialogue.on_raconte.rien,Ici, il ne se passe jamais rien.
+dialogue.on_raconte.quelqu_un,quelqu'un
+dialogue.on_raconte.toi,tu
+dialogue.on_raconte.blame,Ça ne se fait pas.
+dialogue.on_raconte.approuve,Il en faudrait plus, des comme ça.
+dialogue.on_raconte.neutre,Ça ne me regarde pas.
+fait.tuer_civil,a tué quelqu'un
+fait.frapper_civil,a levé la main sur quelqu'un
+fait.tuer_bete,a tué une bête
+fait.tuer_bete_paisible,a massacré une bête qui ne demandait rien
+fait.abattre_arbre,a abattu un arbre
+fait.creuser_roche,a percé la roche
+fait.voler,a volé
+fait.quete_rendue,a rendu service
 dialogue.opinion.personne,"Les gens d’ici ? Je les connais tous, et aucun ne me manque."
 ui.ecran.offrir,Offrir un cadeau
 ui.ecran.offrir_objet,Offrir : {objet}

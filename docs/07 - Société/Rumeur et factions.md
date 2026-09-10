@@ -33,10 +33,14 @@ Un acte laisse un **fait tagué** ; le fait **met du temps** à parcourir la car
 
 **On appartient à une faction** par sa race, par sa fonction de village, ou par un tag d'être — et l'on peut appartenir à plusieurs : un garde nain est à la fois gens d'armes et compagnie de métier, et sa relation les additionne.
 
+> [!success] Complété le 2026-09-09 au soir — **le PNJ colporte**
+> **La rumeur existait et personne ne pouvait l'entendre.** Un fait tagué parcourait la carte, les factions s'en offusquaient, la relation d'un PNJ en tenait compte — mais **aucun PNJ ne le disait**. Un joueur voyait donc un garde le regarder de travers *sans jamais apprendre pourquoi*, et le système entier restait de la plomberie.
+> La réplique **« on raconte »** dit le fait le plus **frais** arrivé jusqu'ici — jamais un fait dont le PNJ est l'auteur, jamais un fait dont la nouvelle n'est pas encore là (la fraîcheur le dit déjà, il suffit de la respecter). **Et le ton vient des VALEURS de celui qui parle, pas d'une table de phrases** : la même somme qui décide de sa relation décide de son indignation. *Le bûcheron s'indigne de l'arbre abattu, le garde hausse les épaules, le Cercle du soufre s'en amuse* — un seul fait, trois tons, et rien d'écrit deux fois.
+
 ## Ce qui reste
 
 - **Les royaumes ne portent pas encore de valeurs.** `Surface._lier_royaumes` reste une fonction **pure de la graine** : deux royaumes ne se haïssent toujours pas *pour quelque chose*. C'est la suite naturelle, et elle demande qu'un royaume porte des valeurs comme une faction.
-- **Le dialogue ne colporte pas encore** : un PNJ sait ce que sa faction pense, mais il ne le **dit** pas. Les faits connus sont lisibles (`SimRumeur.connus`) et attendent une réplique.
+- ~~Le dialogue ne colporte pas encore~~ — **fait le 2026-09-09 au soir** (voir le callout ci-dessus).
 - **L'écran ne montre pas les factions** — la réputation à l'écran est la ligne 38.
 
 ## Liens

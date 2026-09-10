@@ -43,6 +43,24 @@ func test_rumeur_et_factions() -> void:
 	verifier(SimRumeur.reputation(s, "espece:cerf", str(j.id), ici, t0) == 0, "et ne fâche pas les cerfs : une espèce est une faction à elle seule")
 	verifier(SimRumeur.reputation(s, "gardiens_des_bois", str(j.id), ici, t0) < 0, "les Gardiens des bois, eux, comptent aussi les bêtes")
 
+	# 3 bis. ET LE PNJ LE DIT (ordre de travail 29, la moitié qui manquait). La rumeur existait et personne ne
+	# pouvait l'entendre : un joueur voyait un garde le regarder de travers sans jamais apprendre pourquoi.
+	# Le ton vient des VALEURS de ses factions, pas d'une table de phrases — la même somme qui décide de sa
+	# relation décide de son indignation, et le même fait se raconte donc sur trois tons.
+	var bucheron := s.ajouter("villageois", j.pos + Vector2i(1, 0), "ia")
+	bucheron["fonction"] = "bucheron"
+	var garde_r := s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
+	garde_r["fonction"] = "garde"
+	s.monde.faits.clear()
+	SimRumeur.rapporter(s, j, "abattre_arbre", j.pos, [])
+	var juge := func(pnj: Dictionary) -> float:
+		var t := 0.0
+		for fid in SimRumeur.factions_de(pnj):
+			for tag in (s.monde.faits[0] as Dictionary).tags:
+				t += SimRumeur.valeur_de(str(fid), str(tag))
+		return t
+	verifier(juge.call(bucheron) < 0.0 and is_zero_approx(juge.call(garde_r)), "l'arbre abattu indigne le bûcheron (%.1f) et laisse le garde de marbre (%.1f) — le même fait, deux tons" % [juge.call(bucheron), juge.call(garde_r)])
+
 	# 4. LA RÉPUTATION EST UNE SOMME, PAS UN COMPTEUR : deux fois le même acte pèse deux fois, et rien ne se compte
 	# deux fois quand on la relit. C'est ce qui la rend gratuite et ce qui la fait s'effacer toute seule.
 	var un: int = SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0)

@@ -592,7 +592,9 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     décident qui s'en offusque. À faire **avec** la ligne 29, pas avant.
     **CE QUI EST FAIT** : les faits tagués, la rumeur DÉDUITE (rien ne se propage : un observateur sait à
     partir de sa distance et du temps écoulé), les cinq factions nommées, l'espèce comme faction implicite,
-    et `relation_de` qui ajoute ce que les factions du PNJ pensent. **Ce qui reste** : les ROYAUMES ne
+    et `relation_de` qui ajoute ce que les factions du PNJ pensent, **et la réplique « on raconte »** qui rend enfin
+    le système audible : le PNJ dit le fait le plus frais arrivé jusqu'ici, sur le ton de ses propres valeurs.
+    **Ce qui reste** : les ROYAUMES ne
     portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
     moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
 ~~30. **Le temps long** — usure, ruine, repousse — avec `alteration`.~~ — **LA RUINE ET LA REPOUSSE FAITES le
