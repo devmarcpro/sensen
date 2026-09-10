@@ -41,7 +41,7 @@ Puis, selon le besoin : **[[Vers la production]]** (ce qui reste avant de coder)
 | **[[Carte — Combat]]** | action-time, Wu Xing, chaîne, garde, modules | 32 |
 | **[[Carte — Progression]]** | les trois axes, talents, potentiel, races, classes | 18 |
 | **[[Carte — Objets]]** | matériaux, craft compositionnel, équipement, loot | 26 |
-| **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 19 |
+| **[[Carte — Êtres]]** | l'être unique, apparence, IA, compagnons, familles | 20 |
 | **[[Carte — Société]]** | relations, guildes, économie, royaumes, lois | 38 |
 | **[[Carte — Technique]]** | architecture Godot, données, performance, réseau | 23 |
 | **[[Carte — Contenu]]** | les catalogues prêts à transcrire en JSON | 36 |
