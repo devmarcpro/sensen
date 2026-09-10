@@ -4789,4 +4789,5 @@ ui.apparence.val.legere,légère
 ui.apparence.val.fournie,fournie
 ui.apparence.val.etoile,"étoile"
 ui.apparence.val.mecha,"mecha"
+ui.apparence.val.poisson,"poisson"
 ui.coffre.titre,"{nom} — {n} / {cap} emplacements"

@@ -4769,4 +4769,5 @@ ui.apparence.val.legere,light
 ui.apparence.val.fournie,thick
 ui.apparence.val.etoile,"star"
 ui.apparence.val.mecha,"mech"
+ui.apparence.val.poisson,"fish"
 ui.coffre.titre,"{nom} — {n} / {cap} slots"
