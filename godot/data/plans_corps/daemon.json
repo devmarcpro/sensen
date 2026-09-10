@@ -1,0 +1,216 @@
+{
+  "_doc": "UNE ANATOMIE PAR RACE (designer 2026-09-10). Les parties EXTERNES sont celles du plan humanoide — le rig les dessine, et inventer un nom rendrait le membre indessinable et sa blessure invisible. Ce qui differe, ce sont les ORGANES : le dedans, que rien ne dessine et que l ecran d anatomie montre. LE DAEMON brule de l interieur : un COEUR DE SOUFRE, des poumons de CENDRE, une VESICULE ARDENTE au lieu d un foie. Il ne filtre pas l eau — il n a pas de reins, et c est pour cela qu il ne boit presque pas.",
+  "racine": "torse",
+  "parties": {
+    "torse": {
+      "zone": "torse",
+      "vital": true,
+      "poids_coup": 3.5,
+      "part_sante": 2.0,
+      "emplacements": [
+        "cuirasse",
+        "dos",
+        "carquois",
+        "accessoire_1",
+        "accessoire_2"
+      ]
+    },
+    "tete": {
+      "zone": "tete",
+      "parent": "torse",
+      "vital": true,
+      "poids_coup": 2.0,
+      "part_sante": 2.0,
+      "emplacements": [
+        "casque",
+        "amulette"
+      ]
+    },
+    "bras_D": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 0.75,
+      "part_sante": 0.3,
+      "emplacements": [
+        "brassards"
+      ]
+    },
+    "bras_G": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 0.75,
+      "part_sante": 0.3,
+      "emplacements": [
+        "brassards"
+      ]
+    },
+    "main_D": {
+      "zone": "bras",
+      "parent": "bras_D",
+      "poids_coup": 0.25,
+      "part_sante": 0.2,
+      "emplacements": [
+        "main_principale",
+        "anneau_1"
+      ]
+    },
+    "main_G": {
+      "zone": "bras",
+      "parent": "bras_G",
+      "poids_coup": 0.25,
+      "part_sante": 0.2,
+      "emplacements": [
+        "main_secondaire",
+        "anneau_2"
+      ]
+    },
+    "jambe_D": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 1.0,
+      "part_sante": 0.35,
+      "emplacements": [
+        "jambieres"
+      ]
+    },
+    "jambe_G": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 1.0,
+      "part_sante": 0.35,
+      "emplacements": [
+        "jambieres"
+      ]
+    },
+    "pied_D": {
+      "zone": "pieds",
+      "parent": "jambe_D",
+      "poids_coup": 0.5,
+      "part_sante": 0.2,
+      "emplacements": [
+        "bottes"
+      ]
+    },
+    "pied_G": {
+      "zone": "pieds",
+      "parent": "jambe_G",
+      "poids_coup": 0.5,
+      "part_sante": 0.2,
+      "emplacements": [
+        "bottes"
+      ]
+    },
+    "cerveau": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.033,
+      "part_sante": 0.525,
+      "vital": true
+    },
+    "oeil_braise_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "vue"
+    },
+    "oeil_braise_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "vue"
+    },
+    "oreille_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "ouie"
+    },
+    "oreille_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "ouie"
+    },
+    "naseaux": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "odorat"
+    },
+    "coeur_de_soufre": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.033,
+      "part_sante": 0.525,
+      "vital": true
+    },
+    "poumon_de_cendre_D": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.05,
+      "part_sante": 0.36,
+      "perdu": {
+        "vigueur_max_pct": -25
+      }
+    },
+    "poumon_de_cendre_G": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.05,
+      "part_sante": 0.36,
+      "perdu": {
+        "vigueur_max_pct": -25
+      }
+    },
+    "vesicule_ardente": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.63,
+      "vital": true
+    },
+    "estomac": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.033,
+      "part_sante": 0.3,
+      "perdu": {
+        "faim_vitesse_mult": 1.6
+      }
+    },
+    "intestins": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.36,
+      "perdu": {
+        "faim_vitesse_mult": 1.4
+      }
+    },
+    "fournaise": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.033,
+      "part_sante": 0.3,
+      "attend": "le champ thermique (un daemon devrait chauffer sa tuile — c est le talent parque `sang_de_soufre`)"
+    }
+  }
+}

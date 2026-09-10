@@ -586,6 +586,47 @@ partie.bras_G,Bras gauche
 partie.cephalothorax,Céphalothorax
 partie.cerveau,Cerveau
 partie.chelizeres,Chélicères
+partie.ganglion,Ganglion
+partie.oeil_compose_D,Œil composé droit
+partie.oeil_compose_G,Œil composé gauche
+partie.antenne_D,Antenne droite
+partie.antenne_G,Antenne gauche
+partie.tympan_D,Tympan droit
+partie.tympan_G,Tympan gauche
+partie.coeur_dorsal,Cœur dorsal
+partie.trachee_D,Trachée droite
+partie.trachee_G,Trachée gauche
+partie.corps_gras,Corps gras
+partie.jabot,Jabot
+partie.processeur,Processeur
+partie.optique_D,Optique droite
+partie.optique_G,Optique gauche
+partie.capteur_acoustique_D,Capteur acoustique droit
+partie.capteur_acoustique_G,Capteur acoustique gauche
+partie.capteur_chimique,Capteur chimique
+partie.noyau,Noyau
+partie.batterie,Batterie
+partie.pompe_hydraulique,Pompe hydraulique
+partie.dissipateur,Dissipateur
+partie.servo_dorsal,Servo dorsal
+partie.organe_olfactif,Organe olfactif
+partie.ligne_laterale,Ligne latérale
+partie.branchie_D,Branchie droite
+partie.branchie_G,Branchie gauche
+partie.vessie_natatoire,Vessie natatoire
+partie.oreille_mobile_D,Oreille mobile droite
+partie.oreille_mobile_G,Oreille mobile gauche
+partie.glande_odorante,Glande odorante
+partie.coeur_second,Second cœur
+partie.tumeur,Tumeur
+partie.oeil_braise_D,Œil de braise droit
+partie.oeil_braise_G,Œil de braise gauche
+partie.naseaux,Naseaux
+partie.coeur_de_soufre,Cœur de soufre
+partie.poumon_de_cendre_D,Poumon de cendre droit
+partie.poumon_de_cendre_G,Poumon de cendre gauche
+partie.vesicule_ardente,Vésicule ardente
+partie.fournaise,Fournaise
 partie.coeur,Cœur
 partie.corps,Corps
 partie.estomac,Estomac
@@ -4746,4 +4787,6 @@ ui.apparence.pilosite,Pilosité
 ui.apparence.teinte_pilosite,Couleur de la pilosité
 ui.apparence.val.legere,légère
 ui.apparence.val.fournie,fournie
+ui.apparence.val.etoile,"étoile"
+ui.apparence.val.mecha,"mecha"
 ui.coffre.titre,"{nom} — {n} / {cap} emplacements"

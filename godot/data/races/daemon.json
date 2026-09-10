@@ -29,5 +29,6 @@
     "teinte_peau": "#8c3a2e",
     "teinte_cheveux": "#20161a",
     "pilosite": "aucune"
-  }
+  },
+  "plan_corps": "daemon"
 }

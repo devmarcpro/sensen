@@ -416,7 +416,17 @@ static func arme(e: Dictionary, items: Dictionary) -> Dictionary:
 ## Tant que la liste était fixe, ni la perte, ni la prothèse, ni le membre surnuméraire n'étaient possibles.
 ## Le plan est en données, un par silhouette (`data/plans_corps/`), et il dit pour chaque partie sa zone de coup, sa
 ## partie parente, les emplacements qu'elle accorde et si elle est vitale.
+## LA RACE D ABORD, LA SILHOUETTE ENSUITE (designer 2026-09-10 : « différencie l'anatomie pour toutes les races »).
+## Le plan était choisi par la SILHOUETTE, si bien que les sept races humanoïdes partageaient le même : un robot
+## avait des poumons, un nautique des oreilles externes, un insectoïde un nez.
+## **Les parties externes restent celles du plan humanoïde** — le rig les dessine, et inventer un nom rendrait le
+## membre indessinable et sa blessure invisible. Ce qui diffère, ce sont les **organes** : le dedans, que rien ne
+## dessine et que l'écran d'anatomie montre. *Ils sont tous humanoïdes : un robot n'a pas d'autres membres qu'un
+## homme, il a d'autres entrailles.*
 static func plan_corps(e: Dictionary) -> Dictionary:
+	var pr := str(GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("plan_corps", ""))
+	if not pr.is_empty() and GameData.catalogues.plans_corps.has(pr):
+		return GameData.catalogues.plans_corps[pr]
 	return GameData.catalogues.plans_corps.get(str(e.get("corps", {}).get("silhouette", "")), {})
 
 

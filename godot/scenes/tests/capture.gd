@@ -28,6 +28,248 @@ var traverser_cadence := 1  # --cadence-pas K : un pas toutes les K images (12 :
 var traverser_en_jeu := 0   # --traverser-en-jeu N : un pas vers l'est PAR IMAGE pendant la mesure — le recentrage tombe dans les images mesurées
 
 
+## LA GALERIE DE L'APPARENCE (designer 2026-09-10 : « je veux voir de tout »). Une planche de contact : le même
+## corps répété, **un seul réglage qui change d'une case à l'autre**. C'est la règle, et elle vaut d'être dite —
+## une planche où deux réglages bougent ensemble ne prouve rien, on ne sait plus lequel a produit ce qu'on voit.
+##
+## Une capture de jeu ne peut pas faire ça : elle montre le personnage que la partie a tiré, dans la pose où il se
+## trouve. `--pantins` avait ouvert la voie pour les huit angles ; la galerie la suit pour tout le reste.
+func _galerie(sujet: String, cadre := "corps") -> void:
+	var jp: Dictionary = scene.joueur()
+	if jp.is_empty():
+		return
+	var entrees: Array = []
+	match sujet:
+		"races":
+			# UNE RACE PROPOSE UNE APPARENCE (`races/<id>.json → apparence`) et c'est la CRÉATION qui l'applique :
+			# changer `race` sur un être déjà fait ne change pas son visage. Sans ce report, la planche montrait
+			# douze fois le même corps sous douze étiquettes — le pire genre de capture, celle qui a l'air de
+			# prouver quelque chose.
+			for rid: String in GameData.catalogues.races.keys():
+				entrees.append({"nom": rid, "race": rid, "ap": GameData.entree("races", rid).get("apparence", {})})
+		"teintes":
+			for t in GameData.config("apparence").get("teintes_peau", []):
+				entrees.append({"nom": str(t.id), "ap": {"teinte_peau": str(t.id)}})
+		"cheveux":
+			for t in GameData.config("apparence").get("teintes_cheveux", []):
+				entrees.append({"nom": "cheveux " + str(t.id), "ap": {"cheveux": "longs", "teinte_cheveux": str(t.id)}})
+		"tetes":
+			for v in _valeurs_locus("tete"):
+				entrees.append({"nom": v, "ap": {"tete": v}})
+		"yeux":
+			for v in _valeurs_locus("yeux"):
+				entrees.append({"nom": v, "ap": {"yeux": v}})
+		"oreilles":
+			for v in _valeurs_locus("oreilles"):
+				entrees.append({"nom": v, "ap": {"oreilles": v}})
+		"bouches":
+			for v in _valeurs_locus("bouche"):
+				entrees.append({"nom": v, "ap": {"bouche": v}})
+		"coiffes":
+			for v in _valeurs_locus("cheveux"):
+				entrees.append({"nom": v, "ap": {"cheveux": v}})
+			for v in _valeurs_locus("pilosite"):
+				entrees.append({"nom": "barbe " + v, "ap": {"pilosite": v}})
+		"corps":
+			for v in _valeurs_locus("carrure"):
+				entrees.append({"nom": "carrure " + v, "ap": {"carrure": v}})
+			for v in _valeurs_locus("taille"):
+				entrees.append({"nom": "taille " + v, "ap": {"taille": v}})
+		"combinaisons":
+			# CHAQUE TÊTE AVEC LES TRAITS DE SON PROPRE JEU. Le designer dessine par ensembles — `tete etoile` va
+			# avec `yeux etoile` et `bouche etoile` — et c'est cet assemblage-là qu'il faut juger, pas un tirage.
+			# Un trait que le jeu ne fournit pas garde la valeur par défaut : *ce qui n'est pas dessiné n'est pas
+			# inventé*, et la case montre alors ce que le joueur verra vraiment.
+			# La coiffe est retirée : sur un crâne d'insecte ou une tête de mécanoïde, une frange de cheveux
+			# cache le dessin qu'on est venu regarder.
+			for v_t in _valeurs_locus("tete"):
+				# Ni oreilles ni coiffe par défaut : sur un crâne d'insecte, une étoile ou un mécanoïde, une frange
+				# de cheveux et deux oreilles rondes cachent le dessin qu'on est venu regarder. Un jeu qui EN
+				# fournit les remet ci-dessous.
+				var jeu := {"tete": str(v_t), "cheveux": "chauve", "pilosite": "aucune", "oreilles": "aucune"}
+				for autre in ["yeux", "nez", "bouche", "oreilles"]:
+					if str(v_t) in _valeurs_locus(autre):
+						jeu[autre] = str(v_t)
+				entrees.append({"nom": str(v_t) + (" (jeu complet)" if jeu.size() > 3 else ""), "ap": jeu})
+		"mutations":
+			# LES ATTACHES ANNEXES (designer 2026-09-10) : le troisième œil, le quatrième. Dessinés d'avance sur la
+			# planche de tête, ils ne coûtent rien tant qu'un être ne les réclame — voici ce que ça donne quand il
+			# les réclame.
+			for n in 4:
+				entrees.append({"nom": "%d œil(s) annexe(s)" % n, "ap": {"yeux_annexes": str(n)}})
+			for perdu in [["main_D"], ["bras_D"], ["jambe_G"], ["bras_D", "jambe_G"], ["tete"]]:
+				entrees.append({"nom": "sans " + ", ".join(PackedStringArray(perdu)), "perdues": perdu})
+		"equipement":
+			entrees.append({"nom": "nu", "ap": {}})
+			for c in GameData.config("styles").get("planches", {}).get("constructions", []):
+				entrees.append({"nom": "cuirasse " + str(c), "equip": {"cuirasse": str(c)}})
+			entrees.append({"nom": "panoplie", "equip": {"cuirasse": "", "casque": "", "jambieres": "", "brassards": "", "bottes": ""}})
+			for c2 in GameData.config("styles").get("planches", {}).get("constructions", []):
+				entrees.append({"nom": "casque " + str(c2), "equip": {"casque": str(c2)}})
+		"armes":
+			# UN ÉCHANTILLON, PAS UN EXEMPLAIRE. « La première arme du catalogue » était un choix d'ordre
+			# alphabétique — une arbalète pour illustrer « une main ». La comparaison que le designer demande ne
+			# veut rien dire sur un seul objet : on en montre plusieurs de chaque, nommées avec leur nombre de mains.
+			entrees.append({"nom": "mains nues", "armes": []})
+			for id_a in _armes_de(1, 5):
+				entrees.append({"nom": str(id_a).trim_prefix("craft_") + " · 1 main", "arme_id": id_a})
+			entrees.append({"nom": "1 main + bouclier", "arme_id": _armes_de(1, 1)[0] if _armes_de(1, 1).size() > 0 else "", "bouclier": true})
+			for id_b in _armes_de(2, 6):
+				entrees.append({"nom": str(id_b).trim_prefix("craft_") + " · 2 mains", "arme_id": id_b})
+	if entrees.is_empty():
+		print("galerie : sujet inconnu « %s »" % sujet)
+		return
+	_poser_banc(jp, sujet, entrees, cadre)
+
+
+func _valeurs_locus(id: String) -> Array:
+	for l in GameData.config("apparence").get("loci", []):
+		if str((l as Dictionary).id) == id:
+			return (l as Dictionary).valeurs
+	return []
+
+
+## LE PREMIER OBJET DU CATALOGUE QUI RÉPOND À UNE DEMANDE — jamais un identifiant écrit en clair. Une planche qui
+## citerait ses items rouillerait à la première retouche du catalogue, **et elle rouillerait en silence** : une case
+## vide ressemble à un personnage nu.
+func _item_pour(slot: String, mains: int, construction: String) -> String:
+	for id: String in GameData.catalogues.items.keys():
+		var d: Dictionary = GameData.catalogues.items[id]
+		if str(d.get("equip_slot", "")) != slot:
+			continue
+		if mains > 0 and int(d.get("hands", 1)) != mains:
+			continue
+		if not construction.is_empty() and str(d.get("construction", "")) != construction:
+			continue
+		return id
+	return ""
+
+
+## UN ÉCHANTILLON D'ARMES À `mains` mains, au plus `combien`, dans l'ordre du catalogue — jamais un identifiant
+## écrit en clair : une planche qui citerait ses armes rouillerait à la première retouche, et en silence.
+func _armes_de(mains: int, combien: int) -> Array:
+	var res: Array = []
+	for id: String in GameData.catalogues.items.keys():
+		var it: Dictionary = GameData.catalogues.items[id]
+		if str(it.get("type", "")) != "arme" or str(it.get("equip_slot", "")) != "main_principale":
+			continue
+		if int(it.get("hands", 1)) != mains:
+			continue
+		res.append(id)
+		if res.size() >= combien:
+			break
+	return res
+
+
+func _equiper_galerie(copie: Dictionary, slot: String, def_id: String) -> void:
+	if def_id.is_empty():
+		return
+	var inst: Dictionary = SimObjets.generer_objet(scene.sim, def_id, 1)
+	if inst.is_empty():
+		return
+	scene.sim.items[str(inst.uid)] = inst
+	(copie["equipement"] as Dictionary)[slot] = str(inst.uid)
+
+
+func _poser_banc(modele: Dictionary, titre: String, entrees: Array, cadre := "corps") -> void:
+	var couche := CanvasLayer.new()
+	couche.layer = 90
+	add_child(couche)
+	var taille := get_viewport().get_visible_rect().size
+	var fond := ColorRect.new()
+	fond.color = Color(0.10, 0.11, 0.13)
+	fond.size = taille
+	couche.add_child(fond)
+	var entete := Label.new()
+	entete.text = "GALERIE — %s  (%d cas)" % [titre, entrees.size()]
+	entete.position = Vector2(12.0, 6.0)
+	couche.add_child(entete)
+	# LA GRILLE S'ADAPTE AU NOMBRE DE CAS : une planche qui déborde de l'écran ne se juge pas, et une planche à
+	# quatre cases perdues dans le vide non plus.
+	# UNE CASE RÉSERVE SA BANDE D'ÉTIQUETTE, et l'échelle se calcule sur ce qui reste : la première planche
+	# écrivait les noms PAR-DESSUS les corps et sortait sa dernière rangée de l'écran. Une planche qu'on ne voit
+	# pas en entier ne se juge pas.
+	const ENTETE := 26.0
+	const ETIQUETTE := 18.0
+	var cols := maxi(1, int(ceil(sqrt(float(entrees.size()) * 1.7))))
+	var lignes := int(ceil(float(entrees.size()) / float(cols)))
+	var lw := taille.x / float(cols)
+	var lh := (taille.y - ENTETE) / float(lignes)
+	var haut_fig := lh - ETIQUETTE
+	# 32 unités de large et 50 de haut : la boîte d'un humanoïde debout, bras écartés, avec sa marge.
+	# EN CADRAGE TÊTE, la boîte est celle du crâne — 17 unités — et le pantin descend d'autant qu'il faut pour que
+	# la tête tombe au milieu de la case. **Une planche illisible ne dit pas « rien n'a changé », elle ne dit rien**,
+	# et c'est pire : on la lit quand même. Le troisième œil des mutations marchait ; il faisait trois pixels.
+	var tete := cadre == "tete"
+	var ech: float = maxf(0.6, minf(lw / (17.0 if tete else 32.0), haut_fig / (17.0 if tete else 50.0)))
+	for i in entrees.size():
+		var en: Dictionary = entrees[i]
+		var copie: Dictionary = modele.duplicate(true)
+		if en.has("race"):
+			copie["race"] = str(en.race)
+		# ON PART D'UNE APPARENCE COMPLÈTE ET NEUTRE. Le joueur d'une partie de capture n'a pas de `teinte_peau` :
+		# le pantin retombe alors sur la teinte de l'ENTITÉ, un rouge de fiche, et toute la planche est rouge sombre.
+		# L'humain en a une, complète — et les planches de teintes la remplacent case par case, ce qui est leur sujet.
+		# ON PART DE L'APPARENCE DE L'HUMAIN, pas de celle du joueur. Le joueur d'une partie de capture porte une
+		# `teinte_peau` qui n'est pas dans la palette : le pantin retombe alors sur la teinte de l'ENTITÉ, un rouge
+		# de fiche, et toute la planche vire au rouge sombre. Compléter ce qui manquait ne suffisait pas — il
+		# fallait ne PAS partir de là.
+		var ap: Dictionary = (GameData.entree("races", "humain").get("apparence", {}) as Dictionary).duplicate()
+		for k: String in (en.get("ap", {}) as Dictionary).keys():
+			ap[k] = (en.ap as Dictionary)[k]   # tel quel : `echelle` est un nombre, pas une chaîne
+		copie["apparence"] = ap
+		copie["equipement"] = {}
+		if en.has("perdues"):
+			(copie["corps"] as Dictionary)["perdues"] = (en.perdues as Array).duplicate()
+		var manque := ""
+		for slot: String in (en.get("equip", {}) as Dictionary).keys():
+			var def_e := _item_pour(slot, 0, str((en.equip as Dictionary)[slot]))
+			# UNE CASE VIDE NE MENT PAS. « cuirasse écailles » montrait un homme nu sous une étiquette qui
+			# promettait une armure : aucune fiche du catalogue ne porte cette construction. La planche le dit.
+			if def_e.is_empty():
+				manque = " (aucune fiche)"
+			_equiper_galerie(copie, slot, def_e)
+		if en.has("arme_id") and not str(en.arme_id).is_empty():
+			_equiper_galerie(copie, "main_principale", str(en.arme_id))
+		if bool(en.get("bouclier", false)):
+			_equiper_galerie(copie, "main_secondaire", _item_pour("main_secondaire", 0, ""))
+		Etres.recalculer(copie, scene.sim.items, scene.sim.affixes_defs, scene.sim.regles)
+		var pd := Paperdoll.new()
+		var rid := str(GameData.entree("races", str(copie.get("race", ""))).get("rig", copie.corps.get("silhouette", "humanoide")))
+		pd.configurer(copie, GameData.entree("rigs", rid if GameData.catalogues.rigs.has(rid) else "humanoide"),
+			scene.sim.items, scene.sim.fonctionnalites, GameData.config("palette_materiaux"))
+		var col := i % cols
+		var lig := i / cols
+		var x0 := lw * float(col)
+		var y0 := ENTETE + lh * float(lig)
+		# Les pieds remontent d'un cheveu et l'étiquette descend : les orteils dépassent sous l'origine du pantin,
+		# et le nom se posait dessus.
+		# HAUTEUR_TETE : le crâne d'un humanoïde se tient à ~31 unités au-dessus des pieds (bassin 13 + 5, torse 9,
+		# cou et demi-crâne). C'est une mesure de CADRAGE, pas de jeu : elle ne sert qu'à viser l'objectif.
+		const HAUTEUR_TETE := 31.0
+		# CHAQUE CASE SE DÉCOUPE. En cadrage tête, le corps est dessiné à la même échelle que le crâne : il
+		# débordait sur les cases voisines et la planche devenait illisible — cinq torses géants par rangée pour
+		# onze visages à comparer. Un `Control` qui coupe ce qui dépasse, et la case ne montre que son sujet.
+		var boite := Control.new()
+		boite.clip_contents = true
+		boite.position = Vector2(x0, y0)
+		boite.size = Vector2(lw, haut_fig)
+		boite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		couche.add_child(boite)
+		pd.position = Vector2(lw * 0.5,
+			(haut_fig * 0.5 + HAUTEUR_TETE * ech) if tete else (haut_fig - 10.0))
+		pd.scale = Vector2(ech, ech)
+		boite.add_child(pd)
+		var etiq := Label.new()
+		etiq.text = str(en.nom) + manque
+		etiq.position = Vector2(x0, y0 + haut_fig)
+		etiq.size = Vector2(lw, ETIQUETTE)
+		etiq.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		etiq.add_theme_font_size_override(&"font_size", 13)
+		couche.add_child(etiq)
+	print("galerie « %s » : %d cas, %d colonnes, échelle %.1f" % [titre, entrees.size(), cols, ech])
+
+
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	for i in args.size():
@@ -702,6 +944,33 @@ func _ready() -> void:
 			if not j_cd.is_empty():
 				var t_cd: Vector2i = scene.sim._tuile_libre_autour(j_cd.pos)
 				scene._contexte(t_cd if t_cd.x >= 0 else j_cd.pos, get_viewport().get_visible_rect().size * 0.45)
+		# COMPOSER LE JOUEUR EN JEU (designer 2026-09-10) : `--joueur race=insectoide,nez=aucun,teinte_peau=#2f6b2a`.
+		# L'outil savait choisir une race À LA CRÉATION et ouvrir un écran ; il ne savait pas composer un être déjà
+		# en jeu, ce qu'il faut pour juger l'anatomie ou le pantin d'un personnage donné. Les clés sont celles de
+		# l'apparence (`tete`, `yeux`, `bouche`, `oreilles`, `cheveux`, `nez`, `pilosite`, `carrure`, les teintes et
+		# les `couleur_<locus>`), plus `race` qui est sur l'être lui-même.
+		if args[i2] == "--joueur" and i2 + 1 < args.size() and scene.sim != null:
+			var j_c: Dictionary = scene.joueur()
+			if not j_c.is_empty():
+				var ap_c: Dictionary = j_c.get("apparence", {}).duplicate()
+				for paire in str(args[i2 + 1]).split(","):
+					var kv := paire.split("=")
+					if kv.size() != 2:
+						continue
+					if str(kv[0]) == "race":
+						j_c["race"] = str(kv[1])
+					elif str(kv[0]) == "nu":
+						# `nu=1` : LE TEINT NE SE VOIT PAS SOUS L'ARMURE (constaté le 2026-09-10 en composant un
+						# insectoïde vert : le kit de départ peint le torse, les bras et les jambes, si bien que la
+						# peau de la race n'apparaît que sur le visage). Pour juger une apparence, il faut pouvoir
+						# la déshabiller.
+						j_c["equipement"] = {}
+					else:
+						ap_c[str(kv[0])] = str(kv[1])
+				j_c["apparence"] = ap_c
+				Etres.recalculer(j_c, scene.sim.items, scene.sim.affixes_defs, scene.sim.regles)
+				if scene.noeuds.has(str(j_c.id)):   # le pantin ne se redessine que si sa signature change : on le force
+					scene.noeuds[str(j_c.id)].set_meta("signature", -1)
 		if args[i2] == "--ecran" and i2 + 1 < args.size():
 			scene.ecrans.ouvrir(args[i2 + 1])
 	for il in args.size():   # --ligne N : la N-ième ligne de la liste sélectionnée, son détail à droite (2026-09-04)
@@ -798,6 +1067,11 @@ func _ready() -> void:
 		print("pantins : les huit directions de marche du rig %s, calées sur ses %d orientations déclarées (%s)" % [
 			rig_p, int(GameData.entree("rigs", rig_p).get("orientations", {}).size()),
 			", ".join(PackedStringArray(GameData.entree("rigs", rig_p).get("orientations", {}).keys()))])
+	# --galerie <sujet> : LE BANC DE CONTACT DE L'APPARENCE (designer 2026-09-10). Beaucoup de personnages côte à
+	# côte, un seul réglage qui change d'une case à l'autre.
+	for i_g in args.size():
+		if args[i_g] == "--galerie" and i_g + 1 < args.size() and scene != null and scene.sim != null:
+			_galerie(str(args[i_g + 1]), "tete" if "--cadre-tete" in args else "corps")
 	if "--debug-survol" in args:
 		print("survol=", scene.survol, " occ=", scene.sim.grille.occupant(scene.survol), " voit=", scene.sim.voit(j, scene.survol), " ecran=", scene.ecrans.est_ouvert(), " j=", j.pos)
 

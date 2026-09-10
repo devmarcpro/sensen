@@ -1,0 +1,216 @@
+{
+  "_doc": "UNE ANATOMIE PAR RACE (designer 2026-09-10). Les parties EXTERNES sont celles du plan humanoide — le rig les dessine, et inventer un nom rendrait le membre indessinable et sa blessure invisible. Ce qui differe, ce sont les ORGANES : le dedans, que rien ne dessine et que l ecran d anatomie montre. L INSECTOIDE ne respire pas par des poumons mais par des TRACHEES ; son coeur est DORSAL ; il n a ni foie ni reins mais un CORPS GRAS qui fait les deux ; il ne sent pas par un nez mais par ses ANTENNES, et n entend pas par des oreilles mais par des TYMPANS lateraux. Ses yeux sont composes. Ce sont ceux du monde reel — la regle du designer vaut ici comme pour les matieres.",
+  "racine": "torse",
+  "parties": {
+    "torse": {
+      "zone": "torse",
+      "vital": true,
+      "poids_coup": 3.5,
+      "part_sante": 2.0,
+      "emplacements": [
+        "cuirasse",
+        "dos",
+        "carquois",
+        "accessoire_1",
+        "accessoire_2"
+      ]
+    },
+    "tete": {
+      "zone": "tete",
+      "parent": "torse",
+      "vital": true,
+      "poids_coup": 2.0,
+      "part_sante": 2.0,
+      "emplacements": [
+        "casque",
+        "amulette"
+      ]
+    },
+    "bras_D": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 0.75,
+      "part_sante": 0.3,
+      "emplacements": [
+        "brassards"
+      ]
+    },
+    "bras_G": {
+      "zone": "bras",
+      "parent": "torse",
+      "poids_coup": 0.75,
+      "part_sante": 0.3,
+      "emplacements": [
+        "brassards"
+      ]
+    },
+    "main_D": {
+      "zone": "bras",
+      "parent": "bras_D",
+      "poids_coup": 0.25,
+      "part_sante": 0.2,
+      "emplacements": [
+        "main_principale",
+        "anneau_1"
+      ]
+    },
+    "main_G": {
+      "zone": "bras",
+      "parent": "bras_G",
+      "poids_coup": 0.25,
+      "part_sante": 0.2,
+      "emplacements": [
+        "main_secondaire",
+        "anneau_2"
+      ]
+    },
+    "jambe_D": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 1.0,
+      "part_sante": 0.35,
+      "emplacements": [
+        "jambieres"
+      ]
+    },
+    "jambe_G": {
+      "zone": "jambes",
+      "parent": "torse",
+      "poids_coup": 1.0,
+      "part_sante": 0.35,
+      "emplacements": [
+        "jambieres"
+      ]
+    },
+    "pied_D": {
+      "zone": "pieds",
+      "parent": "jambe_D",
+      "poids_coup": 0.5,
+      "part_sante": 0.2,
+      "emplacements": [
+        "bottes"
+      ]
+    },
+    "pied_G": {
+      "zone": "pieds",
+      "parent": "jambe_G",
+      "poids_coup": 0.5,
+      "part_sante": 0.2,
+      "emplacements": [
+        "bottes"
+      ]
+    },
+    "ganglion": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.033,
+      "part_sante": 0.525,
+      "vital": true
+    },
+    "oeil_compose_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "vue"
+    },
+    "oeil_compose_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "vue"
+    },
+    "antenne_D": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "odorat"
+    },
+    "antenne_G": {
+      "zone": "tete",
+      "interne": true,
+      "contenant": "tete",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "odorat"
+    },
+    "tympan_D": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "ouie"
+    },
+    "tympan_G": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.2,
+      "sens": "ouie"
+    },
+    "coeur_dorsal": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.033,
+      "part_sante": 0.525,
+      "vital": true
+    },
+    "trachee_D": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.05,
+      "part_sante": 0.36,
+      "perdu": {
+        "vigueur_max_pct": -25
+      }
+    },
+    "trachee_G": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.05,
+      "part_sante": 0.36,
+      "perdu": {
+        "vigueur_max_pct": -25
+      }
+    },
+    "corps_gras": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.63,
+      "vital": true
+    },
+    "jabot": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.033,
+      "part_sante": 0.3,
+      "perdu": {
+        "faim_vitesse_mult": 1.6
+      }
+    },
+    "intestins": {
+      "zone": "torse",
+      "interne": true,
+      "contenant": "torse",
+      "poids_coup": 0.04,
+      "part_sante": 0.36,
+      "perdu": {
+        "faim_vitesse_mult": 1.4
+      }
+    }
+  }
+}

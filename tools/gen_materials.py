@@ -28,6 +28,10 @@ NE_FOND_PAS = 9999
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
          "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
          "fusion", "portance", "absorption", "alteration", "permeabilite"]
+# LES SEIZE QUE LES TABLES DU CATALOGUE PORTENT VRAIMENT. `STATS` en compte deux de plus — `alteration` et
+# `permeabilite`, ajoutees apres coup directement dans les fiches — et le `zip` ci-dessous s arretait donc sur les
+# seize premieres sans que rien ne le dise. On ecrit la difference au lieu de la subir : ces deux-la se PRESERVENT.
+STATS_TABLE = STATS[:16]
 # fichier de catalogue → catégorie (Catégories de matériaux : 11 catégories figées)
 CATALOGUES = {
     "Bois": "bois", "Métaux": "metal", "Roches": "roche", "Minéraux": "mineral", "Gemmes": "gemme",
@@ -107,6 +111,15 @@ for f in glob.glob(os.path.join(SORTIE, "**", "*.json"), recursive=True):
         continue
     ancienne = json.load(io.open(f, encoding="utf-8"))
     garde = {k: ancienne[k] for k in CLES_PRESERVEES if k in ancienne}
+    # LES STATS AJOUTEES APRES LES TABLES SE GARDENT AUSSI (2026-09-10). Les tables du catalogue portent SEIZE
+    # colonnes ; `alteration` et `permeabilite` sont arrivees plus tard, ecrites directement dans les fiches. Ce
+    # script les effacait donc a chaque passage — c est exactement le defaut que sa propre note du 2026-09-08
+    # decrit (« il effacerait sept champs ajoutes apres lui »), revenu par une autre porte. Tout ce que ce script
+    # ne SAIT PAS calculer, il le garde : les colonnes qu il lit restent sa propriete, le reste appartient a qui
+    # l a ecrit. `verif_generateurs.py` le voyait, et c est bien pour cela qu il existe.
+    sup = {k: v for k, v in (ancienne.get("stats") or {}).items() if k not in STATS_TABLE}
+    if sup:
+        garde["_stats_en_plus"] = sup
     if garde:
         conserve[os.path.basename(f)[:-5]] = garde
 
@@ -123,7 +136,7 @@ for fichier, cat in CATALOGUES.items():
         nom = cellules[0].replace("**", "").strip()
         valeurs = cellules[1:17]
         stats = {}
-        for cle, v in zip(STATS, valeurs):
+        for cle, v in zip(STATS_TABLE, valeurs):
             # Un tiret vaut zero partout — sauf pour `fusion`, ou il veut dire « ne fond pas » : 9999, que rien
             # n'atteint. Zero y serait un vrai point de fusion, celui de la glace.
             vide = v in ("—", "-", "")
@@ -154,7 +167,10 @@ for fichier, cat in CATALOGUES.items():
         if "tags" in garde_id:   # la règle `organique` ci-dessus n'est qu'un DÉFAUT, pour un matériau encore sans fiche
             # (une liste VIDE est un état voulu : treize fiches n'ont délibérément aucun tag)
             m["tags"] = garde_id["tags"]
+        sup_id = garde_id.pop("_stats_en_plus", None) if isinstance(garde_id, dict) else None
         m.update({k: v for k, v in garde_id.items() if k != "tags"})   # ce que ce script n'écrit pas, et détruisait
+        if sup_id:
+            m["stats"].update(sup_id)   # et les stats ajoutées après les tables (alteration, permeabilite…)
         materiaux[ident] = (nom, m)
 
 if sans_couleur:

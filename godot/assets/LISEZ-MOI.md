@@ -9,12 +9,26 @@ Un dossier = une planche (Direction artistique, 2026-09-06). Chaque PNG y est un
 
 `00_substitution.png` est un gabarit généré par `tools/gen_planches_substitution.py` : remplace-le par tes cases, ou supprime-le. Un fichier dont la taille n'est pas un multiple de 64 est ignoré (`tools/verif_sprites.py` le signale).
 
-## Les points d'un visage (2026-09-09)
+## Les points d'attache (2026-09-09, refaits le 2026-09-10)
 
-`06_museau.png` porte le dessin, **`06_museau.points.png` porte les points** : transparent partout, sauf un pixel de couleur franche par élément à ancrer. Le jeu s'en sert pour poser les yeux, le nez, la bouche et les oreilles **là où cette tête-là les veut** — tu ne mets rien dans ton sprite.
+`06_museau.png` porte le dessin, **`06_museau.points.png` porte les points** : transparent partout, sauf un **bloc de 2 × 2** de couleur franche par chose à ancrer. Tu ne mets rien dans ton sprite.
 
-- **Une couleur par élément**, dans `data/styles.json → planches.marqueurs` : yeux `#ff0000`, nez `#00ff00`, bouche `#0000ff`, oreilles `#ffff00`, cheveux `#ff00ff`, pilosité `#00ffff`, sourcils `#ff8000`, barbe `#8000ff`, mâchoire `#00ff80`, menton `#ff0080`, pommettes `#80ff00`, implantation `#0080ff`.
-- **Deux pixels de la même couleur** (les deux yeux, les deux oreilles) = deux ancres : l'élément est dessiné deux fois.
+**Pipette les couleurs dans `assets/marqueurs_legende.png`** : une ligne par élément, trois colonnes (base, annexe 1, annexe 2). Elles sont aussi écrites dans `data/styles.json → planches.marqueurs.couleurs`.
+
+**Une seule règle, la même pour le visage et pour le corps :**
+
+- un **CONTENANT** porte les ancres de ses enfants — une tête porte `yeux`, `nez`, `bouche`, `oreilles` ; un torse porte `bras`, `jambe`, `tete` ;
+- une **PIÈCE** porte son propre point — un œil porte `yeux` ; un bras porte `attache` (son articulation) et `bout` (son extrémité).
+
+**Ce qu'il faut savoir en dessinant :**
+
+- **La taille est libre.** Le jeu réunit les pixels voisins de même couleur en UN point posé sur leur centre : 1 × 1, 2 × 2 ou une tache de trois pixels donnent tous un point. Dessine en 2 × 2, c'est ce que tu vois.
+- **Deux blocs de la même couleur** (les deux yeux, les deux épaules) = deux ancres, triées de gauche à droite.
+- **Les rangs.** La couleur de la colonne « base » est celle qui sert toujours. Les deux autres colonnes sont des attaches **annexes** : elles ne servent que si un être les réclame (un troisième œil, un bras de mutant). Tu peux en placer sans que rien ne change aujourd'hui — c'est fait pour.
+- **Ne colle pas deux blocs.** S'ils se touchent, le jeu n'en verra qu'un ; le générateur, lui, refuse d'écraser et te le dit.
 - **Un fichier de points n'est PAS une case** : il ne compte pas dans la numérotation, il ne se dessine jamais.
-- **Sur un trait** (un œil, une oreille), un point dans son propre calque en fait une **pièce** : dessine-la au centre de la case, mets le point au même endroit, et le jeu la posera sur chaque ancre de la tête. Sans point, ta planche reste un visage entier, comme avant.
-- Sans calque, **rien ne change** : une tête sans points place les traits comme elle l'a toujours fait.
+- **Sans calque, rien ne change** : une planche sans points se place comme elle l'a toujours fait.
+- **Pour un membre**, la case est carrée et posée le **bas sur l'articulation**, le **haut sur le bout**. Un `attache` ailleurs qu'en bas au milieu décale ton dessin pour que ce point tombe pile sur le joint.
+- **Un œil, une oreille : dessine-en UN SEUL**, au centre de la case, et mets son point au même endroit. Le jeu le pose sur chaque ancre de la tête et **retourne celui de droite** — c'est ce qui fait qu'un museau, un crâne d'insecte ou une tête difforme placent enfin leurs yeux là où *leur* forme les veut. (Les planches livrées ont été coupées en deux le 2026-09-10 ; elles contenaient la paire, et une paire ne peut être posée qu'à un seul endroit.)
+- **Le générateur ne te pose des points que sur les têtes et les membres**, parce que ses marqueurs y valent exactement ce que le jeu faisait déjà — rien ne bouge. Sur un œil ou une oreille il s'abstient : y poser un point déclarerait ton dessin « pièce à répéter », et s'il contenait la paire on en dessinerait quatre. Ce choix-là est le tien.
+- **Ton dessin reste en nuances de gris** (le jeu le teinte) : c'est ce qui permet à une couleur franche de ne jamais être ambiguë. Un sprite peint en couleur peut faire croire à un marqueur — c'est arrivé.

@@ -14,7 +14,9 @@
         "plaque",
         "ecailleuse",
         "difforme",
-        "cornue"
+        "cornue",
+        "etoile",
+        "mecha"
       ],
       "universel": false
     },
@@ -29,7 +31,8 @@
         "poilues",
         "capteurs",
         "nageoires",
-        "asymetriques"
+        "asymetriques",
+        "aucune"
       ],
       "universel": false
     },
@@ -46,7 +49,9 @@
         "optiques",
         "globuleux",
         "multiples",
-        "braise"
+        "braise",
+        "etoile",
+        "mecha"
       ],
       "universel": false
     },
@@ -57,7 +62,9 @@
         "crochu",
         "plat",
         "fin",
-        "busque"
+        "busque",
+        "aucun",
+        "mecha"
       ],
       "universel": false
     },
@@ -73,7 +80,9 @@
         "grille",
         "branchies",
         "tordue",
-        "ardente"
+        "ardente",
+        "etoile",
+        "mecha"
       ],
       "universel": false
     },

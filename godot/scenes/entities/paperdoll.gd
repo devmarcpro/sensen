@@ -31,6 +31,7 @@ var _vue_tete := "face"
 var _carrure := 1.0
 var _pose_courante: Dictionary = {}   # la pose du joueur pour l'action en cours (point 63)
 var _pose_marche: Dictionary = {}     # l'oscillation du pas (designer 2026-09-08) : recalculée quand `avancement` bouge
+var _pose_tenue: Dictionary = {}      # ce que l'arme impose aux bras (designer 2026-09-10) : une arme à deux mains
 var avancement := -1.0                # 0 → 1 pendant un pas, −1 à l'arrêt ; le client la règle à chaque image
 var _monde_dernier: Dictionary = {}   # les segments tels qu'ils viennent d'être posés, pour qui veut les situer
 var _lacet := 0.0                     # le lacet du corps, en radians (la profondeur, designer 2026-09-08)
@@ -152,6 +153,7 @@ func _dessiner_etre() -> void:
 	_epaisseur_defaut = float(st_pd.get("epaisseur_defaut", 0.7))
 	_ap = e.get("apparence", {})
 	_pose_courante = _pose_action()
+	_pose_tenue = _pose_de_tenue()
 	_vue_tete = str(ori.get("vue_tete", "face"))
 	var fac: Dictionary = GameData.config("apparence").get("facteurs", {})
 	_carrure = float(fac.get("carrure", {}).get(str(_ap.get("carrure", "moyenne")), 1.0))
@@ -183,9 +185,17 @@ func _dessiner_etre() -> void:
 		var m: Dictionary = monde[nom]
 		var col := teinte
 		var contour := 0.0
+		# L'ÉQUIPEMENT EST UN SPRITE PAR-DESSUS, PLUS UNE TEINTE (designer 2026-09-10). Une pièce d'armure
+		# REMPLAÇAIT la couleur du segment : le membre n'était pas couvert, il était **repeint** — et la peau d'une
+		# race ne se voyait donc que sur le visage. Le membre garde sa peau ; l'armure se pose dessus, plus bas.
+		# **Le repli est explicite** : tant qu'un slot n'a pas de planche, on teinte comme avant, faute de quoi
+		# toutes les armures deviendraient invisibles le temps que les sprites arrivent.
+		var arme_sprite := false
 		if peint.has(nom):
-			col = peint[nom].couleur
 			contour = float(CONTOURS.get(peint[nom].construction, 1.0))
+			arme_sprite = Planches.variantes("equipement/" + str(peint[nom].get("slot", ""))) > 0
+			if not arme_sprite:
+				col = peint[nom].couleur
 		if not plan_c.is_empty():
 			var pc := str((rig.segments.get(nom, {}) as Dictionary).get("partie", ""))
 			if not pc.is_empty() and (plan_c.parties as Dictionary).has(pc):
@@ -197,6 +207,8 @@ func _dessiner_etre() -> void:
 					if reste < 1.0:
 						col = col.lerp(coul_bl, (1.0 - reste) * force_bl)
 		_dessine_segment(m, col, contour, nom)
+		if arme_sprite:
+			_planche_equipement(m, nom, peint[nom])
 		t_pp = _top_pp("pd.seg." + nom, t_pp)
 	_dessine_tenus(monde)
 	t_pp = _top_pp("pd.tenus", t_pp)
@@ -307,7 +319,7 @@ func _poser_segments() -> Dictionary:
 			if not monde.has(s.parent):
 				continue
 			var p: Dictionary = monde[s.parent]
-			var a: Array = rig.segments[s.parent].ancrages.get(s.ancrage, [0, 0, 0])
+			var a: Array = _ancrage_de(str(s.parent), nom, str(s.ancrage))
 			var pt3: Vector3 = p.origine3 + p.dir3 * float(a[0]) + p.perp3 * float(a[1])
 			if a.size() > 2:
 				pt3 += p.norm3 * float(a[2])   # l'ancrage a une profondeur : l'épaule est DEVANT le plan du torse
@@ -316,6 +328,72 @@ func _poser_segments() -> Dictionary:
 			herite[nom] = h + _delta_pose(nom)
 			restants.erase(nom)
 	return monde
+
+
+## OÙ UN ENFANT S'ACCROCHE À SON PARENT (designer 2026-09-10 : « des points de connexions entre membres »).
+## Trois sources, dans cet ordre, et la première qui répond gagne :
+## · **le marqueur de FAMILLE que le parent porte** — un torse qui dessine deux points `bras` place lui-même les
+##   épaules ; c'est la règle du visage, mot pour mot, appliquée au corps ;
+## · **son marqueur `bout`** — l'avant-bras s'accroche au bout du bras, la main au bout de l'avant-bras ;
+## · **le nombre écrit dans `rigs`**, comme depuis toujours.
+##
+## **Rien ne bouge tant que rien n'est dessiné** : un rig dont aucune planche ne porte de marqueur pose ses segments
+## exactement comme hier. Et comme `_poser_segments` descend l'arbre, déplacer une épaule emmène tout le bras —
+## on ne recale pas un dessin, on bouge un squelette.
+##
+## Deux marqueurs de même famille (deux épaules) se départagent par le SIGNE du perpendiculaire de l'ancrage du rig :
+## le côté que le squelette voulait déjà reste le côté qu'il obtient.
+func _ancrage_de(parent: String, enfant: String, ancrage: String) -> Array:
+	var defaut: Array = rig.segments[parent].ancrages.get(ancrage, [0, 0, 0])
+	# ON NE RELIT PAS LES PIXELS À CHAQUE POSE. Le résultat ne dépend que du rig, de la carrure et du nom de
+	# l'enfant — et un enfant n'a qu'un parent, si bien que son nom suffit à le désigner. Sans ce mémo, poser un
+	# pantin passait de 0,9 à 2,0 ms pour quatre corps (mesuré à la capture des pantins) : quinze relectures de
+	# pixels par redessin pour un chiffre qui ne bouge pas. La carrure garde le mémo honnête — elle seule peut
+	# changer le résultat en cours de partie.
+	var carrure := str(_ap.get("carrure", ""))
+	if carrure != _ancrages_carrure:
+		_ancrages_carrure = carrure
+		_ancrages_lus.clear()
+	if _ancrages_lus.has(enfant):
+		return _ancrages_lus[enfant]
+	var res := _ancrage_lu(parent, enfant, ancrage, defaut)
+	_ancrages_lus[enfant] = res
+	return res
+
+
+var _ancrages_lus: Dictionary = {}
+var _ancrages_carrure := "?"   # jamais égal à une carrure (aucune ne porte ce nom) : le premier appel remplit toujours
+
+
+func _ancrage_lu(parent: String, enfant: String, ancrage: String, defaut: Array) -> Array:
+	var base := parent.trim_suffix("_G").trim_suffix("_D")
+	var dossier := "membres/" + base
+	if Planches.variantes(dossier) <= 0:
+		return defaut
+	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
+	var mq: Dictionary = Planches.marqueurs(dossier, variante)
+	if mq.is_empty():
+		return defaut
+	var famille := enfant.trim_suffix("_G").trim_suffix("_D").trim_suffix("_haut").trim_suffix("_bas")
+	var pts: Array = mq.get(famille, [])
+	if pts.is_empty():
+		pts = mq.get("bout", [])
+	if pts.is_empty():
+		return defaut
+	# LE CÔTÉ QUE LE SQUELETTE VOULAIT DÉJÀ. Les marqueurs sortent triés de gauche à droite ; le signe du
+	# perpendiculaire de l'ancrage du rig dit lequel des deux revient à cet enfant-là.
+	var pt: Vector2 = pts[0]
+	if pts.size() > 1:
+		pt = pts[0] if float(defaut[1]) <= 0.0 else pts[pts.size() - 1]
+	# DE LA CASE VERS LE SEGMENT. La case d'un membre est carrée, centrée sur lui, le BAS sur l'articulation et le
+	# HAUT sur le bout ; son côté est la plus grande des deux mesures — la même règle qu'au dessin, faute de quoi
+	# le point lu ne tomberait pas où le pixel est peint.
+	var sp: Dictionary = rig.segments[parent]
+	var l := float(sp.get("longueur", 0.0))
+	var cote := maxf(l, float(sp.get("largeur", l)))
+	var k := cote / float(Planches.case())
+	return [l * 0.5 + cote * 0.5 - k * pt.y, k * pt.x - cote * 0.5,
+		float(defaut[2]) if defaut.size() > 2 else 0.0]
 
 
 ## L'ordre de dessin : du plus loin au plus près. `rig.ordre` ne sert qu'à départager deux segments à la même
@@ -373,7 +451,7 @@ func _orientation_proche(dir_ecran: Vector2) -> Dictionary:
 ## repos du rig est déjà absolu et ne doit pas se propager deux fois. Une pose vaut un nombre (l'angle seul, comme
 ## avant) ou un couple [angle, profondeur] — un bras qui part en arrière est une pose que la 2D ne savait pas dire.
 func _delta_pose(nom: String) -> Vector2:
-	return _val_pose(pose, nom) + _val_pose(_pose_courante, nom) + _val_pose(_pose_marche, nom)
+	return _val_pose(pose, nom) + _val_pose(_pose_courante, nom) + _val_pose(_pose_marche, nom) + _val_pose(_pose_tenue, nom)
 
 
 func _val_pose(d: Dictionary, nom: String) -> Vector2:
@@ -435,6 +513,45 @@ func _pose_action() -> Dictionary:
 	return poses.get(act, poses.get("repos", {}))
 
 
+## CE QUE L'ARME IMPOSE AUX BRAS (designer 2026-09-10 : « une arme à deux mains doit être portée avec 2 mains »).
+## `hands: 2` existait dans les fiches et les règles le respectaient — équiper une arme à deux mains vide la main
+## secondaire depuis toujours ; **le dessin, lui, ne le savait pas** et l'espadon se posait dans un poing, l'autre
+## bras pendant le long du corps.
+## **C'est une couche, pas un état** : elle s'ajoute à la pose de l'action au lieu de la remplacer, parce que tenir
+## une arme n'est pas un état du corps mais une contrainte sur les bras — on marche EN tenant, on garde EN tenant.
+## Un mort ne tient plus rien : sa pose de mort suffit à lui rouvrir les bras.
+func _pose_de_tenue() -> Dictionary:
+	if not bool(e.get("vivant", true)):
+		return {}
+	var uid := str(e.get("equipement", {}).get("main_principale", ""))
+	if uid.is_empty() or int(items.get(uid, {}).get("hands", 1)) <= 1:
+		return {}
+	return GameData.config("poses").get("tenue", {}).get("deux_mains", {})
+
+
+## LES DEUX PRISES D'UNE ARME À DEUX MAINS, du poing BAS vers le poing HAUT — ou un tableau vide si l'être n'en
+## tient pas. **L'arme n'a pas de position propre : elle n'existe que dans les mains.** On ne résout donc aucune
+## cinématique pour amener la main libre sur le manche ; on prend l'axe qui joint les deux prises, et les deux mains
+## sont sur l'arme *par construction*, quelles que soient la carrure, l'orientation et l'oscillation du pas.
+func _prises_deux_mains(monde: Dictionary) -> Array:
+	var uid := str(e.get("equipement", {}).get("main_principale", ""))
+	if uid.is_empty() or int(items.get(uid, {}).get("hands", 1)) <= 1:
+		return []
+	var a: Variant = rig.get("prise_arme")
+	var b: Variant = rig.get("prise_bouclier")
+	if not (a is String and b is String and monde.has(a) and monde.has(b)):
+		return []
+	var pa := _point_prise(monde, str(a))
+	var pb := _point_prise(monde, str(b))
+	return [pa, pb] if pa.y > pb.y else [pb, pa]   # le poing le plus BAS d'abord : c'est le pommeau
+
+
+func _point_prise(monde: Dictionary, nom: String) -> Vector2:
+	var m: Dictionary = monde[nom]
+	var pr: Array = rig.segments[nom].ancrages.get("prise", [0, 0])
+	return m.origine + m.direction * float(pr[0]) + m.perp * float(pr[1])
+
+
 func _placer(nom: String, origine3: Vector3, herite: Vector2) -> Dictionary:
 	var s: Dictionary = rig.segments[nom]
 	# `herite` : la somme des rotations de pose des PARENTS, dans le plan ET en profondeur. L'origine d'un segment
@@ -484,7 +601,7 @@ func _segments_peints() -> Dictionary:
 			continue
 		var couleur := _couleur_materiau(it.get("materiau", ""))
 		for seg in rig.slots_segments.get(slot, []):
-			res[seg] = {"couleur": couleur, "construction": it.get("construction", "")}
+			res[seg] = {"couleur": couleur, "construction": it.get("construction", ""), "slot": slot}
 	return res
 
 
@@ -523,6 +640,30 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 ## centrée sur son axe — le dessin part du bas de la case (l'origine du segment) vers le haut (son bout) ; le côté gauche
 ## est le miroir du droit ; la variante suit la carrure ; la case prend la couleur du segment (la peau, ou la matière qui le
 ## couvre — les planches se dessinent en blanc-gris pour cela).
+## L'ARMURE PAR-DESSUS LE MEMBRE (designer 2026-09-10). Même boîte que le membre — carrée, centrée sur le segment,
+## du bas (l'articulation) vers le haut (le bout) —, mais la planche est celle du SLOT et la case celle de la
+## CONSTRUCTION : une plaque et une maille ont enfin une forme, pas seulement une teinte. La couleur reste celle de
+## la matière : c'est elle qui distingue une plaque de fer d'une plaque de bronze.
+func _planche_equipement(m: Dictionary, nom: String, info: Dictionary) -> void:
+	var dossier := "equipement/" + str(info.get("slot", ""))
+	if Planches.variantes(dossier) <= 0:
+		return
+	var l: float = m.longueur
+	var d: Vector2 = m.direction
+	var p: Vector2 = m.perp
+	var o: Vector2 = m.origine
+	var cote := maxf(l, float(m.largeur))
+	var k := cote / float(Planches.case())
+	var miroir := nom.ends_with("_G")
+	var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * (l * 0.5 + cote * 0.5) + p * (cote * 0.5) * (1.0 if miroir else -1.0))
+	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
+	var ordre: Array = GameData.config("styles").get("planches", {}).get("constructions", [])
+	var idx := maxi(0, ordre.find(str(info.get("construction", ""))))
+	var c := float(Planches.case())
+	Planches.dessiner(self, dossier, idx, Rect2(0, 0, c, c), info.couleur)
+	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
+
+
 func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
 	var base := nom.trim_suffix("_G").trim_suffix("_D")
 	var dossier := "membres/" + base
@@ -542,7 +683,17 @@ func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
 	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
 	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
 	var c := float(Planches.case())
-	Planches.dessiner(self, dossier, variante, Rect2(0, 0, c, c), col)
+	# LE DESSIN DIT OÙ IL S'ACCROCHE (designer 2026-09-10 : « des points de connexions entre membres »). La case
+	# était collée au segment sans rien demander au dessin : le bas sur l'articulation, le haut sur le bout. Un
+	# poignet que le designer n'avait pas dessiné pile en bas de sa case pendait donc à côté de l'avant-bras, et la
+	# seule façon de corriger était de redessiner. Si la planche porte un marqueur `attache`, on la TRANSLATE pour
+	# qu'il tombe sur l'articulation. Sans marqueur, rien ne change — à l'octet près.
+	var decale := Vector2.ZERO
+	var att: Array = Planches.marqueurs(dossier, variante).get("attache", [])
+	if not att.is_empty():
+		var att0: Array = Planches.ancres_defaut("attache", true)
+		decale = (att0[0] if not att0.is_empty() else Vector2(c * 0.5, c)) - (att[0] as Vector2)
+	Planches.dessiner(self, dossier, variante, Rect2(decale, Vector2(c, c)), col)
 	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 	return true
 
@@ -562,8 +713,18 @@ func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vect
 	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
 	var cc := float(Planches.case())
 	var idx := maxi(0, Planches.index_locus(trait_id, valeur))
-	for decalage in _places_trait(trait_id, dossier, idx):
-		Planches.dessiner(self, dossier, idx, Rect2(decalage, Vector2(cc, cc)), teinte)
+	var repere := Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local
+	for place in _places_trait(trait_id, dossier, idx):
+		# UNE PIÈCE POSÉE À DROITE SE RETOURNE (designer 2026-09-10). Une paire dessinée à la main est symétrique :
+		# la couper en une pièce sans retourner l'une des deux donnerait deux yeux penchés du même côté, et un
+		# visage plus laid qu'avant la coupe. **Le retournement se fait autour de l'ANCRE** — autour du centre de
+		# la case, l'œil se poserait ailleurs qu'on ne l'a demandé.
+		if bool(place.get("miroir", false)):
+			var ax := float(place.get("ancre_x", cc * 0.5))
+			draw_set_transform_matrix(repere * Transform2D(Vector2(-1.0, 0.0), Vector2(0.0, 1.0), Vector2(2.0 * ax, 0.0)))
+		else:
+			draw_set_transform_matrix(repere)
+		Planches.dessiner(self, dossier, idx, Rect2(place.decalage, Vector2(cc, cc)), teinte)
 	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 	return true
 
@@ -575,35 +736,55 @@ func _planche_visage(trait_id: String, c: Vector2, r: float, d: Vector2, p: Vect
 ## · **Les ancres d'un élément** sont les marqueurs que la case de TÊTE porte pour lui ; à défaut, les ancres par
 ##   défaut des données — là où le visage les a toujours portés.
 ## · Une case de trait qui porte **son propre marqueur** est une **pièce** : dessinée UNE FOIS PAR ANCRE, calée pour
-##   que son marqueur tombe dessus. C'est ainsi qu'un seul œil dessiné sert aux deux yeux.
+##   que son marqueur tombe dessus, et **retournée sur les ancres de droite**. C'est ainsi qu'un seul œil dessiné
+##   sert aux deux yeux — sans le retournement, ils pencheraient du même côté.
 ## · Une case sans marqueur est un **visage entier**, comme avant : dessinée une fois, translatée du déplacement
 ##   MOYEN des ancres. Une tête sans marqueurs ne translate rien — le comportement d'avant, à l'octet près.
 ##
-## Rend la liste des décalages, en pixels de case.
+## Rend une liste de placements : `{decalage (pixels de case), miroir (bool), ancre_x}`. Le miroir sert aux pièces
+## posées à DROITE, depuis que les yeux et les oreilles sont dessinés un par un (designer 2026-09-10).
 func _places_trait(trait_id: String, dossier: String, idx: int) -> Array:
 	if trait_id == "tete":
-		return [Vector2.ZERO]   # la tête EST la case : rien à ancrer sur elle-même
+		return [{"decalage": Vector2.ZERO}]   # la tête EST la case : rien à ancrer sur elle-même
 	var defaut: Array = Planches.ancres_defaut(trait_id)
 	var idx_tete := maxi(0, Planches.index_locus("tete", str(_ap.get("tete", "ronde"))))
 	var ancres: Array = Planches.marqueurs("visage/tete", idx_tete).get(trait_id, [])
 	if ancres.is_empty():
 		ancres = defaut
+	# LES ANNEXES SE RÉCLAMENT (designer 2026-09-10 : « des points d'attache bonus de couleurs différentes pour
+	# prévoir les mutations »). Le rang 0 sert toujours ; un être qui déclare `yeux_annexes: 2` prend EN PLUS les
+	# deux premières ancres du rang 1, puis du rang 2. Un troisième œil sans redessiner la tête, et sans qu'aucune
+	# règle du jeu ne connaisse le mot « mutation ». *Ce qui n'est pas dessiné ne se réclame pas* : demander plus
+	# d'annexes qu'il n'y en a sur la planche en donne ce qu'il y a, et rien de plus.
+	var veut := int(_ap.get(trait_id + "_annexes", 0))
+	if veut > 0:
+		ancres = ancres.duplicate()
+		var rang := 1
+		while veut > 0 and rang < Planches.rangs_marques("visage/tete", idx_tete, trait_id):
+			for pt in Planches.marqueurs_rang("visage/tete", idx_tete, rang).get(trait_id, []):
+				if veut <= 0:
+					break
+				ancres.append(pt)
+				veut -= 1
+			rang += 1
 	if ancres.is_empty():
-		return [Vector2.ZERO]
+		return [{"decalage": Vector2.ZERO}]
 	var siens: Array = Planches.marqueurs(dossier, idx).get(trait_id, [])
 	if not siens.is_empty():
 		var propre: Vector2 = siens[0]   # une pièce n'a qu'un point d'attache : le premier suffit
+		var milieu := float(Planches.case()) * 0.5
 		var res: Array = []
-		for a in ancres:
-			res.append(a - propre)
+		for a: Vector2 in ancres:
+			# Un élément à ancre UNIQUE (le nez, la bouche) n'est jamais retourné : il n'a pas de côté.
+			res.append({"decalage": a - propre, "miroir": ancres.size() > 1 and a.x > milieu, "ancre_x": a.x})
 		return res
 	# Un visage entier : on le déplace du mouvement moyen des ancres, et de rien du tout si la tête est muette.
 	if defaut.is_empty() or defaut.size() != ancres.size():
-		return [Vector2.ZERO]
+		return [{"decalage": Vector2.ZERO}]
 	var somme := Vector2.ZERO
 	for i in ancres.size():
 		somme += (ancres[i] as Vector2) - (defaut[i] as Vector2)
-	return [somme / float(ancres.size())]
+	return [{"decalage": somme / float(ancres.size())}]
 
 
 func _angle_arme() -> float:
@@ -624,6 +805,17 @@ func _dessine_tenus(monde: Dictionary) -> void:
 			var echange: Variant = main_arme
 			main_arme = main_bouclier_c
 			main_bouclier_c = echange
+	# UNE ARME À DEUX MAINS SE DESSINE SUR L'AXE QUI JOINT LES DEUX PRISES (designer 2026-09-10), du poing bas
+	# (le pommeau) vers le poing haut. Les deux mains sont dessus par construction — rien à synchroniser.
+	var deux: Array = _prises_deux_mains(monde)
+	if deux.size() == 2 and equip.has("main_principale"):
+		var it2: Dictionary = items.get(equip.main_principale, {})
+		var bas: Vector2 = deux[0]
+		var vers: Vector2 = (deux[1] - deux[0])
+		var haut2 := vers.normalized() if vers.length() > 0.001 else Vector2.UP
+		if not _dessine_arme_sprite(it2, bas, haut2):
+			_dessine_tenu_picto(it2, bas, haut2)
+		return
 	if main_arme is String and monde.has(main_arme) and equip.has("main_principale"):
 		var it: Dictionary = items.get(equip.main_principale, {})
 		var fonct: Dictionary = fonctionnalites.get(it.get("functionality", ""), {})
@@ -755,6 +947,20 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 			for cote6 in [-1.0, 1.0]:
 				var haut6: Vector2 = c + p * (r * 0.8 * cote6) + d * r * 0.2
 				draw_line(haut6, haut6 - d * r * 1.6 + p * (r * 0.3 * cote6), cheveux, maxf(1.2, r * 0.22))
+	# LA PILOSITÉ PASSE AVANT LES TRAITS (galerie du 2026-09-10). Elle se dessinait en DERNIER, donc par-dessus la
+	# bouche et le nez : « barbe fournie » posait un trapèze sombre du milieu du visage jusque sous le menton, et le
+	# visage disparaissait dessous. Une barbe ENTOURE ce qu'elle encadre — elle est derrière. Le repli part
+	# désormais de la mâchoire (0,45 rayon) et non des pommettes : une barbe, pas une cagoule.
+	var poils := _teinte_de("teintes_cheveux", str(_ap.get("teinte_pilosite", "")), cheveux)
+	var p_brut: Variant = _ap.get("pilosite", 0.0)
+	var pilosite := float(GameData.config("apparence").get("facteurs", {}).get("pilosite", {}).get(str(p_brut), 0.0)) if p_brut is String else float(p_brut)
+	if pv.call("pilosite", poils):
+		pass
+	elif pilosite > 0.0:
+		draw_colored_polygon(PackedVector2Array([
+			c - p * r * 0.66 + d * r * 0.45, c + p * r * 0.66 + d * r * 0.45,
+			c + p * r * 0.32 + d * (r + pilosite), c - p * r * 0.32 + d * (r + pilosite),
+		]), poils)
 	if _vue_tete == "dos":
 		return
 	var cur: Dictionary = _ap.get("curseurs", {})   # les réglages continus (point 53)
@@ -813,16 +1019,6 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 	# LA PILOSITÉ (2026-09-08, designer : « tete, yeux, bouche, cheveux, pilosité, oreilles, nez ») : ce qui reste du
 	# visage. Sourcils, marque, mâchoire, menton, pommettes, implantation et paupières ont été retirés — un trait qui
 	# n'est pas dessiné n'a pas à être réglable. La pilosité a sa propre couleur, qui retombe sur celle des cheveux.
-	var poils := _teinte_de("teintes_cheveux", str(_ap.get("teinte_pilosite", "")), cheveux)
-	var p_brut: Variant = _ap.get("pilosite", 0.0)
-	var pilosite := float(GameData.config("apparence").get("facteurs", {}).get("pilosite", {}).get(str(p_brut), 0.0)) if p_brut is String else float(p_brut)
-	if pv.call("pilosite", poils):
-		pass
-	elif pilosite > 0.0:
-		draw_colored_polygon(PackedVector2Array([
-			c - p * r * 0.8 - d * r * 0.1, c + p * r * 0.8 - d * r * 0.1,
-			c + p * r * 0.35 - d * (r + pilosite), c - p * r * 0.35 - d * (r + pilosite),
-		]), poils)
 
 
 ## Le segment sous un point, en coordonnées locales du nœud (designer 2026-09-01, point 68) : l'écran de

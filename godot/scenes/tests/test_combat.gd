@@ -94,6 +94,7 @@ func _ready() -> void:
 	_lancer("test_regen_longue")
 	_lancer("test_planches")
 	_lancer("test_marqueurs_visage")
+	_lancer("test_marqueurs_membres")
 	_lancer("test_noyau_passes")
 	_lancer("test_des")
 	_lancer("test_regles")

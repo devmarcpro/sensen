@@ -2071,6 +2071,47 @@ partie.bras_G,Left arm
 partie.cephalothorax,Cephalothorax
 partie.cerveau,Brain
 partie.chelizeres,Chelicerae
+partie.ganglion,Ganglion
+partie.oeil_compose_D,Right compound eye
+partie.oeil_compose_G,Left compound eye
+partie.antenne_D,Right antenna
+partie.antenne_G,Left antenna
+partie.tympan_D,Right tympanum
+partie.tympan_G,Left tympanum
+partie.coeur_dorsal,Dorsal heart
+partie.trachee_D,Right trachea
+partie.trachee_G,Left trachea
+partie.corps_gras,Fat body
+partie.jabot,Crop
+partie.processeur,Processor
+partie.optique_D,Right optic
+partie.optique_G,Left optic
+partie.capteur_acoustique_D,Right acoustic sensor
+partie.capteur_acoustique_G,Left acoustic sensor
+partie.capteur_chimique,Chemical sensor
+partie.noyau,Core
+partie.batterie,Battery
+partie.pompe_hydraulique,Hydraulic pump
+partie.dissipateur,Heat sink
+partie.servo_dorsal,Dorsal servo
+partie.organe_olfactif,Olfactory organ
+partie.ligne_laterale,Lateral line
+partie.branchie_D,Right gill
+partie.branchie_G,Left gill
+partie.vessie_natatoire,Swim bladder
+partie.oreille_mobile_D,Right mobile ear
+partie.oreille_mobile_G,Left mobile ear
+partie.glande_odorante,Scent gland
+partie.coeur_second,Second heart
+partie.tumeur,Tumour
+partie.oeil_braise_D,Right ember eye
+partie.oeil_braise_G,Left ember eye
+partie.naseaux,Nostrils
+partie.coeur_de_soufre,Sulphur heart
+partie.poumon_de_cendre_D,Right ash lung
+partie.poumon_de_cendre_G,Left ash lung
+partie.vesicule_ardente,Burning vesicle
+partie.fournaise,Furnace
 partie.coeur,Heart
 partie.corps,Body
 partie.estomac,Stomach
@@ -4726,4 +4767,6 @@ ui.apparence.pilosite,Body hair
 ui.apparence.teinte_pilosite,Body hair colour
 ui.apparence.val.legere,light
 ui.apparence.val.fournie,thick
+ui.apparence.val.etoile,"star"
+ui.apparence.val.mecha,"mech"
 ui.coffre.titre,"{nom} — {n} / {cap} slots"

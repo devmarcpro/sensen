@@ -37,6 +37,7 @@ class Toile:
         self.cov = [[0.0] * c for _ in range(c)]   # couverture 0..1 (alpha)
         self.val = [[1.0] * c for _ in range(c)]   # gris 0..1
         self.marques = {}   # (x, y) -> (r, g, b) : les marqueurs de couleur, poses par-dessus tout a la fin
+        self.perdus = []    # les marqueurs qui n ont pas pu s ecrire : recouverts, ou hors de la case
 
     def forme(self, dedans, gris=1.0):
         c, n = self.c, SS
@@ -106,13 +107,40 @@ class Toile:
                    or (x - cx) ** 2 + (y - (cy - h / 2.0 + r)) ** 2 <= r * r
                    or (x - cx) ** 2 + (y - (cy + h / 2.0 - r)) ** 2 <= r * r, gris)
 
-    def marqueur(self, x, y, hexa):
-        """UN PIXEL DE COULEUR FRANCHE (designer 2026-09-09) : il dit ou va un element du visage. Le jeu le lit puis
-        l EFFACE — il ne se voit jamais. Il se pose APRES le dessin, exactement sur son pixel, sans anticrenelage :
-        une couleur moyennee avec du gris ne serait plus reconnaissable."""
-        xi, yi = int(round(x)), int(round(y))
-        if 0 <= xi < self.c and 0 <= yi < self.c:
-            self.marques[(xi, yi)] = (int(hexa[1:3], 16), int(hexa[3:5], 16), int(hexa[5:7], 16))
+    def marqueur(self, x, y, hexa, taille=None):
+        """UN BLOC DE COULEUR FRANCHE (designer 2026-09-09, puis 2026-09-10 : « de 2x2 »). Il dit ou va un element.
+        Le jeu le lit puis l EFFACE — il ne se voit jamais. Il se pose APRES le dessin, sans anticrenelage : une
+        couleur moyennee avec du gris ne serait plus reconnaissable.
+
+        POURQUOI 2x2 ET PLUS 1x1 : un pixel isole est invisible dans un logiciel de dessin, on le perd et on le
+        decale sans le voir. Le jeu, lui, REGROUPE les pixels voisins de meme couleur en un seul point pose sur leur
+        centre — le bloc pair se centre donc exactement la ou on l a demande, sans decalage d un demi-pixel."""
+        if taille is None:
+            taille = int(lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get("taille", 1))
+        taille = max(1, taille)
+        rgb = (int(hexa[1:3], 16), int(hexa[3:5], 16), int(hexa[5:7], 16))
+        # Le bloc est centre sur (x, y) : pour un cote pair on part du pixel a gauche/au-dessus, si bien que le
+        # centre du bloc retombe sur la frontiere demandee — la ou le jeu, qui moyenne, le retrouvera.
+        x0 = int(round(x - taille / 2.0))
+        y0 = int(round(y - taille / 2.0))
+        # LE PREMIER ECRIT GAGNE, ET CE QUI N A PAS PU S ECRIRE EST DIT. Deux blocs poses a un pixel l un de l autre
+        # se recouvrent ; le dernier ecrivait par-dessus le premier, en silence — le nez de la substitution avait
+        # perdu la moitie de son marqueur au profit des cheveux. Un generateur qui perd un point sans le dire est
+        # pire qu un generateur qui n en pose pas.
+        pose, refuse, dehors = 0, 0, 0
+        for dy in range(taille):
+            for dx in range(taille):
+                xi, yi = x0 + dx, y0 + dy
+                if not (0 <= xi < self.c and 0 <= yi < self.c):
+                    dehors += 1
+                elif (xi, yi) in self.marques and self.marques[(xi, yi)] != rgb:
+                    refuse += 1
+                else:
+                    self.marques[(xi, yi)] = rgb
+                    pose += 1
+        if pose == 0:
+            self.perdus.append((hexa, round(x, 1), round(y, 1), "recouvert" if refuse else "hors de la case"))
+        return pose
 
     def rgba(self):
         """LE DESSIN SEUL, sans un pixel de couleur : les points vivent dans leur propre fichier (designer
@@ -167,13 +195,64 @@ def ecrire_png(chemin, cases):
 ##   · dossier DEJA GARNI de cases individuelles : on n ecrit QUE les valeurs manquantes, une par fichier, numerotees
 ##     a leur place — c est la convention du designer, et elle garde les index exacts.
 ## Rend le nombre de fichiers ecrits.
-def poser(dossier, valeurs, cases, calques=None):
+## LA TAILLE D UN PNG, sans le decoder : les huit octets de signature, puis le bloc IHDR (longueur, type, largeur,
+## hauteur). C est tout ce qu il faut pour savoir de combien de cases un dessin est fait.
+def taille_png(chemin):
+    d = open(chemin, "rb").read(33)
+    if len(d) < 24 or d[:8] != b"\x89PNG\r\n\x1a\n":
+        return (0, 0)
+    return (int.from_bytes(d[16:20], "big"), int.from_bytes(d[20:24], "big"))
+
+
+## LE CALQUE DE POINTS D UN DESSIN QUI N EN A PAS (designer 2026-09-10). Le generateur protege le DESSIN du
+## designer ; les points vivent dans un fichier separe, et rien ne les posait sur ses sprites a lui — ses huit
+## membres et ses six visages n avaient donc aucune attache, et n en auraient jamais eu. On ecrit ici, a cote de
+## chaque dessin qui n a pas son `<nom>.points.png`, un calque de depart aux places par defaut : le designer n a
+## plus qu a deplacer des pixels. **Jamais par-dessus un calque existant** — un point deplace a la main est un
+## choix, et on n ecrase pas un choix.
+def poser_calques_manquants(c, dossier, calques):
+    """UN CONTENANT, OUI ; UNE PIECE, JAMAIS — et la difference n est pas un detail de mise en oeuvre.
+
+    Les marqueurs d un CONTENANT (une tete, un torse) DECRIVENT ou vont les choses : ils remplacent les ancres par
+    defaut par les memes valeurs, donc les poser sur un dessin existant ne change rien a l ecran. Le marqueur propre
+    d une PIECE, lui, CHANGE CE QUE LE DESSIN VEUT DIRE : il declare « je suis un seul oeil, repete-moi sur chaque
+    ancre ». Pose sur un sprite qui contient DEJA les deux yeux — et ceux du designer les contiennent —, il en
+    dessine QUATRE.
+
+    Le generateur ne peut pas deviner laquelle des deux conventions un dessin suit. Il ne pose donc de calque que la
+    ou il ne risque rien, et laisse le reste au seul qui sait : celui qui a dessine."""
+    if not calques or not os.path.isdir(dossier):
+        return 0
+    n = 0
+    dessins = sorted(f for f in os.listdir(dossier) if f.endswith(".png") and not f.endswith(".points.png"))
+    for i, f in enumerate(dessins):
+        cible = os.path.join(dossier, f[:-4] + ".points.png")
+        if os.path.exists(cible):
+            continue
+        k = calques[i] if i < len(calques) else calques[0]
+        if k is None:
+            continue
+        # LE CALQUE SUIT LA GRILLE DU DESSIN : autant de cases, sinon `Planches` l ecarte et le travail est invisible.
+        larg, haut_ = taille_png(os.path.join(dossier, f))
+        n_cases = max(1, (larg // c) * (haut_ // c)) if larg and haut_ else 1
+        ecrire_png(cible, [k] * n_cases)
+        n += 1
+    return n
+
+
+def poser(dossier, valeurs, cases, calques=None, sur_existant=True):
     existants = []
     if os.path.isdir(dossier):
         # UN CALQUE DE POINTS N EST PAS UNE CASE : il ne compte pas comme « le dossier est deja garni », et sa
         # presence ne doit pas faire croire qu une valeur a deja son dessin.
         existants = [f for f in os.listdir(dossier)
                      if f.endswith(".png") and not f.endswith(".points.png") and f != "00_substitution.png"]
+    if existants and sur_existant:
+        # LE COTE DE LA CASE se lit sur la LARGEUR d une ligne (quatre octets par pixel), pas sur le nombre de
+        # lignes divise par quatre — la premiere version confondait les deux et ecrivait des calques de seize cases
+        # pour des dessins d une seule. `Planches` les ecartait alors sans bruit (« ne fait pas la taille de son
+        # dessin ») et TOUS les marqueurs du visage disparaissaient : le test l a dit, l oeil ne l aurait pas vu.
+        poser_calques_manquants(len(cases[0][0]) // 4, dossier, calques)
     if not existants:
         ecrire_png(os.path.join(dossier, "00_substitution.png"), cases)
         if calques and any(c is not None for c in calques):
@@ -205,24 +284,78 @@ def planches_membres(c, rig, facteurs):
         if base == "tete":
             continue   # la tête est un trait du visage (visage/tete)
         segments.setdefault(base, (float(s["longueur"]), float(s["largeur"])))
+    # QUEL SEGMENT PORTE QUELS ENFANTS, ET OU. Le rig le sait deja : `ancrages` donne, pour chaque point nomme, sa
+    # position le long du segment et en travers. On la retranscrit en PIXELS DE CASE — c est tout le sujet du
+    # calque de points : le squelette dit ou est l epaule, le calque le REDIT en pixels, et le jour ou le designer
+    # deplace le pixel, c est l epaule qui suit. La conversion est l inverse exact de celle du pantin : la case est
+    # carree, de cote max(longueur, largeur), le BAS sur l articulation et le HAUT sur le bout.
+    enfants = {}
+    for nom_e, s_e in rig["segments"].items():
+        p_e = str(s_e.get("parent") or "")   # la racine a un parent nul : `str(None)` vaudrait « None », un faux nom
+        if not p_e or p_e == nom_e or p_e not in rig["segments"]:
+            continue
+        b_p = p_e
+        b_e = nom_e
+        for suf in ("_G", "_D"):
+            b_p = b_p[: -len(suf)] if b_p.endswith(suf) else b_p
+            b_e = b_e[: -len(suf)] if b_e.endswith(suf) else b_e
+        for suf in ("_haut", "_bas"):
+            b_e = b_e[: -len(suf)] if b_e.endswith(suf) else b_e
+        a_e = rig["segments"][p_e].get("ancrages", {}).get(str(s_e.get("ancrage", "")), None)
+        if a_e is None:
+            continue
+        enfants.setdefault(b_p, {}).setdefault(b_e, []).append((float(a_e[0]), float(a_e[1])))
+
+    couleurs_m = lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get("couleurs", {})
+    ancres_m = lire_json("styles.json").get("planches", {}).get("ancres", {})
+
     for base, (lo, la) in segments.items():
         cases = []
+        toiles = []
         for carrure in ordre_carrure:
             f = float(facteurs["carrure"].get(carrure, 1.0))
             t = Toile(c)
             w = min(c - 2.0, c * (la * f) / lo)   # la case fait la longueur du segment
             t.pilule(c / 2.0, c / 2.0, max(4.0, w), c - 1.0, 0.92)
             t.pilule(c / 2.0, c / 2.0, max(2.0, w - 4.0), c - 5.0, 1.0)   # un liseré : la pilule se lit une fois teintée
+            # LES ANCRES DES ENFANTS D ABORD : ce sont les vraies articulations, celles que le rig connait —
+            # l epaule, le coude, le poignet. Un torse dit ou pendent les bras et la tete.
+            cote = max(lo, la)
+            for fam, points in enfants.get(base, {}).items():
+                if not couleurs_m.get(fam):
+                    continue
+                for (le_long, en_travers) in points:
+                    px = (en_travers + cote / 2.0) * c / cote
+                    py = (lo / 2.0 + cote / 2.0 - le_long) * c / cote
+                    t.marqueur(px, py, str(couleurs_m[fam][0]))
+            # PUIS SES DEUX BOUTS, DANS CE QUI RESTE : `attache` sur son articulation, `bout` sur son extremite. Un
+            # membre dont un enfant occupe deja le bout n a pas besoin qu on le lui redise ; c est pourquoi le
+            # premier ecrit gagne, et c est pourquoi cet ordre-la est le bon.
+            # `bout` NE SE POSE QUE S IL EST LIBRE : un membre dont un enfant occupe deja l extremite n a pas
+            # besoin qu on le lui redise, et le signaler comme une perte serait crier au loup a chaque generation.
+            for el in (("attache",) if enfants.get(base) else ("attache", "bout")):
+                for a in ancres_m.get(el, []):
+                    if couleurs_m.get(el):
+                        t.marqueur(c / 2.0 + float(a[0]) * c, c / 2.0 + float(a[1]) * c, str(couleurs_m[el][0]))
+            for perdu in t.perdus:
+                print("    ! membres/%s : marqueur %s en (%s, %s) %s" % (base, perdu[0], perdu[1], perdu[2], perdu[3]))
+            toiles.append(t)
             cases.append(t.rgba())
         # UN MEMBRE N EST PAS UN VISAGE : son dossier ne porte qu UN dessin (l index y est la carrure, et
         # `posmod` la ramene a la seule case presente). On n y pose donc la planche des cinq carrures QUE si le
         # dossier est vide — y ajouter des cases decalerait ce que le designer a mis.
         dossier_m = os.path.join(ASSETS, "membres", base)
         if os.path.isdir(dossier_m) and [f for f in os.listdir(dossier_m) if f.endswith(".png") and not f.endswith(".points.png")]:
-            print("  membres/%-11s deja garni : on ne touche a rien" % base)
+            k_m = poser_calques_manquants(c, dossier_m, [t.points() for t in toiles])
+            print("  membres/%-11s deja garni : le dessin est intact, %d calque(s) de points ecrit(s)" % (base, k_m))
             continue
         ecrire_png(os.path.join(dossier_m, "00_substitution.png"), cases)
-        print("  membres/%-11s %d variante(s) (carrure), pilule %.0f × %d" % (base, len(cases), la, lo))
+        calques_m = [t.points() for t in toiles]
+        if any(k is not None for k in calques_m):
+            ecrire_png(os.path.join(dossier_m, "00_substitution.points.png"),
+                       [k if k is not None else [[0] * (4 * c)] * c for k in calques_m])
+        print("  membres/%-11s %d variante(s) (carrure), pilule %.0f × %d, %d enfant(s) ancre(s)"
+              % (base, len(cases), la, lo, len(enfants.get(base, {}))))
 
 
 # ---------------------------------------------------------------- le visage : la boîte de tête, le trait à sa place
@@ -251,18 +384,33 @@ def planches_visage(c, app, facteurs):
         "cornue":     {"yeux": [(-0.44, -0.28), (0.44, -0.28)], "bouche": [(0.0, 0.55)]},
     }
 
+    # LES ANNEXES DE SUBSTITUTION (designer 2026-09-10 : « des points d attache bonus de couleurs differentes pour
+    # prevoir les mutations »). Une tete generee porte, en plus de ses deux yeux, deux ancres de rang 1 au front et
+    # aux tempes : la reserve a mutations existe donc des la substitution, et le designer voit a quoi elle ressemble
+    # avant d en dessiner une. Rien ne les utilise tant qu un etre ne les reclame pas.
+    # Le rang 1 etait a (0, -0,62), a un pixel de l implantation : un troisieme oeil que la generation perdait.
+    ANNEXES = {"yeux": [[(0.0, -0.45), (0.0, 0.18)], [(-0.72, -0.5), (0.72, -0.5)]]}
+
     def marquer_tete(t, valeur):
         """Les marqueurs d une case de TETE : la ou vont les autres elements, sur CETTE forme-la."""
         table = lire_json("styles.json").get("planches", {})
-        couleurs = table.get("marqueurs", {})
+        couleurs = table.get("marqueurs", {}).get("couleurs", {})
         ancres = table.get("ancres", {})
         propre = FORMES.get(valeur, {})
-        for element, hexa in couleurs.items():
-            if element.startswith("_"):
+        # UNE TETE N ANCRE QUE DES ELEMENTS DE VISAGE : sans ce filtre, elle se couvrait d epaules et de genoux
+        # depuis que la table connait aussi les familles du corps.
+        for element in table.get("marqueurs", {}).get("visage", []):
+            teintes = couleurs.get(element, [])
+            if not teintes:
                 continue
-            points = propre.get(element, ancres.get(element, []))
-            for a in points:
-                t.marqueur(cx + float(a[0]) * r, cy + float(a[1]) * r, str(hexa))
+            liste = teintes if isinstance(teintes, list) else [teintes]
+            for a in propre.get(element, ancres.get(element, [])):
+                t.marqueur(cx + float(a[0]) * r, cy + float(a[1]) * r, str(liste[0]))
+            for rang, points in enumerate(ANNEXES.get(element, []), start=1):
+                if rang >= len(liste):
+                    break
+                for a in points:
+                    t.marqueur(cx + float(a[0]) * r, cy + float(a[1]) * r, str(liste[rang]))
 
     def case(trait, valeur, piece=False):
         t = Toile(c)
@@ -318,7 +466,9 @@ def planches_visage(c, app, facteurs):
                     t.cercle(ox, oy, r * 0.12)
         elif trait == "nez":
             hx, hy = cx, (cy - r * 0.18 if piece else haut(0.05))
-            if valeur == "fin":
+            if valeur == "aucun":
+                pass   # UN TRAIT PEUT ETRE ABSENT (2026-09-10) : une case vide ne dessine rien, et c est tout
+            elif valeur == "fin":
                 t.segment(hx, hy, hx, hy + r * 0.3, r * 0.03)
             elif valeur == "busque":
                 t.segment(hx, hy - r * 0.1, hx + r * 0.08, hy + r * 0.15, r * 0.05)
@@ -358,10 +508,22 @@ def planches_visage(c, app, facteurs):
                 for cote in ((1,) if piece else (-1, 1)):
                     ox, oy = cx + ecart * cote, (cy if piece else haut(0.42))
                     t.segment(ox - r * 0.16, oy, ox + r * 0.16, oy, r * (0.08 if valeur == "epais" else 0.04))
+        elif trait == "pilosite":
+            # LE GENERATEUR NE SAVAIT PAS DESSINER LA PILOSITE (trouve par la galerie, 2026-09-10) : le locus
+            # existait, ses trois cases venaient d une version anterieure de cet outil, et le supprimer pour
+            # regenerer donnait des cases VIDES. Un generateur qui ne sait pas refaire ce qu il a fait est un
+            # generateur a moitie. La barbe part de la MACHOIRE et non des pommettes — a mi-visage elle couvrait
+            # la bouche et le nez, et le visage disparaissait sous un trapeze sombre.
+            lg = float(facteurs.get("pilosite", {}).get(valeur, 0.0)) / 8.0 * r
+            if lg > 0:
+                t.polygone([(droite(-0.66), cy + r * 0.45), (droite(0.66), cy + r * 0.45),
+                            (droite(0.34), cy + r + lg), (droite(-0.34), cy + r + lg)])
         elif trait == "barbe":
             lg = float(facteurs["barbe"].get(valeur, 0.0)) / 8.0 * r   # en unités de rig, la tête fait 8 : ramené au rayon
             if lg > 0:
-                t.polygone([(droite(-0.8), cy + r * 0.1), (droite(0.8), cy + r * 0.1), (droite(0.35), cy + r + lg), (droite(-0.35), cy + r + lg)])
+                # DEPUIS LA MACHOIRE, PAS DEPUIS LES POMMETTES (galerie du 2026-09-10) : a `cy + 0,1 r` la barbe
+                # couvrait la bouche et le nez, et le visage disparaissait sous un trapeze sombre.
+                t.polygone([(droite(-0.66), cy + r * 0.45), (droite(0.66), cy + r * 0.45), (droite(0.32), cy + r + lg), (droite(-0.32), cy + r + lg)])
         elif trait == "oreilles":
             lg = float(facteurs["oreilles"].get(valeur, 0.0)) / 8.0 * r
             for cote in ((1,) if piece else (-1, 1)):
@@ -407,9 +569,9 @@ def planches_visage(c, app, facteurs):
         if trait == "tete":
             marquer_tete(t, valeur)
         elif piece:
-            hexa = lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get(trait, "")
-            if hexa:
-                t.marqueur(cx, cy, str(hexa))
+            teintes = lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get("couleurs", {}).get(trait, [])
+            if teintes:
+                t.marqueur(cx, cy, str(teintes[0] if isinstance(teintes, list) else teintes))
         return t
 
     for locus in app["loci"]:
@@ -418,10 +580,59 @@ def planches_visage(c, app, facteurs):
         trait = locus["id"]
         dossier = os.path.join(ASSETS, "visage", trait)
         toiles = [case(trait, v, trait in PIECES) for v in locus["valeurs"]]
+        for i_t, t_t in enumerate(toiles):
+            for perdu in t_t.perdus:
+                print("    ! visage/%s/%s : marqueur %s en (%s, %s) %s"
+                      % (trait, locus["valeurs"][i_t], perdu[0], perdu[1], perdu[2], perdu[3]))
         cases = [t.rgba() for t in toiles]
         calques = [t.points() for t in toiles]
-        n = poser(dossier, locus["valeurs"], cases, calques)
+        # ON NE POSE DE CALQUE SUR UN DESSIN EXISTANT QUE POUR LA TETE : elle est le CONTENANT, ses marqueurs disent
+        # ou vont les AUTRES et valent exactement les ancres par defaut — rien ne bouge a l ecran. Sur un oeil ou une
+        # oreille, le marqueur declarerait le dessin « piece a repeter sur chaque ancre », et les sprites du designer
+        # contiennent la PAIRE : on en dessinerait quatre. Les cases que le generateur ECRIT LUI-MEME, elles, gardent
+        # leur marqueur — il sait ce qu il a dessine.
+        n = poser(dossier, locus["valeurs"], cases, calques, sur_existant=(trait == "tete"))
         print("  visage/%-13s %d variante(s), %d ecrite(s) : %s" % (trait, len(cases), n, ", ".join(locus["valeurs"])))
+
+
+# ---------------------------------------------------------------- l equipement : une coque par-dessus le membre
+
+def planches_equipement(c, rig):
+    """UNE CASE PAR CONSTRUCTION, dans la boite du segment. Le gabarit donne une FORME a l armure — une plaque n est
+    pas une maille — la ou l ancien systeme ne changeait qu une teinte. Le jeu les colore par la matiere."""
+    st = lire_json("styles.json").get("planches", {})
+    ordre = st.get("constructions", ["matelasse", "cuir", "mailles", "ecailles", "plaque", "tissu", "rituel"])
+    for slot, segments in rig.get("slots_segments", {}).items():
+        cases = []
+        for construction in ordre:
+            t = Toile(c)
+            # LA COQUE : une pilule un peu plus large que le membre, ouverte en bas (l articulation reste libre).
+            larg = c * 0.62
+            haut_ = c * 0.86
+            t.pilule(c / 2.0, c / 2.0, larg, haut_, 0.88)
+            if construction == "plaque":          # lisse, avec une arete centrale
+                t.pilule(c / 2.0, c / 2.0, larg - 8, haut_ - 8, 1.0)
+                t.segment(c / 2.0, c / 2.0 - haut_ * 0.35, c / 2.0, c / 2.0 + haut_ * 0.35, 1.6, 0.62)
+            elif construction == "mailles":       # un semis de points
+                for ry in range(5):
+                    for rx in range(4):
+                        t.cercle(c / 2.0 - larg * 0.32 + rx * larg * 0.21, c / 2.0 - haut_ * 0.34 + ry * haut_ * 0.17, 1.7, 0.6)
+            elif construction == "ecailles":      # des arcs qui se recouvrent
+                for ry in range(4):
+                    t.arc(c / 2.0, c / 2.0 - haut_ * 0.3 + ry * haut_ * 0.2, larg * 0.34, 1.6, math.pi * 0.15, math.pi * 0.85, 0.62)
+            elif construction == "matelasse":     # des bandes horizontales
+                for ry in range(5):
+                    t.segment(c / 2.0 - larg * 0.34, c / 2.0 - haut_ * 0.34 + ry * haut_ * 0.17, c / 2.0 + larg * 0.34, c / 2.0 - haut_ * 0.34 + ry * haut_ * 0.17, 1.3, 0.6)
+            elif construction == "cuir":          # une couture au milieu
+                t.segment(c / 2.0, c / 2.0 - haut_ * 0.36, c / 2.0, c / 2.0 + haut_ * 0.36, 1.2, 0.6)
+            elif construction == "tissu":         # un drape leger : la coque seule, plus etroite
+                t = Toile(c)
+                t.pilule(c / 2.0, c / 2.0, larg * 0.9, haut_ * 0.94, 0.7)
+            elif construction == "rituel":        # un anneau grave
+                t.anneau(c / 2.0, c / 2.0, larg * 0.3, 1.8, 0.55)
+            cases.append(t.rgba())
+        poser(os.path.join(ASSETS, "equipement", slot), ordre, cases)
+        print("  equipement/%-11s %d construction(s) sur %d segment(s)" % (slot, len(cases), len(segments)))
 
 
 def main():
@@ -431,6 +642,7 @@ def main():
     print("planches de substitution (cases de %d) :" % c)
     planches_membres(c, rig, app["facteurs"])
     planches_visage(c, app, app["facteurs"])
+    planches_equipement(c, rig)
     lisez = os.path.join(ASSETS, "LISEZ-MOI.md")
     if not os.path.exists(lisez):
         open(lisez, "w", encoding="utf-8").write(

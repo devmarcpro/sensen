@@ -30,5 +30,6 @@
     "teinte_peau": "#8a6a3c",
     "teinte_cheveux": "#4a3120",
     "pilosite": "fournie"
-  }
+  },
+  "plan_corps": "homme_bete"
 }

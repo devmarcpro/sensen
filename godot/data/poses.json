@@ -81,5 +81,14 @@
     "bras_haut_G": -14.0,
     "bras_haut_D": 14.0,
     "torse": 2.5
+  },
+  "tenue": {
+    "_doc": "LES POSES DE TENUE (designer 2026-09-10) : elles s AJOUTENT a la pose de l action au lieu de la remplacer, parce que tenir une arme n est pas un etat du corps mais une contrainte sur les bras — on marche EN tenant, on garde EN tenant, et un mort lache tout. `deux_mains` s applique des que l arme en main principale declare `hands: 2`. LES ANGLES SONT CALCULES, PAS ESTIMES : on a demande une prise (deux poings a cinq unites d ecart, devant le corps, l un nettement plus haut que l autre, coudes sous les epaules) et cherche le couple qui la donne — ecrits au jugé, les deux poings tombaient a la meme hauteur et l arme sortait couchee a l horizontale.",
+    "deux_mains": {
+      "bras_haut_G": 8.0,
+      "bras_bas_G": -80.0,
+      "bras_haut_D": -6.0,
+      "bras_bas_D": 116.0
+    }
   }
 }

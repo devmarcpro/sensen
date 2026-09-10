@@ -250,23 +250,173 @@
     "case": 64,
     "visage_boite": 2.6,
     "marqueurs": {
-      "_doc": "UNE COULEUR PAR ELEMENT (designer 2026-09-09). Un pixel de cette couleur, pose sur une case de planche de visage, dit OU va l element. Les planches se dessinent en nuances de gris — une couleur franche ne peut donc etre que volontaire, et le jeu l EFFACE du dessin apres l avoir lue : elle ne se voit jamais en jeu. Deux pixels de la meme couleur (les deux yeux, les deux oreilles) donnent deux ancres, et la piece est dessinee deux fois.",
-      "yeux": "#ff0000",
-      "nez": "#00ff00",
-      "bouche": "#0000ff",
-      "oreilles": "#ffff00",
-      "cheveux": "#ff00ff",
-      "pilosite": "#00ffff",
-      "sourcils": "#ff8000",
-      "barbe": "#8000ff",
-      "machoire": "#00ff80",
-      "menton": "#ff0080",
-      "pommettes": "#80ff00",
-      "implantation": "#0080ff"
+      "_doc": "UNE COULEUR PAR ELEMENT ET PAR RANG (designer 2026-09-10). Un bloc de `taille` x `taille` pixels de cette couleur, pose sur une case de planche, dit OU va quelque chose. Les planches se dessinent en nuances de gris : une couleur franche ne peut donc etre que volontaire, et le jeu l EFFACE du dessin apres l avoir lue (sauf si elle est sur un calque `<nom>.points.png`, auquel cas le dessin n est jamais touche). LA REGLE, LA MEME POUR LE VISAGE ET POUR LES MEMBRES : un CONTENANT porte les ancres de ses enfants (une tete porte `yeux`, un torse porte `bras`), une PIECE porte son propre point (un oeil porte `yeux`, un bras porte `attache` et `bout`). LE RANG 0 (`base`) est ce que tout le monde a ; les rangs suivants sont des attaches ANNEXES, prevues d avance pour les mutations, et inutilisees tant qu un etre ne les reclame pas.",
+      "taille": 2,
+      "_doc_taille": "LE COTE D UN MARQUEUR EN PIXELS. Indicatif : le lecteur REGROUPE les pixels voisins de meme couleur en un seul marqueur pose sur leur centre, donc un 1x1, un 2x2 et une tache de trois pixels donnent tous UN point. La valeur est ici pour le generateur et pour l oeil du designer, pas pour contraindre son dessin.",
+      "rangs": [
+        "base",
+        "annexe_1",
+        "annexe_2"
+      ],
+      "dossiers": [
+        "visage",
+        "membres",
+        "equipement"
+      ],
+      "_doc_tolerance": "Un pixel sature est rendu a la couleur de marqueur LA PLUS PROCHE ; `marqueur_tolerance` dit seulement a partir de quelle distance il n est le marqueur de personne. Le plus proche ne peut pas etre ambigu, la ou deux boites de tolerance pouvaient se chevaucher et faire repondre un pixel a deux elements en silence.",
+      "_doc_dossiers": "OU L ON CHERCHE DES MARQUEURS. Balayer les pixels d une planche coute au chargement : on ne le fait que la ou un marqueur a un sens. Un dossier absent de cette liste est lu comme un dessin ordinaire.",
+      "couleurs": {
+        "yeux": [
+          "#ff0000",
+          "#ff70ef",
+          "#40bfbf"
+        ],
+        "nez": [
+          "#00ff00",
+          "#0000af",
+          "#40bfff"
+        ],
+        "bouche": [
+          "#0000ff",
+          "#004070",
+          "#40ef00"
+        ],
+        "oreilles": [
+          "#ffff00",
+          "#0040af",
+          "#40ef40"
+        ],
+        "cheveux": [
+          "#ff00ff",
+          "#0040ef",
+          "#40ff80"
+        ],
+        "pilosite": [
+          "#00ffff",
+          "#008040",
+          "#800040"
+        ],
+        "sourcils": [
+          "#ff8000",
+          "#0080bf",
+          "#8000bf"
+        ],
+        "barbe": [
+          "#8000ff",
+          "#00bf00",
+          "#804000"
+        ],
+        "machoire": [
+          "#00ff80",
+          "#00bf40",
+          "#8040af"
+        ],
+        "menton": [
+          "#ff0080",
+          "#00bf80",
+          "#8040ef"
+        ],
+        "pommettes": [
+          "#80ff00",
+          "#00bfbf",
+          "#80af40"
+        ],
+        "implantation": [
+          "#0080ff",
+          "#00ff40",
+          "#80bf00"
+        ],
+        "tete": [
+          "#000070",
+          "#400070",
+          "#80ef40"
+        ],
+        "torse": [
+          "#8f8fff",
+          "#4000af",
+          "#af4040"
+        ],
+        "bassin": [
+          "#008000",
+          "#4000ef",
+          "#bf0000"
+        ],
+        "bras": [
+          "#008080",
+          "#4040af",
+          "#bf0040"
+        ],
+        "jambe": [
+          "#800000",
+          "#4040ef",
+          "#bf0080"
+        ],
+        "main": [
+          "#800080",
+          "#407000",
+          "#bf00bf"
+        ],
+        "pied": [
+          "#808000",
+          "#4080af",
+          "#bf4000"
+        ],
+        "queue": [
+          "#80ef80",
+          "#4080ef",
+          "#bf4080"
+        ],
+        "aile": [
+          "#ff8080",
+          "#40af00",
+          "#bf40bf"
+        ],
+        "attache": [
+          "#ffff80",
+          "#40af40",
+          "#bf40ff"
+        ],
+        "bout": [
+          "#70ffef",
+          "#40bf80",
+          "#bf8000"
+        ]
+      },
+      "visage": [
+        "yeux",
+        "nez",
+        "bouche",
+        "oreilles",
+        "cheveux",
+        "pilosite",
+        "sourcils",
+        "barbe",
+        "machoire",
+        "menton",
+        "pommettes",
+        "implantation"
+      ],
+      "corps": [
+        "tete",
+        "torse",
+        "bassin",
+        "bras",
+        "jambe",
+        "main",
+        "pied",
+        "queue",
+        "aile"
+      ],
+      "piece": [
+        "attache",
+        "bout"
+      ],
+      "_doc_groupes": "QUEL ELEMENT VA SUR QUOI. `visage` : ce qu une tete peut ancrer. `corps` : les familles de membres, qu un CONTENANT porte pour dire ou pendent ses enfants (un torse porte `bras`). `piece` : les deux bouts qu un membre porte pour lui-meme, `attache` sur son articulation et `bout` sur son extremite. Un generateur qui sortirait de son groupe dessinerait une epaule sur un visage — ce qu il a fait, une fois.",
+      "_doc_compatibilite": "LES DOUZE COULEURS DU VISAGE SONT CELLES DU 2026-09-09, ET ELLES NE BOUGENT PLUS. Une couleur de marqueur est un VOCABULAIRE : les `.points.png` deja ecrits parlent celui-la. En redefinir une repeint le sens de tous les calques du depot d un coup, sans erreur et sans message — c est arrive une fois, le `#0000ff` de la bouche s est mis a dire « bras ». ON N EN REDEFINIT JAMAIS UN MOT, on en ajoute : les teintes suivantes ont ete choisies dans ce qui restait, au plus loin de tout ce qui existait deja."
     },
-    "marqueur_tolerance": 0.06,
+    "marqueur_tolerance": 0.1,
     "ancres": {
-      "_doc": "OU VA CHAQUE ELEMENT QUAND LA TETE NE LE DIT PAS. En RAYONS DE TETE, depuis le centre de la case (x vers la droite, y vers le bas) — la meme unite que le reste du visage, si bien que changer `visage_boite` ne les fausse pas. Le generateur y pose ses marqueurs et le jeu s en sert de repli : une tete sans marqueurs place donc ses traits exactement comme avant.",
+      "_doc": "OU VA CHAQUE ELEMENT QUAND LA PLANCHE NE LE DIT PAS. Pour le visage, en RAYONS DE TETE depuis le centre de la case (x vers la droite, y vers le bas). Pour un membre, en FRACTIONS DE CASE depuis son centre, la case etant posee le bas sur l articulation et le haut sur le bout : `attache` vaut donc (0, +0,5) et `bout` (0, -0,5). Le generateur y pose ses marqueurs et le jeu s en sert de repli — une planche sans marqueurs se place donc exactement comme avant.",
       "yeux": [
         [
           -0.42,
@@ -280,7 +430,7 @@
       "nez": [
         [
           0.0,
-          -0.05
+          -0.14
         ]
       ],
       "bouche": [
@@ -308,7 +458,7 @@
       "pilosite": [
         [
           0.0,
-          0.55
+          0.64
         ]
       ],
       "sourcils": [
@@ -330,7 +480,7 @@
       "machoire": [
         [
           0.0,
-          0.55
+          0.3
         ]
       ],
       "menton": [
@@ -354,8 +504,96 @@
           0.0,
           -0.6
         ]
+      ],
+      "attache": [
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "bout": [
+        [
+          0.0,
+          -0.5
+        ]
+      ],
+      "bras": [
+        [
+          -0.42,
+          -0.3
+        ],
+        [
+          0.42,
+          -0.3
+        ]
+      ],
+      "jambe": [
+        [
+          -0.22,
+          0.45
+        ],
+        [
+          0.22,
+          0.45
+        ]
+      ],
+      "tete": [
+        [
+          0.0,
+          -0.5
+        ]
+      ],
+      "main": [
+        [
+          0.0,
+          -0.5
+        ]
+      ],
+      "pied": [
+        [
+          0.0,
+          -0.5
+        ]
+      ],
+      "queue": [
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "aile": [
+        [
+          -0.45,
+          -0.1
+        ],
+        [
+          0.45,
+          -0.1
+        ]
+      ],
+      "torse": [
+        [
+          0.0,
+          -0.5
+        ]
+      ],
+      "bassin": [
+        [
+          0.0,
+          0.5
+        ]
       ]
-    }
+    },
+    "constructions": [
+      "matelasse",
+      "cuir",
+      "mailles",
+      "ecailles",
+      "plaque",
+      "tissu",
+      "rituel"
+    ],
+    "_doc_constructions": "L ORDRE DES CONSTRUCTIONS D ARMURE (2026-09-10) : l index d une case dans `assets/equipement/<slot>/`. Il est ECRIT ICI et non deduit des cles de `armure.matrice`, parce qu un ordre de dictionnaire est une coincidence et qu un index de sprite ne doit pas dependre d une coincidence."
   },
   "sprites": {
     "px_par_unite": 8,

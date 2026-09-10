@@ -1506,6 +1506,33 @@ func test_plan_corps() -> void:
 					casse.append("%s/%s.%s" % [pid, nom, cle])
 	verifier(casse.is_empty(), "chaque plan est un arbre : racine, parents et contenants existants (%s)" % str(casse))
 
+	# 0. UNE ANATOMIE PAR RACE (designer 2026-09-10). Le plan était choisi par la SILHOUETTE : les sept races
+	# humanoïdes partageaient le même, et un robot avait des poumons. Ce que le test éprouve, c'est la DIFFÉRENCE —
+	# qu'elle existe, et qu'elle porte sur le dedans et non sur les membres, que le rig doit pouvoir dessiner.
+	var par_race: Dictionary = {}
+	for rid_a: String in GameData.catalogues.races.keys():
+		var pid_a := str(GameData.entree("races", rid_a).get("plan_corps", ""))
+		if not pid_a.is_empty():
+			par_race[rid_a] = pid_a
+	verifier(par_race.size() >= 6, "six races au moins ont leur propre anatomie (%d)" % par_race.size())
+	var ext_hum: Array[String] = []
+	for n_h: String in (plans.humanoide.parties as Dictionary).keys():
+		if not bool((plans.humanoide.parties[n_h] as Dictionary).get("interne", false)):
+			ext_hum.append(n_h)
+	var ecarts_membres: Array[String] = []
+	for rid_b: String in par_race.keys():
+		var pl: Dictionary = plans[str(par_race[rid_b])]
+		for n_e in ext_hum:   # LES MEMBRES SONT LES MÊMES : le rig les dessine, un nom inventé les rendrait invisibles
+			if not (pl.parties as Dictionary).has(n_e):
+				ecarts_membres.append("%s/%s" % [rid_b, n_e])
+	verifier(ecarts_membres.is_empty(), "toutes les races gardent les membres que le rig sait dessiner (%s)" % str(ecarts_membres))
+	verifier(not (plans.robot.parties as Dictionary).has("poumon_D") and (plans.robot.parties as Dictionary).has("noyau"), "un robot n'a pas de poumons : il a un noyau")
+	verifier(not (plans.nautique.parties as Dictionary).has("oreille_D") and (plans.nautique.parties as Dictionary).has("branchie_D"), "un nautique n'a pas d'oreilles externes : il a des branchies et une ligne latérale")
+	verifier(not (plans.insectoide.parties as Dictionary).has("nez") and (plans.insectoide.parties as Dictionary).has("antenne_D"), "un insectoïde ne sent pas par un nez : il sent par ses antennes")
+	# ET LE MUTANT EST LA SEULE ANATOMIE OÙ UN CŒUR PERCÉ NE TUE PAS : il en a un de rechange, et c'est dit dans la
+	# DONNÉE — le second est vital, le premier ne l'est pas.
+	verifier(not bool((plans.mutant.parties.coeur as Dictionary).get("vital", false)) and bool((plans.mutant.parties.coeur_second as Dictionary).get("vital", false)), "le mutant a deux cœurs, et le premier n'est pas vital")
+
 	# 1. LE MONDE RÉEL : un torse humain a cœur, poumons, foie, reins. Ce n'est pas de la couleur.
 	var h: Dictionary = plans.humanoide.parties
 	var attendus := ["coeur", "poumon_D", "poumon_G", "foie", "rein_D", "rein_G", "estomac", "cerveau"]
@@ -1973,13 +2000,40 @@ func test_planches() -> void:
 	Planches.vider()
 
 
-## LES MARQUEURS DE VISAGE (designer 2026-09-09 : « avoir sur chaque forme de visage des marqueurs pour les autres
-## éléments… une couleur par élément… le sprite de l'élément correspondant est centré sur le pixel »).
-## Quatre choses à prouver, et la troisième est celle qu'on oublierait : le marqueur **ne se voit pas**.
+## LES POINTS D'ATTACHE (designer 2026-09-09 : « avoir sur chaque forme de visage des marqueurs pour les autres
+## éléments… une couleur par élément… le sprite de l'élément correspondant est centré sur le pixel » ; puis
+## 2026-09-10 : « pour le visage ET les éléments, de 2 × 2 … et aussi pour les membres pour les points de connexions
+## entre membres … l'attache de base d'une teinte et des attaches annexes d'une teinte différente »).
 func test_marqueurs_visage() -> void:
 	var st: Dictionary = GameData.config("styles").get("planches", {})
-	var table: Dictionary = st.get("marqueurs", {})
-	verifier(table.has("yeux") and table.has("bouche"), "chaque élément du visage a SA couleur de marqueur (%d)" % table.size())
+	var mq: Dictionary = st.get("marqueurs", {})
+	var table: Dictionary = mq.get("couleurs", {})
+	verifier(table.has("yeux") and table.has("bouche") and table.has("bras"), "chaque élément a SA couleur de marqueur, le visage comme le corps (%d)" % table.size())
+	verifier(int(mq.get("taille", 1)) >= 2, "un marqueur fait au moins 2 × 2 : un pixel isolé est invisible dans un logiciel de dessin")
+	# 0. LES TEINTES RESTENT DISTINCTES ET SATURÉES, et c'est vérifié ICI, dans le moteur. Le générateur qui les a
+	# calculées le prouvait déjà ; mais un jour quelqu'un en ajoutera une à la main dans `styles.json` et ne le
+	# fera pas tourner. Deux marqueurs trop proches, c'est un œil qui devient une épaule, en silence.
+	var toutes: Array = []
+	for element: String in table.keys():
+		if element.begins_with("_"):
+			continue
+		for h in (table[element] as Array):
+			toutes.append([Color.html(str(h)), element])
+	var pire := 9.9
+	var coupable := ""
+	var fades := 0
+	for i in toutes.size():
+		var a: Color = toutes[i][0]
+		if maxf(a.r, maxf(a.g, a.b)) - minf(a.r, minf(a.g, a.b)) < 0.35:
+			fades += 1   # sous ce seuil, le lecteur écarte le pixel d'emblée : la couleur ne serait jamais vue
+		for j in range(i + 1, toutes.size()):
+			var b: Color = toutes[j][0]
+			var d := maxf(absf(a.r - b.r), maxf(absf(a.g - b.g), absf(a.b - b.b)))
+			if d < pire:
+				pire = d
+				coupable = "%s / %s" % [str(toutes[i][1]), str(toutes[j][1])]
+	verifier(fades == 0, "aucune couleur de marqueur n'est trop pâle pour être vue (%d)" % fades)
+	verifier(pire >= 0.06, "les %d teintes restent distinguables : écart minimal %.3f (%s)" % [toutes.size(), pire, coupable])
 	# 1. LES ANCRES PAR DÉFAUT sont là où le visage les a toujours portés : deux yeux, une bouche.
 	verifier(Planches.ancres_defaut("yeux").size() == 2 and Planches.ancres_defaut("bouche").size() == 1, "les ancres par défaut : deux yeux, une bouche")
 	var c := float(Planches.case())
@@ -1989,16 +2043,34 @@ func test_marqueurs_visage() -> void:
 	var i_museau := Planches.index_locus("tete", "museau")
 	var mk: Dictionary = Planches.marqueurs("visage/tete", maxi(0, i_museau))
 	verifier(mk.has("yeux") and (mk.yeux as Array).size() == 2 and mk.has("bouche"), "la tête « museau » porte ses marqueurs (%s)" % str(mk.keys()))
+	# LE REGROUPEMENT, et c'est LUI qui permet le 2 × 2 : la planche porte quatre pixels par œil, le jeu en fait UN
+	# point posé sur leur centre. Sans regroupement, cette tête aurait huit yeux.
+	verifier((mk.get("yeux", []) as Array).size() == 2, "deux yeux, pas huit : les pixels voisins de même couleur font UN marqueur")
 	if mk.has("bouche"):
 		verifier(float((mk.bouche as Array)[0].y) > float(Planches.ancres_defaut("bouche")[0].y), "et sa bouche est PLUS BAS que la bouche par défaut : au bout du museau (%.1f contre %.1f)" % [float((mk.bouche as Array)[0].y), float(Planches.ancres_defaut("bouche")[0].y)])
-	# 3. LE MARQUEUR NE SE VOIT PAS. C'est ce qu'on oublierait de vérifier, et ce serait un pixel rouge en plein
-	# front. Le chargement le lit puis l'efface : aucune case de visage ne garde de couleur saturée.
+	# UNE TÊTE N'ANCRE QUE DU VISAGE. La table connaît maintenant les familles du corps, et le générateur en a
+	# couvert chaque visage avant qu'on regarde les pixels : une épaule et un genou dessinés sur un front.
+	var intrus: Array[String] = []
+	for el_c in mq.get("corps", []):
+		if mk.has(str(el_c)):
+			intrus.append(str(el_c))
+	verifier(intrus.is_empty(), "une tête ne porte pas de marqueur de membre (%s)" % str(intrus))
+	# 3. LES RANGS : la base sert toujours, les annexes attendent qu'un être les réclame. C'est la réserve à
+	# mutations — dessinée d'avance, et qui ne coûte rien tant que personne n'en veut.
+	var i_ronde := maxi(0, Planches.index_locus("tete", "ronde"))
+	var n_rangs := Planches.rangs_marques("visage/tete", i_ronde, "yeux")
+	verifier(n_rangs >= 2, "la tête ronde porte des yeux ANNEXES en plus des siens (%d rang(s))" % n_rangs)
+	verifier((Planches.marqueurs("visage/tete", i_ronde).get("yeux", []) as Array).size() == 2, "et le rang de base en donne toujours deux, pas plus")
+	if n_rangs >= 2:
+		verifier(not (Planches.marqueurs_rang("visage/tete", i_ronde, 1).get("yeux", []) as Array).is_empty(), "le rang 1 existe et se lit à part : un troisième œil sans redessiner la tête")
+	# 4. LE MARQUEUR NE SE VOIT PAS. C'est ce qu'on oublierait de vérifier, et ce serait un pixel rouge en plein
+	# front. Le chargement le lit puis l'efface : aucune case de visage ne garde de couleur de marqueur.
 	# On cherche les COULEURS DE MARQUEUR, pas « toute couleur » : une planche dessinée à la main a le droit d'avoir
 	# du rouge sombre dans un œil ou du châtain dans des cheveux, et le premier jet de ce test l'accusait d'être un
 	# marqueur oublié. *Un test trop large accuse le contenu au lieu de la règle.*
 	var restants := 0
-	var tol := float(st.get("marqueur_tolerance", 0.06))
-	for dossier in ["visage/tete", "visage/yeux", "visage/bouche", "visage/oreilles"]:
+	var tol := float(st.get("marqueur_tolerance", 0.10))
+	for dossier in ["visage/tete", "visage/yeux", "visage/bouche", "visage/oreilles", "membres/torse", "membres/bras_haut"]:
 		var img: Image = Planches.image(dossier)
 		if img == null:
 			continue
@@ -2007,22 +2079,53 @@ func test_marqueurs_visage() -> void:
 				var px := img.get_pixel(x, y)
 				if px.a < 0.5:
 					continue
-				for element: String in table.keys():
-					var col := Color.html(str(table[element]))
-					if absf(px.r - col.r) <= tol and absf(px.g - col.g) <= tol and absf(px.b - col.b) <= tol:
+				if maxf(px.r, maxf(px.g, px.b)) - minf(px.r, minf(px.g, px.b)) < 0.35:
+					continue
+				for paire in toutes:
+					var col: Color = paire[0]
+					if maxf(absf(px.r - col.r), maxf(absf(px.g - col.g), absf(px.b - col.b))) <= tol:
 						restants += 1
 						break
 	verifier(restants == 0, "aucun marqueur ne survit au chargement : il ne se voit jamais en jeu (%d pixel(s))" % restants)
-	# 4. UNE PIÈCE PORTE LE SIEN, AU CENTRE : c'est lui que le jeu fera tomber sur chaque ancre, si bien qu'un seul
+	# 5. UNE PIÈCE PORTE LE SIEN, AU CENTRE : c'est lui que le jeu fera tomber sur chaque ancre, si bien qu'un seul
 	# œil dessiné sert aux deux yeux.
 	var i_fauves := Planches.index_locus("yeux", "fauves")
 	var mp: Dictionary = Planches.marqueurs("visage/yeux", maxi(0, i_fauves))
 	if i_fauves >= 0:
 		verifier(mp.has("yeux") and (mp.yeux as Array).size() == 1, "l'œil « fauve » est une PIÈCE : un seul marqueur, le sien (%s)" % str(mp.keys()))
-	# Et une planche que le designer a dessinée sans marqueur reste un visage entier : rien ne l'y oblige.
-	var i_points := Planches.index_locus("yeux", "points")
-	verifier(Planches.marqueurs("visage/yeux", maxi(0, i_points)).is_empty(), "une planche sans marqueur reste un visage entier — le marquage est un CHOIX, pas une obligation")
-	# 5. LE CALQUE DES POINTS N'EST PAS UNE CASE (designer 2026-09-09 : « le sprite et un autre fichier
+	# TOUS LES YEUX ET TOUTES LES OREILLES SONT DES PIÈCES (designer 2026-09-10 : « sépare les sprites des yeux
+	# oreilles en deux »). Les planches livrées contenaient LA PAIRE, et une paire ne peut être posée qu'à un seul
+	# endroit : les marqueurs de la tête n'avaient donc aucune prise sur elle, et un museau recevait ses yeux là où
+	# une tête ronde les met. C'est ce que cette règle-là débloque, et c'est pour ça qu'elle se vérifie en entier.
+	var pas_pieces: Array[String] = []
+	for el_p in ["yeux", "oreilles"]:
+		for i_p in Planches.variantes("visage/" + el_p):
+			var m_p: Array = Planches.marqueurs("visage/" + el_p, i_p).get(el_p, [])
+			if m_p.size() != 1:
+				pas_pieces.append("%s[%d]:%d" % [el_p, i_p, m_p.size()])
+	verifier(pas_pieces.is_empty(), "chaque œil et chaque oreille est une pièce unique, marquée une fois (%s)" % str(pas_pieces))
+	# TOUT ÉLÉMENT DU VISAGE A SON POINT (designer 2026-09-10 : « il faut aussi rajouter un point d'ancrage pour
+	# les cheveux et autres »). Une coiffe n'est pas une pièce qu'on répète — elle couvre la tête entière — mais
+	# elle a désormais UNE ancre à elle, au lieu d'être translatée de la MOYENNE des déplacements des autres :
+	# sur une tête à museau, dont la bouche descend beaucoup et les yeux presque pas, la moyenne tirait la coiffe
+	# vers le bas *par la bouche*.
+	# **Ce test dit la RÈGLE, pas le contenu du jour** : il exigeait auparavant qu'une coiffe n'ait aucun marqueur,
+	# et il aurait donc interdit ce changement-là. C'est le même piège que le boss `elite` et que les trois
+	# orientations — un test qui recopie l'état d'hier interdit au designer de changer d'avis.
+	var sans_ancre: Array[String] = []
+	for locus_a in GameData.config("apparence").get("loci", []):
+		var lid_a := str((locus_a as Dictionary).id)
+		if Planches.variantes("visage/" + lid_a) <= 0:
+			continue
+		if lid_a == "tete":
+			continue   # la tête EST la case : elle ancre les autres, elle ne s'ancre pas sur elle-même
+		# Chaque élément dessiné doit savoir où il va sur DEUX chemins : son propre marqueur (la pièce), et
+		# l'ancre par défaut (le repli, pour une tête muette). L'un sans l'autre laisse un trou.
+		if not Planches.marqueurs("visage/" + lid_a, 0).has(lid_a) or Planches.ancres_defaut(lid_a).is_empty():
+			sans_ancre.append(lid_a)
+	verifier(sans_ancre.is_empty(), "chaque élément du visage a son point ET son ancre par défaut (%s)" % str(sans_ancre))
+	verifier(Planches.ancres_defaut("cheveux").size() == 1, "une coiffe n'a qu'UNE ancre : elle couvre la tête, elle ne se répète pas et ne se retourne pas")
+	# 6. LE CALQUE DES POINTS N'EST PAS UNE CASE (designer 2026-09-09 : « le sprite et un autre fichier
 	# correspondant qui est juste les points »). C'est LE piège de cette convention : laissé dans la liste des
 	# fichiers, `06_museau.points.png` se rangerait entre deux dessins et décalerait d'un rang tout ce qui suit —
 	# chaque visage sauvegardé changerait de tête, sans erreur et sans message. Le compte le prouve.
@@ -2032,6 +2135,57 @@ func test_marqueurs_visage() -> void:
 		var n_p := Planches.variantes("visage/" + lid)
 		if n_p > 0:
 			verifier(n_p == n_v, "visage/%s : %d cases pour %d valeurs — un calque de points ne compte pas pour une case" % [lid, n_p, n_v])
+
+
+## LES POINTS DE CONNEXION ENTRE MEMBRES (designer 2026-09-10 : « en avoir aussi pour les membres pour les points de
+## connexions entre membres »). La règle du visage, appliquée au corps : un CONTENANT porte les ancres de ses
+## enfants, une PIÈCE porte son propre point.
+##
+## Ce qui se prouve ici et qui vaut tout le reste : **l'aller-retour**. Ce que `rigs` dit du coude, le calque le
+## redit en pixels, et le pantin le relit — à moins d'un dixième d'unité près. C'est ce qui garantit que le jour où
+## le designer déplacera le pixel, c'est l'ARTICULATION qui bougera, et le bras entier avec elle.
+func test_marqueurs_membres() -> void:
+	var mq: Dictionary = GameData.config("styles").get("planches", {}).get("marqueurs", {})
+	verifier((mq.get("corps", []) as Array).has("bras") and (mq.get("piece", []) as Array).has("attache"), "le vocabulaire du corps existe : des familles pour le contenant, `attache` et `bout` pour la pièce")
+	var c := float(Planches.case())
+	var m_bras: Dictionary = Planches.marqueurs("membres/bras_haut", 0)
+	verifier(m_bras.has("attache"), "un bras dit où il s'accroche (%s)" % str(m_bras.keys()))
+	verifier(m_bras.has("bras"), "et où pend son avant-bras")
+	if m_bras.has("attache"):
+		verifier(float((m_bras.attache as Array)[0].y) > c * 0.5, "son attache est du côté de l'articulation, en BAS de la case (%.1f sur %.0f)" % [float((m_bras.attache as Array)[0].y), c])
+	# L'ALLER-RETOUR. On refait le chemin complet : le rig → le pixel → ce que le pantin relit.
+	var rig: Dictionary = GameData.catalogues.rigs.get("humanoide", {})
+	if rig.is_empty():
+		return
+	var pire := 0.0
+	var quoi := ""
+	var n := 0
+	for enfant: String in (rig.segments as Dictionary).keys():
+		var sg: Dictionary = rig.segments[enfant]
+		var parent := str(sg.get("parent", ""))
+		if parent.is_empty() or not (rig.segments as Dictionary).has(parent):
+			continue
+		var attendu: Array = (rig.segments[parent] as Dictionary).get("ancrages", {}).get(str(sg.get("ancrage", "")), [])
+		if attendu.is_empty():
+			continue
+		var base := parent.trim_suffix("_G").trim_suffix("_D")
+		var famille := enfant.trim_suffix("_G").trim_suffix("_D").trim_suffix("_haut").trim_suffix("_bas")
+		var pts: Dictionary = Planches.marqueurs("membres/" + base, 0)
+		var liste: Array = pts.get(famille, pts.get("bout", []))
+		if liste.is_empty():
+			continue
+		var pt: Vector2 = liste[0]
+		var lo := float((rig.segments[parent] as Dictionary).get("longueur", 0.0))
+		var cote := maxf(lo, float((rig.segments[parent] as Dictionary).get("largeur", lo)))
+		var k := cote / c
+		var relu := lo * 0.5 + cote * 0.5 - k * pt.y
+		var ecart := absf(relu - float(attendu[0]))
+		n += 1
+		if ecart > pire:
+			pire = ecart
+			quoi = "%s→%s" % [parent, enfant]
+	verifier(n >= 4, "au moins quatre articulations sont marquées en pixels (%d)" % n)
+	verifier(pire < 0.15, "et le pixel redit ce que le rig disait, à %.3f près (%s) — déplacer le point déplacera l'articulation" % [pire, quoi])
 
 
 ## Les passes de dessin par le noyau (file 114, 2026-09-06) : le brouillard et les toits en tableaux de triangles — le noyau

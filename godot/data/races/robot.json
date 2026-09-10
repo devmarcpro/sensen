@@ -29,5 +29,6 @@
     "teinte_peau": "#8d9298",
     "teinte_cheveux": "#3a3f45",
     "pilosite": "aucune"
-  }
+  },
+  "plan_corps": "robot"
 }
