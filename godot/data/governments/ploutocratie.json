@@ -9,5 +9,13 @@
   "siege": {
     "batiment": "comptoir",
     "fonction": "syndic"
+  },
+  "valeurs": {
+    "conquete": -1.0,
+    "entraide": 1.0,
+    "industrie": 4.0,
+    "meurtre": -3.0,
+    "nature_detruite": 1.0,
+    "vol": -6.0
   }
 }

@@ -9,5 +9,13 @@
   "siege": {
     "batiment": "mairie",
     "fonction": "maire"
+  },
+  "valeurs": {
+    "conquete": -4.0,
+    "entraide": 3.0,
+    "industrie": 2.0,
+    "meurtre": -5.0,
+    "ordre_trouble": -2.0,
+    "vol": -3.0
   }
 }

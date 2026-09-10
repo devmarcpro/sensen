@@ -9,5 +9,14 @@
   "siege": {
     "batiment": "caserne",
     "fonction": "commandant"
+  },
+  "valeurs": {
+    "conquete": 2.0,
+    "industrie": 2.0,
+    "meurtre": -4.0,
+    "nature_detruite": 0.0,
+    "ordre_garde": 4.0,
+    "ordre_trouble": -6.0,
+    "vol": -4.0
   }
 }

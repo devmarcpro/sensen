@@ -39,7 +39,7 @@ Un acte laisse un **fait tagué** ; le fait **met du temps** à parcourir la car
 
 ## Ce qui reste
 
-- **Les royaumes ne portent pas encore de valeurs.** `Surface._lier_royaumes` reste une fonction **pure de la graine** : deux royaumes ne se haïssent toujours pas *pour quelque chose*. C'est la suite naturelle, et elle demande qu'un royaume porte des valeurs comme une faction.
+- ~~Les royaumes ne portent pas de valeurs~~ — **à moitié fait le 2026-09-09 au soir**, et l'autre moitié a une raison. **Ce qui est fait** : un royaume juge le joueur **par sa gouvernance** — une dictature militaire ne pardonne pas le désordre et se moque d'un arbre, une théocratie compte le sang versé, une anarchie applaudit ce qui trouble l'ordre. Ce sont les mêmes valeurs, la même somme, le même oubli par la fraîcheur : *un royaume est un observateur de plus, placé à sa capitale*, et `SimRumeur` savait déjà tout faire pour lui. **Prendre un village se raconte** désormais, et chaque trône le juge à sa manière — pourvu que la nouvelle ait eu le temps d'arriver. **Ce qui n'est PAS fait, et la raison est nette** : deux royaumes ne se haïront toujours pas *pour* quelque chose, parce qu'**un royaume n'AGIT pas**. Les faits ont un auteur, et seuls le joueur et les PNJ en sont un ; la vie des royaumes est simulée en abstrait — semaines, trésors, vacances — et ne pose aucun acte daté en un lieu. *Leur donner des valeurs sans leur donner des actes ferait une table qui ne juge rien.*
 - ~~Le dialogue ne colporte pas encore~~ — **fait le 2026-09-09 au soir** (voir le callout ci-dessus).
 - **L'écran ne montre pas les factions** — la réputation à l'écran est la ligne 38.
 

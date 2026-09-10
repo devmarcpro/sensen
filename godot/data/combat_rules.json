@@ -1961,6 +1961,11 @@
       "quete_rendue": [
         "entraide",
         "ordre_garde"
+      ],
+      "conquete": [
+        "conquete",
+        "ordre_trouble",
+        "sang_verse"
       ]
     }
   },

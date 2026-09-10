@@ -11,7 +11,8 @@
     "voler": 0.5,
     "abattre": 0.25,
     "creuser": 0.15,
-    "quete": 0.6
+    "quete": 0.6,
+    "conquete": 1.5
   },
   "memo_ticks": 60000
 }

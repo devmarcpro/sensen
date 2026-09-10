@@ -96,7 +96,22 @@ static func factions_de(e: Dictionary) -> Array[String]:
 static func valeur_de(fid: String, tag: String) -> float:
 	if fid.begins_with("espece:"):
 		return -6.0 if tag == "espece:" + fid.trim_prefix("espece:") else 0.0
+	# UN ROYAUME JUGE PAR SA GOUVERNANCE (ordre de travail 29 bis, 2026-09-09). Il n'a pas de table à lui : une
+	# dictature militaire ne pardonne pas le désordre où qu'elle règne, et c'est bien ce qu'on veut dire par
+	# « gouvernance ». Le royaume est un observateur de plus, et `SimRumeur` savait déjà tout faire pour lui.
+	if fid.begins_with("gouvernance:"):
+		return float((GameData.entree("governments", fid.trim_prefix("gouvernance:")).get("valeurs", {}) as Dictionary).get(tag, 0.0))
 	return float((GameData.entree("factions", fid).get("valeurs", {}) as Dictionary).get(tag, 0.0))
+
+
+## CE QU'UN ROYAUME PENSE DE QUELQU'UN, vu de sa capitale (ordre de travail 29 bis). La même somme que pour une
+## faction, le même oubli par la fraîcheur — et la même économie : rien ne s'accumule, tout se déduit des faits
+## qui ont eu le temps d'arriver jusqu'au trône.
+static func opinion_royaume(sim: Simulation, roy: Dictionary, e: Dictionary) -> int:
+	if roy.is_empty() or sim.monde == null or (sim.monde.faits as Array).is_empty():
+		return 0
+	var cap: Vector2i = roy.get("capital_poi", Vector2i.ZERO)
+	return reputation(sim, "gouvernance:" + str(roy.get("government_type", "")), str(e.id), sim.monde.cellule_de(cap), sim.horloge_monde.ticks)
 
 
 ## LA RÉPUTATION D'UNE FACTION ENVERS QUELQU'UN, VUE D'ICI. Une somme, pas un compteur : elle se recalcule des faits

@@ -61,6 +61,19 @@ func test_rumeur_et_factions() -> void:
 		return t
 	verifier(juge.call(bucheron) < 0.0 and is_zero_approx(juge.call(garde_r)), "l'arbre abattu indigne le bûcheron (%.1f) et laisse le garde de marbre (%.1f) — le même fait, deux tons" % [juge.call(bucheron), juge.call(garde_r)])
 
+	# 3 ter. UN ROYAUME JUGE PAR SA GOUVERNANCE (ordre de travail 29 bis, la moitié restante). La réputation acquise
+	# disait ce qu'on avait fait AU royaume ; elle ne disait rien de ce qu'on faisait AILLEURS. Une dictature
+	# militaire tient désormais compte du désordre semé chez le voisin, une théocratie du sang versé dans les bois.
+	s.monde.faits.clear()
+	SimRumeur.rapporter(s, j, "tuer_civil", j.pos, [])
+	var cap_ici := {"id": "essai", "government_type": "theocratie", "capital_poi": j.pos}
+	var cap_anar := {"id": "essai2", "government_type": "anarchie", "capital_poi": j.pos}
+	var vu_theo: int = SimRumeur.opinion_royaume(s, cap_ici, j)
+	var vu_anar: int = SimRumeur.opinion_royaume(s, cap_anar, j)
+	verifier(vu_theo < vu_anar, "une théocratie compte le sang versé plus lourdement qu'une anarchie (%d contre %d)" % [vu_theo, vu_anar])
+	var trone_loin := {"id": "essai3", "government_type": "theocratie", "capital_poi": s.monde.pos_monde(s.monde.cellule_de(j.pos) + Vector2i(15, 0), Vector2i(0, 0))}
+	verifier(SimRumeur.opinion_royaume(s, trone_loin, j) == 0, "et un trône lointain n'a encore rien appris : la nouvelle est en route")
+
 	# 4. LA RÉPUTATION EST UNE SOMME, PAS UN COMPTEUR : deux fois le même acte pèse deux fois, et rien ne se compte
 	# deux fois quand on la relit. C'est ce qui la rend gratuite et ce qui la fait s'effacer toute seule.
 	var un: int = SimRumeur.reputation(s, "espece:loup", str(j.id), ici, t0)

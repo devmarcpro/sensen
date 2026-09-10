@@ -318,6 +318,10 @@ static func _conquerir(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int
 		EventBus.emettre(&"journal", [&"journal.conquete_echec", {"village": v.nom, "jet": jet, "dd": int(dd)}])
 		return true
 	sim.monde.claims[cell] = {"role": "habitation"}
+	# PRENDRE UN VILLAGE SE RACONTE (ordre de travail 29 bis) : c'est le fait le plus lourd qu'un joueur puisse
+	# poser, et il n'était su que du royaume dépouillé. Les autres l'apprendront à la vitesse de la rumeur, et
+	# chacun le jugera par sa gouvernance — une anarchie n'y voit pas ce qu'une monarchie y voit.
+	SimRumeur.rapporter(sim, e, "conquete", sim.monde.pos_monde(cell, Vector2i(0, 0)), [])
 	info["conquis_par"] = e.id
 	if sim.territoires.has(str(v.nom)):   # une ville-territoire (Villes B0) : elle devient sienne, avec ses gens, ses stocks, ses dettes
 		sim.territoires[str(v.nom)].proprietaire = "joueur"
@@ -633,7 +637,11 @@ static func royaumes_voisins(sim: Simulation) -> Array:
 
 
 static func relation_royaume(sim: Simulation, e: Dictionary, roy: Dictionary) -> String:
-	var rep := int(e.get("reputations", {}).get(str(roy.id), 0))
+	# ET IL JUGE PAR SA GOUVERNANCE (ordre de travail 29 bis, 2026-09-09). La réputation acquise disait ce qu'on
+	# avait fait AU royaume ; elle ne disait rien de ce qu'on faisait AILLEURS. Une dictature militaire tient
+	# désormais compte du désordre semé chez le voisin, une théocratie du sang versé dans les bois — pourvu que la
+	# nouvelle ait eu le temps d'arriver jusqu'au trône.
+	var rep := int(e.get("reputations", {}).get(str(roy.id), 0)) + SimRumeur.opinion_royaume(sim, roy, e)
 	if str(sim.territoire.accords.get(str(roy.id), "")) == "alliance":
 		return "allie"
 	if rep <= -30:

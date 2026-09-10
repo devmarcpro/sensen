@@ -9,5 +9,13 @@
   "siege": {
     "batiment": "auberge",
     "fonction": ""
+  },
+  "valeurs": {
+    "conquete": -3.0,
+    "entraide": 2.0,
+    "industrie": -1.0,
+    "meurtre": -2.0,
+    "ordre_garde": -4.0,
+    "ordre_trouble": 3.0
   }
 }

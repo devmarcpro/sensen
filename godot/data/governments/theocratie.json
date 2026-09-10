@@ -9,5 +9,13 @@
   "siege": {
     "batiment": "temple",
     "fonction": "pretre"
+  },
+  "valeurs": {
+    "conquete": -2.0,
+    "cruaute": -5.0,
+    "entraide": 3.0,
+    "meurtre": -6.0,
+    "nature_detruite": -1.0,
+    "sang_verse": -4.0
   }
 }

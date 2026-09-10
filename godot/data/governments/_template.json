@@ -1,5 +1,5 @@
 {
-  "_doc": "Type de gouvernance (docs: Gouvernance, lois et diplomatie / 14.4). base_rate module l'entretien (÷ 0,08) ; defense_mult la défense totale ; succession : heritier | second | clerge | plus_riche | general | aucune. siege : le bâtiment du pouvoir d'une ville et la fonction de son magistrat (Villes B1).",
+  "_doc": "Type de gouvernance (docs: Gouvernance, lois et diplomatie / 14.4). base_rate module l'entretien (÷ 0,08) ; defense_mult la défense totale ; succession : heritier | second | clerge | plus_riche | general | aucune. siege : le bâtiment du pouvoir d'une ville et la fonction de son magistrat (Villes B1). | `valeurs` (ordre de travail 29 bis, 2026-09-09) : ce que cette gouvernance pense de chaque tag d acte, comme une faction. C est par elles qu un royaume juge le joueur — une dictature ne pardonne pas le desordre et se moque d un arbre abattu ; une theocratie compte le sang verse.",
   "name_key": "government.<id>.name",
   "base_rate": 0.08,
   "defense_mult": 1.0,
@@ -10,5 +10,8 @@
   "siege": {
     "batiment": "mairie",
     "fonction": "maire"
+  },
+  "valeurs": {
+    "<tag>": 0.0
   }
 }

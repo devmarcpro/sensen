@@ -9,5 +9,13 @@
   "siege": {
     "batiment": "chateau",
     "fonction": "seigneur"
+  },
+  "valeurs": {
+    "conquete": -2.0,
+    "entraide": 2.0,
+    "meurtre": -5.0,
+    "ordre_garde": 3.0,
+    "ordre_trouble": -4.0,
+    "vol": -3.0
   }
 }
