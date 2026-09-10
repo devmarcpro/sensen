@@ -27,7 +27,7 @@ LOCALE = os.path.join(RACINE, "godot", "locale", "fr.csv")
 NE_FOND_PAS = 9999
 STATS = ["durete", "densite", "valeur_base", "conductivite_mana", "flammabilite", "isolation",
          "conductivite_electrique", "flottabilite", "luminosite", "fertilite", "transparence", "elasticite", "friction",
-         "fusion", "portance", "absorption", "alteration"]
+         "fusion", "portance", "absorption", "alteration", "permeabilite"]
 # fichier de catalogue → catégorie (Catégories de matériaux : 11 catégories figées)
 CATALOGUES = {
     "Bois": "bois", "Métaux": "metal", "Roches": "roche", "Minéraux": "mineral", "Gemmes": "gemme",

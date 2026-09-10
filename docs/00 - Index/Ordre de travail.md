@@ -626,7 +626,19 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     s'estampille à la première lecture) ; **la faim ne l'est pas**, parce que les nombres de ses tests sont
     calibrés sur ce comportement — un PNJ de village naît à moitié affamé, et plusieurs seuils s'y accrochent.
     *C'est un manque écrit, pas un manque tu.*
-32. **L'eau qui pèse** — pression, poids, érosion — avec `permeabilite`.
+32. **L'eau qui pèse** — ~~pression~~, ~~poids~~, ~~érosion~~ — avec `permeabilite`. **L'INFILTRATION FAITE le
+    2026-09-09** ; la pression et l'érosion restent.
+    **La quinzième et dernière des cinq colonnes est écrite.** Un creux était jusqu'ici un bassin PARFAIT quel
+    que soit son fond — on tenait un étang sur du sable, et un trou creusé dans le gravier gardait sa pluie
+    pour l'éternité. Le fond décide désormais : l'argile (3) retient, le sable (92) vide, la ponce (74) boit.
+    **Et creuser un bassin devient un ouvrage** : il faut la bonne matière au fond, ou l'y poser.
+    **UNE PARTICULARITÉ DE CETTE COLONNE, ET ELLE EST HONNÊTE À DIRE** : les quatre autres se déduisaient de
+    stats existantes ; celle-ci ne le peut pas — la perméabilité est affaire de GRAIN, pas de densité, et
+    l'argile et le sable ont chez nous la même densité. Une trentaine de matières dont la perméabilité est le
+    trait définissant portent donc leur valeur en clair. C'est du contenu, pas du code en dur.
+    **RESTENT** : la **pression** (une nappe qui jaillit quand on la perce) et l'**érosion** (une eau qui use
+    ce qu'elle traverse) — les deux demandent que l'automate porte une CHARGE, là où il ne connaît qu'un
+    niveau par tuile.
 
 ## Palier 8 — les nombres cessent de mentir
 

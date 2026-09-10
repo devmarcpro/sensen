@@ -18,7 +18,8 @@
     "fusion": -39,
     "portance": 0,
     "absorption": 10,
-    "alteration": 70
+    "alteration": 70,
+    "permeabilite": 100
   },
   "tags": [
     "toxique"

@@ -18,7 +18,8 @@
     "fusion": 660,
     "portance": 60,
     "absorption": 10,
-    "alteration": 49
+    "alteration": 49,
+    "permeabilite": 0
   },
   "tags": [],
   "color": "#CED3D6",

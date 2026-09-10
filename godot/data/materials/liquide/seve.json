@@ -18,7 +18,8 @@
     "fusion": 0,
     "portance": 0,
     "absorption": 25,
-    "alteration": 70
+    "alteration": 70,
+    "permeabilite": 99
   },
   "tags": [
     "liquide"

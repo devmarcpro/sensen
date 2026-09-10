@@ -18,7 +18,8 @@
     "fusion": 9999,
     "portance": 12,
     "absorption": 55,
-    "alteration": 73
+    "alteration": 73,
+    "permeabilite": 44
   },
   "tags": [
     "animal"

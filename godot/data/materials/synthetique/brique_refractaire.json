@@ -18,7 +18,8 @@
     "fusion": 1750,
     "portance": 58,
     "absorption": 58,
-    "alteration": 32
+    "alteration": 32,
+    "permeabilite": 12
   },
   "tags": [
     "industriel"

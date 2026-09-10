@@ -45,6 +45,18 @@ static func _tiquer_eau(sim: Simulation, tick: int) -> void:
 		if niveau < 8 and niveau > 0 and not _alimentee(sim, t):   # plus rien ne l'alimente : elle ne verse plus, et se retire si elle n'est pas dans un creux
 			if not _en_creux(sim, t):
 				_retirer_eau(sim, t)
+				continue
+			# ELLE S'INFILTRE SI LE FOND LA LAISSE PASSER (ordre de travail 32). Un creux était jusqu'ici un bassin
+			# parfait quel que soit son fond : on tenait un étang sur du sable. Désormais le sol décide — l'argile
+			# retient, le sable vide, la ponce boit —, et **creuser un bassin devient un ouvrage** : il faut la
+			# bonne matière au fond, ou l'y poser.
+			var perte := infiltration_de(sim, t)
+			if perte > 0:
+				if niveau - perte <= 0:
+					_retirer_eau(sim, t)
+				else:
+					_poser_eau(sim, t, niveau - perte)
+					sim.eau_active[sim.grille.idx(t)] = true   # elle continuera de descendre au pas suivant
 			continue
 		if niveau <= 1:
 			continue
@@ -60,6 +72,20 @@ static func _tiquer_eau(sim: Simulation, tick: int) -> void:
 			if cible <= 0 or sim.grille.niveau_liquide(q) >= cible:
 				continue
 			_poser_eau(sim, q, cible)
+
+
+## CE QUE LE FOND D'UNE FLAQUE BOIT À CHAQUE PAS (ordre de travail 32, 2026-09-09) : zéro s'il la retient, et
+## `infiltration_par_pas` niveaux au-delà du seuil de perméabilité. La matière lue est celle de la tuile elle-même —
+## le fond du creux —, et le seuil est en données : c'est lui qui dit ce qu'est « une terre qui tient l'eau ».
+static func infiltration_de(sim: Simulation, t: Vector2i) -> int:
+	var ea: Dictionary = sim.regles.r.get("eau", {})
+	var mat := str(sim.grille.materiau_sol(t))
+	if mat.is_empty():
+		mat = str(sim.grille.materiau_de(t))
+	var perm := float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("permeabilite", 0))
+	if perm < float(ea.get("infiltration_seuil", 35)):
+		return 0
+	return int(ea.get("infiltration_par_pas", 1))
 
 
 ## La direction du courant sur une tuile d'écoulement (Eau et liquides) : là où l'eau s'en va — la voisine

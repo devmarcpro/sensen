@@ -18,7 +18,8 @@
     "fusion": 1150,
     "portance": 78,
     "absorption": 44,
-    "alteration": 7
+    "alteration": 7,
+    "permeabilite": 10
   },
   "tags": [],
   "color": "#8A8A82",

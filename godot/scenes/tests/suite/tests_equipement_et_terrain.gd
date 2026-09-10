@@ -4,6 +4,33 @@ extends TestsBase
 ## `test_combat.gd`, tels quels ; le lanceur les appelle par leur nom, dans l'ordre de sa liste.
 
 
+## L'EAU QUI PÈSE — première moitié : **elle s'infiltre** (ordre de travail 32, 2026-09-09). Un creux était jusqu'ici
+## un bassin PARFAIT quel que soit son fond : on tenait un étang sur du sable. La quinzième colonne, `permeabilite`,
+## lui donne sa raison — et fait d'un bassin un ouvrage.
+func test_infiltration() -> void:
+	var ea: Dictionary = GameData.config("combat_rules").get("eau", {})
+	verifier(ea.has("infiltration_seuil"), "l'infiltration a son seuil en données")
+	# 1. LA COLONNE EXISTE PARTOUT, et elle range le monde dans le bon ordre.
+	var sans := 0
+	for mid: String in GameData.catalogues.materials.keys():
+		if not (GameData.catalogues.materials[mid].get("stats", {}) as Dictionary).has("permeabilite"):
+			sans += 1
+	verifier(sans == 0, "chaque matière dit ce que l'eau traverse (%d muette(s))" % sans)
+	var perm := func(m: String) -> int: return int(GameData.catalogues.materials.get(m, {}).get("stats", {}).get("permeabilite", -1))
+	verifier(perm.call("argile") < perm.call("limon") and perm.call("limon") < perm.call("sable") and perm.call("sable") < perm.call("gravier"), "argile %d < limon %d < sable %d < gravier %d — l'ordre du monde réel" % [perm.call("argile"), perm.call("limon"), perm.call("sable"), perm.call("gravier")])
+	verifier(perm.call("granit") < perm.call("gres") and perm.call("beton") < perm.call("brique"), "le granit et le béton arrêtent l'eau ; le grès et la brique la laissent un peu passer")
+	# 2. LE FOND DÉCIDE. On demande à la règle, sur deux fonds opposés — c'est elle qu'on éprouve, pas l'automate.
+	var s := nouvelle_sim("gorge")
+	var t: Vector2i = joueur_de(s).pos + Vector2i(2, 0)
+	if not s.grille.dans(t):
+		return
+	s.grille.sols[s.grille.idx(t)] = "argile"
+	var sur_argile: int = SimTerrain.infiltration_de(s, t)
+	s.grille.sols[s.grille.idx(t)] = "sable"
+	var sur_sable: int = SimTerrain.infiltration_de(s, t)
+	verifier(sur_argile == 0 and sur_sable > 0, "un creux d'argile tient l'eau (%d), un creux de sable la boit (%d)" % [sur_argile, sur_sable])
+
+
 ## LE TEMPS LONG (ordre de travail 30, 2026-09-09) : la repousse existait, mais elle était IMMÉDIATE et identique
 ## pour tout le monde — un mur de granit et un toit de chaume tombaient à la même seconde. La colonne `alteration`
 ## lui donne enfin un délai, et c'est ce délai qu'on éprouve : sa dépendance à la matière, et le fait qu'il ne se

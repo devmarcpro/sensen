@@ -18,7 +18,8 @@
     "fusion": 1670,
     "portance": 70,
     "absorption": 30,
-    "alteration": 71
+    "alteration": 71,
+    "permeabilite": 42
   },
   "tags": [
     "organique",

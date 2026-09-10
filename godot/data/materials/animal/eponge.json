@@ -18,7 +18,8 @@
     "fusion": 9999,
     "portance": 4,
     "absorption": 95,
-    "alteration": 74
+    "alteration": 74,
+    "permeabilite": 45
   },
   "tags": [
     "marin",
