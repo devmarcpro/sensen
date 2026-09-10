@@ -636,6 +636,47 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **CE QU'IL FAUDRAIT EN DONNÉES** : un `caractere` par village (paisible, laborieux, chaotique, dévot…), ses
     poids de routine, ses actes permis, et ce qu'il fait aux prix et à la garde. Le reste existe.
 
+29 quinquies. **LE TÉMOIN, ET L'ABSENCE QUI SE REMARQUE** *(designer 2026-09-10 : « tuer un robot devant tout le
+    village fait baisser la réputation drastiquement… mais si le robot est tué discrètement, caché dans un coin, et
+    que le corps est débarrassé, les autres ne peuvent pas savoir donc pas de répercussions — mais les PNJ vont se
+    demander où est passé le PNJ mort, ça va affecter tout le monde »).* **Noté, pas codé.**
+    **C'EST LA LIGNE QUI DISTINGUE LE JEU**, et la seconde moitié est meilleure que la première.
+
+    **1. LE TÉMOIN — une demi-journée, et le plus fort effet du lot.** `SimRumeur.rapporter` enregistre aujourd'hui
+    un fait **quoi qu'il arrive** : le monde sait tout, tout le temps. Il devrait exiger **quelqu'un qui a vu** — et
+    le code existe déjà, mot pour mot, dans `SimRoyaumes._infraction` : le témoin civil le plus proche qui voit
+    l'auteur, jet de Perception contre Discrétion, +4 la nuit. Cette seule condition transforme le système social en
+    **système d'infiltration** : la Discrétion cesse d'être un modificateur de portée pour devenir *ce qui décide si
+    le monde apprend*. Et elle donne son sens noir à ce qui est déjà codé — porter un corps (26 decies), le cacher,
+    le laisser devenir des ossements.
+
+    **2. L'ABSENCE EST UN FAIT SANS AUTEUR, et c'est la trouvaille.** Un meurtre a un auteur ; une disparition n'en a
+    pas. « On ne voit plus le forgeron » se range donc dans la rumeur comme un fait d'un genre nouveau — sujet, lieu,
+    heure, **pas d'auteur** — et il ne produit pas de l'hostilité mais de l'**inquiétude**. Personne ne t'accuse ;
+    la ville change autour de toi. Les prix montent, on rentre plus tôt, les gardes patrouillent, et quelqu'un te
+    demande *à toi* si tu l'as vu.
+    **QUI LE REMARQUE, ET QUAND** : d'abord **ceux qui avaient une relation avec lui** (`social.relations` existe
+    déjà), puis le village. Un proche s'en aperçoit en un jour, la ville en une semaine — la même mécanique de délai
+    que la rumeur, appliquée à un manque au lieu d'un événement.
+
+    **3. LE CORPS SENT, ET C'EST LE CHAMP D'ODEUR QUI LE TROUVE.** Une dépouille émet dans le champ d'odeur, et
+    **d'autant plus fort qu'elle gonfle** (28 ter). Un PNJ qui passe près d'elle et **dont le nez fonctionne**
+    (`Etres.sens_actif(e, "odorat")` — les organes de sens, 28 bis) la découvre. La disparition devient alors un
+    **corps trouvé** : un meurtre est su, mais **toujours sans auteur** tant que personne n'a vu. *Cacher un corps
+    n'est donc pas binaire : c'est un DÉLAI.* Et le temps joue pour toi — passé la putréfaction, les ossements ne
+    sentent plus rien.
+    **Quatre systèmes déjà écrits se rejoignent ici** : l'anatomie (le nez), le champ d'odeur, les stades de
+    pourriture, la rumeur. *C'est le meilleur signe qu'une ligne est à sa place.*
+
+    **LE PIÈGE À CONNAÎTRE AVANT DE CODER** : « absent » ne doit pas vouloir dire « dormant ». Un PNJ hors de la
+    fenêtre est mis de côté dans `Monde.dormants` — s'il compte comme disparu, tout village qu'on quitte se croira
+    décimé. La comparaison honnête est **le rôle du village contre les vivants** : `monde.villages[nom].capacite` et
+    le `village` que chaque PNJ porte. Une passe hebdomadaire suffit.
+
+    **CE QUE ÇA OUVRE, ET C'EST LA PHRASE DU JEU** : *on peut distancer sa propre réputation*. Tuer sans témoin,
+    marcher trois jours, être accueilli — puis voir la nouvelle vous rattraper. Ou ne jamais être rattrapé, si le
+    corps est devenu des ossements au fond d'une mine.
+
 ~~30. **Le temps long** — usure, ruine, repousse — avec `alteration`.~~ — **LA RUINE ET LA REPOUSSE FAITES le
     2026-09-09** ; **l'usure d'un objet reste**.
     **CE QUI N'ALLAIT PAS, ET QUI N'ÉTAIT PAS UN MANQUE MAIS UNE FAUTE** : la repousse existait déjà — chaque
