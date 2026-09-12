@@ -104,5 +104,17 @@
   ],
   "portes": 0.5,
   "salles_carrees": true,
-  "_doc_boss": "Le boss du thème (ordre de travail 21, 2026-09-09) : la plus forte du pool (70), moitié feu. Les sept thèmes partageaient `chef_de_bande`, qui n'appartenait au pool d'aucun d'eux. La règle est vérifiable : le boss est la créature LA PLUS FORTE du pool de son propre thème (le drapeau `boss_donjon` ne le renforce pas, il ne fait que le désigner), les égalités se tranchent sur l'affinité élémentaire, et deux thèmes ne partagent pas leur boss."
+  "_doc_boss": "Le boss du thème (ordre de travail 21, 2026-09-09) : la plus forte du pool (70), moitié feu. Les sept thèmes partageaient `chef_de_bande`, qui n'appartenait au pool d'aucun d'eux. La règle est vérifiable : le boss est la créature LA PLUS FORTE du pool de son propre thème (le drapeau `boss_donjon` ne le renforce pas, il ne fait que le désigner), les égalités se tranchent sur l'affinité élémentaire, et deux thèmes ne partagent pas leur boss.",
+  "prefabs": {
+    "chance": 0.25,
+    "max": 2,
+    "tailles": [
+      "petite",
+      "moyenne",
+      "grande"
+    ],
+    "themes": [
+      "ruine"
+    ]
+  }
 }

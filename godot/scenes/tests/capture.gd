@@ -576,6 +576,24 @@ func _ready() -> void:
 		var jd: Dictionary = scene.joueur()
 		scene.sim.charger_donjon("ruine", 7, 7, 1, jd)
 		scene._apres_changement_de_grille()
+		if "--prefab" in args:   # --prefab : le joueur au centre de la première salle préfabriquée de l'étage (ordre de travail 41)
+			var dj: Dictionary = scene.sim.donjon
+			var gp := Donjon.new(GameData.catalogues.get("dungeon_rooms", {}), GameData.catalogues.get("dungeon_connectors", {}), GameData.entree("dungeon_themes", "ruine"))
+			var r_nb := RandomNumberGenerator.new()
+			r_nb.seed = hash([int(dj.graine), int(dj.id), int(dj.etage), "salles"])
+			var th: Dictionary = GameData.entree("dungeon_themes", "ruine")
+			var nb_p := r_nb.randi_range(int(th.salles_par_etage[0]), int(th.salles_par_etage[1]))
+			var ep: Dictionary = gp.generer_etage(int(dj.graine), int(dj.id), int(dj.etage), nb_p, int(dj.etage) == int(dj.etages))
+			for pc in ep.pieces:
+				if pc.has("prefab"):
+					var cible: Vector2i = gp._centre_libre(ep, pc)
+					print("capture : préfab « %s » en %s" % [str(pc.prefab), str((pc.rect as Rect2i).position)])
+					scene.sim.grille.liberer(jd.pos)
+					jd.pos = cible
+					scene.sim.grille.placer(jd.id, cible)
+					scene.sim.maj_vision()
+					scene._apres_changement_de_grille()
+					break
 	for i10 in args.size():   # --objet a,b,c : des objets générés (profondeur 3, donc assemblés et composés) dans le sac du joueur
 		if args[i10] == "--objet" and i10 + 1 < args.size() and scene.sim != null:
 			var jo: Dictionary = scene.joueur()

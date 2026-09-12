@@ -608,8 +608,8 @@ func test_donjon() -> void:
 	verifier(e.largeur == tc2 and e.hauteur == tc2, "un étage = une cellule de %d×%d" % [tc2, tc2])
 	verifier(gen._nb_salles(e) >= 12, "au moins 12 salles procédurales posées (%d)" % gen._nb_salles(e))
 	var tailles := {}
-	for pc in e.pieces:
-		tailles[str(pc.id).split("_")[1]] = true
+	for pc in e.pieces:   # un préfab porte sa catégorie dans sa fiche ; une salle procédurale, dans son id
+		tailles[str(GameData.catalogues.dungeon_rooms[pc.prefab].size_category) if pc.has("prefab") else str(pc.id).split("_")[1]] = true
 	verifier(tailles.size() >= 2, "des salles de tailles différentes (%s)" % str(tailles.keys()))
 	var e3 := gen.generer_etage(42, 1, 2, 8, false)
 	verifier(e3.sol.size() != e.sol.size() or e3.entree != e.entree, "chaque étage est différent")
@@ -620,6 +620,41 @@ func test_donjon() -> void:
 			if e.pieces[i].rect.intersects(e.pieces[k].rect):
 				ok = false
 	verifier(ok, "aucun chevauchement de salles")
+	# LES PRÉFABS SONT POSÉS (ordre de travail 41, 2026-09-13) : la bibliothèque chargée à chaque démarrage sert enfin.
+	var n_pref := 0
+	var pref_vus := {}
+	var par_la_porte := 0
+	var murs_dessines := true
+	for g_p in [7, 42, 73, 300, 924, 1234, 5150, 8080]:
+		var e_p: Dictionary = gen.generer_etage(g_p, 1, 2, 12, false)
+		for pc_p in e_p.pieces:
+			if not pc_p.has("prefab"):
+				continue
+			n_pref += 1
+			pref_vus[pc_p.prefab] = true
+			var plan_p: Array = GameData.catalogues.dungeon_rooms[pc_p.prefab].plan
+			var o_p: Vector2i = (pc_p.rect as Rect2i).position
+			for o in pc_p.attaches:   # au moins une porte a un couloir devant elle
+				var dv: Vector2i = (o.pos as Vector2i) + (o.dir as Vector2i)
+				if e_p.sol.has(dv.y * e_p.largeur + dv.x):
+					par_la_porte += 1
+					break
+			# le plan est estampé : un '.' est du sol, un chiffre porte sa hauteur
+			for y_p in plan_p.size():
+				for x_p in str(plan_p[y_p]).length():
+					var c_p := str(plan_p[y_p])[x_p]
+					var i_p: int = (o_p.y + y_p) * e_p.largeur + o_p.x + x_p
+					if (c_p == "." or c_p.is_valid_int()) and not e_p.sol.has(i_p):
+						murs_dessines = false
+					if c_p.is_valid_int() and int(e_p.hauteurs[i_p]) != 10 + int(c_p):
+						murs_dessines = false
+	verifier(n_pref > 0 and pref_vus.size() >= 2, "des salles préfabriquées sont posées : %d sur 8 étages, %d plans différents" % [n_pref, pref_vus.size()])
+	verifier(par_la_porte == n_pref, "chaque préfab est rejoint PAR UNE PORTE (%d / %d)" % [par_la_porte, n_pref])
+	verifier(murs_dessines, "le plan est estampé tel qu'il est dessiné : son sol et ses reliefs")
+	var theme_nu: Dictionary = GameData.entree("dungeon_themes", "ruine").duplicate(true)
+	theme_nu.erase("prefabs")
+	var e_nu: Dictionary = Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], theme_nu).generer_etage(42, 1, 1, 18, false)
+	verifier(e_nu.pieces.all(func(p: Dictionary) -> bool: return not p.has("prefab")), "un thème sans bloc `prefabs` n'en pose aucun")
 	var reliefs := 0   # décors de salles (2026-08-30) : au moins une estrade ou une fosse sur un étage de ruine
 	for i_h in e.hauteurs.size():
 		if e.sol.has(i_h) and int(e.hauteurs[i_h]) != 10:
@@ -701,6 +736,15 @@ func test_donjon() -> void:
 	s.horloge_monde.avancer(100)
 	verifier(not s.intention(j.id, {"type": "creuser", "vers": Vector2i(0, j.pos.y)}) , "la roche du bord ne se creuse pas (hors adjacence ou indestructible)")
 	j.sante = 30
+	# L'ESCALIER DOIT ÊTRE CALME (2026-09-13) : ce test prouve qu'on descend AVEC SON ÉTAT, pas qu'on descend en
+	# plein combat. Il comptait sans le dire sur un étage où rien ne gardait l'escalier ; les préfabs (ordre de
+	# travail 41) ont redessiné l'étage, deux scorpions y veillaient, et le combat retenait le joueur hors de la file.
+	for x_c in s.vivants():
+		var engage: bool = s.en_combat(j) and x_c.id in s.combats[j.horloge].participants
+		if x_c.controle == "ia" and (engage or Grille.distance(x_c.pos, s.donjon.escalier) <= 12):
+			x_c.vivant = false
+			s.grille.liberer(x_c.pos)
+	s._verifier_desengagements()   # plus de menace : le combat se dissout, le joueur revient sur l'horloge du monde
 	s.grille.liberer(j.pos)
 	j.pos = s.donjon.escalier
 	s.grille.placer(j.id, j.pos)

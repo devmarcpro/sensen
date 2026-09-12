@@ -143,5 +143,17 @@
   ],
   "portes": 0.3,
   "salles_carrees": true,
-  "_doc_boss": "Le boss du thème (ordre de travail 21, 2026-09-09) : la plus forte du pool que nul autre thème n'a prise (64) — la jorogumo, plus forte, garde déjà le feu. Les sept thèmes partageaient `chef_de_bande`, qui n'appartenait au pool d'aucun d'eux. La règle est vérifiable et ne dépend pas de l'ordre de lecture : aucune créature du pool n'est plus forte que le boss, SAUF si elle garde déjà un autre thème — sept thèmes pour douze créatures de folklore, chacun son visage."
+  "_doc_boss": "Le boss du thème (ordre de travail 21, 2026-09-09) : la plus forte du pool que nul autre thème n'a prise (64) — la jorogumo, plus forte, garde déjà le feu. Les sept thèmes partageaient `chef_de_bande`, qui n'appartenait au pool d'aucun d'eux. La règle est vérifiable et ne dépend pas de l'ordre de lecture : aucune créature du pool n'est plus forte que le boss, SAUF si elle garde déjà un autre thème — sept thèmes pour douze créatures de folklore, chacun son visage.",
+  "prefabs": {
+    "chance": 0.25,
+    "max": 2,
+    "tailles": [
+      "petite",
+      "moyenne",
+      "grande"
+    ],
+    "themes": [
+      "repaire"
+    ]
+  }
 }

@@ -13,12 +13,13 @@ extends RefCounted
 ##   5. peuplement par le thème, contenants de loot.
 ## Déterministe par seed(monde, id_donjon, étage) : chaque étage est différent, stable au retour.
 ## Le plein est du mur (destructible) ; le bord de la cellule est de la roche (indestructible).
-## La bibliothèque de prefabs (salles, connecteurs) reste en données, non posée.
+## Les salles PRÉFABRIQUÉES (ordre de travail 41, 2026-09-13) : `theme.prefabs` en mêle quelques-unes aux rectangles — un
+## plan dessiné à la main, ses murs, ses reliefs et SES PORTES, par lesquelles arrivent les couloirs.
 
 const H_BASE := 10                 # hauteur de référence d'un étage (Hauteur de terrain ±10)
 const ESSAIS_SALLE := 12
 
-var salles: Dictionary             # bibliothèque de prefabs, conservée mais non posée
+var salles: Dictionary             # bibliothèque de prefabs (data/dungeon_rooms), posée selon `theme.prefabs`
 var connecteurs: Dictionary
 var theme: Dictionary
 var rng := RandomNumberGenerator.new()
@@ -87,6 +88,8 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	var essais := 0
 	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
 		essais += 1
+		if _essayer_prefab(e):
+			continue
 		var dim := _dimension_salle()
 		if dim.x > taille - 6 or dim.y > taille - 6:
 			continue
@@ -114,7 +117,8 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 			if relies.has(cle):
 				continue
 			relies[cle] = true
-			_tunnel(e, ci, _centre_libre(e, e.pieces[v.k]), couloirs)
+			var ck2 := _centre_libre(e, e.pieces[v.k])
+			_tunnel(e, _ancre(e, e.pieces[i], ck2), _ancre(e, e.pieces[v.k], ci), couloirs)
 	var f_boucles: Array = couloirs.get("boucles", [1, 3])
 	for k in rng.randi_range(int(f_boucles[0]), int(f_boucles[1])):
 		if e.pieces.size() < 2:
@@ -122,7 +126,9 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		var a := rng.randi_range(0, e.pieces.size() - 1)
 		var b := rng.randi_range(0, e.pieces.size() - 1)
 		if a != b:
-			_tunnel(e, _centre_libre(e, e.pieces[a]), _centre_libre(e, e.pieces[b]), couloirs)
+			var ca := _centre_libre(e, e.pieces[a])
+			var cb := _centre_libre(e, e.pieces[b])
+			_tunnel(e, _ancre(e, e.pieces[a], cb), _ancre(e, e.pieces[b], ca), couloirs)
 	var f_impasses: Array = couloirs.get("impasses", [2, 5])
 	for k in rng.randi_range(int(f_impasses[0]), int(f_impasses[1])):
 		_impasse(e, couloirs)
@@ -228,6 +234,87 @@ func _poser_lave(e: Dictionary, etage: int) -> void:
 
 # ---------------------------------------------------------------- salles
 
+## UNE SALLE PRÉFABRIQUÉE, au dé (ordre de travail 41). `theme.prefabs` : `chance` par salle posée, `max` par étage,
+## `tailles` admises (les catégories du préfab), `themes` (les `floor_theme` qu'il accepte ; par défaut son propre id).
+## Rend vrai si un préfab a été posé. Sans bloc `prefabs`, ne tire RIEN : l'étage d'un thème qui n'en veut pas reste
+## exactement celui d'avant, dé pour dé.
+func _essayer_prefab(e: Dictionary) -> bool:
+	var cfg: Dictionary = theme.get("prefabs", {})
+	if cfg.is_empty() or salles.is_empty():
+		return false
+	var n_poses := 0
+	for p in e.pieces:
+		if p.has("prefab"):
+			n_poses += 1
+	if n_poses >= int(cfg.get("max", 1)) or rng.randf() >= float(cfg.get("chance", 0.0)):
+		return false
+	var admis: Array = cfg.get("themes", [str(theme.get("id", ""))])
+	var tailles: Array = cfg.get("tailles", ["petite", "moyenne", "grande"])
+	var ids: Array = []
+	for id in salles.keys():
+		var sd: Dictionary = salles[id]
+		if str(sd.get("kind", "")) != "salle" or not (str(sd.get("size_category", "")) in tailles):
+			continue
+		for t in sd.get("floor_theme", []):
+			if str(t) in admis:
+				ids.append(str(id))
+				break
+	if ids.is_empty():
+		return false
+	ids.sort()   # l'ordre du catalogue n'est pas garanti : le dé doit tomber sur le même préfab à chaque génération
+	var id_p: String = ids[rng.randi_range(0, ids.size() - 1)]
+	var plan: Array = salles[id_p].plan
+	var dim := Vector2i(str(plan[0]).length(), plan.size())
+	if dim.x > e.largeur - 6 or dim.y > e.hauteur - 6:
+		return false
+	var r := Rect2i(Vector2i(rng.randi_range(2, e.largeur - dim.x - 3), rng.randi_range(2, e.hauteur - dim.y - 3)), dim)
+	if not _libre(e, r):
+		return false
+	_placer_prefab(e, r, id_p)
+	return true
+
+
+## Estampe un plan : '.' et les chiffres sont du sol (le chiffre, une hauteur relative), N/S/E/W une porte sur le bord
+## — du sol, que `_ancre` désigne aux couloirs —, X une cage d'escalier (du sol), '#' et ' ' restent du plein.
+func _placer_prefab(e: Dictionary, r: Rect2i, id_p: String) -> Dictionary:
+	var sd: Dictionary = salles[id_p]
+	var plan: Array = sd.plan
+	var ouvertures: Array = []
+	for y in plan.size():
+		var ligne := str(plan[y])
+		for x in ligne.length():
+			var c := ligne[x]
+			if c == "#" or c == " ":
+				continue
+			var i: int = (r.position.y + y) * e.largeur + r.position.x + x
+			e.sol[i] = true
+			if c.is_valid_int():
+				e.hauteurs[i] = clampi(H_BASE + int(c), 0, 20)
+			elif c in ["N", "S", "E", "W"]:
+				var dv: Vector2i = {"N": Vector2i(0, -1), "S": Vector2i(0, 1), "E": Vector2i(1, 0), "W": Vector2i(-1, 0)}[c]
+				ouvertures.append({"pos": r.position + Vector2i(x, y), "dir": dv})
+	var piece := {"id": id_p, "kind": "salle", "rect": r, "attaches": ouvertures, "prefab": id_p,
+		"tags": (sd.get("special_tags", []) as Array).duplicate()}
+	e.pieces.append(piece)
+	return piece
+
+
+## Où un couloir rejoint une pièce : le centre d'une salle ordinaire ; pour un préfab, la tuile DEVANT la porte la plus
+## proche de la destination — creusée, pour que le couloir arrive par la porte et non à travers un mur dessiné.
+func _ancre(e: Dictionary, piece: Dictionary, vers: Vector2i) -> Vector2i:
+	if not piece.has("prefab") or (piece.attaches as Array).is_empty():
+		return _centre_libre(e, piece)
+	var meilleur: Dictionary = piece.attaches[0]
+	for o in piece.attaches:
+		var po: Vector2i = o.pos
+		var pm: Vector2i = meilleur.pos
+		if absi(po.x - vers.x) + absi(po.y - vers.y) < absi(pm.x - vers.x) + absi(pm.y - vers.y):
+			meilleur = o
+	var dehors: Vector2i = (meilleur.pos as Vector2i) + (meilleur.dir as Vector2i)
+	_creuser(e, dehors)
+	return dehors
+
+
 ## Tire une catégorie de salle selon `poids_salles`, puis une dimension dans sa fourchette.
 func _dimension_salle() -> Vector2i:
 	var tailles: Dictionary = theme.get("tailles_salles", {"petite": [3, 5], "moyenne": [6, 9], "grande": [10, 16]})
@@ -279,8 +366,8 @@ func _poser_decors(e: Dictionary) -> void:
 	var reliefs := 0
 	var plus_grande: Dictionary = {}
 	for piece in e.pieces:
-		if piece.kind != "salle":
-			continue
+		if piece.kind != "salle" or piece.has("prefab"):
+			continue   # un préfab porte ses propres reliefs : on ne lui en ajoute pas
 		var r: Rect2i = piece.rect
 		if mini(r.size.x, r.size.y) < 5:
 			continue   # une petite salle reste nue
