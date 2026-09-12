@@ -31,7 +31,6 @@ signal explosion(pos: Vector2i, rayon: int, source: String)  # une bombe a explo
 signal action_engaged(id: String, action: Dictionary)      # télégraphe : intention visible
 signal action_resolved(id: String, action: Dictionary)
 signal journal(cle: String, params: Dictionary)             # une ligne de journal, localisée côté client
-signal locale_changed(locale: String)
 signal book_read(id: String, livre: String, succes: bool)
 signal controle_change(id: String)                            # le joueur incarne un autre corps (Changer de personnage)
 signal tile_changed(pos: Vector2i)                            # mutation de tuile (hauteur, contenu)

@@ -2288,6 +2288,7 @@ func _dessiner_superpositions() -> void:
 	# opacité fixe — un nuage naissait donc à sa densité finale et ne changeait plus jamais d'aspect.
 	# Le gaz le plus CHARGÉ de la tuile donne la teinte : un mélange se lit par ce qui domine, pas par une moyenne
 	# qui ne serait la couleur de rien.
+	var _champ_gaz: Dictionary = GameData.config("gaz_regles").get("champ", {})
 	for i_n in sim.nuages.keys():
 		var t_n: Vector2i = g.pos_de(int(i_n))
 		if not g.dans(t_n):
@@ -2305,7 +2306,14 @@ func _dessiner_superpositions() -> void:
 		if pire_g.is_empty():
 			continue
 		var col_n: Color = _couleur_liste(GameData.catalogues.gaz.get(pire_g, {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
-		col_n.a = clampf(col_n.a * minf(1.0, total_c) * 2.0, 0.05, 0.85)
+		# CE QUI BLESSE DOIT SE VOIR (capture du 2026-09-12). L'opacité descendait linéairement avec la charge : au
+		# seuil d'effet le losange tombait à 13 %, invisible sur l'herbe, et le joueur entrait dans un nuage qui le
+		# blessait sans l'avoir vu — l'IA, elle, le fuyait. Deux planchers : une trace se devine, une tuile nocive ne
+		# passe jamais sous `opacite_nocive`, et la racine carrée fait monter vite au-delà. La bordure se voit.
+		var ch_n := minf(1.0, total_c)
+		var nocive := ch_n >= float(_champ_gaz.get("seuil_effet", 0.18))
+		var plancher := float(_champ_gaz.get("opacite_nocive", 0.42)) if nocive else float(_champ_gaz.get("opacite_trace", 0.10))
+		col_n.a = clampf(maxf(plancher, sqrt(ch_n) * float(_champ_gaz.get("opacite_max", 0.85))), 0.0, float(_champ_gaz.get("opacite_max", 0.85)))
 		_losange(t_n, col_n)
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))

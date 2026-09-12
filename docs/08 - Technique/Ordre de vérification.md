@@ -80,6 +80,12 @@ Un critère de performance à valider avant de passer à l'étape suivante. **Un
 > **Ce qu'il a trouvé du premier coup** : six notes nommaient data/reserved_colors.json (cité ici en texte simple : il n'existe plus), renommé en `palette_materiaux.json` ; deux autres citaient ore_bands.json et strata.json, fondus dans `minerais_par_etage.json` ; une clé loot_rules.bases_consommables (citée ici en texte simple : elle n'existe pas) ; et surtout une note qui décrivait les artefacts comme du contenu écrit à la main dans un dossier jamais créé, **alors que le code les génère** depuis longtemps.
 > **Le principe qui le rend utilisable** : il ne juge que ce qui est vérifiable sans ambiguïté — chemins, clés de catalogue connu, fonctions en snake_case entre accents graves. La prose française est laissée tranquille. Un outil qui crie au loup est un outil qu'on désactive, et son premier jet donnait dix-neuf faux positifs sur la seule forme `combat_rules.json`, où « json » était pris pour une clé.
 
+> [!success] Codé le 2026-09-12 — `tools/verif_signaux.py` : un signal de l'EventBus sans émetteur, sans auditeur, ou mort des deux côtés (ordre de travail 43)
+> **La file demandait de « supprimer les signaux sans auditeur ». C'est le mauvais geste**, et l'outil existe pour cette raison : un signal émis sans auditeur n'est pas un défaut, c'est un **point d'extension** — `item_sold` attend les quêtes, `raid_resolved` attend le journal du territoire. Les supprimer retirerait l'API au moment où elle va servir.
+> **Ce qui est un défaut, c'est qu'on ne le sache pas**, et l'outil en distingue trois : **mort des deux côtés** (du bruit pur — `locale_changed` l'était, retiré le jour même), **écouté mais jamais émis** (le pire : une fonctionnalité qui ne partira jamais, et rien ne le dit — l'outil échoue toujours dessus), et **émis sans auditeur** (gelé, avec une raison écrite par signal dans l'outil lui-même).
+> **Ce qu'il ne peut pas voir, et il le dit** : un auditeur **dynamique** (un `Callable` monté à l'exécution) est invisible à une lecture de texte. Deux des douze en ont un, par les bulles d'onboarding — d'où le gel plutôt qu'un échec, et d'où la colonne « raison ».
+> **Mesure** : 30 signaux, 17 émis et écoutés, 12 émis sans auditeur (tous justifiés), 0 écouté sans émetteur, 1 mort retiré. Le gel est `tools/verif_signaux_baseline.txt` ; `--gel` le réécrit quand un changement est voulu.
+
 ## Liens
 - **Dépend de** : [[Optimisation — principes]], [[Budgets de performance]], [[Ordre de construction]]
 - **Alimente** : [[Ordre de construction]]

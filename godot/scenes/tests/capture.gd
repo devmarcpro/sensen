@@ -944,6 +944,28 @@ func _ready() -> void:
 			if not j_cd.is_empty():
 				var t_cd: Vector2i = scene.sim._tuile_libre_autour(j_cd.pos)
 				scene._contexte(t_cd if t_cd.x >= 0 else j_cd.pos, get_viewport().get_visible_rect().size * 0.45)
+		# UN NUAGE À CÔTÉ DU JOUEUR (champ d'air, ordre de travail 24 ter, 2026-09-12) : `--nuage <gaz> [pas]`.
+		# Le champ a changé le DESSIN des nuages — une opacité qui suit la charge, la teinte du gaz dominant — et
+		# aucun test ne voit un défaut de rendu. Sans ce drapeau, rien ne permettait d'en poser un devant la caméra :
+		# il fallait descendre huit étages et percer une poche. On le verse à deux tuiles du joueur et on le laisse
+		# vivre `pas` pas de champ, pour voir une FRANGE et pas seulement un carré plein.
+		if args[i2] == "--nuage" and i2 + 1 < args.size() and scene.sim != null:
+			var j_n: Dictionary = scene.joueur()
+			if not j_n.is_empty():
+				var pas_n := 6
+				if i2 + 2 < args.size() and str(args[i2 + 2]).is_valid_int():
+					pas_n = int(args[i2 + 2])
+				var centre_n: Vector2i = Vector2i(j_n.pos) + Vector2i(2, 0)
+				SimTerrain.ajouter_gaz(scene.sim, centre_n, str(args[i2 + 1]), 1.0)
+				for k_n in pas_n:
+					scene.sim.gaz_prochain_pas = 0
+					SimTerrain._tiquer_gaz(scene.sim, k_n)
+				print("nuage : %s, %d pas, %d tuile(s) chargée(s), charge au centre %.2f" % [str(args[i2 + 1]), pas_n, scene.sim.nuages.size(), SimTerrain.charge_gaz(scene.sim, centre_n)])
+				# FIGÉ POUR LA PRISE. Une capture a besoin d'une dizaine d'images pour charger, et le monde tourne
+				# pendant ce temps à mille ticks par seconde : à ciel ouvert, le nuage avait fait cent pas de champ et
+				# s'était dissipé avant la photo. On photographie ici l'état qu'on vient de poser — le rendu, pas la
+				# simulation, que `test_champ_air` mesure déjà.
+				scene.sim.gaz_prochain_pas = 1 << 40
 		# COMPOSER LE JOUEUR EN JEU (designer 2026-09-10) : `--joueur race=insectoide,nez=aucun,teinte_peau=#2f6b2a`.
 		# L'outil savait choisir une race À LA CRÉATION et ouvrir un écran ; il ne savait pas composer un être déjà
 		# en jeu, ce qu'il faut pour juger l'anatomie ou le pantin d'un personnage donné. Les clés sont celles de
@@ -1078,6 +1100,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	frames += 1
+	# CE QUE LA CAPTURE A VRAIMENT DEVANT ELLE (champ d'air, 2026-09-12). Les deux premières captures ne montraient
+	# aucun nuage, pour deux raisons OPPOSÉES : à 60 images il s'était dissipé, à 4 images la scène n'avait pas fini de
+	# se dessiner. Ce chiffre dit laquelle — il est hors du bloc des mesures, qui ne tourne qu'après l'image 5.
+	if frames == cible - 1 and "--nuage" in OS.get_cmdline_user_args() and scene != null and scene.sim != null:
+		print("nuage a la prise : %d tuile(s) chargee(s)" % scene.sim.nuages.size())
 	if frames == 1:
 		RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	if traverser_en_jeu > 0 and frames > 5 and frames % traverser_cadence == 0 and scene != null and scene.sim != null:

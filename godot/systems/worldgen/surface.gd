@@ -613,12 +613,6 @@ func _nom_de_terre(rng: RandomNumberGenerator, cultures: Dictionary, culture_id:
 	return Noms.ville(cultures[culture_id], rng)
 
 
-## La culture d'une région (2026-09-07) : une région entière parle la même langue, et son nom en vient. Sans cela,
-## un hameau japonais poussait au milieu des terres celtes — les cultures se répartissaient en confettis.
-func culture_de_region(c: Vector2i) -> String:
-	return str(region_de(c).get("culture", ""))
-
-
 ## Le pas du réseau de germes de région, en cellules.
 func _pas_region() -> int:
 	return maxi(2, int(planete.get("regions", {}).get("pas_cellules", 24)))
@@ -1927,29 +1921,6 @@ func _liste_par_biome(table: Dictionary, tags: Array) -> Array:
 	return table.get("_defaut", [])
 
 
-## Un rectangle de terre libre (ni rue, ni parcelle prise, ni eau), tiré au sort ; position (-1,-1) s'il n'y en a pas.
-func _rectangle_libre(e: Dictionary, dims: Vector2i, pris: Array[Rect2i], rue: Dictionary, rng: RandomNumberGenerator, essais: int = 80) -> Rect2i:
-	var taille: int = e.largeur
-	for essai in essais:
-		var origine := Vector2i(rng.randi_range(2, taille - 3 - dims.x), rng.randi_range(2, taille - 3 - dims.y))
-		var r := Rect2i(origine, dims)
-		var libre := true
-		for pr in pris:
-			if pr.grow(1).intersects(r):
-				libre = false
-				break
-		if not libre:
-			continue
-		for y in dims.y:
-			for x in dims.x:
-				var i := (origine.y + y) * taille + origine.x + x
-				if e.eau.has(i) or rue.has(i) or e.murs.has(i):
-					libre = false
-		if libre:
-			return r
-	return Rect2i(Vector2i(-1, -1), dims)
-
-
 ## Le nombre de lits d'un préfab : son plan et ses étages (les couches Z, 2026-09-06).
 func _lits_du_prefab(bat: Dictionary) -> int:
 	var n := _lits_du_plan(bat.plan, bat.meubles)
@@ -1968,52 +1939,6 @@ func _lits_du_plan(plan: Array, meubles: Dictionary) -> int:
 				n += 1
 	return n
 
-
-## Une parcelle libre le long d'une rue, façade sur la rue, du centre vers les bords, la rue principale avant les
-## parallèles ; (-1,-1) s'il n'y en a plus. `sens` : le côté vers lequel la porte regarde — « sud » : le bâtiment
-## est au nord d'une rue est-ouest, etc.
-func _parcelle(e: Dictionary, sens: String, w: int, h: int, centre: Vector2i, larg: int, curseurs: Dictionary, pris: Array[Rect2i], rues_h: Array[int], rues_v: Array[int]) -> Vector2i:
-	var taille: int = e.largeur
-	var lignes: Array[int] = rues_h if sens in ["sud", "nord"] else rues_v
-	for li in lignes.size():
-		var cle := sens + str(li)
-		var rue0: int = int(lignes[li]) - larg / 2
-		var essais := 0
-		while essais < taille / 2:
-			essais += 1
-			var k: int = int(curseurs.get(cle, 0))
-			curseurs[cle] = k + 1
-			var pas: int = (k + 1) / 2 * (1 if k % 2 == 0 else -1)   # 0, +1, −1, +2, −2… du centre vers les bords
-			var origine := Vector2i(-1, -1)
-			match sens:
-				"sud":
-					origine = Vector2i(centre.x + pas * 2 - w / 2, rue0 - 2 - h + 1)
-				"nord":
-					origine = Vector2i(centre.x + pas * 2 - w / 2, rue0 + larg + 1)
-				"est":
-					origine = Vector2i(rue0 - 2 - w + 1, centre.y + pas * 2 - h / 2)
-				"ouest":
-					origine = Vector2i(rue0 + larg + 1, centre.y + pas * 2 - h / 2)
-			var r := Rect2i(origine, Vector2i(w, h))
-			if origine.x < 2 or origine.y < 2 or r.end.x > taille - 2 or r.end.y > taille - 2:
-				continue
-			var libre := true
-			for pr in pris:
-				if pr.grow(1).intersects(r):
-					libre = false
-					break
-			if not libre:
-				continue
-			var mouille := false
-			for y in h:
-				for x in w:
-					var idx := (origine.y + y) * taille + origine.x + x
-					if e.eau.has(idx):
-						mouille = true
-			if mouille:
-				continue
-			return origine
-	return Vector2i(-1, -1)
 
 ## LE RATTRAPAGE DES PORTES (ordre de travail 26 terdecies, 2026-09-09). Un bâtiment peut se retrouver ENCLAVÉ :
 ## sa porte ouvre sur du sol marchable, mais ce sol est coupé du reste de la cellule.
@@ -2920,7 +2845,7 @@ func _occuper(occupe: PackedByteArray, taille: int, r: Rect2i, marge: int = 1) -
 
 ## Le rempart de la vieille ville (Villes, 2026-09-07) : un anneau irrégulier de la PIERRE du village autour de la place,
 ## tracé après les rues — une porte là où une rue le traverse, et les bâtiments n'y viennent pas. Rend ses tuiles.
-## (Les tuiles du rempart sont des murs : `_parcelle_sur_rue` et `_rectangle_libre` les refusent déjà — inutile de les
+## (Les tuiles du rempart sont des murs : `_parcelle_sur_rue` les refuse déjà — inutile de les
 ## ajouter aux emprises prises, ce qui ferait des centaines de rectangles à tester par candidat.)
 func _poser_rempart(e: Dictionary, cell: Vector2i, centre: Vector2i, rayon: int, palette: Dictionary, rue: Dictionary) -> Array[Vector2i]:
 	var taille: int = e.largeur

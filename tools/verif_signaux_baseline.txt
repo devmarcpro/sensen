@@ -1,0 +1,3 @@
+morts=
+sans_auditeur=cell_claimed,cell_role_changed,creature_recruited,dungeon_cleared,explosion,item_sold,leadership_changed,quest_completed,raid_resolved,skill_level_up,skill_xp_gained,village_conquered
+sans_emetteur=

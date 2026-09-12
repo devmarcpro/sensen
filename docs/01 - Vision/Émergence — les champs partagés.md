@@ -217,6 +217,14 @@ jamais s'ajouter à côté. Sinon on obtient six vérités qui se contredisent, 
 >
 > **Ce qui reste** : le combat, la mort et les portes ne sonnent pas encore ; les deux champs ignorent les couches Z ; et l'odeur **ne distingue pas ce qui sent** — un loup suit la piste d'un loup aussi bien que celle du joueur.
 
+> [!success] Codé le 2026-09-12 — **le champ d'air** (ordre de travail 24 ter) : le cinquième champ, et le premier qui se voit bouger
+> Le détail est dans [[Gaz dans le sol]] ; ce qui compte ici, c'est ce qu'il apporte au **système des champs**.
+> **Il remplace une liste figée**, comme la chaleur avait remplacé cinq règles ad hoc : `sim.zones` de type gaz — quatorze tuiles posées d'un coup, qui ne bougeaient plus — devient une charge par tuile qui diffuse. Le patron est celui de la chaleur, mot pour mot : les tuiles chargées et leur bordure, jamais la fenêtre, un ordre de clés fixe.
+> **Il lit ce qui existait déjà et n'invente aucune donnée** : la masse des quinze gaz (posée le 2026-09-08 exprès) et la hauteur de chaque tuile. `1 + pente_masse × Δhauteur × (1 − masse)` suffit à faire monter le léger et couler le lourd, et s'annule exactement à la masse de l'air.
+> **Il est lu par le champ de danger**, qui en tire un danger **gradué** — une frange vaut 25 là où le cœur vaut 100. C'est la première fois que deux champs se nourrissent l'un l'autre avec une valeur continue plutôt qu'un oui-ou-non.
+> **Et l'air n'est pas un sixième champ : il est le complément du cinquième.** `air = 1 − charge`. C'est la règle de ce coffre appliquée à un champ entier — *ce qui peut se déduire ne se balaie pas* —, et elle a une conséquence qu'aucune donnée n'a eu à déclarer : un gaz inerte devient mortel en quantité, parce que ce n'est pas le gaz qui étouffe, c'est la place qu'il prend.
+> **Ce qu'il ne lit pas encore** : le **vent** (qui décidera si une galerie ventilée garde son grisou) et les **couches Z** (un gaz qui monte d'un étage). Le premier attend que le vent existe ; le second, qu'on ait tranché ce qu'un étage montre de celui du dessous (question 13).
+
 ## Liens
 - **Dépend de** : [[Décisions fondatrices]], [[Matériaux — 13 stats]], [[Application des stats de matériau]], [[Grille continue]]
 - **Alimente** : [[Mine sous une cellule]], [[Éclairage]], [[Météo]], [[IA des créatures]], [[Modules de la simulation et le C++]]

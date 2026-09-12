@@ -77,6 +77,10 @@
     "_doc_seuil_explosion": "Il faut une concentration pour qu un gaz inflammable prenne. Une trace de grisou ne saute pas — et c est precisement ce qui rend la lampe dangereuse AU FOND de la galerie et pas a son entree.",
     "air_seuil_souffle": 0.55,
     "air_seuil_asphyxie": 0.25,
-    "_doc_air": "L air respirable est `1 - charge`. Sous `air_seuil_souffle` on s essouffle (la vigueur ne remonte plus) ; sous `air_seuil_asphyxie` on etouffe. Ces deux nombres ne decrivent pas un gaz : ils decrivent CE QU IL RESTE quand un gaz a pris la place, et ils valent donc pour les quinze."
+    "_doc_air": "L air respirable est `1 - charge`. Sous `air_seuil_souffle` on s essouffle (la vigueur ne remonte plus) ; sous `air_seuil_asphyxie` on etouffe. Ces deux nombres ne decrivent pas un gaz : ils decrivent CE QU IL RESTE quand un gaz a pris la place, et ils valent donc pour les quinze.",
+    "opacite_trace": 0.1,
+    "opacite_nocive": 0.42,
+    "opacite_max": 0.85,
+    "_doc_opacite": "CE QUI BLESSE DOIT SE VOIR (capture du 2026-09-12). L opacite descendait lineairement avec la charge : au seuil d effet (0,18) le losange etait a 13 %, invisible sur de l herbe texturee, et un joueur entrait dans un nuage qui le blessait sans l avoir vu — le champ de danger le voyait, l IA le fuyait, et le joueur, lui, non. Deux planchers desormais : une TRACE (sous le seuil) se devine a `opacite_trace`, une tuile NOCIVE (au seuil et au-dela) ne descend jamais sous `opacite_nocive`, et la racine carree de la charge monte vite a partir de la. La bordure se voit, et elle se voit comme une bordure."
   }
 }

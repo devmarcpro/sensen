@@ -457,6 +457,11 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
 ## Palier 6 — les 236 contenus meurent, la grammaire reste
 
 27. **Supprimer les 236 contenus de modules**, les branches d'effet en dur et les listes des fiches de classe.
+    > [!info] **Inventaire refait le 2026-09-12, avant d'ouvrir le chantier** — les chiffres du 2026-09-08 avaient vieilli.
+    > · **« Les listes des fiches de classe » est FAIT** : les talents et les classes ont été mis de côté le 2026-09-09 (il ne reste qu'une fiche, le placeholder). Les 57 capacités écrites en dur sont parties avec elles.
+    > · **Les 236 contenus sont toujours là**, en sept types (condition, déclencheur, forme, liaison, modificateur, noyau, portée), et **29 fichiers** en citent par leur nom — dont 11 de tests et 9 tests déjà désactivés (« on en a rien à battre des modules de sorts », Vers la production 180).
+    > · **LE PIÈGE DU CHANTIER : 36 identifiants sont des HOMONYMES** — `saignement`, `aveugle`, `epuisement` sont aussi des statuts, `ombre` un élément, `absorption` une stat, `gel` un état. Un `grep` sur leur nom accuse des lignes qui ne parlent pas de sorts ([[Vocabulaire]] le disait pour `absorption`). **Les 200 autres sont propres aux modules** : ce sont eux qu'on peut chercher sans mentir, et les 36 se relisent à la main.
+    > **L'ordre, pour que la suite reste verte à chaque pas** : (1) la grammaire survit à un catalogue **vide** — chaque lecteur tient sans contenu ; (2) chaque test qui asserte sur un contenu est repointé vers la grammaire ou désactivé avec sa raison ; (3) **alors seulement** les 236 fichiers partent ; (4) la suite.
     **Correction du chiffre** : ce ne sont pas 13 fichiers de tests qui dépendent des modules mais **15**, dont un avec
     40 références, plus **57 capacités écrites en dur dans les 19 fiches de classe**.
     Techniquement, aucun champ ne bloque cette suppression : **c'est une décision d'ordre du designer, pas une
@@ -801,14 +806,14 @@ appelle.
     danger** (ligne 24). Le faire avant, c'est le faire deux fois. Voir [[Carte du monde]].
 
 
-40. **Effacer le code mort de la génération de village.** *La ligne d'origine était fausse et à l'envers* : les
+~~40. **Effacer le code mort de la génération de village.**~~ — **FAIT le 2026-09-12** : la ligne annonçait deux fonctions sans appelant, **il y en avait trois** (75 lignes) — `_parcelle` (46 lignes, la plus grosse, que la ligne ne nommait pas), `_rectangle_libre` (« celle qui tirait au hasard ») et `culture_de_region`. **Vérifié avant de supprimer** : la fonctionnalité « une région parle la même langue » est bien vivante — `_palette_village` lit la culture de la région en direct —, seul le raccourci était inutile. *Supprimer un raccourci sans regarder ce qu'il enveloppe, c'est faire passer une fonctionnalité morte pour un nettoyage réussi.* — *La ligne d'origine était fausse et à l'envers* : les
     bâtiments **se rangent** le long des rues depuis le 2026-09-07 ; ce sont deux autres fonctions qui n'ont plus
     d'appelant, dont celle qui tirait au hasard. Il ne reste qu'à supprimer.
 41. **Poser la bibliothèque de préfabs de donjon** (12 salles, 8 connecteurs), chargée à chaque démarrage et jamais
     utilisée. **Attention** : poser des préfabs alourdit la génération d'un étage — à mesurer au palier 11.
 42. **Les 30 bois inatteignables.** Le chemin décide de la dépendance : par les fiches de matériau, c'est bloqué par le
     palier 2 **et** il faut écrire le lecteur qui n'existe pas ; par les tables de biome, ce n'est bloqué par rien.
-43. **Les signaux sans auditeur.** *Correction* : ils ne sont pas douze mais **dix** — deux ont un auditeur dynamique,
+~~43. **Les signaux sans auditeur.**~~ — **FAIT le 2026-09-12, et PAS comme la ligne le demandait** : un signal émis sans auditeur est un point d'extension, pas un défaut. Un seul était vraiment mort (`locale_changed`, retiré) ; les douze autres sont gelés avec leur raison par `tools/verif_signaux.py`, qui échoue sur le treizième et sur tout signal **écouté mais jamais émis** — voir [[Ordre de vérification]]. — *Correction* : ils ne sont pas douze mais **dix** — deux ont un auditeur dynamique,
     invisible au grep, via les bulles d'onboarding. En revanche `locale_changed` est bien mort des deux côtés.
     `dungeon_cleared` est déjà traité au palier 4 : c'est la même plaie vue de l'autre côté.
 
