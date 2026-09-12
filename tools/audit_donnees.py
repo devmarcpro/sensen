@@ -83,16 +83,22 @@ def sources_materiau():
         src.add(str(b.get("subsurface_material", "")))
         for _cle in ("vegetation", "rochers", "plantes", "cueillette"):
             src.update(str(v.get("id", "")) for v in b.get(_cle, []) or [])
-    for pool in conf("minerais_par_etage").get("tiers", {}).values():
+    _mpe = conf("minerais_par_etage")
+    for pool in _mpe.get("tiers", {}).values():
         src.update(str(x) for x in pool)
+    src.update(str(x) for x in _mpe.get("fossiles", {}).get("materiaux", []))   # les fossiles du donjon (42 bis)
+    for pool in _mpe.get("par_theme", {}).values():                             # le guano des repaires
+        src.update(str(x) for x in pool)
+    for _tr in conf("sous_sol").get("geodes", {}).get("gemmes_par_profondeur", []):   # les gemmes des geodes
+        src.update(str(x) for x in _tr[2])
+    # `depouille` et `drops_chasse` sont des OBJETS (la peau, l'os consommables) dont l'id est parfois homonyme d'un
+    # materiau : ce ne sont pas des sources de matiere brute (verifie le 2026-09-13, sim_objets `generer_objet`).
     for c in creatures.values():
-        for d in c.get("depouille", []): src.add(str(d))
-        for d in c.get("drops_chasse", []) or []: src.add(str(d))
         for _pr in (c.get("elevage", {}) or {}).get("produits", []) or []:   # la laine du mouton, le lait
             if isinstance(_pr, dict) and _pr.get("materiau"): src.add(str(_pr["materiau"]))
     return src
 src = sources_materiau()
-# 5 bis. un materiau « de biome » qu'aucune table de biome ne pose : il n'existe pas en jeu (ligne 42). Les exceptions
+# 5 bis. un materiau « de biome » qu aucune table de biome ne pose : on ne peut pas l obtenir brut (ligne 42). Les exceptions
 # connues sont ecrites avec leur raison ; une nouvelle entree est un materiau qui vient d'etre coupe du monde.
 BIOME_SANS_TABLE = {
     "acajou": "tropical : attend un biome tropical", "balsa": "tropical : attend un biome tropical",
