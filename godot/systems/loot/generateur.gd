@@ -188,6 +188,14 @@ func _composer_livre(inst: Dictionary, base: Dictionary, profondeur: int, rng: R
 	# un manuel dans ceux du corps — et la difficulté suit la profondeur.
 	var ids_m: Array = modules.keys()
 	ids_m.sort()
+	# SANS CATALOGUE, IL N Y A RIEN A ENSEIGNER (chantier 27, 2026-09-12). Le butin tirait le module d'un grimoire
+	# dans une liste qu'il supposait pleine ; les 236 contenus de sorts vont mourir, et le livre doit survivre à
+	# leur absence. Il reste un livre — il ne dit simplement rien de ce qu'il enseignerait.
+	if ids_m.is_empty():
+		inst["modules"] = []
+		inst["domaine"] = ""
+		inst["difficulte"] = int(lv.difficulte_base) + maxi(0, profondeur - 1) * int(lv.difficulte_par_etage) / 2
+		return
 	var grimoire: bool = base.type == "grimoire"
 	var pool: Array = []
 	for id: String in ids_m:

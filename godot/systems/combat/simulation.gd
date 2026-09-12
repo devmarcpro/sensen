@@ -2478,7 +2478,13 @@ func _declencher(e: Dictionary, evenement: String, pos: Vector2i) -> void:
 	for d in e.declencheurs_armes.duplicate():
 		if d.evenement == evenement:
 			e.declencheurs_armes.erase(d)
-			EventBus.emettre(&"journal", [&"journal.declencheur", {"nom": e.name_key, "evenement": "declencheur." + evenement, "capacite": d.plan.noyau.name_key}])
+			# UN PLAN SANS NOYAU NE FAIT RIEN (chantier 27, 2026-09-12). Le journal lisait `d.plan.noyau.name_key` sans
+			# vérifier que le plan en porte un ; sans catalogue, la composition ne résout aucun noyau et le combat
+			# plantait au moment où la charge partait. Elle part désormais — dans le vide, comme elle le doit.
+			var noyau_d: Dictionary = (d.plan as Dictionary).get("noyau", {})
+			if noyau_d.is_empty():
+				continue
+			EventBus.emettre(&"journal", [&"journal.declencheur", {"nom": e.name_key, "evenement": "declencheur." + evenement, "capacite": noyau_d.get("name_key", "")}])
 			_executer_capacite(e, d.plan, pos, false)
 
 

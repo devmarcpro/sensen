@@ -17,7 +17,7 @@
 | materials/ | les 157 matériaux des 11 catalogues (`tools/gen_materials.py`, + os et os massif des dépouilles, + verre trempé, brique réfractaire, béton du palier industriel), 13 stats, couleur, Wu Xing | Schéma matériau (B.1), catalogues 09 - Contenu |
 | items/ | objets et recettes ; `proto_*` = objets du prototype (dureté, qualité et élément fixés à la main en attendant le craft) | Schéma objet et recette (B.3), Stats d'armes |
 | functionalities/ | profils d'armes/armures/véhicules | Fonctionnalité (B.3.1) |
-| modules/ | les 176 composants ; `effet` = forme structurée des descriptions (`tools/structure_modules.py`) | Vocabulaire des modules (B.4), Modules (F.2) |
+| modules/ | **vide depuis le 2026-09-13** (chantier 27) : les contenus seront réécrits sur les champs ; la grammaire se teste sur `scenes/tests/fixtures/modules/` | Vocabulaire des modules (B.4), Modules (F.2) |
 | creatures/ | tout être (joueur compris) : `corps.stats`, `equipement`, `ratelier`, `actions`, `capacites` (séquences de modules) | Schéma créature (B.5), Blocs de l'être, Créatures (F.3) |
 | creature_actions/ | les 24 actions des créatures (`tools/gen_creature_actions.py` les transcrit) | Décision — Vocabulaire d'attaque des créatures, Actions des créatures |
 | ai_profiles/ | profils Utility AI (`hostile`, `bete_sauvage`, `compagnon`, `elite`) | IA des créatures (E.16) |

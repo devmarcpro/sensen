@@ -15,6 +15,58 @@ func add_child(n: Node) -> void:
 	lanceur.add_child(n)
 
 
+## UN MODULE DÉCLARÉ PAR LE TEST (chantier 27, palier 6, 2026-09-12). Les 236 contenus de sorts vont mourir ; un
+## test qui prouve une RÈGLE de la grammaire (le coût d'un noyau, une monnaie, une charge qui part) ne doit pas
+## emprunter l'un d'eux, sinon il tombe avec lui et la règle reste sans preuve au moment où on la refonde.
+## Rend un module minimal et valide : les champs que l'assembleur lit tous, à zéro, et ceux qu'on passe par-dessus.
+func module_synthetique(id: String, champs: Dictionary = {}) -> Dictionary:
+	var m := {"id": id, "name_key": "module." + id + ".name", "module_type": "noyau", "tags": ["noyau"],
+		"elements": {}, "power_base": "arme", "effets": ["degats"], "effet": {}, "forme": null, "portee": null,
+		"cout_ticks": 0, "cout_mana": 0, "cout_vigueur": 0}
+	for k: String in champs.keys():
+		m[k] = champs[k]
+	return m
+
+
+## Un `Capacites` qui ne connaît QUE les modules synthétiques qu'on lui donne — ni plus, ni ce qui reste sur disque.
+func capacites_synthetiques(modules: Array) -> Capacites:
+	var cat := {}
+	for m in modules:
+		cat[str((m as Dictionary).id)] = m
+	return Capacites.new(cat)
+
+
+## INSCRIRE DES MODULES SYNTHÉTIQUES DANS UNE SIMULATION (chantier 27, 2026-09-12), et les retirer après. Les tests
+## de liaisons et de déclencheurs prouvent la grammaire qui RESTE, mais ils passent par `_capacite_test` — qui lit le
+## catalogue GLOBAL — et par `sim.capacites`, qui en a gardé une copie. Un module synthétique doit être vu des deux,
+## et ne fuir vers AUCUN test suivant : un butin qui tire un grimoire tomberait sur lui et changerait de séquence.
+## L'inscription garde ce qu'elle écrase ; le retrait le rend.
+var _modules_ecrases := {}
+
+
+func inscrire_modules(s: Simulation, modules: Array) -> Array[String]:
+	var ids: Array[String] = []
+	for m in modules:
+		var id := str((m as Dictionary).id)
+		if GameData.catalogues.modules.has(id) and not _modules_ecrases.has(id):
+			_modules_ecrases[id] = GameData.catalogues.modules[id]
+		GameData.catalogues.modules[id] = m
+		s.capacites.modules[id] = m
+		ids.append(id)
+	return ids
+
+
+func retirer_modules(s: Simulation, ids: Array[String]) -> void:
+	for id in ids:
+		if _modules_ecrases.has(id):
+			GameData.catalogues.modules[id] = _modules_ecrases[id]
+			s.capacites.modules[id] = _modules_ecrases[id]
+			_modules_ecrases.erase(id)
+		else:
+			GameData.catalogues.modules.erase(id)
+			s.capacites.modules.erase(id)
+
+
 func nouvelle_sim(arene: String) -> Simulation:
 	var s := Simulation.new(42)
 	s.charger_arene(arene)

@@ -21,50 +21,8 @@
   "tags": [
     "visible"
   ],
-  "capacites": [
-    {
-      "id": "placeholder_frappe",
-      "name_key": "module.frappe.name",
-      "modules": [
-        "point",
-        "contact",
-        "frappe"
-      ]
-    },
-    {
-      "id": "placeholder_estoc",
-      "name_key": "module.estoc.name",
-      "modules": [
-        "point",
-        "contact",
-        "estoc"
-      ]
-    },
-    {
-      "id": "placeholder_projection",
-      "name_key": "module.projection.name",
-      "modules": [
-        "point",
-        "contact",
-        "projection"
-      ]
-    }
-  ],
-  "hotbar": [
-    {
-      "type": "capacite",
-      "ref": 0
-    },
-    {
-      "type": "capacite",
-      "ref": 1
-    },
-    {
-      "type": "capacite",
-      "ref": 2
-    }
-  ],
-  "signature": "frappe",
+  "capacites": [],
+  "hotbar": [],
   "classe_mere": "guerrier",
   "equipement_slots": {
     "main_principale": "craft_epee",

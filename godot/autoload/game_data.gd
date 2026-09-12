@@ -235,14 +235,14 @@ func _charger_dossier(nom: String) -> Dictionary:
 
 ## Un catalogue peut être **rangé en sous-dossiers** (data/modules/noyau/…) : l'id reste le nom du fichier,
 ## le sous-dossier n'est qu'un classement pour l'humain (décision du designer, 2026-08-29).
-func _charger_recursif(nom: String, sous: String, schema: Dictionary, res: Dictionary) -> void:
-	var chemin := RACINE + nom + sous
+func _charger_recursif(nom: String, sous: String, schema: Dictionary, res: Dictionary, racine: String = RACINE) -> void:
+	var chemin := racine + nom + sous
 	var dir := DirAccess.open(chemin)
 	if dir == null:
 		return
 	for d2 in dir.get_directories():
 		if not d2.begins_with("_"):
-			_charger_recursif(nom, sous + "/" + d2, schema, res)
+			_charger_recursif(nom, sous + "/" + d2, schema, res, racine)
 	for f in dir.get_files():
 		if not f.ends_with(".json") or f.begins_with("_"):
 			continue
@@ -276,6 +276,21 @@ func _charger_config(nom: String) -> Dictionary:
 	if not schema.is_empty():
 		_valider(d, schema, "", fichier)
 	return d
+
+
+## UN CATALOGUE DE BANC D'ESSAI, chargé PAR-DESSUS celui du jeu (chantier 27, palier 6, 2026-09-13). Les 236
+## contenus de sorts sont supprimés du jeu ; les tests qui prouvent la GRAMMAIRE (l'ordre d'assemblage, une charge
+## qui part, une liaison, un cran) gardent les 70 pièces qu'ils assemblent, figées sous `scenes/tests/fixtures/`.
+## Même schéma, mêmes clés vérifiées : un banc d'essai invalide est une erreur comme une autre. Rend les ids posés.
+func charger_banc_d_essai(nom: String, racine: String) -> Array[String]:
+	var res := {}
+	_charger_recursif(nom, "", _charger_schema(nom), res, racine)
+	var ids: Array[String] = []
+	for id: String in res.keys():
+		catalogues[nom][id] = res[id]
+		ids.append(id)
+	_cache_filtres.clear()
+	return ids
 
 
 func _charger_schema(nom: String) -> Dictionary:

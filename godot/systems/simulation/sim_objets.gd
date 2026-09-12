@@ -954,9 +954,11 @@ static func _lire(sim: Simulation, e: Dictionary, objet: String, tick: int) -> b
 		EventBus.emettre(&"book_read", [e.id, objet, true])
 		return true
 	if succes:
-		var n: int = livre.modules.size()
-		if marge < 10:
-			n = maxi(1, int(floorf(float(livre.modules.size()) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
+		var n: int = livre.get("modules", []).size()
+		# `maxi(1, …)` FORÇAIT un module appris même quand le livre n'en porte aucun, puis lisait `modules[0]` d'une
+		# liste vide (chantier 27, 2026-09-12). Un livre vide se lit — et n'apprend rien.
+		if marge < 10 and n > 0:
+			n = maxi(1, int(floorf(float(n) * minf(1.0, float(n_lecture) / float(livre.difficulte)))))
 		for k in n:
 			var m: String = str(livre.modules[k])
 			sim.crediter_module(e, m)   # apprendre un module est définitif (designer 2026-08-31)

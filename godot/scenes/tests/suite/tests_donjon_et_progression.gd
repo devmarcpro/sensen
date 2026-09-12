@@ -792,39 +792,20 @@ func test_donjon_temps_a_l_action() -> void:
 
 	# Les sorts de départ viennent de la classe et sont viables (2026-08-31, point 47)
 	var prog47 := Progression.new(GameData.config("combat_rules").progression, GameData.catalogues.competences, GameData.config("astrologie"))
+	# CHANTIER 27 (2026-09-13) : les contenus de sorts sont supprimés du jeu, la fiche de classe ne porte plus de sorts
+	# de départ. La RÈGLE demeure — une classe ne cite que des modules qui existent, et le personnage naît avec ceux
+	# qu'elle cite — ; le compte « trois » était du contenu.
 	var classes_ok := true
-	var modules_ok := true
 	for cid47: String in GameData.catalogues.classes.keys():
 		var cl47: Dictionary = GameData.entree("classes", cid47)
-		if cl47.get("capacites", []).size() != 3 or cl47.get("hotbar", []).is_empty():
-			classes_ok = false
 		for cap47 in cl47.get("capacites", []):
 			for m47 in cap47.modules:
 				if GameData.entree("modules", str(m47)).is_empty():
 					classes_ok = false
-	verifier(classes_ok, "chaque classe déclare trois capacités assemblables et son loadout")
+	verifier(classes_ok, "chaque classe ne cite que des modules qui existent")
 	var perso47 := Etres.creer_personnage("creature.aventurier.name", "humain", "placeholder", {}, 1000, prog47)
-	var attendus47 := {}
-	for cap47b in GameData.entree("classes", "placeholder").capacites:
-		for m47b in cap47b.modules:
-			attendus47[str(m47b)] = true
-	for m47c in perso47.get("modules_connus", []):
-		if not attendus47.has(str(m47c)):
-			modules_ok = false
-	verifier(perso47.capacites.size() == 3, "le personnage naît avec les trois sorts de sa classe")
-	var sig_ok := true   # la signature de chaque classe est toujours dans son loadout (designer, point 48)
-	for cid48: String in GameData.catalogues.classes.keys():
-		var cl48: Dictionary = GameData.entree("classes", cid48)
-		var sig48 := str(cl48.get("signature", ""))
-		if sig48.is_empty():
-			continue
-		var trouve48 := false
-		for cap48 in cl48.get("capacites", []):
-			if sig48 in Array(cap48.modules):
-				trouve48 = true
-		if not trouve48:
-			sig_ok = false
-	verifier(sig_ok, "chaque classe garde sa signature dans ses sorts de départ")
+	var n_cl47: int = GameData.entree("classes", "placeholder").capacites.size()
+	verifier(perso47.capacites.size() == n_cl47, "le personnage naît avec les sorts de sa classe (%d, %d attendus)" % [perso47.capacites.size(), n_cl47])
 	# Stats tirées aux dés (designer, point 48) : sans tirage, la base de repli ; avec, elle s'applique
 	var cfg48: Dictionary = GameData.config("creation")
 	verifier(str(cfg48.get("stats_des", "")).contains("d"), "les stats de base sont une notation de dés (%s)" % str(cfg48.get("stats_des", "")))
@@ -832,24 +813,11 @@ func test_donjon_temps_a_l_action() -> void:
 	verifier(int(tire48.corps.stats.force) == 8 + int(GameData.entree("classes", "placeholder").bonus_stats.get("force", 0)), "le dé de Force devient la base, bonus de classe en plus")
 	verifier(not bool(GameData.config("combat_rules").modules.get("tout_au_depart", false)), "plus de kit complet de modules au départ : les livres font le reste")
 
-	# Sorts recommandés à la création (2026-08-31, point 38) : les modules existent et s'assemblent
-	var cfg38: Dictionary = GameData.config("creation")
-	var recos38: Array = cfg38.get("sorts_recommandes", [])
-	verifier(recos38.size() >= 3 and int(cfg38.get("max_sorts", 0)) == 3, "sept sorts recommandés, trois cochables au plus")
+	# Sorts recommandés à la création (2026-08-31, point 38) : partis avec les contenus (chantier 27, 2026-09-13) — ils
+	# ne citaient que des modules supprimés, et plus aucun écran ne les lisait.
+	verifier(not GameData.config("creation").has("sorts_recommandes"), "la création ne recommande plus de sorts faits de contenus disparus")
 	var s38 := Simulation.new(38)
 	s38.charger_camp()
-	var j38: Dictionary = s38.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
-	var tous38 := true
-	for r38 in recos38:
-		for m38 in r38.modules:
-			if GameData.entree("modules", str(m38)).is_empty():
-				tous38 = false
-			s38.crediter_module(j38, str(m38), 9)
-		if not s38.composer_capacite(j38, Array(r38.modules).duplicate()):
-			tous38 = false
-			var emb38: Dictionary = s38.emboitement(j38, Array(r38.modules))
-			print("    sort recommandé refusé : %s — %d cases pour %d (grille de « %s »)" % [str(r38.modules), int(emb38.demande), (emb38.cases as Array).size(), str(emb38.stat)])
-	verifier(tous38, "chaque sort recommandé s'assemble avec des modules du catalogue, et tient dans la grille de départ")
 	s38.monde.fermer()
 	var s2 := Simulation.new(22)
 	s2.charger_camp()

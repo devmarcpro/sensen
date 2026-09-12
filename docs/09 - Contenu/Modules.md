@@ -6,6 +6,9 @@ statut: décidé
 etape: 0
 ---
 
+> [!warning] Contenus supprimés du jeu — 2026-09-13 (ordre de travail, ligne 27)
+> Les tables ci-dessous décrivent un catalogue qui **n'existe plus** dans `data/modules/`. La grammaire reste ; les contenus seront réécrits sur les champs (ligne 28). 70 pièces subsistent comme banc d'essai des tests, sous `godot/scenes/tests/fixtures/modules/`.
+
 > [!success] Catalogue étendu — 2026-08-26
 > **176 composants**, aucun sort fini. L'extension vise trois choses explicitement : rendre **chaque classe jouable par ses briques** ([[Talents de classe]]), traiter l'**endurance** à parité du mana, et donner autant de place au **non-offensif** qu'aux dégâts. Historique du défaut : [[Décision — Transcription du catalogue de modules]].
 

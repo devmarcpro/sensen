@@ -85,6 +85,11 @@ func _ready() -> void:
 		if args[i] == "--seul" and i + 1 < args.size():
 			_filtre = str(args[i + 1])
 	verifier(GameData.erreurs.is_empty(), "données valides (Décision — Pipeline de contenu)")
+	# LE JEU N'A PLUS DE CONTENUS DE SORTS (chantier 27) : la grammaire se prouve sur un banc d'essai que la suite
+	# possède, pas sur un catalogue qui va être réécrit sur les champs (ligne 28).
+	verifier(GameData.catalogues.modules.is_empty(), "le jeu ne porte aucun contenu de sort (%d)" % GameData.catalogues.modules.size())
+	var banc := GameData.charger_banc_d_essai("modules", "res://scenes/tests/fixtures/")
+	verifier(banc.size() == 70 and GameData.erreurs.is_empty(), "le banc d'essai des sorts se charge : %d pièces, %d erreur(s)" % [banc.size(), GameData.erreurs.size()])
 	_lancer("test_porter")
 	_lancer("test_pile_sur_une_tuile")
 	_lancer("test_grille")

@@ -613,7 +613,10 @@ func test_simulation() -> void:
 	st_d.dexterite = int(st_d.dexterite) + 1
 	verifier(s.regles.sang_froid_max(st_d) > s.regles.sang_froid_max(st_j), "+1 Dextérité agrandit le sang-froid")
 	verifier(int(j.get("sang_froid_max", 0)) == s.regles.sang_froid_max(j.stats_eff), "le personnage naît avec sa barre de sang-froid")
-	var plan_sf := s.capacites.assembler(["estoc"], 10, "1d4", {}, j.competences_eff)
+	# UN NOYAU DE DEXTÉRITÉ DÉCLARÉ ICI, pas emprunté au catalogue (chantier 27) : la règle « la monnaie suit la stat
+	# du noyau » ne dépend pas d'`estoc`, qui va mourir avec les 235 autres contenus.
+	var noyau_dex := module_synthetique("noyau_dex_test", {"stat": "dexterite", "cout_sang_froid": 9})
+	var plan_sf := capacites_synthetiques([noyau_dex]).assembler(["noyau_dex_test"], 10, "1d4", {}, j.competences_eff)
 	verifier(str(plan_sf.monnaie) == "sang_froid" and int(plan_sf.ressource) > 0, "un noyau de dextérité se paie en sang-froid (%s)" % str(plan_sf.monnaie))
 	# Dépenser à vide n'est pas refusé : ça se paie en PV, comme la surchauffe du mana.
 	j["sang_froid"] = 0
@@ -1162,13 +1165,21 @@ func test_statuts() -> void:
 	var perdu: int = pvc - chef.sante
 	verifier(int(j.xp.element.get("metal", 0)) == perdu and int(j.xp.competence.get("epee", 0)) == perdu and int(j.xp.type.get("tranchant", 0)) == perdu, "XP = dégâts appliqués, trois pistes")
 	verifier(int(chef.xp.construction.get("mailles", 0)) >= 0, "l'armure du chef gagne ce qu'elle épargne")
-	# Un statut par module : Feinte annule la garde 15 ticks
+	# Un statut par module : Feinte annule la garde 15 ticks.
+	# LES TROIS MODULES SONT DÉCLARÉS ICI (chantier 27, 2026-09-12) : la règle « un noyau pose le statut que sa fiche
+	# décrit » ne dépend ni de `feinte`, ni de `point`, ni de `jet_court`, trois des 236 contenus qui vont mourir.
+	var mods_f := inscrire_modules(s, [
+		module_synthetique("forme_point_test", {"module_type": "forme", "tags": ["forme"], "geometrie": "point", "surcout_ticks": 0, "taille_base": 1, "portee_defaut": [1, 1]}),
+		module_synthetique("portee_courte_test", {"module_type": "portee", "tags": ["portee"], "portee_base": [1, 3], "surcout_ticks": 200, "ligne_de_vue": true, "origine": "cible"}),
+		module_synthetique("feinte_test", {"power_base": null, "cout_ticks": 400, "effets": ["statut"], "effet": {"statut": {"id": "garde_annulee", "duree_ticks": 1500}}, "stat": "dexterite", "cout_sang_froid": 7}),
+	])
 	chef.garde = true
-	_capacite_test(s, j, "f", ["point", "feinte"])
+	_capacite_test(s, j, "f", ["forme_point_test", "portee_courte_test", "feinte_test"])
 	j.compteur = h.ticks
 	s.pas(j.horloge)
 	verifier(s.intention(j.id, {"type": "capacite", "index": 3, "cible": chef.pos}), "Feinte")
 	verifier(Etres.bloque_statuts(chef, "garde", s.statuts_defs), "garde annulée par la Feinte")
+	retirer_modules(s, mods_f)
 
 
 # ---------------------------------------------------------------- Liaisons et déclencheurs
