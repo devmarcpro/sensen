@@ -6,7 +6,7 @@ statut: décidé
 etape: 8
 ---
 
-Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 29 notes.
+Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le fait vivre. 30 notes.
 
 **Génération**
 - **[[Génération par couches de bruit]]** — le principe fondateur : 8 couches qui définissent biomes et contenu.
@@ -23,6 +23,7 @@ Le monde continu : sa génération, sa structure, ce qui l'habite et ce qui le f
 - **[[Hauteur de terrain ±10]]** — la note la plus transversale du dossier : 21 niveaux, et tout le combat en dérive.
 - **[[Destruction du terrain]]** — ce qu'on peut casser, et les deux garde-fous.
 - **[[Carte du monde]]** — la couche stratégique et le voyage rapide.
+- **[[La métropole, la gare et la mégastructure]]** — *à décider* : une ville qui descend sans fin, faite à la main, la même dans toutes les parties. Trois des idées du 2026-09-12 n'en font qu'une.
 - **[[Biomes — schéma]]** · **[[Explosions]]**
 
 **Danger et territoire**
