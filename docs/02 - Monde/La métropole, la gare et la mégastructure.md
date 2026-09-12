@@ -10,6 +10,65 @@ Sept idées du designer, le 2026-09-12, prises dans ses notes. Cette note les ga
 
 Rien de tout cela n'est décidé. C'est une exploration, écrite avant tout code.
 
+> [!important] Précisé par le designer le 2026-09-12, dans l'heure — **le gruyère n'est pas la métropole, c'est le MONDE**
+> « Je pensais faire en sorte que le monde entier soit un gruyère avec au centre l'espèce de hub mmo avec la bourse et une ville cyberpunk. L'intérêt du gruyère/tour infini c'est que le monde ne s'étend pas en longueur et largeur mais aussi en hauteur. »
+> **Ma lecture d'avant était renversée, et il faut le dire** : j'avais rangé la mégastructure *dans* la métropole — infinie en z, bornée en xy, un lieu parmi d'autres. C'est l'inverse. **Le gruyère est la règle du monde ; la métropole en est le centre.** Tout ce qui suit sous la ligne 7 est à lire avec ce callout devant.
+> **Ce que ça change à l'arbitrage** : la question 40 (« un lieu ou le centre ? ») est tranchée pour la métropole — elle est le centre. Mais elle se déplace d'un cran et devient plus lourde : *le jeu se joue-t-il sur la couche 0, ou dedans ?*
+
+## Ce que le gruyère ne rouvre PAS, et c'est le premier point
+
+**Il ne ramène pas le voxel.** [[Décisions fondatrices]] écarte le **moteur voxel temps réel en première personne** — *« décision irrévocable, elle ne sera pas rediscutée »* — et ce n'est pas ce qu'on demande ici. Un gruyère fait de **niveaux 2D discrets empilés** garde tout ce que le pivot a acheté, ligne par ligne : pas de meshing volumétrique, pas de LOD 3D, pas de streaming en volume, lumière propagée en 2D, détection de pièces en 2D, eau en 2D + hauteur, personnages en billboards.
+
+**Il ne renverse qu'une phrase**, et elle est dans [[Grille continue]] : *« le souterrain n'existe plus comme espace continu : il devient les donjons, grilles séparées en étages discrets »*. Le gruyère garde les **étages discrets** — il les rend **continus latéralement** et les donne à **toutes** les cellules au lieu des seules cellules à donjon. *Ce n'est pas un volume, c'est N planètes empilées.*
+
+## Et le mécanisme existe déjà, avec ta propre phrase dans le code
+
+`godot/systems/grid/grille.gd`, en tête de fichier, datée du **2026-09-06, 16 h** :
+
+> « changer d'étage change juste la dimension Z du monde, ce n'est pas une dimension à part »
+
+C'est la phrase fondatrice du gruyère, et elle a **six jours**. Ce qu'elle a produit et qui tourne aujourd'hui :
+
+- **`couches`** : la grille porte `k` niveaux de `largeur × hauteur_grille` tuiles ; `poser_couches(k)` les ajoute, les tableaux par tuile s'allongent, les couches neuves naissent pleines d'air.
+- **La couche est portée par `y`** (`y + z × BANDE_Z`, `BANDE_Z = 1 << 20`), si bien que **tout ce qui parle en positions — occupants, chemins, vue, dangers — marche sans changer une ligne**. C'est le choix d'architecture qui rend le gruyère abordable, et il est déjà fait.
+- **`lien_a`** : l'escalier relie une tuile d'une couche à une tuile d'une autre. *Deux tuiles de couches différentes ne sont jamais voisines, sauf par un lien* — la règle du gruyère, écrite.
+- **`en_couche(p, z)`, `plat(p)`, `z_de(p)`, `distance_plate`** : la boîte à outils est posée.
+- **Le gouffre est déjà « infini et descendant »** ([[Mine sous une cellule]] le dit mot pour mot ; le bandeau affiche « étage 4/**999** »), et **la mine descend niveau par niveau à la Dwarf Fortress**, le puits creusé sous ses pieds.
+- **Et la demande est déjà en file** : [[Ordre de travail]] **26 quater** (designer, 2026-09-08) — *« un étage est un niveau à part entière, comme dans Dwarf Fortress et Caves of Qud »*. **Le gruyère ne change pas de cap : il finit celui du 8.**
+
+**Le seul verrou technique, et il est petit et nommable** : tout ceci est **au-dessus** du sol. `z_de` rabat toute coordonnée négative sur la couche 0 (*« une coordonnée négative tombe sur la couche 0 »*), et `couches` vaut aujourd'hui `1 + le plus haut préfab de village`. **Descendre demande deux choses** : des couches négatives (ou une origine de couche décalée, ce qui est plus sûr que des index signés), et un nombre de couches qui vienne du **monde** au lieu des bâtiments. C'est la première ligne à écrire, avant toute idée de contenu.
+
+## Ce que le gruyère rapporte — et c'est l'argument que je n'avais pas vu
+
+**« Le monde ne s'étend pas qu'en longueur et largeur » est un argument de densité, et il est juste.** Le monde fait **131 km de côté** dont 35 % de terres. C'est beaucoup de marche pour peu de rencontres, et l'aveu est déjà dans le coffre : le relief est **plat par défaut** (`échelle_relief = 0`, les reliefs en exception), la moitié de la carte est de l'océan, et le voyage rapide existe précisément parce que traverser ne vaut pas toujours le temps.
+
+Un monde **plus petit en xy et profond en z** porte autant de contenu avec **moins de vide**. Et il donne gratuitement ce que la carte plate n'a jamais eu : **un gradient de difficulté lisible sans jamais scaler sur le joueur**. [[Niveau de danger]] dit *« le danger est une propriété du lieu »* — la profondeur **est** une propriété du lieu. Descendre est plus dangereux partout, tout le temps, sans mentir et sans regarder la fiche du joueur. *C'est la meilleure chose que le gruyère fasse au jeu, et elle ne coûte rien.*
+
+## Ce que ça coûte, et ce n'est pas du code
+
+**La surface devient une couche sur N.** Les 51 plantes cultivées, les 14 bêtes d'élevage, les rotations, la météo, les saisons, les biomes, les royaumes et leurs frontières terrestres, les bateaux, les villes vivantes, les champs et les caravanes — **six mois de travail** — vivent tous sur la **couche 0**. Si le centre de gravité du jeu descend, la couche 0 devient un tutoriel avec une agriculture dedans.
+
+**Le vrai prix du gruyère est donc un prix de contenu** : que fait-on des niveaux −3 à −40 pour qu'ils ne soient pas « encore des salles » ? Le donjon a une réponse pour six étages (le thème, la palette de roche, le boss) ; il n'en a aucune pour quarante. **Et ce problème n'a pas de solution technique** — c'est exactement celui que Blame! résout par l'échelle et le silence, et Qud par les factions et les vestiges.
+
+## Les quatre nombres qui sautent
+
+1. **`corruption + étage × 8`, plafonné à 100.** Au-delà de l'**étage 12**, descendre ne change plus rien. Si la profondeur devient l'axe du jeu, c'est **le nombre le plus important du jeu**, et il est à réécrire en entier.
+2. **La fenêtre glissante est 3×3 cellules.** Elle devient 3×3×`k` : le coût de matérialisation se multiplie par le nombre de couches tenues en mémoire. La parade est celle qui existe déjà — **paresseuse** : on ne tient que la couche où l'on est, plus ce qu'une ouverture laisse voir.
+3. **Un étage de donjon coûte 79 ms à froid**, sous un budget de 100. Ce budget est **par niveau** : il tient, tant qu'on n'en génère qu'un à la fois.
+4. **La sauvegarde n'a une taille bornée que si `z` est borné.** C'est le seul endroit où « infini » coûte vraiment, et c'est le gain technique n° 1 du monde fini ([[Décision — Monde fini, continents et océan]]). Un fond très bas (−100 ?) se comporte comme un infini pour un joueur et reste borné pour la sauvegarde.
+
+## Un piège de vocabulaire, et il a déjà coûté cher une fois
+
+Dans les notes de génération, **`z` est HORIZONTAL** — `altitude(x, z)`, `f(x, z)`, héritage du moteur voxel. Dans la grille, la mine, les étages et ton message, **`z` est VERTICAL**. Deux sens du même mot dans le même coffre, et le gruyère met les deux au centre du jeu.
+
+C'est **exactement la forme du piège `endurance` → `vigueur`**, qui a corrompu neuf littéraux en une passe de renommage aveugle. À trancher **avant** d'écrire une ligne : soit les couches de bruit passent à `f(x, y)`, soit la profondeur s'appelle autrement (`niveau`, `profondeur`) — mais pas les deux `z`.
+
+## La tour : monte-t-elle, descend-elle, ou les deux ?
+
+La lecture qui rend le tout cohérent d'un coup : **le hub est la taille de guêpe**. La surface au centre du monde, la **tour au-dessus**, le **gruyère en dessous**, et la métropole à la jonction — *l'endroit où l'on change d'axe*. On y arrive par le train (horizontal), on en repart par l'ascenseur (vertical), et la bourse est au croisement parce que c'est là que tout passe.
+
+Et une tour **visible depuis n'importe où** est le repère le moins cher du jeu : une silhouette à l'horizon, la même dans toutes les parties, qui dit en permanence où est le centre. *Le joueur n'a plus jamais besoin d'ouvrir la carte pour savoir où il est.*
+
 > [!quote] Les notes, mot pour mot
 > « Métropole gigantesque à plusieurs étages avec bourse, hub style mmo avec pleins d'aventuriers où tout peut s'acheter et tout peut se vendre — en gros c'est cyberpunk — pour y accéder trouver une gare et ride très loin — un des seuls endroits hand crafted donc dans toutes les parties — le joueur — un donjon gigantesque au milieu de la map — tout le monde est un donjon/ville/ruine infini en xyz style blamz — en combat les tuiles prennent des teintes de damier »
 
