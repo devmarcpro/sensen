@@ -72,18 +72,42 @@ def sources_materiau():
                 if e.get("category"):
                     for m, md in materials.items():
                         if str(md.get("category", "")) == str(e["category"]): src.add(m)
-    for m, md in materials.items():   # ce que le monde pose
+    # ce que le monde pose. `world_gen.mode == "biome"` N'EST PAS une source (ligne 42, 2026-09-13) : c'etait une
+    # promesse que personne ne tenait — `biome_tags` est vide sur les 40 bois et aucun code ne le lit — et c'est elle
+    # qui a cache 30 bois inatteignables. Un materiau « de biome » est une source s'il figure dans une TABLE de biome.
+    for m, md in materials.items():
         wg = md.get("world_gen", {})
-        if wg and str(wg.get("mode", "")) in ("biome", "filon", "strate", "surface"): src.add(m)
+        if wg and str(wg.get("mode", "")) in ("filon", "strate", "surface"): src.add(m)
     for b in cat("biomes").values():
         src.add(str(b.get("surface_material", "")))
         src.add(str(b.get("subsurface_material", "")))
+        for _cle in ("vegetation", "rochers", "plantes", "cueillette"):
+            src.update(str(v.get("id", "")) for v in b.get(_cle, []) or [])
     for pool in conf("minerais_par_etage").get("tiers", {}).values():
         src.update(str(x) for x in pool)
     for c in creatures.values():
         for d in c.get("depouille", []): src.add(str(d))
+        for d in c.get("drops_chasse", []) or []: src.add(str(d))
+        for _pr in (c.get("elevage", {}) or {}).get("produits", []) or []:   # la laine du mouton, le lait
+            if isinstance(_pr, dict) and _pr.get("materiau"): src.add(str(_pr["materiau"]))
     return src
 src = sources_materiau()
+# 5 bis. un materiau « de biome » qu'aucune table de biome ne pose : il n'existe pas en jeu (ligne 42). Les exceptions
+# connues sont ecrites avec leur raison ; une nouvelle entree est un materiau qui vient d'etre coupe du monde.
+BIOME_SANS_TABLE = {
+    "acajou": "tropical : attend un biome tropical", "balsa": "tropical : attend un biome tropical",
+    "ebene": "tropical : attend un biome tropical", "teck": "tropical : attend un biome tropical",
+    "gaiac": "tropical : attend un biome tropical", "bambou": "tropical : attend un biome tropical",
+    "bois_calcine": "une transformation (un arbre brule), pas une essence : attend que le feu la produise",
+    "bois_flotte": "une transformation (un bois roule par l'eau), pas une essence : attend que l'eau la produise",
+}
+for m, md in sorted(materials.items()):
+    # Borne aux BOIS pour l'instant : les 57 autres materiaux « de biome » que ce test leve demandent d'abord que
+    # l'audit lise toutes les vraies sources (sous-sol, elevage, minerais par etage) — ordre de travail 42 bis.
+    if md.get("category") != "bois":
+        continue
+    if str(md.get("world_gen", {}).get("mode", "")) == "biome" and m not in src and m not in BIOME_SANS_TABLE:
+        probs["materiau de biome qu'aucune table de biome ne pose"].append(m)
 for fid, f in familles.items():
     if fid == "_doc": continue
     m = str(f.get("material", ""))
