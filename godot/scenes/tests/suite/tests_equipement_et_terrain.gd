@@ -1205,16 +1205,26 @@ func test_champ_de_danger() -> void:
 	# 1. LE GAZ. Un nuage toxique posé à côté du joueur : avant, rien ne le disait à l'IA.
 	var t_gaz: Vector2i = s._tuile_libre_autour(j.pos)
 	verifier(s.grille.danger_de(t_gaz) == 0, "la tuile est sûre avant le nuage")
-	s.zones.append({"pos": t_gaz, "type": "gaz", "gaz": "sulfure_d_hydrogene", "fin": 100000, "source": "", "params": {}})
+	# LE CHAMP, PLUS LES ZONES (champ d'air, ordre de travail 24 ter, 2026-09-12) : un nuage est une CHARGE, et le
+	# danger la GRADUE. On pose donc la charge pleine — une frange diluée ne vaudrait pas le même danger, et c'est
+	# précisément ce que le champ a apporté.
+	SimTerrain.ajouter_gaz(s, t_gaz, "sulfure_d_hydrogene", 1.0)
 	s._tiquer_danger(0)
 	var d_gaz: int = s.grille.danger_de(t_gaz)
 	verifier(d_gaz > 0, "un nuage de gaz toxique EST un danger pour l'IA (%d/100) — il ne l'était pas" % d_gaz)
 	# Un gaz qui ne fait qu'étouffer les feux vaut moins qu'un gaz qui blesse : la fiche décide, rien n'est inventé.
 	var t_inerte: Vector2i = s._tuile_libre_autour(t_gaz)
-	s.zones.append({"pos": t_inerte, "type": "gaz", "gaz": "azote", "fin": 100000, "source": "", "params": {}})
+	SimTerrain.ajouter_gaz(s, t_inerte, "azote", 1.0)
 	s.danger_prochain_pas = 0
 	s._tiquer_danger(10)
 	verifier(s.grille.danger_de(t_inerte) > 0 and s.grille.danger_de(t_inerte) < d_gaz, "un gaz qui asphyxie sans blesser vaut moins (%d contre %d)" % [s.grille.danger_de(t_inerte), d_gaz])
+	# ET LA CHARGE GRADUE LE DANGER — ce que les zones ne pouvaient pas faire : une frange vaut moins qu'un cœur,
+	# donc l'IA peut traverser l'une en refusant l'autre. C'est l'apport du champ, et il se mesure ici.
+	var t_frange: Vector2i = s._tuile_libre_autour(t_inerte)
+	SimTerrain.ajouter_gaz(s, t_frange, "sulfure_d_hydrogene", 0.25)
+	s.danger_prochain_pas = 0
+	s._tiquer_danger(20)
+	verifier(s.grille.danger_de(t_frange) > 0 and s.grille.danger_de(t_frange) < d_gaz, "une frange diluée du même gaz vaut moins que son cœur (%d contre %d)" % [s.grille.danger_de(t_frange), d_gaz])
 	# 2. LA CHALEUR. Une tuile brûlante SANS flamme est un danger.
 	var t_chaud: Vector2i = s._tuile_libre_autour(t_inerte)
 	s.chauffer(t_chaud, 350.0)
@@ -1224,6 +1234,7 @@ func test_champ_de_danger() -> void:
 	verifier(s.grille.danger_de(t_chaud) > 0, "une tuile à 350 °C sans flamme EST un danger (%d/100)" % s.grille.danger_de(t_chaud))
 	# 3. LE CHAMP SE RETIRE quand la source s'en va — et il ne retire QUE les siennes.
 	s.zones.clear()
+	s.nuages.clear()   # le nuage vit dans le CHAMP depuis le 24 ter : le dissiper, c'est vider le champ
 	s.carte_chaleur[s.grille.idx(t_chaud)] = 15.0
 	s.chaleur_active.erase(s.grille.idx(t_chaud))
 	s.danger_prochain_pas = 0

@@ -211,7 +211,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     (chaleur, gaz, lave) et la structure à remplacer est là, binaire, lue par le noyau C++ et par deux endroits de
     l'IA. **C'est le seul chantier de ce palier codable aujourd'hui.** L'ordre du designer le place après le bruit : je
     le signale sans le réordonner — c'est sa décision.
-24 ter. **LE CHAMP D'AIR** — *remonté ici le 2026-09-08 sur une question du designer : « tu rajoutes le gaz dans le
+~~24 ter. **LE CHAMP D'AIR**~~ — **FAIT le 2026-09-12** : un nuage est une charge par tuile qui diffuse, monte ou coule selon sa masse (`1 + pente × Δhauteur × (1 − masse)` — une formule, quinze comportements), se dilue à ciel ouvert et s'accumule dans un espace clos ; les effets se déclenchent par concentration, le danger se gradue, le champ se voit bouger. **L'air est le complément du gaz** (`air = 1 − charge`), et il alimente le souffle qui existait déjà pour la noyade : la suffocation a cessé d'être une étiquette. `test_champ_air` mesure la montée et la descente. *Ce qui reste : une pièce hermétique sans gaz n'étouffe personne — la consommation d'air est un second mécanisme.* — *remonté ici le 2026-09-08 sur une question du designer : « tu rajoutes le gaz dans le
     sol mais est-ce que tu fais pareil pour l'air ? ».* **Non, et l'asymétrie est exacte.**
     **Sous terre le gaz est une vraie chose** : des poches placées par le bruit, percées à la pioche, un volume, une
     inondation par les galeries ouvertes, l'inflammation, l'explosion.

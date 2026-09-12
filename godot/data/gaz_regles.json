@@ -1,5 +1,5 @@
 {
-  "_doc": "Les regles des gaz (Gaz dans le sol) — ce qui n est PAS le catalogue. Le catalogue des gaz est dans data/gaz/, un fichier par gaz, comme les materiaux et les creatures (« Decision — Pipeline de contenu » : un fichier par entree pour une collection, fichier unique pour une configuration). Separe le 2026-09-08 sur une remarque du designer. poches : ou les poches se forment et lesquelles, par profondeur. liberation : ce qu une breche laisse sortir. periode_ticks : la cadence du pas.",
+  "_doc": "Les regles des gaz (Gaz dans le sol) — ce qui n est PAS le catalogue. Le catalogue des gaz est dans data/gaz/, un fichier par gaz, comme les materiaux et les creatures (« Decision — Pipeline de contenu » : un fichier par entree pour une collection, fichier unique pour une configuration). Separe le 2026-09-08 sur une remarque du designer. poches : ou les poches se forment et lesquelles, par profondeur. liberation : ce qu une breche laisse sortir. champ : comment un nuage VIT une fois sorti (ordre de travail 24 ter, 2026-09-12). periode_ticks : la cadence du pas.",
   "poches": {
     "etage_min": 4,
     "mine_etage_min": 2,
@@ -55,5 +55,28 @@
     "volume": 14,
     "duree_ticks": 40000
   },
-  "periode_ticks": 1000
+  "periode_ticks": 1000,
+  "champ": {
+    "_doc": "LE CHAMP D AIR (ordre de travail 24 ter, 2026-09-12). Un nuage n est plus une liste de tuiles figees mais une CHARGE PAR TUILE, de 0 a 1, qui diffuse, monte ou coule selon la masse du gaz, se dilue a l air libre et s accumule dans un espace clos. L AIR RESPIRABLE EST SON COMPLEMENT — `air = 1 - charge totale` — et rien ne le stocke : la suffocation cesse d etre une etiquette et devient une absence.",
+    "diffusion": 0.34,
+    "_doc_diffusion": "La part de sa charge qu une tuile repartit sur ses voisines a chaque pas. Le meme role que `thermique.diffusion` pour la chaleur, et la meme discipline : on ne balaie JAMAIS la fenetre, seulement les tuiles chargees et leur bordure.",
+    "pente_masse": 0.22,
+    "_doc_pente_masse": "CE QUI FAIT MONTER OU COULER UN GAZ, et la seule ligne de tout le champ ou la masse sert. Le poids d une voisine vaut `1 + pente_masse x (hauteur_voisine - hauteur_ici) x (1 - masse)`. Pour un gaz LEGER (masse < 1) le facteur (1 - masse) est positif : les voisines PLUS HAUTES pesent plus, le nuage remonte la pente — c est le grisou au toit de la galerie. Pour un gaz LOURD il est negatif : le nuage descend et s accumule au fond — c est la mofette au fond du puits. Et a masse 1,00, l air lui-meme, le biais s annule exactement : la diffusion redevient isotrope. UNE formule, les deux comportements, et aucune table.",
+    "dilution_clos": 0.012,
+    "dilution_ouvert": 0.16,
+    "_doc_dilution": "Ce qu une tuile perd par pas, hors diffusion. A CIEL OUVERT le nuage se dissipe vite ; DANS UN ESPACE CLOS — sous terre, ou sous un toit — il ne perd presque rien, et c est ce qui le fait s accumuler. Treize fois l ecart : une galerie devient mortelle la ou un champ ne l est jamais.",
+    "fuite_legere": 0.55,
+    "_doc_fuite_legere": "A CIEL OUVERT SEULEMENT, un gaz leger s echappe EN PLUS vers le haut : la dilution est multipliee par `1 + fuite_legere x (1 - masse)`. L hydrogene (0,07) part presque aussitot, le radon (7,67) ne part jamais par le haut — il ne sort que par les cotes, et lentement. Sous terre, rien ne fuit : il n y a pas de haut.",
+    "epsilon": 0.02,
+    "_doc_epsilon": "Sous cette charge la tuile sort du champ. Sans ce plancher, un nuage laisse derriere lui une trainee de millioniemes que le pas continue de visiter pour toujours.",
+    "charge_source": 1.0,
+    "_doc_charge_source": "La charge que la breche recoit a l instant ou la poche est percee. Le VOLUME de l ancienne version n est plus un nombre de tuiles a inonder : c est cette charge-la qui se repand toute seule, et le nuage prend la forme de la galerie au lieu d un disque.",
+    "seuil_effet": 0.18,
+    "_doc_seuil_effet": "En dessous, un gaz est present mais trop dilue pour agir : on le voit, on ne le subit pas. C est ce qui donne sa BORDURE a un nuage et ce qui rend une fuite reperable avant d etre mortelle.",
+    "seuil_explosion": 0.3,
+    "_doc_seuil_explosion": "Il faut une concentration pour qu un gaz inflammable prenne. Une trace de grisou ne saute pas — et c est precisement ce qui rend la lampe dangereuse AU FOND de la galerie et pas a son entree.",
+    "air_seuil_souffle": 0.55,
+    "air_seuil_asphyxie": 0.25,
+    "_doc_air": "L air respirable est `1 - charge`. Sous `air_seuil_souffle` on s essouffle (la vigueur ne remonte plus) ; sous `air_seuil_asphyxie` on etouffe. Ces deux nombres ne decrivent pas un gaz : ils decrivent CE QU IL RESTE quand un gaz a pris la place, et ils valent donc pour les quinze."
+  }
 }

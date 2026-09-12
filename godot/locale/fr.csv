@@ -703,6 +703,7 @@ status.respiration_aquatique_potion.name,Respiration aquatique
 item.potion_respiration_aquatique.name,Potion de respiration aquatique
 journal.coule,trop chargé pour nager : tu coulerais
 journal.noyade,"{nom} manque d'air ({degats})"
+journal.asphyxie,"{nom} étouffe : l'air ne suffit plus ({degats})"
 journal.feu_dans_eau,pas de Feu sous l'eau
 ui.souffle," · souffle {n}/{max}"
 status.resistance_feu.name,Résistance au feu

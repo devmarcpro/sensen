@@ -89,6 +89,10 @@ var odeur_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
+var nuages: Dictionary = {}       # idx → {gaz → charge 0-1} : LE CHAMP D'AIR (ordre de travail 24 ter, 2026-09-12).
+                                  # Creux comme les poches : seules les tuiles chargées y sont. L'air respirable
+                                  # n'est pas un second champ, c'est son COMPLÉMENT — `SimTerrain.air_a`.
+                                  # État d'étage, comme `poches_gaz` : vidé au changement de fenêtre, jamais sauvé.
 var gaz_prochain_pas := 0
 var canicule_heure := -1
 var arrachage_heure := -1   # la dernière heure de tempête où le vent a arraché (Météo)

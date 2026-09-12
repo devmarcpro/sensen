@@ -2184,6 +2184,7 @@ journal.mort_vieillesse,{nom} has died of old age
 journal.naissance,"{village}: {nom} gives birth to a child"
 journal.niveau,{nom}: {competence} reaches level {niveau} (potential {potentiel})
 journal.noyade,"{nom} is running out of air ({degats})"
+journal.asphyxie,"{nom} is suffocating: not enough air ({degats})"
 journal.objet_fini,"this item is finished by nature: no socket, no infusion"
 journal.ordre,"{nom}: {ordre}"
 journal.parle,"{nom}: “{texte}”"

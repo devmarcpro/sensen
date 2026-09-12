@@ -391,30 +391,60 @@ static func _enflammer(sim: Simulation, t: Vector2i) -> bool:
 
 ## Une poche percée (Gaz dans le sol) : le gaz remplit par inondation `volume` tuiles d'air à partir de la brèche — les
 ## galeries ouvertes, pas la roche — en zones au sol qui se dissipent après `duree_ticks`. Rend le nombre de tuiles.
-static func _liberer_gaz(sim: Simulation, breche: Vector2i, gaz_id: String, tick: int) -> int:
-	var cfg: Dictionary = GameData.config("gaz_regles")
-	var lib: Dictionary = cfg.get("liberation", {})
-	var volume := maxi(1, int(lib.get("volume", 14)))
-	var duree := int(lib.get("duree_ticks", 400))
+static func _liberer_gaz(sim: Simulation, breche: Vector2i, gaz_id: String, _tick: int) -> int:
+	# LA BRÈCHE REÇOIT UNE CHARGE, ELLE N'INONDE PLUS (ordre de travail 24 ter, 2026-09-12). L'ancienne version
+	# déposait N tuiles de nuage d'un coup, en éventail, et c'était un disque : le gaz naissait déjà répandu et ne
+	# bougeait plus jamais. Une charge à la brèche et le champ fait le reste — le nuage prend **la forme de la
+	# galerie**, met du temps à venir jusqu'à toi, et repart par où il est venu.
 	sim.poches_gaz.erase(sim.grille.idx(breche))
-	var vus := {breche: true}
-	var file: Array[Vector2i] = [breche]
-	var tete := 0
-	var n := 0
-	while tete < file.size() and n < volume:
-		var t: Vector2i = file[tete]
-		tete += 1
-		sim.zones.append({"pos": t, "type": "gaz", "gaz": gaz_id, "fin": tick + duree, "source": "", "params": {}})
-		EventBus.emettre(&"tile_changed", [t])
-		n += 1
-		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var q: Vector2i = t + dd
-			if vus.has(q) or not sim.grille.dans(q) or sim.grille.bloque_passage(q):
-				continue
-			vus[q] = true
-			file.append(q)
-	EventBus.emettre(&"journal", [&"journal.gaz_echappe", {"gaz": "gaz." + gaz_id, "n": n}])
-	return n
+	var champ: Dictionary = GameData.config("gaz_regles").get("champ", {})
+	ajouter_gaz(sim, breche, gaz_id, float(champ.get("charge_source", 1.0)))
+	EventBus.emettre(&"journal", [&"journal.gaz_echappe", {"gaz": "gaz." + gaz_id, "n": 1}])
+	return 1
+
+
+## ---------------------------------------------------------------- le champ d'air (ordre de travail 24 ter)
+
+## LA CHARGE DE CHAQUE GAZ SUR UNE TUILE — `{gaz → 0..1}`, vide si l'air y est pur. Ne jamais écrire dedans : le
+## dictionnaire rendu est celui du champ.
+static func gaz_a(sim: Simulation, t: Vector2i) -> Dictionary:
+	return sim.nuages.get(sim.grille.idx(t), {})
+
+
+## CE QUE LES GAZ OCCUPENT EN TOUT sur une tuile, tous mélangés. Borné à 1 : on ne remplit pas une tuile deux fois.
+static func charge_gaz(sim: Simulation, t: Vector2i) -> float:
+	var total := 0.0
+	for c in (sim.nuages.get(sim.grille.idx(t), {}) as Dictionary).values():
+		total += float(c)
+	return minf(1.0, total)
+
+
+## L'AIR RESPIRABLE, ET IL N'EST PAS UN SECOND CHAMP : il est ce qui RESTE quand le gaz a pris la place. Rien ne le
+## stocke, rien ne le diffuse, rien ne peut le désynchroniser du gaz — *ce qui peut se déduire ne se balaie pas.*
+## C'est ce qui fait que la suffocation cesse d'être une étiquette (`statut: epuisement` posé par le gaz) pour
+## devenir une **absence** : un espace clos qui se remplit devient irrespirable PARCE QUE le gaz y est.
+static func air_a(sim: Simulation, t: Vector2i) -> float:
+	return 1.0 - charge_gaz(sim, t)
+
+
+## Verser du gaz sur une tuile. Le total d'une tuile ne dépasse jamais 1 — un mélange partage la place.
+static func ajouter_gaz(sim: Simulation, t: Vector2i, gaz_id: String, charge: float) -> void:
+	if charge <= 0.0 or not sim.grille.dans(t):
+		return
+	var i := sim.grille.idx(t)
+	var m: Dictionary = sim.nuages.get(i, {})
+	m[gaz_id] = minf(1.0, float(m.get(gaz_id, 0.0)) + charge)
+	sim.nuages[i] = m
+	EventBus.emettre(&"tile_changed", [t])
+
+
+## UNE TUILE EST CLOSE si rien ne s'ouvre au-dessus d'elle : sous terre, ou sous un bâtiment. C'est **la seule
+## chose** qui sépare une fuite spectaculaire d'une fuite mortelle — à ciel ouvert un nuage se dissipe, dans une
+## galerie il s'accumule. Et c'est pour ça qu'une mine se joue autrement qu'une plaine.
+static func _clos(sim: Simulation, i: int) -> bool:
+	if not sim.donjon.is_empty():
+		return true
+	return i >= 0 and i < sim.grille.niveaux_bat.size() and int(sim.grille.niveaux_bat[i]) > 0
 
 
 ## Une autre poche percée (Gaz dans le sol, 18 h 40) : la nappe fait de la brèche une source et l'automate d'eau inonde
@@ -1090,13 +1120,28 @@ static func _tiquer_danger(sim: Simulation, tick: int) -> void:
 		return
 	sim.danger_prochain_pas = tick + maxi(1, int(cfg.get("periode_ticks", 10)))
 	var voulu := {}
-	# a. Les nuages.
+	# a. Les nuages — LE CHAMP, et il se GRADUE (ordre de travail 24 ter, 2026-09-12). L'ancienne version lisait
+	#    `sim.zones` : une tuile de nuage valait son danger plein, qu'elle en soit le cœur ou la frange. La charge
+	#    dit maintenant combien il y en a, et l'IA peut traverser une bordure en refusant un cœur — ce qui est la
+	#    différence entre fuir une mine et y entrer.
+	var seuil_g := float(GameData.config("gaz_regles").get("champ", {}).get("seuil_effet", 0.18))
+	for idx_g in sim.nuages.keys():
+		var i_g := int(idx_g)
+		var pire := 0
+		for gaz_g: String in (sim.nuages[i_g] as Dictionary).keys():
+			var ch := float((sim.nuages[i_g] as Dictionary)[gaz_g])
+			if ch < seuil_g:
+				continue
+			var plein := _danger_du_gaz(cfg, gaz_g)
+			pire = maxi(pire, clampi(roundi(float(plein) * minf(1.0, ch)), 1, 100))
+		if pire > 0:
+			voulu[i_g] = maxi(int(voulu.get(i_g, 0)), pire)
+	# Les autres zones (glyphes, portails…) gardent le danger plein : elles ne se diluent pas.
 	for z in sim.zones:
-		if not sim.grille.dans(z.pos):
+		if not sim.grille.dans(z.pos) or str(z.get("type", "")) == "gaz":
 			continue
 		var i_z := sim.grille.idx(z.pos)
-		var v := int(cfg.get("gaz_degats", 100)) if str(z.get("type", "")) != "gaz" else _danger_du_gaz(cfg, str(z.get("gaz", "")))
-		voulu[i_z] = maxi(int(voulu.get(i_z, 0)), v)
+		voulu[i_z] = maxi(int(voulu.get(i_z, 0)), int(cfg.get("gaz_degats", 100)))
 	# b. La chaleur, au-delà du seuil où elle blesse.
 	var seuil := float(cfg.get("chaleur_seuil", 70.0))
 	var plein := maxf(seuil + 1.0, float(cfg.get("chaleur_plein", 400.0)))
@@ -1322,62 +1367,171 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 ## Le pas du gaz (Gaz dans le sol), à la cadence de `gaz.periode_ticks` : chaque zone de gaz fait sa nature à son
 ## occupant (dégâts, statut) ; un gaz inflammable qu'une flamme touche — une lumière en main, un feu au sol, de la lave
 ## voisine — explose avec la formule des Explosions, et tout le nuage de ce gaz part d'un coup.
+## LE PAS DU CHAMP D'AIR (ordre de travail 24 ter, 2026-09-12). Il remplace entièrement la liste de zones figées :
+## un nuage diffuse, monte ou coule selon sa masse, se dilue à l'air libre et s'accumule dans un espace clos.
+## Le patron est celui de la chaleur, et c'est voulu : **on ne balaie jamais la fenêtre**, on visite les tuiles
+## chargées et leur bordure, dans un ordre de clés FIXE — un champ diffusé ne peut pas dépendre du hasard.
 static func _tiquer_gaz(sim: Simulation, tick: int) -> void:
 	if tick < sim.gaz_prochain_pas:
 		return
 	var cfg: Dictionary = GameData.config("gaz_regles")
 	sim.gaz_prochain_pas = tick + int(cfg.get("periode_ticks", 10))
-	var defs: Dictionary = GameData.catalogues.gaz   # le CATALOGUE, un fichier par gaz depuis le 2026-09-08
-	for z in sim.zones.duplicate():
-		if str(z.get("type", "")) != "gaz":
+	if sim.nuages.is_empty():
+		return   # l'air est pur : le pas ne coûte rien
+	var champ: Dictionary = cfg.get("champ", {})
+	var defs: Dictionary = GameData.catalogues.gaz
+	var diff := float(champ.get("diffusion", 0.34))
+	var pente := float(champ.get("pente_masse", 0.22))
+	var dil_clos := float(champ.get("dilution_clos", 0.012))
+	var dil_ouvert := float(champ.get("dilution_ouvert", 0.16))
+	var fuite := float(champ.get("fuite_legere", 0.55))
+	var eps := float(champ.get("epsilon", 0.02))
+	# 1. LES TUILES À VISITER : les chargées et leur bordure. La bordure est ce qui permet au nuage de GRANDIR ;
+	#    sans elle il diffuserait à l'intérieur de lui-même et ne bougerait jamais d'une tuile.
+	var a_traiter := {}
+	for idx in sim.nuages.keys():
+		var i := int(idx)
+		a_traiter[i] = true
+		var tv := sim.grille.pos_de(i)
+		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			if sim.grille.dans(tv + dd) and not sim.grille.bloque_passage(tv + dd):
+				a_traiter[sim.grille.idx(tv + dd)] = true
+	var cles: Array = a_traiter.keys()
+	cles.sort()
+	var apres := {}
+	for idx2 in cles:
+		var i2 := int(idx2)
+		var t2 := sim.grille.pos_de(i2)
+		var m: Dictionary = sim.nuages.get(i2, {})
+		if m.is_empty():
 			continue
-		var d: Dictionary = defs.get(str(z.gaz), {})
-		if d.is_empty():
-			continue
-		var t: Vector2i = z.pos
+		var h_ici := int(sim.grille.hauteurs[i2]) if i2 < sim.grille.hauteurs.size() else 0
+		var clos := _clos(sim, i2)
+		for gaz_id: String in m.keys():
+			var charge := float(m[gaz_id])
+			if charge <= 0.0:
+				continue
+			var masse := float((defs.get(gaz_id, {}) as Dictionary).get("masse", 1.0))
+			# 2. LA MASSE BIAISE LA RÉPARTITION PAR LA HAUTEUR — la seule ligne où elle sert, et elle donne les
+			#    quinze comportements. Léger : il pèse vers le haut et remonte la pente (le grisou au toit d'une
+			#    galerie). Lourd : il descend et s'accumule au fond (la mofette au fond d'un puits). À 1,00, l'air
+			#    lui-même, le biais s'annule et la diffusion redevient isotrope.
+			var poids: Array = []
+			var somme := 0.0
+			for dd2 in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var q: Vector2i = t2 + dd2
+				if not sim.grille.dans(q) or sim.grille.bloque_passage(q):
+					continue
+				var iq := sim.grille.idx(q)
+				var h_q := int(sim.grille.hauteurs[iq]) if iq < sim.grille.hauteurs.size() else 0
+				var p := maxf(0.0, 1.0 + pente * float(h_q - h_ici) * (1.0 - masse))
+				poids.append([iq, p])
+				somme += p
+			var reste := charge
+			if somme > 0.0001:
+				var part := charge * diff
+				reste -= part
+				for pr in poids:
+					var vers := int(pr[0])
+					var mv: Dictionary = apres.get(vers, {})
+					mv[gaz_id] = float(mv.get(gaz_id, 0.0)) + part * (float(pr[1]) / somme)
+					apres[vers] = mv
+			# 3. LA DILUTION. À ciel ouvert le nuage se dissipe, et un gaz léger s'échappe EN PLUS vers le haut ;
+			#    dans un espace clos il ne perd presque rien, donc il s'accumule. Sous terre il n'y a pas de haut :
+			#    rien ne fuit par là, et c'est tout le drame d'une mine.
+			var perte := dil_clos if clos else dil_ouvert * (1.0 + fuite * maxf(0.0, 1.0 - masse))
+			reste *= maxf(0.0, 1.0 - perte)
+			if reste > eps:
+				var mr: Dictionary = apres.get(i2, {})
+				mr[gaz_id] = float(mr.get(gaz_id, 0.0)) + reste
+				apres[i2] = mr
+	# Le plancher : une tuile sous `epsilon` sort du champ. Sans lui, un nuage laisse une traînée de millionièmes
+	# que le pas continuerait de visiter pour toujours.
+	var propre := {}
+	for idx3 in apres.keys():
+		var mm: Dictionary = apres[idx3]
+		var garde := {}
+		for g3: String in mm.keys():
+			if float(mm[g3]) > eps:
+				garde[g3] = minf(1.0, float(mm[g3]))
+		if not garde.is_empty():
+			propre[int(idx3)] = garde
+	# Ce qui a changé de charge se redessine — y compris les tuiles que le nuage vient de QUITTER.
+	for i4 in sim.nuages.keys():
+		if not propre.has(int(i4)):
+			EventBus.emettre(&"tile_changed", [sim.grille.pos_de(int(i4))])
+	for i5 in propre.keys():
+		EventBus.emettre(&"tile_changed", [sim.grille.pos_de(int(i5))])
+	sim.nuages = propre
+	_gaz_effets(sim, champ, defs)
+
+
+## CE QU'UN NUAGE FAIT À CELUI QUI S'Y TIENT — et il ne le fait plus par PRÉSENCE mais par CONCENTRATION.
+## En dessous de `seuil_effet` le gaz se voit et ne se subit pas : un nuage a enfin une **bordure**, et une fuite se
+## repère avant de tuer. Rien d'autre n'a changé : les dégâts, le statut, le soin, le mana et l'extinction des feux
+## sont ceux des fiches, et le code ne connaît toujours aucun nom de gaz.
+static func _gaz_effets(sim: Simulation, champ: Dictionary, defs: Dictionary) -> void:
+	var seuil := float(champ.get("seuil_effet", 0.18))
+	var seuil_ex := float(champ.get("seuil_explosion", 0.30))
+	for idx in sim.nuages.keys():
+		var i := int(idx)
+		var t: Vector2i = sim.grille.pos_de(i)
+		var m: Dictionary = sim.nuages[i]
 		var occ := sim.grille.occupant(t)
 		var x: Dictionary = sim.entites.get(occ, {}) if not occ.is_empty() else {}
-		if bool(d.get("eteint_feux", false)) and sim.feux.has(sim.grille.idx(t)):   # le nuage étouffe le feu sous lui
-			sim.feux.erase(sim.grille.idx(t))
-			sim.grille.oter_danger(sim.grille.idx(t))
-			sim.lumiere_sale = true
-			EventBus.emettre(&"tile_changed", [t])
-		if not x.is_empty() and bool(x.get("vivant", false)):
-			if not str(d.get("degats", "")).is_empty():
-				var deg := sim.des.jet(str(d.degats))
-				sim._appliquer_degats(x, deg, "", {"type": "gaz", "element": d.get("element", {})})
-				EventBus.emettre(&"journal", [&"journal.gaz_blesse", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "degats": deg}])
-			if not str(d.get("statut", "")).is_empty():
-				sim.appliquer_statut(x, str(d.statut), int(d.get("statut_ticks", 30)), "")
-			if not str(d.get("soigne", "")).is_empty() and int(x.sante) < int(x.sante_max):
-				var soin := mini(sim.des.jet(str(d.soigne)), int(x.sante_max) - int(x.sante))
-				x.sante = int(x.sante) + soin
-				EventBus.emettre(&"journal", [&"journal.gaz_soigne", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "n": soin}])
-			if not str(d.get("mana", "")).is_empty() and x.has("mana_max") and int(x.get("mana", 0)) < int(x.mana_max):
-				var plus := mini(sim.des.jet(str(d.mana)), int(x.mana_max) - int(x.get("mana", 0)))
-				x.mana = int(x.get("mana", 0)) + plus
-				EventBus.emettre(&"journal", [&"journal.gaz_mana", {"nom": x.name_key, "gaz": "gaz." + str(z.gaz), "n": plus}])
-		if not bool(d.get("inflammable", false)):
-			continue
-		var flamme := sim.feux.has(sim.grille.idx(t)) or (not x.is_empty() and sim.lumiere_de(x) >= int(d.get("lumiere_min", 1)))
-		if not flamme:
-			for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				var q: Vector2i = t + dd
-				if sim.grille.dans(q) and "lave" in sim.grille.contenu_de(q).get("tags", []):
-					flamme = true
-		if not flamme:
-			continue
-		var restantes: Array[Dictionary] = []   # tout le nuage de ce gaz part d'un coup
-		for z2 in sim.zones:
-			if str(z2.get("type", "")) == "gaz" and str(z2.gaz) == str(z.gaz):
-				EventBus.emettre(&"tile_changed", [z2.pos])
-			else:
-				restantes.append(z2)
-		sim.zones = restantes
-		var ex: Dictionary = d.get("explosion", {})
-		EventBus.emettre(&"journal", [&"journal.gaz_explose", {"gaz": "gaz." + str(z.gaz)}])
-		sim._exploser({"pos": t, "rayon": int(ex.get("rayon", 2)), "puissance": float(ex.get("puissance", 25)), "degats": str(ex.get("degats", "4d6")), "source": ""})
-		return   # les zones ont changé : le reste attend le pas suivant
+		for gaz_id: String in m.keys():
+			var charge := float(m[gaz_id])
+			if charge < seuil:
+				continue
+			var d: Dictionary = defs.get(gaz_id, {})
+			if d.is_empty():
+				continue
+			if bool(d.get("eteint_feux", false)) and sim.feux.has(i):   # le nuage étouffe le feu sous lui
+				sim.feux.erase(i)
+				sim.grille.oter_danger(i)
+				sim.lumiere_sale = true
+				EventBus.emettre(&"tile_changed", [t])
+			if not x.is_empty() and bool(x.get("vivant", false)):
+				if not str(d.get("degats", "")).is_empty():
+					var deg := sim.des.jet(str(d.degats))
+					sim._appliquer_degats(x, deg, "", {"type": "gaz", "element": d.get("element", {})})
+					EventBus.emettre(&"journal", [&"journal.gaz_blesse", {"nom": x.name_key, "gaz": "gaz." + gaz_id, "degats": deg}])
+				if not str(d.get("statut", "")).is_empty():
+					sim.appliquer_statut(x, str(d.statut), int(d.get("statut_ticks", 30)), "")
+				if not str(d.get("soigne", "")).is_empty() and int(x.sante) < int(x.sante_max):
+					var soin := mini(sim.des.jet(str(d.soigne)), int(x.sante_max) - int(x.sante))
+					x.sante = int(x.sante) + soin
+					EventBus.emettre(&"journal", [&"journal.gaz_soigne", {"nom": x.name_key, "gaz": "gaz." + gaz_id, "n": soin}])
+				if not str(d.get("mana", "")).is_empty() and x.has("mana_max") and int(x.get("mana", 0)) < int(x.mana_max):
+					var plus := mini(sim.des.jet(str(d.mana)), int(x.mana_max) - int(x.get("mana", 0)))
+					x.mana = int(x.get("mana", 0)) + plus
+					EventBus.emettre(&"journal", [&"journal.gaz_mana", {"nom": x.name_key, "gaz": "gaz." + gaz_id, "n": plus}])
+			# UNE TRACE NE SAUTE PAS. Il faut une concentration pour qu'un gaz inflammable prenne — et c'est ce qui
+			# rend la lampe dangereuse au FOND d'une galerie, là où le grisou s'est accumulé, et pas à son entrée.
+			if not bool(d.get("inflammable", false)) or charge < seuil_ex:
+				continue
+			var flamme := sim.feux.has(i) or (not x.is_empty() and sim.lumiere_de(x) >= int(d.get("lumiere_min", 1)))
+			if not flamme:
+				for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					if sim.grille.dans(t + dd) and "lave" in sim.grille.contenu_de(t + dd).get("tags", []):
+						flamme = true
+			if not flamme:
+				continue
+			# Tout ce gaz-là part d'un coup, partout où il est : un nuage inflammable est UNE chose, pas des tuiles.
+			for i6 in sim.nuages.keys():
+				var m6: Dictionary = sim.nuages[int(i6)]
+				if m6.erase(gaz_id):
+					EventBus.emettre(&"tile_changed", [sim.grille.pos_de(int(i6))])
+			var vides: Array = []
+			for i7 in sim.nuages.keys():
+				if (sim.nuages[int(i7)] as Dictionary).is_empty():
+					vides.append(int(i7))
+			for i8 in vides:
+				sim.nuages.erase(int(i8))
+			var ex: Dictionary = d.get("explosion", {})
+			EventBus.emettre(&"journal", [&"journal.gaz_explose", {"gaz": "gaz." + gaz_id}])
+			sim._exploser({"pos": t, "rayon": int(ex.get("rayon", 2)), "puissance": float(ex.get("puissance", 25)), "degats": str(ex.get("degats", "4d6")), "source": ""})
+			return   # le champ a changé : le reste attend le pas suivant
 
 
 ## Le pas du feu : brûle qui s'y tient, gagne ses voisines, s'éteint sous la pluie, consume la tuile au bout de sa durée.
@@ -1865,8 +2019,19 @@ static func souffle_max(sim: Simulation, e: Dictionary) -> int:
 
 
 ## Le souffle (Eau et liquides) : décroît dans l'eau, se remplit dehors ; à zéro, 1d6 par période.
+##
+## **L'AIR VICIÉ EST UNE DEUXIÈME RAISON DE LE PERDRE** (champ d'air, ordre de travail 24 ter, 2026-09-12), et pas
+## une deuxième mécanique. La note demandait que « la suffocation cesse d'être une étiquette » — elle l'était
+## (`statut: epuisement`, posé par la fiche du gaz). Elle est maintenant **une absence** : une tuile dont le gaz a
+## pris la place ne remplit plus le souffle, et sous le seuil d'asphyxie elle le vide.
+## Tout le reste est hérité sans une ligne : le maximum tiré de l'endurance, l'exemption des volants, le tag
+## `respiration_aquatique`, les dégâts périodiques à zéro. *Un seul compteur, deux façons de mourir* — et le journal
+## dit laquelle : on se **noie** dans l'eau, on **étouffe** dans un nuage.
 static func _tiquer_souffle(sim: Simulation, nom: String, tick: int) -> void:
 	var ng: Dictionary = sim.regles.r.nage
+	var champ: Dictionary = GameData.config("gaz_regles").get("champ", {})
+	var s_souffle := float(champ.get("air_seuil_souffle", 0.55))
+	var s_asphyxie := float(champ.get("air_seuil_asphyxie", 0.25))
 	for e in sim.vivants():
 		if e.horloge != nom or Etres.est_volant(e):
 			continue
@@ -1878,14 +2043,21 @@ static func _tiquer_souffle(sim: Simulation, nom: String, tick: int) -> void:
 		if ecoules <= 0:
 			continue
 		e.souffle_tick = tick
-		if dans_l_eau(sim, e.pos) and not ("respiration_aquatique" in e.get("tags_acquis", [])):
+		var noye: bool = dans_l_eau(sim, e.pos) and not ("respiration_aquatique" in e.get("tags_acquis", []))
+		# L'air de la tuile est ce que le gaz n'a pas pris. Rien ne le stocke — il se déduit du champ.
+		var air := air_a(sim, e.pos) if not sim.nuages.is_empty() else 1.0
+		var etouffe := air < s_asphyxie
+		if noye or etouffe:
 			e.souffle = maxi(0, int(e.souffle) - ecoules)
 			if int(e.souffle) <= 0:
 				var periodes := tick / int(ng.periode_ticks) - (tick - ecoules) / int(ng.periode_ticks)
 				for k in periodes:
 					var deg := sim.des.jet(str(ng.degats_des))
-					EventBus.emettre(&"journal", [&"journal.noyade", {"nom": e.name_key, "degats": deg}])
-					sim._appliquer_degats(e, deg, "", {"type": "noyade", "element": {}})
+					var cle := &"journal.noyade" if noye else &"journal.asphyxie"
+					EventBus.emettre(&"journal", [cle, {"nom": e.name_key, "degats": deg}])
+					sim._appliquer_degats(e, deg, "", {"type": "noyade" if noye else "asphyxie", "element": {}})
+		elif air < s_souffle:
+			pass   # l'air est vicié sans être mortel : on ne se remplit plus, et c'est ce qu'on sent dans une cave
 		else:
 			e.souffle = mini(maxi_s, int(e.souffle) + ecoules)
 

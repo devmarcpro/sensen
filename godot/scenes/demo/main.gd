@@ -2279,9 +2279,34 @@ func _dessiner_superpositions() -> void:
 				continue
 		var cz := _ecran(z.pos, g.h(z.pos))
 		var cz_col: Color = COULEUR_ZONE.get(str(z.type), Color(0.7, 0.7, 0.7, 0.35))
-		if str(z.type) == "gaz":   # un nuage à la teinte de son gaz (Gaz dans le sol)
+		if str(z.type) == "gaz":   # plus aucune zone n'est de ce type depuis le champ d'air (24 ter) — garde d'une vieille sauvegarde
 			cz_col = _couleur_liste(GameData.catalogues.gaz.get(str(z.get("gaz", "")), {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
 		_losange(z.pos, cz_col)
+	# LE CHAMP D'AIR SE DESSINE, ET SON OPACITÉ SUIT LA CONCENTRATION (ordre de travail 24 ter, 2026-09-12).
+	# C'est la première fois qu'un champ de ce jeu se VOIT bouger : un nuage s'épaissit, rampe le long d'une galerie,
+	# remonte une pente s'il est léger, coule au fond s'il est lourd. L'ancienne version dessinait des zones à
+	# opacité fixe — un nuage naissait donc à sa densité finale et ne changeait plus jamais d'aspect.
+	# Le gaz le plus CHARGÉ de la tuile donne la teinte : un mélange se lit par ce qui domine, pas par une moyenne
+	# qui ne serait la couleur de rien.
+	for i_n in sim.nuages.keys():
+		var t_n: Vector2i = g.pos_de(int(i_n))
+		if not g.dans(t_n):
+			continue
+		var m_n: Dictionary = sim.nuages[int(i_n)]
+		var pire_g := ""
+		var pire_c := 0.0
+		var total_c := 0.0
+		for gz: String in m_n.keys():
+			var c_n := float(m_n[gz])
+			total_c += c_n
+			if c_n > pire_c:
+				pire_c = c_n
+				pire_g = gz
+		if pire_g.is_empty():
+			continue
+		var col_n: Color = _couleur_liste(GameData.catalogues.gaz.get(pire_g, {}).get("teinte", [0.7, 0.7, 0.7, 0.35]))
+		col_n.a = clampf(col_n.a * minf(1.0, total_c) * 2.0, 0.05, 0.85)
+		_losange(t_n, col_n)
 	for gl in sim.glyphes:   # les glyphes : un losange cerclé à la teinte de leur élément
 		var cg := _ecran(gl.pos, g.h(gl.pos))
 		var teinte := sim.wuxing.teinte(sim.wuxing.dominante(gl.elements)) if not gl.elements.is_empty() else Color(0.8, 0.8, 0.9)

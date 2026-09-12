@@ -2103,6 +2103,108 @@ func test_arenes_autonomes() -> void:
 ## Les gaz dans le sol (designer 2026-09-07) : des poches semées dans le plein d'une mine à partir de son étage minimal ;
 ## la pioche qui en perce une libère un nuage de zones qui remplit les galeries ouvertes ; le gaz toxique blesse qui s'y
 ## tient au pas d'automate ; le grisou explose au contact d'une flamme — ici la lave voisine — et tout le nuage part.
+## LE CHAMP D'AIR (ordre de travail 24 ter, designer 2026-09-08 : « tu rajoutes le gaz dans le sol mais est-ce que
+## tu fais pareil pour l'air ? »). Ce test prouve la seule chose qui ne se voit nulle part ailleurs : **que la masse
+## fait monter ou couler un gaz**. C'est LA promesse de la ligne ; sans cette preuve, elle n'est qu'un commentaire.
+##
+## On bâtit une pente à la main — trois hauteurs croissantes — on y pose de l'hydrogène (masse 0,07) et du radon
+## (7,67), on fait un pas, et l'on regarde où chacun est parti. Aucune moyenne, aucun « à peu près » : le léger doit
+## être EN HAUT et le lourd EN BAS.
+func test_champ_air() -> void:
+	var champ: Dictionary = GameData.config("gaz_regles").get("champ", {})
+	verifier(not champ.is_empty() and champ.has("pente_masse"), "le champ d'air a ses réglages en données")
+	var s := Simulation.new(77)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# UNE PENTE, TROIS TUILES LIBRES ALIGNÉES ET DE HAUTEURS CROISSANTES. On l'écrit dans la grille : le test ne
+	# cherche pas un relief qui lui conviendrait, il en fabrique un — un test qui dépend du terrain tiré est un test
+	# qui rougit un jour sur deux.
+	var bas := Vector2i(-1, -1)
+	for r in range(1, 8):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				var q: Vector2i = j.pos + Vector2i(dx, dy)
+				if bas != Vector2i(-1, -1):
+					continue
+				var q1: Vector2i = q + Vector2i(1, 0)
+				var q2: Vector2i = q + Vector2i(2, 0)
+				if not (s.grille.dans(q) and s.grille.dans(q1) and s.grille.dans(q2)):
+					continue
+				if s.grille.bloque_passage(q) or s.grille.bloque_passage(q1) or s.grille.bloque_passage(q2):
+					continue
+				bas = q
+	verifier(bas != Vector2i(-1, -1), "trois tuiles libres alignées pour la pente")
+	if bas == Vector2i(-1, -1):
+		return
+	var milieu: Vector2i = bas + Vector2i(1, 0)
+	var haut: Vector2i = bas + Vector2i(2, 0)
+	s.grille.hauteurs[s.grille.idx(bas)] = 4
+	s.grille.hauteurs[s.grille.idx(milieu)] = 8
+	s.grille.hauteurs[s.grille.idx(haut)] = 12
+	# LE LÉGER ET LE LOURD, PARTIS DU MÊME POINT. Tout le reste est identique : même tuile, même charge, même pas.
+	s.nuages.clear()
+	SimTerrain.ajouter_gaz(s, milieu, "hydrogene", 1.0)
+	SimTerrain.ajouter_gaz(s, milieu, "radon", 1.0)
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	var h_haut := float((s.nuages.get(s.grille.idx(haut), {}) as Dictionary).get("hydrogene", 0.0))
+	var h_bas := float((s.nuages.get(s.grille.idx(bas), {}) as Dictionary).get("hydrogene", 0.0))
+	var r_haut := float((s.nuages.get(s.grille.idx(haut), {}) as Dictionary).get("radon", 0.0))
+	var r_bas := float((s.nuages.get(s.grille.idx(bas), {}) as Dictionary).get("radon", 0.0))
+	verifier(h_haut > h_bas, "l'hydrogène (masse 0,07) REMONTE la pente : %.4f en haut contre %.4f en bas — le grisou au toit de la galerie" % [h_haut, h_bas])
+	verifier(r_bas > r_haut, "le radon (7,67) la DESCEND : %.4f en bas contre %.4f en haut — la mofette au fond du puits" % [r_bas, r_haut])
+	# ET LA MASSE 1,00 NE BIAISE RIEN. L'azote est à 0,97, l'éthane à 1,04 : les deux plus proches de l'air, et leur
+	# écart haut/bas doit rester minuscule devant celui de l'hydrogène. C'est ce qui prouve que le biais vient de la
+	# MASSE et non d'un artefact de la boucle de voisinage.
+	s.nuages.clear()
+	SimTerrain.ajouter_gaz(s, milieu, "azote", 1.0)
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	var a_haut := float((s.nuages.get(s.grille.idx(haut), {}) as Dictionary).get("azote", 0.0))
+	var a_bas := float((s.nuages.get(s.grille.idx(bas), {}) as Dictionary).get("azote", 0.0))
+	verifier(absf(a_haut - a_bas) < absf(h_haut - h_bas), "l'azote (0,97, presque l'air) ne penche presque pas : écart %.4f contre %.4f pour l'hydrogène" % [absf(a_haut - a_bas), absf(h_haut - h_bas)])
+	# À CIEL OUVERT ÇA SE DISSIPE, DANS UN ESPACE CLOS ÇA S'ACCUMULE — et c'est la différence entre une fuite
+	# spectaculaire et une fuite mortelle. On compare le MÊME gaz, au même endroit, la seule chose qui change étant
+	# ce qu'il y a au-dessus.
+	s.nuages.clear()
+	SimTerrain.ajouter_gaz(s, milieu, "dioxyde_de_carbone", 1.0)
+	s.gaz_prochain_pas = 0
+	s._tiquer_gaz(0)
+	var reste_ouvert := 0.0
+	for m_o in s.nuages.values():
+		reste_ouvert += float((m_o as Dictionary).get("dioxyde_de_carbone", 0.0))
+	var s2 := Simulation.new(77)
+	s2.charger_camp()
+	s2.donjon = {"etage": 3, "id": 1}   # sous terre : rien ne s'ouvre au-dessus
+	s2.grille.hauteurs[s2.grille.idx(bas)] = 4
+	s2.grille.hauteurs[s2.grille.idx(milieu)] = 8
+	s2.grille.hauteurs[s2.grille.idx(haut)] = 12
+	s2.nuages.clear()
+	SimTerrain.ajouter_gaz(s2, milieu, "dioxyde_de_carbone", 1.0)
+	s2.gaz_prochain_pas = 0
+	s2._tiquer_gaz(0)
+	var reste_clos := 0.0
+	for m_c in s2.nuages.values():
+		reste_clos += float((m_c as Dictionary).get("dioxyde_de_carbone", 0.0))
+	verifier(reste_clos > reste_ouvert, "un espace clos garde son gaz (%.3f) là où le ciel ouvert le dissipe (%.3f)" % [reste_clos, reste_ouvert])
+	# LA SUFFOCATION N'EST PLUS UNE ÉTIQUETTE, C'EST UNE ABSENCE. L'air est le complément du gaz, et il alimente le
+	# souffle QUI EXISTAIT DÉJÀ pour la noyade : un seul compteur, deux façons de mourir. Le journal dit laquelle.
+	verifier(is_equal_approx(SimTerrain.air_a(s2, milieu), 1.0 - SimTerrain.charge_gaz(s2, milieu)), "l'air d'une tuile est ce que le gaz n'a pas pris")
+	var seuil_a := float(champ.get("air_seuil_asphyxie", 0.25))
+	var j2: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s2.grille.liberer(j2.pos)
+	j2.pos = milieu
+	s2.grille.placer(j2.id, milieu)
+	s2.nuages.clear()
+	SimTerrain.ajouter_gaz(s2, milieu, "dioxyde_de_carbone", 1.0)   # la tuile est pleine de gaz : plus d'air du tout
+	verifier(SimTerrain.air_a(s2, milieu) < seuil_a, "une tuile saturée n'a plus d'air respirable (%.2f sous %.2f)" % [SimTerrain.air_a(s2, milieu), seuil_a])
+	j2["souffle"] = SimTerrain.souffle_max(s2, j2)
+	j2["souffle_tick"] = 0
+	var souffle0 := int(j2.souffle)
+	SimTerrain._tiquer_souffle(s2, str(j2.horloge), 60)
+	verifier(int(j2.souffle) < souffle0, "et le souffle s'y vide comme sous l'eau : %d → %d — la même jauge, deux morts" % [souffle0, int(j2.souffle)])
+
+
 func test_gaz_dans_le_sol() -> void:
 	var cfg: Dictionary = GameData.config("gaz_regles")
 	var gaz_cat: Dictionary = GameData.catalogues.gaz   # les FICHES des gaz (data/gaz/) — `cfg` ne porte que les règles
@@ -2160,11 +2262,15 @@ func test_gaz_dans_le_sol() -> void:
 	s.poches_gaz[s.grille.idx(pleine)] = "sulfure_d_hydrogene"
 	j.vigueur = int(j.vigueur_max)
 	verifier(s._creuser(j, pleine, 0), "la pioche perce la poche")
-	var nuage: Array = s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz")
+	# LE CHAMP, PLUS LES ZONES (ordre de travail 24 ter, 2026-09-12). La brèche ne reçoit qu'UNE tuile chargée —
+	# la charge se répand ensuite toute seule, et le nuage prend la forme de la galerie au lieu d'un disque de
+	# quatorze tuiles posé d'un coup. L'attente s'inverse donc, et c'est le sens même du changement.
+	var nuage: Array = s.nuages.keys()
 	var meme_gaz := true
-	for z in nuage:
-		if str(z.gaz) != "sulfure_d_hydrogene":
-			meme_gaz = false
+	for i_n in nuage:
+		for gz: String in (s.nuages[int(i_n)] as Dictionary).keys():
+			if gz != "sulfure_d_hydrogene":
+				meme_gaz = false
 	# Neuf gaz réels (« rajoute plein de gaz », « uniquement des gaz qui existent dans le monde réel ») : chacun fait au moins une chose, ses statuts existent, les bandes ne nomment que lui.
 	var incomplets: Array = []
 	for gid in gaz_cat.keys():
@@ -2179,7 +2285,9 @@ func test_gaz_dans_le_sol() -> void:
 			if not gaz_cat.has(str(gid)):
 				inconnus.append(str(gid))
 	verifier(gaz_cat.size() >= 15 and incomplets.is_empty() and inconnus.is_empty(), "%d gaz, chacun agit et ses statuts existent ; les bandes ne nomment que des gaz connus (%s %s)" % [gaz_cat.size(), str(incomplets), str(inconnus)])
-	verifier(nuage.size() >= 1 and nuage.size() <= int(cfg.liberation.volume) and meme_gaz and not s.poches_gaz.has(s.grille.idx(pleine)), "le gaz s'échappe : %d tuiles de nuage (au plus %d), la poche est vidée" % [nuage.size(), int(cfg.liberation.volume)])
+	verifier(nuage.size() == 1 and meme_gaz and not s.poches_gaz.has(s.grille.idx(pleine)), "le gaz s'échappe par la brèche et par elle seule : %d tuile(s) chargée(s), la poche est vidée" % nuage.size())
+	verifier(is_equal_approx(SimTerrain.charge_gaz(s, pleine), float(cfg.champ.charge_source)), "la brèche porte la charge de la source (%.2f)" % SimTerrain.charge_gaz(s, pleine))
+	verifier(is_equal_approx(SimTerrain.air_a(s, pleine), 1.0 - SimTerrain.charge_gaz(s, pleine)), "et l'air respirable est son complément, jamais un second champ")
 	# Le joueur dans le nuage : le pas d'automate le blesse.
 	s.grille.liberer(j.pos)
 	j.pos = pleine
@@ -2238,29 +2346,37 @@ func test_gaz_dans_le_sol() -> void:
 	s.poches_gaz[s.grille.idx(pleine2)] = "methane"
 	j.vigueur = int(j.vigueur_max)
 	verifier(s._creuser(j, pleine2, 0), "la pioche perce la poche de grisou")
-	var grisou: Array = s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz")
-	verifier(grisou.size() >= 1, "le grisou se répand (%d tuiles)" % grisou.size())
+	# LE CHAMP, ET SON SEUIL (ordre de travail 24 ter, 2026-09-12). La brèche porte la charge pleine, donc bien
+	# au-dessus de `seuil_explosion` : le grisou y saute. Sa FRANGE, diluée, ne sauterait pas — et c'est
+	# exactement ce qui rend la lampe dangereuse AU FOND d'une galerie et pas à son entrée.
+	var grisou: Array = s.nuages.keys()
+	verifier(grisou.size() >= 1 and SimTerrain.charge_gaz(s, pleine2) >= float(cfg.champ.seuil_explosion), "le grisou sort concentré : %d tuile(s), charge %.2f (seuil d'explosion %.2f)" % [grisou.size(), SimTerrain.charge_gaz(s, pleine2), float(cfg.champ.seuil_explosion)])
 	# Une lumière en main est une flamme : si le joueur en porte une, le premier pas d'automate suffit ; sinon la
 	# lave voisine s'en charge. Les deux chemins de l'allumage sont ainsi couverts selon le kit de départ.
 	var lum := s.lumiere_de(j)
 	s.gaz_prochain_pas = 0
 	s._tiquer_gaz(0)
-	var reste := s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz").size()
+	var reste := s.nuages.size()
 	if lum >= int(gaz_cat.methane.get("lumiere_min", 1)):
 		verifier(reste == 0, "la lumière en main (%d) allume le grisou dès le premier pas : tout le nuage part" % lum)
 		SimLieux._sortir(s, j)
 		return
 	verifier(reste == grisou.size(), "sans flamme, le grisou reste là (%d tuiles)" % reste)
-	var lave := Vector2i(-1, -1)   # une tuile d'air voisine d'une tuile du nuage, où poser la lave
-	for z in grisou:
+	var lave := Vector2i(-1, -1)   # une tuile d'air voisine d'une tuile chargée, où poser la lave
+	for i_g in s.nuages.keys():
+		var t_g: Vector2i = s.grille.pos_de(int(i_g))
 		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var q: Vector2i = z.pos + dd
+			var q: Vector2i = t_g + dd
 			if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and lave == Vector2i(-1, -1):
 				lave = q
 	verifier(lave != Vector2i(-1, -1), "une tuile libre touche le nuage")
 	s.grille.poser_contenu(lave, "lave")
 	s.gaz_prochain_pas = 0
 	s._tiquer_gaz(0)
-	verifier(s.zones.filter(func(z: Dictionary) -> bool: return str(z.type) == "gaz").is_empty(), "la lave allume le grisou : explosion, et tout le nuage part")
+	# TOUT LE MÉTHANE DU CHAMP PART, pas seulement la tuile allumée : un nuage inflammable est UNE chose.
+	var methane_restant := 0.0
+	for m_r in s.nuages.values():
+		methane_restant += float((m_r as Dictionary).get("methane", 0.0))
+	verifier(is_zero_approx(methane_restant), "la lave allume le grisou : explosion, et tout le méthane du champ part (%.4f restant)" % methane_restant)
 	SimLieux._sortir(s, j)
 
