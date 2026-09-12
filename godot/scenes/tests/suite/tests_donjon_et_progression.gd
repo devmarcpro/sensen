@@ -651,6 +651,24 @@ func test_donjon() -> void:
 	verifier(n_pref > 0 and pref_vus.size() >= 2, "des salles préfabriquées sont posées : %d sur 8 étages, %d plans différents" % [n_pref, pref_vus.size()])
 	verifier(par_la_porte == n_pref, "chaque préfab est rejoint PAR UNE PORTE (%d / %d)" % [par_la_porte, n_pref])
 	verifier(murs_dessines, "le plan est estampé tel qu'il est dessiné : son sol et ses reliefs")
+	# LES special_tags SONT LUS : le dernier étage met son boss dans une salle faite pour lui, l'arrivée se fait dans
+	# une salle d'entrée quand l'étage en a une.
+	var boss_arene := 0
+	var entree_dessinee := 0
+	var entrees_possibles := 0
+	for g_b in [7, 42, 73, 300, 924]:
+		var e_b: Dictionary = gen.generer_etage(g_b, 1, 3, 10, true)
+		for pc_b in e_b.pieces:
+			if pc_b.get("boss_room", false) and "boss_room_eligible" in pc_b.get("tags", []):
+				boss_arene += 1
+		for i_b in e_b.pieces.size():
+			if "entree_eligible" in e_b.pieces[i_b].get("tags", []):
+				entrees_possibles += 1
+				if i_b == 0:
+					entree_dessinee += 1
+				break
+	verifier(boss_arene == 5, "le boss attend dans une salle dessinée pour lui sur les 5 derniers étages (%d)" % boss_arene)
+	verifier(entree_dessinee == entrees_possibles, "l'arrivée se fait dans la salle d'entrée quand l'étage en a une (%d / %d)" % [entree_dessinee, entrees_possibles])
 	var theme_nu: Dictionary = GameData.entree("dungeon_themes", "ruine").duplicate(true)
 	theme_nu.erase("prefabs")
 	var e_nu: Dictionary = Donjon.new(GameData.catalogues["dungeon_rooms"], GameData.catalogues["dungeon_connectors"], theme_nu).generer_etage(42, 1, 1, 18, false)

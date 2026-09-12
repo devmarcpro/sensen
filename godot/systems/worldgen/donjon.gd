@@ -86,6 +86,10 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	var t_e := Time.get_ticks_usec()
 	# 1. Les salles : petites, moyennes, grandes, posées au hasard sans chevauchement.
 	var essais := 0
+	if dernier:   # le dernier étage essaie d'abord une salle faite pour le boss (special_tags, ordre de travail 41)
+		for k_b in ESSAIS_SALLE:
+			if _essayer_prefab(e, "boss_room_eligible"):
+				break
 	while _nb_salles(e) < nb_salles and essais < nb_salles * ESSAIS_SALLE:
 		essais += 1
 		if _essayer_prefab(e):
@@ -98,6 +102,17 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 		if not _libre(e, r):
 			continue
 		_placer_rectangle(e, r)
+	# L'arène posée en premier ne doit pas devenir l'arrivée : elle passe en queue (on n'entre pas chez le boss).
+	if dernier and e.pieces.size() > 1 and "boss_room_eligible" in e.pieces[0].get("tags", []):
+		e.pieces.append(e.pieces.pop_front())
+	# L'arrivée se fait de préférence dans une salle dessinée pour ça (`entree_eligible`) : elle passe en tête,
+	# AVANT les couloirs, pour que tout ce qui lit « la première pièce » (connexité, escalier montant) la voie.
+	for i_en in range(1, e.pieces.size()):
+		if "entree_eligible" in e.pieces[i_en].get("tags", []):
+			var p_en: Dictionary = e.pieces[i_en]
+			e.pieces.remove_at(i_en)
+			e.pieces.insert(0, p_en)
+			break
 	t_e = _top("etage.salles", t_e)
 	# 2. Les couloirs : chaque salle vers ses plus proches voisines (réseau maillé), puis des
 	#    boucles et des impasses — plusieurs chemins mènent partout.
@@ -146,7 +161,7 @@ func generer_etage(graine: int, id_donjon: int, etage: int, nb_salles: int, dern
 	var p0: Dictionary = e.pieces[0]
 	e.entree = _centre_libre(e, p0)
 	e.sol[e.entree.y * taille + e.entree.x] = true
-	var loin := _piece_la_plus_loin(e, e.entree)
+	var loin := _piece_la_plus_loin(e, e.entree, "boss_room_eligible" if dernier else "")
 	if dernier:
 		e.boss = _centre_libre(e, e.pieces[loin])
 		e.pieces[loin]["boss_room"] = true
@@ -238,22 +253,29 @@ func _poser_lave(e: Dictionary, etage: int) -> void:
 ## `tailles` admises (les catégories du préfab), `themes` (les `floor_theme` qu'il accepte ; par défaut son propre id).
 ## Rend vrai si un préfab a été posé. Sans bloc `prefabs`, ne tire RIEN : l'étage d'un thème qui n'en veut pas reste
 ## exactement celui d'avant, dé pour dé.
-func _essayer_prefab(e: Dictionary) -> bool:
+## `tag` : ne tirer que parmi les préfabs qui portent ce `special_tags` — sans dé de chance, sans plafond ni filtre de
+## taille (l'arène du boss est immense) : c'est le dernier étage qui la demande.
+func _essayer_prefab(e: Dictionary, tag: String = "") -> bool:
 	var cfg: Dictionary = theme.get("prefabs", {})
 	if cfg.is_empty() or salles.is_empty():
 		return false
-	var n_poses := 0
-	for p in e.pieces:
-		if p.has("prefab"):
-			n_poses += 1
-	if n_poses >= int(cfg.get("max", 1)) or rng.randf() >= float(cfg.get("chance", 0.0)):
-		return false
+	if tag.is_empty():
+		var n_poses := 0
+		for p in e.pieces:
+			if p.has("prefab"):
+				n_poses += 1
+		if n_poses >= int(cfg.get("max", 1)) or rng.randf() >= float(cfg.get("chance", 0.0)):
+			return false
 	var admis: Array = cfg.get("themes", [str(theme.get("id", ""))])
 	var tailles: Array = cfg.get("tailles", ["petite", "moyenne", "grande"])
 	var ids: Array = []
 	for id in salles.keys():
 		var sd: Dictionary = salles[id]
-		if str(sd.get("kind", "")) != "salle" or not (str(sd.get("size_category", "")) in tailles):
+		if str(sd.get("kind", "")) != "salle":
+			continue
+		if tag.is_empty() and not (str(sd.get("size_category", "")) in tailles):
+			continue
+		if not tag.is_empty() and not (tag in sd.get("special_tags", [])):
 			continue
 		for t in sd.get("floor_theme", []):
 			if str(t) in admis:
@@ -640,7 +662,8 @@ func _tranchee(e: Dictionary, de: Vector2i, vers: Vector2i) -> void:
 			e.sol[p.y * e.largeur + p.x] = true
 
 
-func _piece_la_plus_loin(e: Dictionary, depart: Vector2i) -> int:
+## `tag` : si une pièce (hors la première) porte ce `special_tags`, on ne choisit que parmi elles.
+func _piece_la_plus_loin(e: Dictionary, depart: Vector2i, tag: String = "") -> int:
 	# Distance de marche (BFS) : la salle la plus lointaine reçoit l'escalier ou le boss.
 	# Les mêmes tableaux compacts que `_bfs` : la distance en int32, la file en index (2026-09-07).
 	var n: int = e.largeur * e.hauteur
@@ -679,7 +702,14 @@ func _piece_la_plus_loin(e: Dictionary, depart: Vector2i) -> int:
 			file.append(ci - larg)
 	var meilleur := 0
 	var dmax := -1
+	var marquees := false
+	if not tag.is_empty():
+		for i_t in range(1, e.pieces.size()):
+			if tag in e.pieces[i_t].get("tags", []):
+				marquees = true
 	for i in range(1, e.pieces.size()):
+		if marquees and not (tag in e.pieces[i].get("tags", [])):
+			continue
 		var c := _centre_libre(e, e.pieces[i])
 		var d: int = int(dist[c.y * larg + c.x])
 		if d > dmax:
@@ -768,6 +798,8 @@ func _poser_coffres(e: Dictionary) -> void:
 		var r: Rect2i = p.rect
 		var n := int(floorf(float(r.size.x * r.size.y) / float(lr.tuiles_par_coffre)))
 		if p.get("boss_room", false):
+			n += 1
+		if "treasure_eligible" in p.get("tags", []):   # une salle dessinée pour un trésor en garde un de plus (ordre de travail 41)
 			n += 1
 		for k in n:
 			var pos := Vector2i(r.position.x + rng.randi_range(1, r.size.x - 2), r.position.y + rng.randi_range(1, r.size.y - 2))
