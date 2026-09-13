@@ -237,7 +237,7 @@ static func _conditions_evenement(sim: Simulation, id: String, roy: Dictionary, 
 	if c.has("voisin"):
 		var trouve := false
 		for autre in roy.get("diplomacy", {}).keys():
-			if str(roy.diplomacy[autre]) in c.voisin and not (str(autre) in etat.guerres):
+			if relation_entre(sim, id, str(autre)) in c.voisin and not (str(autre) in etat.guerres):   # la relation VIVANTE (29 bis)
 				trouve = true
 		if not trouve:
 			return false
@@ -277,7 +277,7 @@ static func _appliquer_evenement(sim: Simulation, id: String, roy: Dictionary, e
 		if str(ef.guerre) == "declare":
 			var cibles: Array = []
 			for autre in roy.get("diplomacy", {}).keys():
-				if str(roy.diplomacy[autre]) in ev.conditions.get("voisin", ["hostile"]) and not (str(autre) in etat.guerres):
+				if relation_entre(sim, id, str(autre)) in ev.conditions.get("voisin", ["hostile"]) and not (str(autre) in etat.guerres):
 					cibles.append(str(autre))
 			if cibles.is_empty():
 				return
@@ -301,6 +301,49 @@ static func _appliquer_evenement(sim: Simulation, id: String, roy: Dictionary, e
 
 
 ## Deux royaumes sont-ils en guerre ?
+## LA RELATION VIVANTE ENTRE DEUX ROYAUMES (29 bis, ce qui restait — 2026-09-13). La relation de la génération, plus
+## les GRIEFS : chaque fait encore frais commis par un sujet de l'un sur les terres de l'autre, pesé par les valeurs de
+## la victime. Rien ne se stocke : on relit la mémoire des faits, qui oublie d'elle-même.
+static func relation_entre(sim: Simulation, id_a: String, id_b: String) -> String:
+	var roy_a := royaume_par_id(sim, id_a)
+	var roy_b := royaume_par_id(sim, id_b)
+	if roy_a.is_empty() or roy_b.is_empty():
+		return str(roy_a.get("diplomacy", {}).get(id_b, "tension"))
+	var dip: Dictionary = GameData.config("combat_rules").royaume.pays.get("diplomatie", {})
+	var nom_rel := str(roy_a.get("diplomacy", {}).get(id_b, "tension"))
+	var score := float(dip.get("scores_relation", {}).get(nom_rel, 0.0)) + griefs(sim, roy_a, roy_b) + griefs(sim, roy_b, roy_a)
+	return "hostile" if score < float(dip.get("seuil_hostile", -0.3)) else ("tension" if score < float(dip.get("seuil_tension", 0.0)) else ("cordial" if score < float(dip.get("seuil_cordial", 0.4)) else "allie"))
+
+
+## Ce que les sujets de `auteurs` ont fait sur les terres de `victime`, pesé par les valeurs de la victime : négatif,
+## elle s'en offusque ; positif, elle applaudit.
+static func griefs(sim: Simulation, auteurs: Dictionary, victime: Dictionary) -> float:
+	if sim.monde == null or sim.monde.faits.is_empty():
+		return 0.0
+	var dip: Dictionary = GameData.config("combat_rules").royaume.pays.get("diplomatie", {})
+	var valeurs: Dictionary = dip.get("valeurs_par_gouvernance", {}).get(str(victime.get("government_type", "")), {})
+	if valeurs.is_empty():
+		return 0.0
+	var cfg_r: Dictionary = GameData.config("rumeur")
+	var duree := maxf(1.0, float(cfg_r.get("duree_memoire", 24000000)))
+	var echelle := float(dip.get("griefs_echelle", 0.25))
+	var total := 0.0
+	for f in sim.monde.faits:
+		var auteur: Dictionary = sim.entites.get(str(f.get("auteur", "")), {})
+		var sujet := str(auteur.get("royaume", ""))
+		if sujet.is_empty() or not (sujet == str(auteurs.id) or sujet == str(auteurs.get("nom", ""))):
+			continue
+		if str(sim.monde.surface.royaume_de(f.cellule).get("id", "")) != str(victime.id):
+			continue
+		var age := float(sim.horloge_monde.ticks - int(f.get("tick", 0)))
+		var frais := clampf(1.0 - age / duree, 0.0, 1.0)
+		if frais <= 0.0:
+			continue
+		for tag in f.get("tags", []):
+			total += float(valeurs.get(str(tag), 0.0)) * float(f.get("gravite", 0.5)) * echelle * frais
+	return total
+
+
 static func en_guerre(sim: Simulation, a: String, b: String) -> bool:
 	if a.is_empty() or b.is_empty() or a == b:
 		return false
@@ -858,6 +901,7 @@ static func _appliquer_pertes(sim: Simulation, perte: float) -> int:
 			sim.grille.contenu[idx] = 0
 			sim.grille.marquer(pos)
 			sim.grille.stations_fixes.erase(idx)
+			SimTerrain.support_reexaminer(sim, pos)   # ce qu'un raid abat ne porte plus rien (2026-09-13)
 			detruites += 1
 			EventBus.emettre(&"tile_changed", [pos])
 	return detruites

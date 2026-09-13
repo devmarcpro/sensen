@@ -337,6 +337,61 @@ func test_saisonniers() -> void:
 	s.monde.fermer()
 
 
+## LES ROYAUMES PORTENT DES VALEURS (29 bis, ce qui restait — 2026-09-13) : on se hait POUR quelque chose, et ce que
+## font les sujets de l'un sur les terres de l'autre change leur relation.
+func test_valeurs_des_royaumes() -> void:
+	verifier(Surface.accord_valeurs("theocratie", "theocratie") > 0.99, "une gouvernance s'accorde avec elle-même")
+	verifier(Surface.accord_valeurs("dictature_militaire", "anarchie") < 0.0, "une dictature militaire et une anarchie ne pensent pas la même chose (%.2f)" % Surface.accord_valeurs("dictature_militaire", "anarchie"))
+	var s := Simulation.new(4249)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var c0: Vector2i = s.monde.cellule_camp
+	var roy_a: Dictionary = {}
+	var roy_b: Dictionary = {}
+	var cell_b := Vector2i.ZERO
+	for r in 60:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var ry: Dictionary = s.monde.surface.royaume_de(c0 + Vector2i(dx, dy))
+				if ry.is_empty():
+					continue
+				if roy_a.is_empty():
+					roy_a = ry
+				elif str(ry.id) != str(roy_a.id) and roy_b.is_empty():
+					roy_b = ry
+					cell_b = c0 + Vector2i(dx, dy)
+		if not roy_b.is_empty():
+			break
+	verifier(not roy_a.is_empty() and not roy_b.is_empty(), "deux royaumes voisins pour l'essai")
+	if roy_b.is_empty():
+		s.monde.fermer()
+		return
+	var avant := SimRoyaumes.relation_entre(s, str(roy_a.id), str(roy_b.id))
+	verifier(avant == str(roy_a.diplomacy.get(str(roy_b.id), "tension")) or not roy_a.diplomacy.has(str(roy_b.id)), "sans fait, la relation vivante est celle de la génération (%s)" % avant)
+	# Un sujet de A commet des meurtres et des conquêtes sur les terres de B : tout ce que B réprouve.
+	var sujet := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	sujet["royaume"] = str(roy_a.id)
+	var valeurs_b: Dictionary = GameData.config("combat_rules").royaume.pays.diplomatie.valeurs_par_gouvernance.get(str(roy_b.government_type), {})
+	# LE SENS DÉPEND DE LA RELATION DE DÉPART : déjà hostiles, on commet ce que B APPLAUDIT et la relation doit
+	# remonter ; sinon ce qu'il RÉPROUVE, et elle doit tourner à l'hostilité. Dans les deux cas elle doit CHANGER.
+	var applaudir := avant == "hostile"
+	var choisi := ""
+	for tag in valeurs_b.keys():
+		if choisi.is_empty() or (float(valeurs_b[tag]) > float(valeurs_b[choisi]) if applaudir else float(valeurs_b[tag]) < float(valeurs_b[choisi])):
+			choisi = str(tag)
+	for k in 30:
+		s.monde.faits.append({"auteur": str(sujet.id), "acte": "essai", "tags": [choisi], "cellule": cell_b, "tick": s.horloge_monde.ticks, "gravite": 1.0, "temoin": "x"})
+	var griefs := SimRoyaumes.griefs(s, roy_a, roy_b)
+	verifier((griefs > 0.0) if applaudir else (griefs < 0.0), "ce que B %s (%s), commis chez lui par un sujet de A, pèse sur la relation (%.2f)" % ["applaudit" if applaudir else "réprouve", choisi, griefs])
+	var apres := SimRoyaumes.relation_entre(s, str(roy_a.id), str(roy_b.id))
+	verifier(apres != avant and ((apres != "hostile") if applaudir else (apres == "hostile")), "et trente fois, la relation vivante change : %s → %s" % [avant, apres])
+	s.horloge_monde.ticks += int(GameData.config("rumeur").duree_memoire) + 1
+	verifier(is_equal_approx(SimRoyaumes.griefs(s, roy_a, roy_b), 0.0), "les faits oubliés, les griefs s'éteignent d'eux-mêmes — rien ne se stockait")
+	s.monde.fermer()
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)

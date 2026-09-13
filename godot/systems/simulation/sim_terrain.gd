@@ -775,17 +775,37 @@ static func _tiquer_sonore(sim: Simulation, tick: int) -> void:
 			sim.carte_sonore[i0] = v0
 			sim.sonore_actif[i0] = true
 		var t0 := sim.grille.pos_de(i0)
+		var voisins: Array = []   # [index, coût d'entrée]
 		for d in Grille.DIRS:
 			var q: Vector2i = t0 + d
 			if not sim.grille.dans(q):
 				continue
-			var iq := sim.grille.idx(q)
 			var cout := pas
 			if sim.grille.contenu_de(q).get("bloque_passage", false):
 				var mid := str(sim.grille.materiau_de(q))
 				var ab := float(mats.get(mid, {}).get("stats", {}).get("absorption", 50.0))
 				cout += ab / div
-			var vq := v0 - cout
+			voisins.append([sim.grille.idx(q), cout])
+		# LE SON TRAVERSE LES ÉTAGES (2026-09-13 ; la ligne 26 le laissait : « un combat à l'étage ne s'entend pas
+		# d'en bas »). Deux passages : l'ESCALIER, qui ne coûte qu'un pas, et le PLANCHER, qui étouffe de
+		# `plancher_cout` — mais seulement là où un bâtiment couvre la colonne : dehors, au-dessus du sol, il n'y a pas
+		# d'étage à entendre.
+		if sim.grille.couches > 1:
+			var n0 := sim.grille.largeur * sim.grille.hauteur_grille
+			@warning_ignore("integer_division")
+			var z0 := i0 / n0
+			var ig := i0 % n0
+			var niveaux := int(sim.grille.niveaux_bat[ig]) if ig < sim.grille.niveaux_bat.size() else 0
+			for dz: int in [-1, 1]:
+				var z1 := z0 + dz
+				if z1 < 0 or z1 >= sim.grille.couches or maxi(z0, z1) > niveaux:
+					continue
+				voisins.append([ig + z1 * n0, pas + float(cfg.get("plancher_cout", 12.0))])
+			if i0 < sim.grille.lien_a.size() and sim.grille.lien_a[i0] >= 0:
+				voisins.append([int(sim.grille.lien_a[i0]), pas])
+		for vz in voisins:
+			var iq := int(vz[0])
+			var vq := v0 - float(vz[1])
 			if vq < seuil or vq <= float(meilleur.get(iq, 0.0)):
 				continue
 			meilleur[iq] = vq
@@ -1580,9 +1600,12 @@ static func _consumer(sim: Simulation, t: Vector2i) -> void:
 	sim.feux.erase(idx)
 	sim.grille.oter_danger(idx)
 	if sim.grille.contenu[idx] != 0 and not ("contenant" in sim.grille.contenu_de(t).get("tags", [])):
+		var portait := bool(sim.grille.contenu_de(t).get("bloque_passage", false))
 		_memoriser_terrain(sim, t)
 		sim.grille.contenu[idx] = 0
 		sim.grille.marquer(t)
+		if portait:
+			support_reexaminer(sim, t)   # UN MUR QUI BRÛLE NE PORTE PLUS (2026-09-13) : le feu démolissait sans que le champ le sache
 	if sim.grille.meubles.has(idx):
 		sim.grille.retirer_meuble(idx)
 		sim.grille.marquer(t)

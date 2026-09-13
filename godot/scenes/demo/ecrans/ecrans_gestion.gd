@@ -134,7 +134,7 @@ static func _lois_txt(ec: Ecrans, roy: Dictionary) -> String:
 			villages.append(str(nom) + (" (conquis)" if not str(sim.monde.villages[nom].get("conquis_par", "")).is_empty() else ""))
 	var diplo: Array[String] = []
 	for autre in roy.get("diplomacy", {}).keys():
-		diplo.append("%s : %s" % [str(autre), ec.tr("relation." + str(roy.diplomacy[autre]))])
+		diplo.append("%s : %s" % [str(autre), ec.tr("relation." + SimRoyaumes.relation_entre(sim, str(roy.id), str(autre)))])
 	l.append(ec.tr("ui.royaume.fiche").format({"race": ec.tr("race.%s.name" % str(roy.get("race", "humain"))), "culture": str(roy.get("culture", "")), "capitale": "(%d,%d)" % [roy.capital_poi.x, roy.capital_poi.y], "dirigeant": dirigeant,
 		"villages": ", ".join(villages) if not villages.is_empty() else "—", "diplomatie": " · ".join(diplo) if not diplo.is_empty() else "—", "base_rate": int(round(float(roy.taxes.base_rate) * 100.0))}))
 	for loi in roy.laws:

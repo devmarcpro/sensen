@@ -302,6 +302,9 @@ func _lier_royaumes(a: Dictionary, b: Dictionary) -> void:
 	if _territoires_voisins(a.territory_cells, b.territory_cells):   # deux frontières qui se touchent se disputent
 		score += float(dip.get("voisins", -0.15))
 	score += float(dip.get("par_cran_de_taille", -0.08)) * float(absi(int(rang.get(a.taille, 0)) - int(rang.get(b.taille, 0))))
+	# ILS SE HAÏSSENT POUR QUELQUE CHOSE (29 bis, 2026-09-13) : des valeurs proches rapprochent, des valeurs opposées
+	# éloignent — une théocratie et une dictature militaire ne pensent pas la même chose du sang versé.
+	score += float(dip.get("valeurs_poids", 0.0)) * accord_valeurs(str(a.government_type), str(b.government_type))
 	var r := RandomNumberGenerator.new()
 	r.seed = hash([graine, str(a.id), str(b.id)] if str(a.id) < str(b.id) else [graine, str(b.id), str(a.id)])
 	var al := float(dip.get("alea", 0.3))
@@ -309,6 +312,31 @@ func _lier_royaumes(a: Dictionary, b: Dictionary) -> void:
 	var rel := "hostile" if score < float(dip.get("seuil_hostile", -0.3)) else ("tension" if score < float(dip.get("seuil_tension", 0.0)) else ("cordial" if score < float(dip.get("seuil_cordial", 0.4)) else "allie"))
 	a.diplomacy[str(b.id)] = rel
 	b.diplomacy[str(a.id)] = rel
+
+
+## L'accord de deux gouvernances sur les actes, de −1 (tout l'inverse) à 1 (les mêmes valeurs) : le cosinus de leurs
+## vecteurs de valeurs. Deux gouvernances sans valeurs écrites ne s'accordent ni ne s'opposent.
+static func accord_valeurs(ga: String, gb: String) -> float:
+	var vg: Dictionary = GameData.config("combat_rules").royaume.pays.get("diplomatie", {}).get("valeurs_par_gouvernance", {})
+	var va: Dictionary = vg.get(ga, {})
+	var vb: Dictionary = vg.get(gb, {})
+	if va.is_empty() or vb.is_empty():
+		return 0.0
+	var tags := {}
+	for k in va.keys():
+		tags[k] = true
+	for k in vb.keys():
+		tags[k] = true
+	var produit := 0.0
+	var na := 0.0
+	var nb := 0.0
+	for k in tags.keys():
+		var x := float(va.get(k, 0.0))
+		var y := float(vb.get(k, 0.0))
+		produit += x * y
+		na += x * x
+		nb += y * y
+	return produit / maxf(0.0001, sqrt(na) * sqrt(nb))
 
 
 ## Deux territoires se touchent-ils ? Une cellule de l'un a une cellule de l'autre pour voisine orthogonale.

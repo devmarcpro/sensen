@@ -1055,6 +1055,40 @@ func test_support() -> void:
 ## LA TROISIÈME DIMENSION (designer 2026-09-09 : « fais le nécessaire alors »). Le modèle disait « et se propage à ce
 ## qu'elle portait » ; le champ ne connaissait qu'une couche. Ce test bâtit une maison de deux étages à la main, abat
 ## les murs du rez-de-chaussée, et regarde tomber ce qu'ils portaient.
+## LE SON TRAVERSE LES ÉTAGES (2026-09-13) : un coup à l'étage s'entend en bas à travers le plancher, plus fort par
+## l'escalier ; hors bâtiment, la couche du dessus n'entend rien.
+func test_sonore_etages() -> void:
+	var cfg: Dictionary = GameData.config("sonore")
+	var s := Simulation.new(611)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	g.poser_couches(2)
+	var sol: Vector2i = Grille.plat(j.pos) + Vector2i(12, 0)
+	for dx in range(-3, 4):   # un bâtiment d'un étage sur sept tuiles, du sol dégagé dessous
+		var t := sol + Vector2i(dx, 0)
+		g.niveaux_bat[g.idx(t)] = 1
+		g.contenu[g.idx(t)] = 0
+	var haut: Vector2i = Grille.en_couche(sol, 1)
+	var dehors: Vector2i = Grille.en_couche(sol + Vector2i(0, 8), 1)
+	var _entendre := func(source: Vector2i, ici: Vector2i) -> float:
+		s.carte_sonore.fill(0.0)
+		s.sonore_actif.clear()
+		s.sonore_sources.clear()
+		SimTerrain.sonner(s, source, float(cfg.volumes.coup))
+		s.sonore_prochain_pas = 0
+		s._tiquer_sonore(s.sonore_prochain_pas)
+		return s.sonore_a(ici)
+	var par_plancher: float = _entendre.call(haut, sol)
+	verifier(par_plancher > 0.0 and par_plancher < float(cfg.volumes.coup) - float(cfg.pas_cout), "un coup à l'étage s'entend en bas, étouffé par le plancher (%.1f sur %.1f)" % [par_plancher, float(cfg.volumes.coup)])
+	g.lien_a[g.idx(haut)] = g.idx(sol)
+	var par_escalier: float = _entendre.call(haut, sol)
+	verifier(par_escalier > par_plancher, "par un escalier, il porte mieux (%.1f contre %.1f)" % [par_escalier, par_plancher])
+	g.lien_a[g.idx(haut)] = -1
+	verifier(float(_entendre.call(sol + Vector2i(0, 8), dehors)) <= 0.0, "hors de tout bâtiment, la couche du dessus n'entend pas le sol")
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
@@ -1103,6 +1137,10 @@ func test_support_etages() -> void:
 	s._tiquer_support(100)
 	var _ouvert := func(t: Vector2i) -> bool: return not g.contenu_de(t).get("bloque_passage", false)
 	verifier(_ouvert.call(centre1) and _ouvert.call(centre2), "la maison debout : les deux planchers tiennent")
+	# 1 bis. LE FEU DÉMOLIT AUSSI (2026-09-13) : un pan du bas qui brûle met en question le plancher qu'il portait.
+	s.support_a_verifier.clear()
+	SimTerrain._consumer(s, coin)
+	verifier(s.support_a_verifier.has(g.idx(Grille.en_couche(coin, 1))), "un mur qui brûle met en question ce qu'il portait — le feu nourrit le champ de support")
 
 	# 2. ON ABAT LES MURS DU BAS. Les murs du haut ne reposent plus sur rien, les planchers non plus.
 	for y in 5:

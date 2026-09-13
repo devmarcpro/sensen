@@ -58,6 +58,10 @@
           "type": "integer"
         }
       }
+    },
+    "plancher_cout": {
+      "type": "number",
+      "minimum": 0
     }
   }
 }

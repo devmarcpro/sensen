@@ -1113,7 +1113,52 @@
         "alea": 0.3,
         "seuil_hostile": -0.3,
         "seuil_tension": 0.0,
-        "seuil_cordial": 0.4
+        "seuil_cordial": 0.4,
+        "_doc_valeurs": "LES ROYAUMES PORTENT DES VALEURS (ordre de travail 29 bis, ce qui restait — 2026-09-13). `valeurs_par_gouvernance` dit ce qu un royaume pense de chaque tag d acte, comme une faction. A la generation, deux royaumes aux valeurs proches se rapprochent et deux aux valeurs opposees s eloignent de `valeurs_poids` (le cosinus de leurs valeurs) : ils se haissent POUR quelque chose. En jeu, un fait commis par un SUJET de A sur les terres de B pese sur leur relation selon les valeurs de B, x la gravite, x `griefs_echelle`, x la fraicheur du fait — rien ne se stocke, tout se relit dans la memoire des faits. `scores_relation` convertit une relation nommee en score, et les memes seuils la renomment.",
+        "valeurs_poids": 0.3,
+        "griefs_echelle": 0.25,
+        "scores_relation": {
+          "hostile": -0.6,
+          "tension": -0.15,
+          "cordial": 0.2,
+          "allie": 0.6
+        },
+        "valeurs_par_gouvernance": {
+          "monarchie_hereditaire": {
+            "ordre_trouble": -3.0,
+            "ordre_garde": 2.0,
+            "vol": -2.0,
+            "conquete": 1.0
+          },
+          "republique_elue": {
+            "meurtre": -4.0,
+            "vol": -3.0,
+            "entraide": 2.0,
+            "conquete": -2.0
+          },
+          "theocratie": {
+            "cruaute": -4.0,
+            "meurtre": -3.0,
+            "nature_detruite": -1.0,
+            "entraide": 3.0
+          },
+          "ploutocratie": {
+            "industrie": 3.0,
+            "vol": -4.0,
+            "ordre_trouble": -2.0
+          },
+          "dictature_militaire": {
+            "conquete": 3.0,
+            "ordre_trouble": -4.0,
+            "sang_verse": 1.0,
+            "entraide": -1.0
+          },
+          "anarchie": {
+            "ordre_garde": -3.0,
+            "ordre_trouble": 2.0,
+            "conquete": -3.0
+          }
+        }
       }
     }
   },

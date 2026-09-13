@@ -260,7 +260,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     salles que le GÉNÉRATEUR avait taillées — un coup de pioche dans une ruine faisait tomber un hall de dix tuiles.
     `test_recolte` a rougi à bon droit : le champ condamnait le contenu existant. **Ce qui a été creusé, pas ce qui a
     été bâti** — le champ ne juge que les tuiles marquées `modifies`, que le jeu tenait déjà.
-    **Reste** : la démolition par les PNJ et les royaumes ne nourrit pas encore le champ.
+    ~~**Reste** : la démolition par les PNJ et les royaumes ne nourrit pas encore le champ.~~ — **FAIT le 2026-09-13** : l'assaut d'un raid creusait déjà par `_creuser` (qui nourrissait le champ) ; ce qui démolissait EN SILENCE, c'étaient **le feu** (un mur qui brûle ne portait plus rien et personne ne le savait) et **les pertes d'un raid abstrait** — les deux mettent maintenant en question ce qu'ils portaient. `test_support_etages` le vérifie sur un pan qui brûle.
 ~~26. **Le champ sonore** avec `absorption`~~ — **FAIT le 2026-09-09**, le jour où le designer l'a **nommé**
     (`sonore` ; `bruit` restant au bruit de Perlin). Le mot était libre — deux occurrences, deux commentaires sur
     « l'onde sonore » du barde, donc une future *source*. `son` a été écarté sur mesure : libre comme identifiant mais
@@ -279,7 +279,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     créature, une explosion, un statut : tout passe par là), le cri porte plus loin que le coup, et la porte est
     atténuée par la Discrétion de qui l'ouvre. *C'était le défaut du champ de danger, reproduit le soir même sur le
     champ sonore : un nombre écrit et lu par personne.*
-    **Reste** : le champ ignore les couches Z — un combat à l'étage ne s'entend pas d'en bas.
+    ~~**Reste** : le champ ignore les couches Z — un combat à l'étage ne s'entend pas d'en bas.~~ — **FAIT le 2026-09-13** : le son passe **par l'escalier** (un pas) et **par le plancher** (`plancher_cout`, 12 de plus), là seulement où un bâtiment couvre la colonne. Un coup à 35 s'entend à 20 sous le plancher, à 32 par l'escalier (`test_sonore_etages`).
     *(Note : le module `absorption` existe aussi dans le catalogue des noyaux — il meurt au palier 6, mais tout grep
     sera ambigu pendant les deux chantiers.)*
     **Et une bonne nouvelle mesurée** : le piège annoncé — « bâtie sur le patron de la lumière, elle hériterait du
@@ -602,7 +602,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     partir de sa distance et du temps écoulé), les cinq factions nommées, l'espèce comme faction implicite,
     et `relation_de` qui ajoute ce que les factions du PNJ pensent, **et la réplique « on raconte »** qui rend enfin
     le système audible : le PNJ dit le fait le plus frais arrivé jusqu'ici, sur le ton de ses propres valeurs.
-    **Ce qui reste** : les ROYAUMES ne
+    ~~**Ce qui reste** : les ROYAUMES ne portent pas de valeurs~~ — **FAIT le 2026-09-13** : chaque gouvernance porte des `valeurs` (comme une faction) ; à la génération, des valeurs opposées éloignent deux royaumes (le cosinus de leurs valeurs) — **ils se haïssent POUR quelque chose** ; en jeu, un fait frais commis par un sujet de A sur les terres de B pèse sur leur relation selon les valeurs de B, et **la guerre lit cette relation vivante**. Rien ne se stocke : tout se relit dans la mémoire des faits (`test_valeurs_des_royaumes` : trente faits applaudis font passer deux royaumes d'hostiles à alliés). *Reste* : le dialogue ne colporte pas encore. — *L'énoncé :* **Ce qui reste** : les ROYAUMES ne
     portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
     moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
 29 ter. **LES SOUS-RACES, ET CHACUNE SA SOUS-FACTION** — **LE MÉCANISME FAIT le 2026-09-13** : une race porte un `parent` ; un être appartient aux factions implicites `race:<id>` de toute sa lignée, et un acte contre lui pose les tags de toute sa lignée — un homme-chat frappé fâche les chats (−12) plus que les chiens (−6). *Reste au designer* : les fichiers de sous-race et leurs visages. — *(designer 2026-09-10 : « sous classes (homme bêtes =
@@ -801,6 +801,11 @@ appelle.
 
 ## Palier 10 — ce qui existe et qu'on ne verra jamais
 
+39 ter. **LE MONDE CHANGE DE MODÈLE : LA CELLULE NE SERT PLUS QU'AU CLAIM** *(designer 2026-09-13 : « on garde le monde en cellule juste pour les claim sinon on part sur une génération plus variée avec des ruines dans le monde, des villages de toutes tailles, des donjons bâtiments, rentrer dedans fait aller dans le donjon, etc, et du coup rajouter le déplacement carte du monde à la Fallout 1 »).* **Lève la suspension de 39 bis** et la remplace.
+    · **La cellule reste l'unité du CLAIM** (acheter, défendre, taxer un morceau de terre) ; elle cesse d'être l'unité de la génération.
+    · **La génération devient une pose de LIEUX** : des ruines dispersées, des villages de toutes tailles (du hameau de trois maisons à la grande ville), des **donjons-bâtiments** — un donjon est un édifice à la surface (tour, crypte, fort, temple enfoui, mine), et **y entrer fait passer dans le donjon** ; « etc. » laisse la liste ouverte (camps, sanctuaires, épaves, repaires).
+    · **Le voyage à la Fallout 1** : sur la carte du monde, on choisit une destination, le personnage s'y rend en ACCÉLÉRÉ — le temps passe (faim, fatigue, jour et nuit), des **rencontres** peuvent interrompre le trajet et poser le joueur sur une petite zone générée ; à l'arrivée, on entre dans le lieu. La marche à pied dans la fenêtre continue d'exister autour des lieux.
+    · **Premier travail** : cartographier ce qui dépend aujourd'hui de la grille des cellules (rumeur par cellules, royaumes par cellule, découverte, sauvegarde par cellule, faune, corruption) avant de toucher quoi que ce soit — puis poser les lieux, puis le voyage.
 39 bis. **Le voyage devient un TRAJET** — ⚠️ **SUSPENDU le 2026-09-08 à 15 h 30** : le designer veut revoir l'exploration et la génération du monde en entier (« plus Caves of Qud / Dwarf Fortress que JRPG classique / Elin / Elona », [[Vers la production]] ligne 154). Un trajet cellule par cellule sur un écran de carte est une amélioration *dans* le modèle actuel ; si le modèle change, elle devient sans objet. **Ne pas coder avant d'en avoir reparlé.** — *décidé le 2026-09-08 : « un système comme Fallout 1 où le joueur clique
     n'importe où sur la carte et le personnage s'y déplace petit à petit avec événements ».* Aujourd'hui cliquer loin
     **téléporte** (l'horloge avance du coût entier d'un coup) et le pas à pas de cellule en cellule est le « Dragon
@@ -878,6 +883,18 @@ sa carte entière au changement de grille).
 
 *Le détail, et tout le reste de ce qui attend une décision : [[Décisions en attente]].*
 
+47 bis. **LA COOP — CONFIRMÉE, À L'ÉTAPE 11** *(designer 2026-09-13 : « je veux que le jeu soit coop », puis « plus tard » : pas avant le jugement du solo ; la pause n'existe qu'en solo ; en ligne, hôte + invités).* L'audit du même jour est dans [[Multijoueur]] : **le verrou est le lieu unique** (`sim.lieu`, `sim.grille`), pas le réseau. D'ici là, **une règle pour tout ce qui s'écrit** : rien ne suppose un seul joueur, et toute pause passe par une seule garde « partie solo ».
+    **LES PISTES DE LA COOP** *(proposées le 2026-09-13, rangées ici à la demande du designer — à trancher le jour venu)* :
+    · **ordre technique** : plusieurs lieux vivants (même en solo, la base vit pendant l'expédition) → deux joueurs dans UN processus, avec un test automatique → les ~40 gestes du client en intentions, la pause solo, la sauvegarde par joueur → le transport ENet (rejoindre, quitter) → la synchro par ZONE D'INTÉRÊT (chacun ne reçoit que ce que ses sens perçoivent — c'est aussi l'anti-triche) → la reconnexion ;
+    · **envoyer des événements, pas l'état** : `tile_changed`, les coups ; tout ce qui se DÉDUIT d'un horodatage (pourriture, rumeur, fatigue) ne voyage pas, le client le recalcule ;
+    · **le personnage importé** se ramène au niveau du monde, ou l'hôte le refuse ;
+    · **des rôles qui naissent des systèmes** (base, expédition, médecine, artisanat), pas de classes imposées ;
+    · **la rumeur par joueur**, avec un effet sur les compagnons connus (« les amis de l'assassin ») — *question : par joueur ou par groupe ?* ;
+    · **le joueur à terre agonise** : les autres doivent venir le soigner, le porter (les piles d'êtres existent), récupérer son équipement ; un membre perdu se greffe ou se prothèse par un autre ;
+    · **un territoire par joueur, avec des accords entre joueurs** (le système d'accords des royaumes) — *question : territoire commun ou par joueur ?* ;
+    · **combat partagé en mode action** : chacun son tour de ticks, un délai maximal (≈ 15 s) après lequel le personnage attend ;
+    · **le sommeil voté** qui fait durer la nuit (faim, raids nocturnes) ; **le PvP par le monde** (arène, paris de taverne, combats de bêtes dressées), jamais non consenti ;
+    · **pièges** : un joueur dans un écran de gestion est vulnérable (le signaler au-dessus de sa tête) ; le franchissement de cellule (ligne 44) est payé par chaque joueur et devient un prérequis ; seul l'hôte tire les dés ; viser 4 joueurs avant 8.
 48. **Le jeu est muet** : zéro fichier audio. Je peux poser l'architecture ; les sons sont un choix du designer.
 49. **La difficulté de départ** — jugeable dès la fin du palier 3, pas plus tard : dès qu'il y a une pause et un écran
     de mort, la question se regarde.
