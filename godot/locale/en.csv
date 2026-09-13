@@ -3582,6 +3582,7 @@ meuble.tombe.name,Grave
 tile_content.verger.name,Orchard
 tile_content.verger_mur.name,Ripe orchard
 ui.tombe,"Here lies {nom}, {metier} · year {an}"
+ui.tombe_effacee,"A worn stone, the name weathered away · year {an}"
 culture.hellenique.name,Hellenic
 titre.hellenique.monarchie_hereditaire.m,Basileus
 titre.hellenique.monarchie_hereditaire.f,Basilissa

@@ -1041,8 +1041,32 @@ static func enterrer(sim: Simulation, mort: Dictionary, source: String = "") -> 
 					EventBus.emettre(&"tile_changed", [pm])
 				_porter_le_deuil(sim, mort, village, source)   # la ville apprend la mort au moment où elle reçoit le corps
 				return true
-		return false   # le cimetière de sa ville est plein
+		# PLEIN : la plus vieille tombe OUBLIÉE est relevée (2026-09-13). Personne ne se souvient plus de qui elle
+		# abritait — son nom s'est effacé depuis longtemps —, et un cimetière de village ne s'agrandit pas : il se reprend.
+		var an_now := int(sim.date_courante().get("annee", 0))
+		var plus_vieille := -1
+		for k_t in tombes.size():
+			if an_now - int(tombes[k_t].get("an", an_now)) >= int(cfg.get("relevee_ans", 120)) and (plus_vieille < 0 or int(tombes[k_t].an) < int(tombes[plus_vieille].an)):
+				plus_vieille = k_t
+		if plus_vieille < 0:
+			return false   # le cimetière de sa ville est plein, et nul n'y est encore oublié
+		tombes[plus_vieille] = {"tuile": Vector2i(tombes[plus_vieille].tuile), "nom": nom_m, "fonction": str(mort.get("fonction", "")), "an": an_now}
+		sim.monde.tombes[cell] = tombes
+		_porter_le_deuil(sim, mort, village, source)
+		return true
 	return false
+
+
+## L'ÂGE D'UNE TOMBE se lit sur l'année gravée — rien ne se tique. « fraiche », « ancienne » (le nom effacé) ou
+## « oubliee » (elle peut être relevée).
+static func age_tombe(sim: Simulation, tombe: Dictionary) -> String:
+	var cfg: Dictionary = GameData.config("villes").get("reperes", {}).get("cimetiere", {})
+	var ans := int(sim.date_courante().get("annee", 0)) - int(tombe.get("an", 0))
+	if ans >= int(cfg.get("relevee_ans", 120)):
+		return "oubliee"
+	if ans >= int(cfg.get("effacee_ans", 60)):
+		return "ancienne"
+	return "fraiche"
 
 
 ## Le deuil d'une ville (Villes, 2026-09-07) : les siens perdent de l'humeur — la famille bien davantage — et, si c'est

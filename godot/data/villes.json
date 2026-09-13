@@ -1122,7 +1122,7 @@
     }
   },
   "reperes": {
-    "_doc": "Les reperes d une ville (designer 2026-09-07) : le puits sur la placette d un quartier sans grande place (et sur la place d un hameau ou d un village), le cimetiere contre la chapelle — hors les murs si la ville est fortifiee —, le moulin aux quartiers agricoles et aux villes-greniers, pres des champs. enterrement (2026-09-07) : un habitant mort rejoint une tombe libre du cimetiere de sa ville, avec son nom, son metier et l annee.",
+    "_doc": "Les reperes d une ville (designer 2026-09-07) : le puits sur la placette d un quartier sans grande place (et sur la place d un hameau ou d un village), le cimetiere contre la chapelle — hors les murs si la ville est fortifiee —, le moulin aux quartiers agricoles et aux villes-greniers, pres des champs. enterrement (2026-09-07) : un habitant mort rejoint une tombe libre du cimetiere de sa ville, avec son nom, son metier et l annee. Les tombes VIEILLISSENT (2026-09-13) sans rien tiquer — l age se lit sur l annee gravee : au-dela de effacee_ans le nom s est efface de la pierre, au-dela de relevee_ans une tombe oubliee se releve, et un cimetiere plein reprend la plus vieille plutot que de refuser le mort.",
     "puits": {
       "sauf_place_centre": true
     },
@@ -1140,7 +1140,9 @@
       },
       "hors_les_murs": true,
       "distance_chapelle": 6,
-      "enterrement": true
+      "enterrement": true,
+      "effacee_ans": 60,
+      "relevee_ans": 120
     },
     "moulin": {
       "quartiers": [

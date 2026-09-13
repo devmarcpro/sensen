@@ -3653,6 +3653,7 @@ meuble.tombe.name,Tombe
 tile_content.verger.name,Verger
 tile_content.verger_mur.name,Verger mûr
 ui.tombe,"Ci-gît {nom}, {metier} · an {an}"
+ui.tombe_effacee,"Une pierre usée, le nom effacé · an {an}"
 culture.hellenique.name,Hellénique
 titre.hellenique.monarchie_hereditaire.m,Basileus
 titre.hellenique.monarchie_hereditaire.f,Basilissa

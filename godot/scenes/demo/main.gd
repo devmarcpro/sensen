@@ -3300,7 +3300,10 @@ func _maj_ui() -> void:
 		if sim.lieu == "camp" and str(g.meubles.get(g.idx(survol), "")) == "tombe":
 			var ep: Dictionary = SimVilles.epitaphe(sim, survol)
 			if not ep.is_empty():
-				lignes.append("  " + tr("ui.tombe").format({"nom": str(ep.nom), "metier": tr("function.%s.name" % str(ep.get("fonction", "oisif"))), "an": int(ep.get("an", 0))}))
+				if SimVilles.age_tombe(sim, ep) == "fraiche":   # une vieille pierre ne dit plus de nom (2026-09-13)
+					lignes.append("  " + tr("ui.tombe").format({"nom": str(ep.nom), "metier": tr("function.%s.name" % str(ep.get("fonction", "oisif"))), "an": int(ep.get("an", 0))}))
+				else:
+					lignes.append("  " + tr("ui.tombe_effacee").format({"an": int(ep.get("an", 0))}))
 	if not j.is_empty():
 		if sim.lieu == "camp" and sim.monde != null:
 			var tr_: Dictionary = sim.temperature_ressentie(j)

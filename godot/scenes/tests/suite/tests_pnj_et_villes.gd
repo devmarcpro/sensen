@@ -1695,7 +1695,24 @@ func test_tombes_nommees() -> void:
 	var garde_fou := 0
 	while SimVilles.enterrer(s, mort) and garde_fou < 200:
 		garde_fou += 1
-	verifier(garde_fou < 200 and not SimVilles.enterrer(s, mort), "le cimetière plein (%d tombes) n'accepte plus personne" % s.monde.tombes.get(cell_c, []).size())
+	verifier(garde_fou < 200 and not SimVilles.enterrer(s, mort), "le cimetière plein (%d tombes) n'accepte plus personne — tant que nul n'y est oublié" % s.monde.tombes.get(cell_c, []).size())
+	# LES TOMBES VIEILLISSENT (l'ancienne file, 2026-09-13) : l'âge se lit sur l'année gravée, rien ne se tique.
+	var cfg_c: Dictionary = GameData.config("villes").reperes.cimetiere
+	var tombes_c: Array = s.monde.tombes.get(cell_c, [])
+	var an_c := s.annee_courante()
+	verifier(SimVilles.age_tombe(s, tombes_c[0]) == "fraiche", "une tombe de l'année est fraîche, son nom se lit")
+	tombes_c[0].an = an_c - int(cfg_c.effacee_ans)
+	verifier(SimVilles.age_tombe(s, tombes_c[0]) == "ancienne", "%d ans plus tard, le nom s'est effacé de la pierre" % int(cfg_c.effacee_ans))
+	tombes_c[1].an = an_c - int(cfg_c.relevee_ans) - 5
+	tombes_c[2].an = an_c - int(cfg_c.relevee_ans) - 30   # la plus vieille
+	var tuile_vieille: Vector2i = Vector2i(tombes_c[2].tuile)
+	var n_tombes := tombes_c.size()
+	verifier(SimVilles.enterrer(s, mort), "plein, le cimetière relève une tombe oubliée plutôt que de refuser le mort")
+	var reprise: Dictionary = {}
+	for t_c in s.monde.tombes[cell_c]:
+		if Vector2i(t_c.tuile) == tuile_vieille:
+			reprise = t_c
+	verifier(s.monde.tombes[cell_c].size() == n_tombes and int(reprise.get("an", 0)) == an_c and int(tombes_c[1].an) < an_c, "c'est la PLUS vieille qui est reprise, sur sa tuile ; le cimetière ne grossit pas (%d tombes)" % n_tombes)
 
 
 ## Le verger (Agriculture et élevage, 2026-09-07) : des buissons plantés une fois, cueillis des années — ni rotation,
