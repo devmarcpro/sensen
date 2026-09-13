@@ -48,7 +48,7 @@ func _ready() -> void:
 	s0.monde.fermer()
 	if meilleure.is_empty():
 		print("SONDE ÉCHELLE : aucune agglomération — rien à mesurer")
-		get_tree().quit()
+		get_tree().quit(2)   # rien mesuré n'est pas « rien à signaler » : un code à part (ordre de travail 47)
 		return
 	var f := meilleure
 	print("ÉCHELLE — monde %d : %s « %s », %d habitants, %d cellule(s)" % [graine, str(f.palier), str(f.nom), int(f.population), f.cellules.size()])
@@ -148,4 +148,4 @@ func _fin() -> void:
 		for x in soucis:
 			print("  - " + x)
 	Monde.fermer_tous()
-	get_tree().quit()
+	get_tree().quit(0 if soucis.is_empty() else 1)   # ses soucis comptés décident du code (ordre de travail 47 : il sortait à 0)

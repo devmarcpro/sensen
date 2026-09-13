@@ -58,7 +58,7 @@ func _ready() -> void:
 	print("  quelques noms : %s" % ", ".join(noms_vus))
 	if meilleure.is_empty():
 		print("SONDE VILLE : aucune agglomération — rien à mesurer")
-		get_tree().quit()
+		get_tree().quit(2)   # rien mesuré n'est pas « rien à signaler » : un code à part (ordre de travail 47)
 		return
 	var f := meilleure
 	print("la plus grande : %s, %s de %d habitants, %d cellule(s), royaume « %s »%s, gouvernance « %s », culture %s, vocation %s" % [str(f.nom), str(f.palier), int(f.population), f.cellules.size(), str(f.royaume), " (capitale)" if bool(f.capitale) else "", str(f.gouvernance), str(f.culture), str(f.get("vocation", "commune"))])

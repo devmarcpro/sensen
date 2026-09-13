@@ -28,7 +28,7 @@ func _ready() -> void:
 					f = fa
 	if f.is_empty():
 		print("SONDE PNJ : aucune agglomération — rien à mesurer")
-		get_tree().quit()
+		get_tree().quit(2)   # rien mesuré n'est pas « rien à signaler » : un code à part (ordre de travail 47)
 		return
 	var s2 := Simulation.new(graine)
 	s2.graine_monde = graine

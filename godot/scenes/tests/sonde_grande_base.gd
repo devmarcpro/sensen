@@ -160,25 +160,26 @@ func _ready() -> void:
 				elif not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty():
 					libres += 1
 		print("résidentiel à la fin : %d tuiles bâties, %d libres, %d occupées par quelqu'un debout" % [construit, libres, debout])
+	var ok_sauvegarde := true
 	if "--sauvegarde" in args:   # sauvegarde partout (décidé) : la grande base revient entière d'un rechargement
-		verifier_sauvegarde(s)
-	print("SONDE GRANDE BASE : fin")
-	get_tree().quit()
+		ok_sauvegarde = verifier_sauvegarde(s)
+	print("SONDE GRANDE BASE : %s" % ("fin" if ok_sauvegarde else "ÉCHEC de l'aller-retour de sauvegarde"))
+	get_tree().quit(0 if ok_sauvegarde else 1)   # les écarts comptés décident du code (ordre de travail 47 : il sortait à 0)
 
 
 ## L'aller-retour de sauvegarde de la base entière : mêmes résidents (poste ET logement), mêmes périmètres, mêmes stocks.
-func verifier_sauvegarde(s: Simulation) -> void:
+func verifier_sauvegarde(s: Simulation) -> bool:
 	var avant: Dictionary = GrandeBase.etat(s)
 	var postes_avant := {}
 	for x in s.residents():
 		postes_avant[str(x.id)] = [str(x.assignation.get("perimetre", "")), str(x.assignation.get("residence", "")), str(x.fonction), bool(x.get("affame", false))]
 	if not s.sauvegarder("sonde_grande_base"):
 		print("SAUVEGARDE : échec d'écriture")
-		return
+		return false
 	var s2 := Simulation.new(s.graine)
 	if not s2.charger_sauvegarde("sonde_grande_base"):
 		print("SAUVEGARDE : échec de relecture")
-		return
+		return false
 	var apres: Dictionary = GrandeBase.etat(s2)
 	var ecarts: Array[String] = []
 	for cle in ["residents", "loges", "lits", "tresor", "dette", "stocks"]:
@@ -200,3 +201,4 @@ func verifier_sauvegarde(s: Simulation) -> void:
 		for e in ecarts:
 			print("  " + e)
 	s2.monde.fermer()
+	return ecarts.is_empty()
