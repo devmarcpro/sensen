@@ -968,6 +968,16 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 
 const SPIRALE: Array[Vector2i] = [Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(-1, -1)]
 
+var lieux_registre: Lieux = null   # le registre des lieux (39 ter, pas A), créé à la première lecture
+
+
+## Le registre des lieux de ce monde : ruines, donjons-bâtiments, hameaux, camps, sanctuaires (39 ter).
+func lieux() -> Lieux:
+	if lieux_registre == null:
+		lieux_registre = Lieux.new(self)
+	return lieux_registre
+
+
 var agglos_cache: Dictionary = {}      # cellule → l'agglomération dont elle fait partie ({} : aucune)
 var fiches_agglo: Dictionary = {}      # cellule-centre → sa fiche
 var mutex_agglo := Mutex.new()

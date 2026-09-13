@@ -1,0 +1,127 @@
+{
+  "_doc": "LES LIEUX (ordre de travail 39 ter, pas A — 2026-09-13 ; designer : « une generation plus variee avec des ruines dans le monde, des villages de toutes tailles, des donjons batiments »). La cellule ne sert plus qu au claim : la generation pose des LIEUX, par secteur de `secteur_cellules` cellules, a une position monde et avec une EMPRISE (un rectangle de tuiles), sans alignement sur les cellules. Chaque type dit combien il en tombe par secteur (`par_secteur` [min, max]), la taille de son emprise (`emprise` [min, max] tuiles de cote), ses sous-types (tires au poids) et, pour les biomes, un multiplicateur (`biomes`, 1 par defaut, 0 l interdit). Un lieu ne tombe ni en mer, ni sur un autre lieu (`marge` tuiles entre deux), ni sur une agglomeration, ni sur la cellule du camp ; il reste a l interieur de son secteur, si bien que deux secteurs voisins ne se disputent jamais une tuile. `essais` borne la recherche d une place. Un donjon-batiment porte le `theme` du donjon qu on trouve en y entrant.",
+  "secteur_cellules": 8,
+  "marge": 6,
+  "essais": 24,
+  "types": {
+    "ruine": {
+      "par_secteur": [
+        3,
+        6
+      ],
+      "emprise": [
+        10,
+        26
+      ],
+      "sous_types": {
+        "tour_effondree": 3,
+        "hameau_abandonne": 3,
+        "temple_ruine": 2,
+        "fort_ruine": 2,
+        "pont_brise": 1
+      },
+      "biomes": {
+        "marecage_corrompu": 1.6,
+        "desert_de_cendres": 1.8,
+        "toundra": 0.6
+      }
+    },
+    "donjon_batiment": {
+      "par_secteur": [
+        1,
+        3
+      ],
+      "emprise": [
+        12,
+        22
+      ],
+      "sous_types": {
+        "tour": {
+          "poids": 3,
+          "theme": "ruine"
+        },
+        "crypte": {
+          "poids": 3,
+          "theme": "terre"
+        },
+        "fort": {
+          "poids": 2,
+          "theme": "metal"
+        },
+        "temple_enfoui": {
+          "poids": 2,
+          "theme": "feu"
+        },
+        "mine_abandonnee": {
+          "poids": 2,
+          "theme": "terre"
+        },
+        "grotte_inondee": {
+          "poids": 1,
+          "theme": "eau"
+        }
+      },
+      "biomes": {
+        "marecage": 1.2,
+        "montagne": 1.5
+      }
+    },
+    "hameau": {
+      "par_secteur": [
+        1,
+        3
+      ],
+      "emprise": [
+        16,
+        28
+      ],
+      "sous_types": {
+        "fermes": 3,
+        "bucherons": 2,
+        "pecheurs": 1,
+        "mineurs": 1
+      },
+      "biomes": {
+        "desert_aride": 0.4,
+        "desert_de_cendres": 0.0,
+        "marecage_corrompu": 0.0,
+        "toundra": 0.5
+      }
+    },
+    "camp": {
+      "par_secteur": [
+        0,
+        2
+      ],
+      "emprise": [
+        10,
+        16
+      ],
+      "sous_types": {
+        "bandits": 3,
+        "nomades": 2,
+        "chasseurs": 2
+      },
+      "biomes": {}
+    },
+    "sanctuaire": {
+      "par_secteur": [
+        0,
+        2
+      ],
+      "emprise": [
+        6,
+        10
+      ],
+      "sous_types": {
+        "autel": 2,
+        "source_sacree": 1,
+        "cercle_de_pierres": 2
+      },
+      "biomes": {
+        "foret_temperee": 1.5,
+        "marecage_corrompu": 0.3
+      }
+    }
+  }
+}

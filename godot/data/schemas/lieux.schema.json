@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "required": [
+    "secteur_cellules",
+    "types"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "secteur_cellules": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "marge": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "essais": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "par_secteur",
+          "emprise",
+          "sous_types"
+        ],
+        "properties": {
+          "par_secteur": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "emprise": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "sous_types": {
+            "type": "object"
+          },
+          "biomes": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

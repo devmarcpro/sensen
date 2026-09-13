@@ -401,3 +401,57 @@ func test_cycle_et_meteo() -> void:
 
 
 # ---------------------------------------------------------------- Étape 8.2c : minimap (exploration par chunk) et sauvegarde
+
+
+## LE REGISTRE DES LIEUX (39 ter, pas A — 2026-09-13) : des lieux posés par secteur, à la graine, sans alignement sur les
+## cellules, sans chevauchement, jamais en mer ni sur une agglomération.
+func test_registre_des_lieux() -> void:
+	var s := Simulation.new(4250)
+	s.charger_camp()
+	var reg: Lieux = s.monde.surface.lieux()
+	var tc := int(s.monde.surface.planete.taille_cellule)
+	var sect0 := Lieux.secteur_de_tuile(s.monde.pos_monde(s.monde.cellule_camp, Vector2i(0, 0)), tc)
+	var tous: Array = []
+	var par_type := {}
+	var tailles := {}
+	for dy in range(-2, 3):
+		for dx in range(-2, 3):
+			for l in reg.secteur(sect0 + Vector2i(dx, dy)):
+				tous.append(l)
+				par_type[l.type] = int(par_type.get(l.type, 0)) + 1
+				var e: Rect2i = l.emprise
+				tailles[l.type + "/" + str(e.size.x)] = true
+	verifier(tous.size() > 25, "vingt-cinq secteurs portent des lieux (%d) : %s" % [tous.size(), str(par_type)])
+	for type_id in ["ruine", "donjon_batiment", "hameau"]:
+		verifier(int(par_type.get(type_id, 0)) > 0, "on trouve des lieux de type %s" % type_id)
+	var chevauchent := 0
+	var alignes := 0
+	for i in tous.size():
+		var a: Rect2i = tous[i].emprise
+		if a.position.x % tc == 0 and a.position.y % tc == 0:
+			alignes += 1
+		for k in range(i + 1, tous.size()):
+			if a.intersects(tous[k].emprise):
+				chevauchent += 1
+	verifier(chevauchent == 0, "aucun lieu n'en chevauche un autre (%d)" % chevauchent)
+	verifier(alignes < 3, "et ils ne s'alignent pas sur la grille des cellules (%d alignés sur %d)" % [alignes, tous.size()])
+	var en_agglo := 0
+	for l in tous:
+		var c := Vector2i(floori(float(l.centre.x) / float(tc)), floori(float(l.centre.y) / float(tc)))
+		if not s.monde.surface.agglomeration_de(c).is_empty():
+			en_agglo += 1
+	verifier(en_agglo == 0, "aucun ne tombe dans une agglomération (%d)" % en_agglo)
+	var donjons := tous.filter(func(l: Dictionary) -> bool: return l.type == "donjon_batiment")
+	verifier(not donjons.is_empty() and donjons.all(func(l: Dictionary) -> bool: return GameData.catalogues.dungeon_themes.has(str(l.get("theme", "")))), "chaque donjon-bâtiment porte un thème de donjon qui existe")
+	# LA GRAINE DÉCIDE, LE CACHE N'EST QU'UN CACHE.
+	var s2 := Simulation.new(4250)
+	s2.charger_camp()
+	var a1: Array = reg.secteur(sect0)
+	var a2: Array = s2.monde.surface.lieux().secteur(sect0)
+	verifier(a1.size() == a2.size() and (a1.is_empty() or (str(a1[0].id) == str(a2[0].id) and a1[0].emprise == a2[0].emprise)), "même graine, mêmes lieux (%d)" % a1.size())
+	if not a1.is_empty():
+		verifier(reg.par_id(str(a1[0].id)).emprise == a1[0].emprise, "un lieu se retrouve par son id")
+		var r: Rect2i = a1[0].emprise
+		verifier(reg.dans(r.grow(2)).any(func(l: Dictionary) -> bool: return str(l.id) == str(a1[0].id)), "et par la zone qu'il recoupe")
+	s.monde.fermer()
+	s2.monde.fermer()
