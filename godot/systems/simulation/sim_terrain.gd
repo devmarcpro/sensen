@@ -2167,6 +2167,14 @@ static func temperature_ressentie(sim: Simulation, e: Dictionary) -> Dictionary:
 		temp += float(ma.montagne)
 	elif alt >= 0.55:
 		temp += float(ma.colline)
+	var r_c := ressenti_depuis(sim, e, temp)
+	return {"temp": r_c.temp, "ecart": r_c.ecart, "meteo": etat_id}
+
+
+## Du thermomètre au ressenti d'un être : l'isolation de ce qu'il porte (et des potions) compense le froid, les résistances
+## le chaud ; rend la température ressentie et l'écart à la zone de confort. Séparé pour s'éprouver à une température donnée.
+static func ressenti_depuis(sim: Simulation, e: Dictionary, temp: float) -> Dictionary:
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
 	var confort: Array = m.confort
 	var ecart := 0.0
 	if temp < float(confort[0]):
@@ -2183,7 +2191,7 @@ static func temperature_ressentie(sim: Simulation, e: Dictionary) -> Dictionary:
 		temp -= Etres.add_statuts(e, "isolation_chaud", sim.statuts_defs) / float(m.isolation_div)   # potion de résistance au feu
 		if temp > float(confort[1]):
 			ecart = temp - float(confort[1])
-	return {"temp": temp, "ecart": ecart, "meteo": etat_id}
+	return {"temp": temp, "ecart": ecart}
 
 
 static func _tiquer_meteo(sim: Simulation, tick: int) -> void:
@@ -2205,12 +2213,20 @@ static func _tiquer_meteo(sim: Simulation, tick: int) -> void:
 		var tr_ := temperature_ressentie(sim, e)
 		e["temp_ressentie"] = tr_.temp
 		e["ecart_confort"] = tr_.ecart
-		if absf(float(tr_.ecart)) >= float(m.degats_hors_confort_ecart):
-			var per := int(m.degats_periode)
-			if tick / per != int(e.get("meteo_tick", 0)) / per:
-				e.sante = maxi(1, int(e.sante) - 1)
-				EventBus.emettre(&"journal", [&"journal.froid" if float(tr_.ecart) < 0.0 else &"journal.chaud", {"nom": e.name_key}])
-		e["meteo_tick"] = tick
+		degats_hors_confort(sim, e, float(tr_.ecart), tick)
+
+
+## Le froid et le chaud mordent par palier (Météo) : à `degats_hors_confort_ecart` degrés hors du confort ou plus, un PV
+## par `degats_periode` franchie — jamais le dernier. Sortie de `_tiquer_meteo` pour qu'un test l'éprouve sans avoir à
+## trouver un coin de monde à −25 °C (ordre de travail 47 : le test de météo annonçait les dégâts et ne les vérifiait pas).
+static func degats_hors_confort(sim: Simulation, e: Dictionary, ecart: float, tick: int) -> void:
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	if absf(ecart) >= float(m.degats_hors_confort_ecart):
+		var per := int(m.degats_periode)
+		if tick / per != int(e.get("meteo_tick", 0)) / per:
+			e.sante = maxi(1, int(e.sante) - 1)
+			EventBus.emettre(&"journal", [&"journal.froid" if ecart < 0.0 else &"journal.chaud", {"nom": e.name_key}])
+	e["meteo_tick"] = tick
 
 
 # ---------------------------------------------------------------- sauvegarde (Sauvegarde, E.10)

@@ -364,6 +364,33 @@ func test_cycle_et_meteo() -> void:
 	j.tick_vigueur = s.horloge_monde.ticks
 	s._regenerer(j, s.horloge_monde.ticks + 1000)
 	verifier(int(j.vigueur) < regen_confort, "hors confort, la vigueur régénère moins qu'au confort (%d contre %d)" % [int(j.vigueur), regen_confort])
+	# LES DÉGÂTS ANNONCÉS PLUS HAUT, ENFIN VÉRIFIÉS (ordre de travail 47, 2026-09-13) : ce test disait « un être nu par
+	# −20 °C prend des dégâts par palier » et ne mesurait que la vigueur.
+	var mt: Dictionary = GameData.config("planete").meteo
+	var per_m: int = int(mt.degats_periode)
+	var t_m: int = per_m * 10
+	j.sante = 20
+	j["meteo_tick"] = t_m
+	SimTerrain.degats_hors_confort(s, j, -float(mt.degats_hors_confort_ecart) + 1.0, t_m + per_m)
+	verifier(int(j.sante) == 20, "un peu frais (sous l'écart) : aucun dégât")
+	SimTerrain.degats_hors_confort(s, j, -25.0, t_m + per_m * 2)
+	verifier(int(j.sante) == 19, "−25 °C hors confort, un palier franchi : un PV (%d)" % int(j.sante))
+	SimTerrain.degats_hors_confort(s, j, -25.0, t_m + per_m * 2 + 10)
+	verifier(int(j.sante) == 19, "dans le même palier : rien de plus (%d)" % int(j.sante))
+	SimTerrain.degats_hors_confort(s, j, 15.0, t_m + per_m * 3)
+	verifier(int(j.sante) == 18, "le chaud mord comme le froid (%d)" % int(j.sante))
+	j.sante = 1
+	SimTerrain.degats_hors_confort(s, j, -40.0, t_m + per_m * 4)
+	verifier(int(j.sante) == 1 and j.vivant, "le froid affaiblit, il ne tue pas : le dernier PV reste")
+	# L'ISOLATION DE L'ÉQUIPEMENT compense le froid : la même tuile, un manteau en plus, un ressenti plus doux.
+	var tr_nu: Dictionary = SimTerrain.ressenti_depuis(s, j, -20.0)
+	var manteau := {"uid": "manteau_test", "stats": {"isolation": 80.0}}
+	s.items["manteau_test"] = manteau
+	j.equipement["dos"] = "manteau_test"
+	var tr_vetu: Dictionary = SimTerrain.ressenti_depuis(s, j, -20.0)
+	verifier(float(tr_nu.ecart) < 0.0 and float(tr_vetu.temp) > float(tr_nu.temp) and float(tr_vetu.ecart) > float(tr_nu.ecart), "à −20 °C, un manteau isolant réchauffe le ressenti (%.1f → %.1f °C, écart %.1f → %.1f)" % [float(tr_nu.temp), float(tr_vetu.temp), float(tr_nu.ecart), float(tr_vetu.ecart)])
+	j.equipement.erase("dos")
+	s.items.erase("manteau_test")
 	s.monde.fermer()
 
 
