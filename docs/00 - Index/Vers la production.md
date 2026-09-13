@@ -888,7 +888,7 @@ Chacune porte désormais une **valeur chiffrée implémentable** — le code ne 
 > - La liaison « propagation » tourne dans un `while true` sans borne ; `decouvertes_recentes` est rempli à chaque être et lu par personne ; le filtre d'horloge des vampires ne filtre que les vampires (moyen, petit ×2).
 >
 > **8. Les tests qui ne prouvent rien**
-> - **L'XP d'armure n'est vérifiée que par une tautologie**, et derrière elle **huit armures pointent vers des compétences qui n'existent pas** (gros).
+> - ~~**L'XP d'armure n'est vérifiée que par une tautologie**, et derrière elle **huit armures pointent vers des compétences qui n'existent pas** (gros).~~ — **FAIT le 2026-09-13** : les compétences `tissu` et `rituel` existent, la règle est éprouvée (7 évités → 7 XP de Mailles) et un invariant refuse toute construction sans compétence.
 > - La fourchette de dégâts affichée au joueur n'est testée nulle part **et ne dit déjà pas la vérité** (moyen) · les dégâts de froid et de chaud n'ont aucun test alors que le test de météo annonce les vérifier (moyen) · les effets d'échec de lecture sont provoqués puis effacés sans être vérifiés (moyen) · le test des budgets de performance garde « 2,6 fois le budget » et le budget de tick peut disparaître en silence (moyen) · trois assertions qui ne peuvent pas échouer (composition de capacités, apprivoisement, « les compagnons défendent ») · une sonde compte ses soucis et sort quand même avec le code 0 (petit ×4).
 >
 > **9. Le coffre qui se contredit** (chaque ligne est une note contre une donnée, vérifiable en une minute)

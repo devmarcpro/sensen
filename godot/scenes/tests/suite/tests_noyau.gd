@@ -1167,7 +1167,19 @@ func test_statuts() -> void:
 	verifier(s.intention(j.id, {"type": "attaquer", "cible": chef.id, "lourde": false}), "coup d'épée")
 	var perdu: int = pvc - chef.sante
 	verifier(int(j.xp.element.get("metal", 0)) == perdu and int(j.xp.competence.get("epee", 0)) == perdu and int(j.xp.type.get("tranchant", 0)) == perdu, "XP = dégâts appliqués, trois pistes")
-	verifier(int(chef.xp.construction.get("mailles", 0)) >= 0, "l'armure du chef gagne ce qu'elle épargne")
+	# L'XP D'ARMURE (ordre de travail 47, 2026-09-13) : cette ligne vérifiait « ≥ 0 », une tautologie — et derrière elle,
+	# huit armures (tissu, rituel) versaient leur XP à des compétences qui n'existaient pas, sans qu'aucun test ne rougisse.
+	# On éprouve la RÈGLE directement : ce qu'une armure épargne va à sa construction, piste ET compétence.
+	var xp_c0: int = int(chef.xp.construction.get("mailles", 0))
+	var comp_c0: float = float(chef.xp_competences.get("mailles", 0.0))
+	s._verser_xp(chef, 0, j.id, {"construction": "mailles", "evites": 7})
+	verifier(int(chef.xp.construction.get("mailles", 0)) == xp_c0 + 7 and float(chef.xp_competences.get("mailles", 0.0)) > comp_c0, "l'armure du chef gagne ce qu'elle épargne : 7 évités, 7 XP de Mailles (%d → %d)" % [xp_c0, int(chef.xp.construction.get("mailles", 0))])
+	var sans_comp: Array[String] = []
+	for iid: String in GameData.catalogues.items.keys():
+		var cons_i := str(GameData.catalogues.items[iid].get("construction", ""))
+		if not cons_i.is_empty() and not GameData.catalogues.competences.has(cons_i):
+			sans_comp.append("%s → %s" % [iid, cons_i])
+	verifier(sans_comp.is_empty(), "chaque construction d'armure est une compétence qui existe (%s)" % str(sans_comp))
 	# Un statut par module : Feinte annule la garde 15 ticks.
 	# LES TROIS MODULES SONT DÉCLARÉS ICI (chantier 27, 2026-09-12) : la règle « un noyau pose le statut que sa fiche
 	# décrit » ne dépend ni de `feinte`, ni de `point`, ni de `jet_court`, trois des 236 contenus qui vont mourir.

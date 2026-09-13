@@ -202,6 +202,8 @@ competence.collecte.name,Gathering
 competence.contondant.name,Blunt
 competence.controle_mana.name,Mana control
 competence.cuir.name,Leather
+competence.tissu.name,Cloth armour
+competence.rituel.name,Ritual garb
 competence.cuisine.name,Cooking
 competence.dague.name,Dagger
 competence.deux_mains.name,Two-handed
