@@ -164,6 +164,12 @@ static func courant_de(sim: Simulation, t: Vector2i) -> Vector2i:
 
 ## Le courant emporte ce qui flotte (Eau et liquides) : les êtres légers, puis les objets au sol.
 static func _tiquer_courant(sim: Simulation, tick: int) -> void:
+	# SANS EAU QUI COULE, PAS DE COURANT (ordre de travail 47, 2026-09-13) : `courant_de` ne rend une direction que pour
+	# un écoulement de niveau 1 à 7, et ces niveaux-là vivent tous dans `niveau_eau`. Sur un étage sec, la fonction
+	# balayait quand même chaque être et chaque contenant — et, sa garde de cadence n'avançant qu'avec l'eau active,
+	# elle le faisait à CHAQUE pas : 1,6 ms du budget de tick, mesurés le jour où ce budget a enfin été mesuré.
+	if sim.grille.niveau_eau.is_empty():
+		return
 	var ea: Dictionary = sim.regles.r.get("eau", {})
 	var chance := float(ea.get("courant_chance", 0.25))
 	var rng := RandomNumberGenerator.new()

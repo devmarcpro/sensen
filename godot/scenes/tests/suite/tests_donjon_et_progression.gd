@@ -1361,7 +1361,9 @@ func test_loot_assemble() -> void:
 	verifier(n_ok == 12, "12 épées de loot : autant de pièces que d'emplacements déclarés, matière, qualité, dureté (%d/12)" % n_ok)
 	verifier(mats.size() >= 3 and quals.size() >= 6, "matériaux (%d) et qualités (%d) variés" % [mats.size(), quals.size()])
 	var epee := s.generer_objet("craft_epee", 1)
-	verifier(epee.composants.has("manche") and epee.composants.manche.materiau != epee.materiau or true, "le manche a son propre matériau (%s / tête %s)" % [str(epee.composants.get("manche", {}).get("materiau", "?")), str(epee.materiau)])
+	# `… or true` (ordre de travail 47) : le manche peut tomber dans la même matière que la tête, donc « différent » n'est
+	# pas la règle. La règle est qu'il PORTE sa matière, une vraie.
+	verifier(epee.composants.has("manche") and GameData.catalogues.materials.has(str(epee.composants.manche.get("materiau", ""))), "le manche a son propre matériau (%s / tête %s)" % [str(epee.composants.get("manche", {}).get("materiau", "?")), str(epee.materiau)])
 	verifier(epee.has("vitesse_facteur"), "la densité du manche fixe la vitesse (%s)" % str(epee.get("vitesse_facteur", "-")))
 	var casque := s.generer_objet("craft_casque", 2)
 	verifier(casque.has("composants") and casque.has("durete_composite"), "une armure de loot est assemblée aussi (plaque, sangles, fixations)")

@@ -946,7 +946,14 @@ func test_pnj_distincts() -> void:
 	j.sac.append(gemme.uid)
 	var rel0: int = int(x2.social.relations.get(j.id, 0))
 	verifier(s._offrir(j, x2.id, gemme.uid, s.horloge_monde.ticks) and bool(x2.get("souhait_realise", false)) and int(x2.social.relations[j.id]) >= rel0 + 25 and not (gemme.uid in j.sac), "la gemme souhaitée : +%d de relation, le souhait est comblé" % (int(x2.social.relations[j.id]) - rel0))
-	verifier(s.replique(x2, j) == "dialogue.souhait_realise.text" or true, "la gratitude est une réplique possible")
+	# `… or true` (ordre de travail 47) : la réplique est tirée au sort. On tire jusqu'à quarante fois ; la gratitude doit sortir.
+	var gratitude := false
+	for k_r in 40:
+		x2["dernieres_repliques"] = []
+		if s.replique(x2, j) == "dialogue.souhait_realise.text":
+			gratitude = true
+			break
+	verifier(gratitude, "la gratitude est une réplique possible, et elle sort")
 	# Les opinions : formées par quartier, avec l'époux.
 	var v := {"nom": "Testbourg", "batiments": []}
 	for x in gens:

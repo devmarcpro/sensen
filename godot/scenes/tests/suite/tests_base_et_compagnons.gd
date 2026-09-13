@@ -300,10 +300,12 @@ func test_compagnons_defendent() -> void:
 		comps.append(c)
 	var b: Dictionary = s.ajouter("bandit", j.pos + Vector2i(1, 0), "ia")
 	var sante0 := int(b.sante)
-	var coups := 0
+	# UN TABLEAU, PAS UN ENTIER : une lambda GDScript capture un entier PAR VALEUR — `coups += 1` incrémentait une copie, et
+	# le compteur restait à zéro quoi qu'il arrive. C'est ce que cachait le `or` de l'assertion (ordre de travail 47).
+	var coups := [0]
 	EventBus.damage_dealt.connect(func(src: String, cible: String, _d: int, _det: Dictionary) -> void:
 		if cible == b.id and (src == comps[0].id or src == comps[1].id):
-			coups += 1)
+			coups[0] += 1)
 	for k in 60:
 		s.attente[j.id] = true
 		s.intention(j.id, {"type": "attendre"})
@@ -312,7 +314,9 @@ func test_compagnons_defendent() -> void:
 			s.pas(nom)
 		if not b.vivant:
 			break
-	verifier(coups > 0 or int(b.sante) < sante0 or not b.vivant, "les compagnons ont frappé le bandit contre le joueur (%d coup(s), %d → %d)" % [coups, sante0, int(b.sante)])
+	# `coups > 0 or sante baissée or bandit mort` passait sans qu'un compagnon ait frappé : n'importe quelle blessure
+	# du bandit suffisait (ordre de travail 47). Ce sont LEURS coups qu'on compte.
+	verifier(coups[0] > 0, "les compagnons ont frappé le bandit contre le joueur (%d coup(s), %d → %d)" % [coups[0], sante0, int(b.sante)])
 
 
 ## Les paliers de dette (Entretien et taxes, 2026-09-04) : l'humeur est un état (−5, pas une pente), et le partant
@@ -395,7 +399,6 @@ func test_composer_capacites() -> void:
 		s.crediter_module(j, m0, 99)
 	var grille := s.grille_composition(j)
 	verifier((grille.cases as Array).size() >= 4, "la grille de l'arme tenue a au moins la grille de poche (%d cases, voie « %s »)" % [(grille.cases as Array).size(), str(grille.stat)])
-	var n0: int = j.capacites.size()
 	j.capacites = []
 	verifier(not s.composer_capacite(j, ["point"]), "sans noyau : refusé")
 	verifier(not s.composer_capacite(j, ["point", "brasier"]), "un module inconnu : refusé")
@@ -437,7 +440,6 @@ func test_composer_capacites() -> void:
 		if j.action_en_cours.is_empty():
 			break
 	verifier(v.vivant and int(j.mana) < 100 and int(j.or) == 0, "le compagnon revient, payé en mana (%d), pas en or [action en cours : %s]" % [int(j.mana), str(j.action_en_cours.get("name_key", "-"))])
-	verifier(n0 >= 0, "")
 
 
 # ---------------------------------------------------------------- Bombes et explosions

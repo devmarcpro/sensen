@@ -509,7 +509,7 @@ func test_compagnons() -> void:
 		verifier(cerf.camp == "joueur" and cerf.ai_profile == "compagnon" and s.compagnons_de(j).size() == 1, "le cerf est un compagnon")
 	else:
 		s.attente[j.id] = true
-		verifier(not s.intention(j.id, {"type": "apprivoiser", "cible": cerf.id}) or int(cerf.dernier_apprivoisement) >= 0, "une seule tentative par jour")
+		verifier(not s.intention(j.id, {"type": "apprivoiser", "cible": cerf.id}), "une seule tentative par jour")   # `or dernier >= 0` rendait la ligne toujours vraie (ordre de travail 47)
 	# Recruter un civil : refusé sous le seuil, accepté au seuil ; il suit.
 	var v := s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
 	s._habiller_pnj(v, GameData.entree("creatures", "villageois"))

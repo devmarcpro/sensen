@@ -233,7 +233,7 @@ func test_grilles_possedees() -> void:
 	var voie_sabre: String = str(GameData.catalogues.grilles[str(fiche.grilles[0])].get("voie", ""))
 	verifier(voie_sabre == "force", "la grille de départ du Sabre est celle du guerrier (%s)" % voie_sabre)
 	# le joueur de la scène n'a pas de collection : il compose dans la grille de sa voie, comme avant
-	verifier(not j.has("grilles") or (j.grilles as Array).is_empty() or true, "sans collection, la grille de la voie")
+	verifier(not j.has("grilles") or (j.grilles as Array).is_empty(), "sans collection, la grille de la voie (%s)" % str(j.get("grilles", [])))
 	var avant_c: int = (s.grille_composition(j).cases as Array).size()
 	verifier(not s.choisir_grille(j, "cercle_1"), "on ne compose pas sur une grille qu'on ne possède pas")
 	verifier(s.apprendre_grille(j, "cercle_1") and not s.apprendre_grille(j, "cercle_1"), "on apprend le cercle du barde, une seule fois")

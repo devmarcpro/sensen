@@ -67,7 +67,13 @@ func test_surface() -> void:
 			plats += 1
 	verifier(plats > e.hauteurs.size() * 0.8 and plats < e.hauteurs.size(), "plat à 10 avec des accidents (%d %% plat, %d accidents)" % [plats * 100 / e.hauteurs.size(), e.accidents.size()])
 	verifier(e.accidents.size() >= 1 and e.accidents.size() <= 8, "1 à 3 accidents posés par cellule de 64 (× accidents_mult du biome : %d)" % e.accidents.size())
-	verifier(e.sols.size() > 100 and e.sols.values()[0] == GameData.entree("biomes", e.biome).surface_material or true, "le sol porte le matériau du biome")
+	# `… or true` (ordre de travail 47) : la PREMIÈRE tuile n'est pas forcément du matériau du biome (une cellule en borde
+	# d'autres) ; la règle est qu'il domine.
+	var sol_biome := 0
+	for v_sol in e.sols.values():
+		if str(v_sol) == str(GameData.entree("biomes", e.biome).surface_material):
+			sol_biome += 1
+	verifier(e.sols.size() > 100 and sol_biome * 2 > e.sols.size(), "le sol porte le matériau du biome (%d / %d tuiles)" % [sol_biome, e.sols.size()])
 	var mat_ok := true
 	for i in e.arbres.keys():
 		if not GameData.catalogues.materials.has(e.arbres[i]):

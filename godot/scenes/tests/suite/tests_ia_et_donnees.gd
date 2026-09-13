@@ -284,7 +284,7 @@ func test_triche() -> void:
 	var n0: int = s.vivants().size()
 	verifier(s.triche(j, "creature", "loup") and s.vivants().size() == n0 + 1, "triche : un loup apparaît")
 	verifier(s.triche(j, "meteo", "orage") and s.meteo(Vector2i.ZERO) == "orage", "triche : l'orage s'impose")
-	verifier(s.triche(j, "statut", "beni") and Etres.a_statut_tag(j, "beni", s.statuts_defs) or true, "triche : un statut s'applique")
+	verifier(s.triche(j, "statut", "beni") and j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == "beni"), "triche : un statut s'applique")
 	var nuit0: bool = s.est_nuit()
 	verifier(s.triche(j, "heure") and s.est_nuit() != nuit0, "triche : jour ↔ nuit")
 	verifier(s.triche(j, "reveler") and s.monde.cellule_exploree(s.monde.cellule_de(j.pos) + Vector2i(30, 30)), "triche : la carte est révélée autour (%d chunks)" % s.monde.explores.size())
