@@ -1598,6 +1598,32 @@ func test_sauvegarde_ne_touche_pas_la_partie() -> void:
 	Sauvegarde.effacer("test_pas_touche")
 
 
+## LA SAUVEGARDE DANS UN FIL (palier 1, ce qui restait — 2026-09-13) : ce qui change après la photo n'entre pas dans le
+## fichier, et la partie écrite en fond se recharge comme une autre.
+func test_sauvegarde_en_fond() -> void:
+	var s := Simulation.new(4325)
+	s.graine_monde = 4325
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	j["or"] = 1234
+	var t0 := Time.get_ticks_usec()
+	verifier(s.sauvegarder("test_en_fond", true), "la sauvegarde part dans un fil")
+	var photo_ms := float(Time.get_ticks_usec() - t0) / 1000.0
+	j["or"] = 99   # APRÈS la photo : ne doit pas entrer dans le fichier
+	verifier(not s.sauvegarder("test_en_fond", true) or SimSauvegarde._fil == null, "une seconde écriture ne se superpose pas à la première")
+	verifier(SimSauvegarde.attendre_fond(), "le fil a fini, et bien écrit")
+	var t1 := Time.get_ticks_usec()
+	s.sauvegarder("test_en_fond_sync")
+	var sync_ms := float(Time.get_ticks_usec() - t1) / 1000.0
+	var s2 := Simulation.new(1)
+	verifier(s2.charger_sauvegarde("test_en_fond"), "la partie écrite en fond se recharge")
+	var j2: Dictionary = s2.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0] if not s2.vivants().is_empty() else {}
+	verifier(int(j2.get("or", -1)) == 1234, "et elle porte l'état DE LA PHOTO, pas celui d'après (%d)" % int(j2.get("or", -1)))
+	print("  sauvegarde : la photo coûte %.1f ms au fil principal, l'écriture entière %.1f ms" % [photo_ms, sync_ms])
+	Sauvegarde.effacer("test_en_fond")
+	Sauvegarde.effacer("test_en_fond_sync")
+
+
 func test_boss_et_artefact() -> void:
 	# Trésors et artefacts : le dernier étage porte le boss ; sa mort marque le donjon vaincu et lâche un artefact (majeur ≥ 4).
 	var s := Simulation.new(95)

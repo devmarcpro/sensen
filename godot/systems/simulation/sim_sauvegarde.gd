@@ -48,7 +48,7 @@ static func resume_partie(sim: Simulation) -> Dictionary:
 	}
 
 
-static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
+static func sauvegarder(sim: Simulation, nom: String = "", en_fond: bool = false) -> bool:
 	if nom.is_empty():
 		nom = slot(sim)
 	# Sauvegarde possible partout (designer, 2026-08-31) : au camp comme en donjon. Seule l'arène de test reste hors jeu.
@@ -104,10 +104,8 @@ static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
 		"modifs_terrain": sim.modifs_terrain, "portails": sim.portails, "gouffres_vides": sim.gouffres_vides, "mines_creusees": sim.mines_creusees,
 		"nettoyages": sim.monde.nettoyages,
 		"carte_cache": sim.monde.carte_cache_serialise()}   # indexés par position monde, donc valables au rechargement
-	var ok := Sauvegarde.ecrire(nom, "surface.json", surface)
-	ok = Sauvegarde.ecrire(nom, "entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}) and ok
-	ok = Sauvegarde.ecrire(nom, "items.json", instances) and ok
-	ok = Sauvegarde.ecrire(nom, "players/joueur.json", {"fiche": sim.fiche_joueur, "etre": j}) and ok
+	var lots: Array = [["surface.json", surface], ["entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}],
+		["items.json", instances], ["players/joueur.json", {"fiche": sim.fiche_joueur, "etre": j}]]
 	var exp := {"lieu": sim.lieu}
 	if sim.lieu == "donjon":   # l'expédition en cours : l'étage se régénère de sa graine, ses êtres sont dans entities.json
 		var camp_ent: Dictionary = sim.camp_sauve.get("entites", {})
@@ -127,15 +125,52 @@ static func sauvegarder(sim: Simulation, nom: String = "") -> bool:
 		exp = {"lieu": "donjon", "donjon": ident,
 			"expedition": sim.expedition, "camp": {"entites": camp_ent, "ordre": sim.camp_sauve.get("ordre", []), "contenants": camp_cont}, "retour": j.get("retour", Vector2i.ZERO),
 			"decouvert": sim.grille.decouvert.duplicate()}   # le brouillard de l'étage courant survit au rechargement (l'expédition reprend où elle était)
-	ok = Sauvegarde.ecrire(nom, "expedition.json", exp) and ok
-	ok = Sauvegarde.ecrire(nom, "world.json", monde_json) and ok   # EN DERNIER : c'est lui qui rend la partie visible
+	lots.append(["expedition.json", exp])
+	lots.append(["world.json", monde_json])   # EN DERNIER : c'est lui qui rend la partie visible
+	# LA PHOTO (palier 1, ce qui restait — 2026-09-13). Les dictionnaires ci-dessus pointent encore dans la partie
+	# vivante : `duplicate(true)` en fait une copie profonde, en C++, et c'est tout ce que le fil principal paie. Ce qui
+	# change ensuite — un pas, un coup, un objet ramassé — n'entre pas dans le fichier : c'est la copie-sur-écriture.
+	var photo: Array = lots.duplicate(true)
+	if not en_fond:
+		return _ecrire_lots(nom, photo)
+	if _fil != null and _fil.is_alive():
+		return false   # une écriture est déjà en cours : la suivante attendra le prochain rendez-vous
+	attendre_fond()
+	_fil = Thread.new()
+	_fil.start(_ecrire_lots.bind(nom, photo))
+	return true
+
+
+static var _fil: Thread = null
+
+
+## Les six fichiers, dans l'ordre (world.json en dernier). Appelée sur le fil principal ou dans le fil de sauvegarde —
+## elle ne touche qu'à sa copie et au disque ; le signal repasse par le fil principal.
+static func _ecrire_lots(nom: String, photo: Array) -> bool:
+	var ok := true
+	for lot in photo:
+		ok = Sauvegarde.ecrire(nom, str(lot[0]), lot[1]) and ok
 	if ok:
-		EventBus.emettre(&"sauvegarde_faite", [nom])
+		if OS.get_thread_caller_id() == OS.get_main_thread_id():
+			EventBus.emettre(&"sauvegarde_faite", [nom])
+		else:
+			EventBus.emettre.call_deferred(&"sauvegarde_faite", [nom])
 	return ok
+
+
+## Attend la fin d'une écriture en fond (quitter, charger, recharger une partie) et rend son résultat — vrai s'il n'y
+## en avait aucune.
+static func attendre_fond() -> bool:
+	if _fil == null:
+		return true
+	var res: Variant = _fil.wait_to_finish()
+	_fil = null
+	return bool(res)
 
 
 ## Recharge une partie : le monde depuis la graine, puis les modifications, les êtres et le joueur.
 static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
+	attendre_fond()   # jamais relire une partie qu'un fil est en train d'écrire
 	if nom.is_empty():
 		nom = slot(sim)
 	sim.nom_partie = nom

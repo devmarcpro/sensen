@@ -6221,8 +6221,8 @@ func temperature_ressentie(e: Dictionary) -> Dictionary:
 func slot() -> String:
 	return SimSauvegarde.slot(self)
 
-func sauvegarder(nom: String = "") -> bool:
-	return SimSauvegarde.sauvegarder(self, nom)
+func sauvegarder(nom: String = "", en_fond: bool = false) -> bool:
+	return SimSauvegarde.sauvegarder(self, nom, en_fond)
 
 func charger_sauvegarde(nom: String = "") -> bool:
 	return SimSauvegarde.charger_sauvegarde(self, nom)

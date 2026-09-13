@@ -1300,7 +1300,7 @@ func _process_corps(delta: float) -> void:
 	minuterie_autosave -= delta
 	if minuterie_autosave <= 0.0:
 		minuterie_autosave = 300.0
-		sim.sauvegarder()
+		sim.sauvegarder("", true)   # l'autosave s'écrit dans un fil : la partie ne gèle plus toutes les cinq minutes
 	queue_redraw()
 
 
