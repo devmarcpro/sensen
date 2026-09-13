@@ -723,6 +723,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     s'estampille à la première lecture) ; **la faim ne l'est pas**, parce que les nombres de ses tests sont
     calibrés sur ce comportement — un PNJ de village naît à moitié affamé, et plusieurs seuils s'y accrochent.
     *C'est un manque écrit, pas un manque tu.*
+    **CORRIGÉ le 2026-09-13** : la faim s'estampille à la première lecture, comme la soif. **Et la raison de l'avoir laissé était périmée** : la suite est passée verte du premier coup, aucun seuil ne s'y accrochait plus. *Une dette écrite se revérifie ; elle peut s'être payée seule.*
 32. **L'eau qui pèse** — ~~pression~~, ~~poids~~, ~~érosion~~ — avec `permeabilite`. **L'INFILTRATION FAITE le
     2026-09-09** ; la pression et l'érosion restent.
     **La quinzième et dernière des cinq colonnes est écrite.** Un creux était jusqu'ici un bassin PARFAIT quel

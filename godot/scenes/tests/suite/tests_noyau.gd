@@ -1896,6 +1896,12 @@ func test_hydratation() -> void:
 	var s := nouvelle_sim("gorge")
 	var j := joueur_de(s)
 	verifier(int(j.get("soif", -1)) == 100, "un être naît désaltéré (%d)" % int(j.get("soif", -1)))
+	# LE DÉFAUT JUMEAU, SUR LA FAIM (2026-09-13) : un être dont la fiche dit `faim_tick: 0` et qui entre dans un monde
+	# vieux de cinq millions de ticks ne doit rien perdre d'un coup.
+	j["faim"] = 100
+	j["faim_tick"] = 0
+	s._tiquer_faim(5000000)
+	verifier(int(j.faim) == 100 and int(j.faim_tick) == 5000000, "entrer tard dans le monde ne rend pas affamé (faim %d)" % int(j.faim))
 	# 1. LE TEMPS ASSÈCHE. On avance de quoi perdre vingt points, et pas un de plus.
 	# L'HORLOGE PART D'UN TICK NON NUL : `soif_tick` à zéro est lu comme « jamais estampillé » (un être créé alors
 	# que le monde en est à cinq millions de ticks ne doit pas mourir de soif à sa naissance), donc un test qui

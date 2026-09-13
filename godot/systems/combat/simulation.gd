@@ -640,8 +640,11 @@ func _tiquer_faim(tick: int) -> void:
 	for e in joueurs():
 		if not e.vivant:
 			continue
-		if not e.has("faim"):
-			e["faim"] = 100
+		# LE DÉFAUT JUMEAU DE LA SOIF, CORRIGÉ (2026-09-13) : `Etres.creer` pose `faim_tick: 0`, une valeur de fiche et
+		# non une heure — un être entré dans le monde à cinq millions de ticks perdait d'un coup tout le temps écoulé
+		# depuis le début du monde, et un compagnon recruté naissait à moitié affamé. On stampe à la première lecture.
+		if not e.has("faim") or int(e.get("faim_tick", 0)) <= 0:
+			e["faim"] = int(e.get("faim", 100))
 			e["faim_tick"] = tick
 		var periode := int(float(f.ticks_par_point) / (float(e.get("faim_vitesse", 1.0)) * float(e.get("mecaniques", {}).get("faim_vitesse", {}).get("mult", 100)) / 100.0))
 		var points := tick / periode - int(e.faim_tick) / periode
