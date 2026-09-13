@@ -14,5 +14,13 @@
     "quete": 0.6,
     "conquete": 1.5
   },
-  "memo_ticks": 60000
+  "memo_ticks": 60000,
+  "temoin": {
+    "_doc": "LE TEMOIN (ordre de travail 29 quinquies, 2026-09-13). Un acte ne devient un fait QUE si quelqu un l a vu : le civil le plus proche (a `portee` tuiles au plus) dont le champ de vue atteint l auteur, et qui remporte un jet de Perception (1d20 + Perception/2) contre la Discretion de l auteur (1d20 + niveau, +`cycle.discretion_nuit` la nuit). C est le meme temoin que les lois (`SimRoyaumes._infraction`), et il transforme le systeme social en systeme d infiltration : tuer sans temoin ne laisse aucune rumeur. `actes_publics` : ce que le monde apprend de toute facon (une conquete ne se cache pas).",
+    "requis": true,
+    "portee": 12,
+    "actes_publics": [
+      "conquete"
+    ]
+  }
 }

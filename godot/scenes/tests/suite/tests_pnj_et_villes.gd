@@ -16,6 +16,13 @@ func test_rumeur_et_factions() -> void:
 	s.monde.faits.clear()
 	var ici: Vector2i = s.monde.cellule_de(j.pos)
 	var t0: int = s.horloge_monde.ticks
+	# UN TÉMOIN QUI NE RATE RIEN (29 quinquies) : sans lui, aucun de ces actes ne deviendrait un fait. Il est posé ici
+	# pour que la suite éprouve la RUMEUR ; le témoin lui-même a son test, `test_temoin`.
+	# Le témoin est le civil LE PLUS PROCHE : tous ceux qui vivent déjà autour du camp reçoivent le même regard.
+	var oeil := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	for x_o in s.vivants():
+		if x_o.camp == "civil":
+			x_o.corps.stats.perception = 200
 	SimRumeur.rapporter(s, j, "abattre_arbre", j.pos, [])
 	verifier(s.monde.faits.size() == 1 and "nature_detruite" in s.monde.faits[0].tags, "un arbre abattu laisse un fait tagué (%s)" % str(s.monde.faits[0].tags))
 
@@ -51,6 +58,8 @@ func test_rumeur_et_factions() -> void:
 	bucheron["fonction"] = "bucheron"
 	var garde_r := s.ajouter("villageois", j.pos + Vector2i(-1, 0), "ia")
 	garde_r["fonction"] = "garde"
+	bucheron.corps.stats.perception = 200   # les voilà plus proches que l'œil : ils seront les témoins
+	garde_r.corps.stats.perception = 200
 	s.monde.faits.clear()
 	SimRumeur.rapporter(s, j, "abattre_arbre", j.pos, [])
 	var juge := func(pnj: Dictionary) -> float:
@@ -85,6 +94,50 @@ func test_rumeur_et_factions() -> void:
 	for k in int(cfg.faits_max) + 20:
 		SimRumeur.rapporter(s, j, "creuser_roche", j.pos, [])
 	verifier(s.monde.faits.size() == int(cfg.faits_max), "la liste des faits est bornée : le plus ancien tombe (%d)" % s.monde.faits.size())
+
+
+## LE TÉMOIN (ordre de travail 29 quinquies, 2026-09-13) : un acte ne devient un fait que si quelqu'un l'a vu.
+func test_temoin() -> void:
+	var s := Simulation.new(4243)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	for x in s.vivants():   # un monde vide autour du joueur : personne pour voir
+		if x.id != j.id and x.camp == "civil":
+			x.vivant = false
+			s.grille.liberer(x.pos)
+	s.monde.faits.clear()
+	SimRumeur.rapporter(s, j, "tuer_civil", j.pos, [])
+	verifier(s.monde.faits.is_empty(), "sans témoin, un meurtre ne laisse aucune rumeur")
+	SimRumeur.rapporter(s, j, "conquete", j.pos, [])
+	verifier(s.monde.faits.size() == 1, "une conquête se sait de toute façon : c'est un acte public")
+	s.monde.faits.clear()
+	var oeil := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	oeil.corps.stats.perception = 200
+	Etres.recalculer(oeil, s.items, s.affixes_defs, s.regles)
+	j.competences["discretion"] = 0
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	SimRumeur.rapporter(s, j, "tuer_civil", j.pos, [])
+	verifier(s.monde.faits.size() == 1 and str(s.monde.faits[0].get("temoin", "")) == str(oeil.id), "sous les yeux d'un villageois, le meurtre est su — et l'on sait par qui")
+	# LA DISCRÉTION DÉCIDE : un maître de l'ombre contre un témoin myope.
+	s.monde.faits.clear()
+	oeil.corps.stats.perception = 1
+	Etres.recalculer(oeil, s.items, s.affixes_defs, s.regles)
+	j.competences["discretion"] = 200
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var vus := 0
+	for k in 20:
+		SimRumeur.rapporter(s, j, "frapper_civil", j.pos, [])
+	vus = s.monde.faits.size()
+	verifier(vus == 0, "un maître de la discrétion passe inaperçu sous les yeux d'un témoin distrait (%d fait(s) sur 20)" % vus)
+	# TROP LOIN POUR VOIR
+	j.competences["discretion"] = 0
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	oeil.corps.stats.perception = 200
+	Etres.recalculer(oeil, s.items, s.affixes_defs, s.regles)
+	var loin: Vector2i = j.pos + Vector2i(int(GameData.config("rumeur").temoin.portee) + 3, 0)
+	SimRumeur.rapporter(s, j, "tuer_civil", loin, [])
+	verifier(s.monde.faits.is_empty(), "un témoin trop loin de la scène ne témoigne de rien")
+	s.monde.fermer()
 
 
 func test_brouillard() -> void:

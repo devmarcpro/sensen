@@ -38,18 +38,46 @@ static func rapporter(sim: Simulation, auteur: Dictionary, acte: String, pos: Ve
 	var tags: Array = (sim.regles.r.get("faits", {}).get("actes", {}) as Dictionary).get(acte, []).duplicate()
 	if tags.is_empty() and tags_extra.is_empty():
 		return
+	# LE TÉMOIN (ordre de travail 29 quinquies) : sans quelqu'un qui a vu, il n'y a pas de fait — seulement un acte.
+	var tc: Dictionary = cfg.get("temoin", {})
+	var temoin_id := ""
+	if bool(tc.get("requis", false)) and not (acte in tc.get("actes_publics", [])):
+		var t := temoin_de(sim, auteur, pos, int(tc.get("portee", 12)))
+		if t.is_empty():
+			return
+		temoin_id = str(t.id)
 	tags.append_array(tags_extra)
 	var faits: Array = sim.monde.faits
 	faits.append({
 		"auteur": str(auteur.id), "acte": acte, "tags": tags,
 		"cellule": sim.monde.cellule_de(pos), "tick": sim.horloge_monde.ticks,
 		"gravite": float((cfg.get("gravite", {}) as Dictionary).get(acte, 0.5)),
+		"temoin": temoin_id,
 	})
 	# LE SEUL OUBLI QUI SOIT UN CHOIX : au-delà du plafond, le plus ancien tombe. Tout le reste s'efface par la
 	# fraîcheur, sans qu'une ligne l'efface.
 	var plafond := int(cfg.get("faits_max", 240))
 	while faits.size() > plafond:
 		faits.remove_at(0)
+
+
+## QUI A VU ? Le civil le plus proche (à `portee` tuiles au plus) dont le champ de vue atteint l'auteur, s'il remporte
+## Perception contre Discrétion — la nuit aide celui qui se cache. Rend {} si personne n'a rien vu. Le même témoin sert
+## aux lois (`SimRoyaumes._infraction`) et à la rumeur : un seul regard dans le monde, pas deux.
+static func temoin_de(sim: Simulation, auteur: Dictionary, pos: Vector2i, portee: int) -> Dictionary:
+	var temoin: Dictionary = {}
+	for x in sim.vivants():
+		if x.id == auteur.id or x.camp != "civil" or Grille.distance(x.pos, pos) > portee or not sim.voit_ia(x, auteur):
+			continue
+		if temoin.is_empty() or Grille.distance(x.pos, pos) < Grille.distance(temoin.pos, pos):
+			temoin = x
+	if temoin.is_empty():
+		return {}
+	var jet_temoin := sim.des.jet("1d20") + int(temoin.corps.stats.perception) / 2
+	var jet_auteur := sim.des.jet("1d20") + sim.regles.niveau(auteur.get("competences_eff", auteur.get("competences", {})), "discretion") + (int(SimTerrain._cycle(sim).get("discretion_nuit", 4)) if SimTerrain.est_nuit(sim) else 0)
+	if jet_auteur >= jet_temoin:
+		return {}
+	return temoin
 
 
 ## CE QU UN FAIT PÈSE POUR QUI SE TIENT ICI, MAINTENANT : zéro tant que la nouvelle n'est pas arrivée, un à son

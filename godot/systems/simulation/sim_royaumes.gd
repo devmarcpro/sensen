@@ -614,17 +614,8 @@ static func _infraction(sim: Simulation, e: Dictionary, type: String, cible: Str
 	if loi.is_empty():
 		return false
 	# Détection : le témoin civil le plus proche qui voit le joueur, jet opposé Perception vs Discrétion.
-	var temoin: Dictionary = {}
-	for x in sim.vivants():
-		if x.id == e.id or x.camp != "civil" or Grille.distance(x.pos, pos) > int(SimTerritoire._ry(sim).lois.portee_temoin_max) or not sim.voit_ia(x, e):
-			continue
-		if temoin.is_empty() or Grille.distance(x.pos, pos) < Grille.distance(temoin.pos, pos):
-			temoin = x
+	var temoin := SimRumeur.temoin_de(sim, e, pos, int(SimTerritoire._ry(sim).lois.portee_temoin_max))   # le même regard que la rumeur (29 quinquies)
 	if temoin.is_empty():
-		return false
-	var jet_temoin := sim.des.jet("1d20") + int(temoin.corps.stats.perception) / 2
-	var jet_joueur := sim.des.jet("1d20") + sim.regles.niveau(e.competences_eff, "discretion") + (int(SimTerrain._cycle(sim).get("discretion_nuit", 4)) if SimTerrain.est_nuit(sim) else 0)   # Cycle jour-nuit : Discrétion +4 la nuit
-	if jet_joueur >= jet_temoin:
 		EventBus.emettre(&"journal", [&"journal.infraction_ignoree", {}])
 		return false
 	var cons := str(loi.consequence)
