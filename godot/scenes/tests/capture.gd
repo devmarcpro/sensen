@@ -379,6 +379,34 @@ func _ready() -> void:
 	for ip in args.size():
 		if args[ip] == "--palier" and ip + 1 < args.size():
 			palier_vise = str(args[ip + 1])
+	for i_l in args.size():   # --lieu <type> : le joueur devant le lieu le plus proche de ce type — ruine, donjon_batiment, hameau, camp, sanctuaire (39 ter)
+		if args[i_l] != "--lieu" or i_l + 1 >= args.size() or scene.sim == null:
+			continue
+		var sl = scene.sim
+		var tc_l := int(sl.monde.taille)
+		var s0_l := Lieux.secteur_de_tuile(sl.monde.pos_monde(sl.monde.cellule_camp, Vector2i(0, 0)), tc_l)
+		var trouve_l := {}
+		for r_l in 3:
+			for dy_l in range(-r_l, r_l + 1):
+				for dx_l in range(-r_l, r_l + 1):
+					for l_l in sl.monde.surface.lieux().secteur(s0_l + Vector2i(dx_l, dy_l)):
+						if trouve_l.is_empty() and str(l_l.type) == str(args[i_l + 1]):
+							trouve_l = l_l
+		if trouve_l.is_empty():
+			print("lieu : aucun ", args[i_l + 1])
+			continue
+		var jl: Dictionary = sl.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+		var cl := Vector2i(floori(float(trouve_l.centre.x) / tc_l), floori(float(trouve_l.centre.y) / tc_l))
+		sl.voyager(jl, cl)
+		var devant := Vector2i(trouve_l.centre.x, (trouve_l.emprise as Rect2i).end.y + 1)
+		sl.grille.liberer(jl.pos, jl.id)
+		jl.pos = sl._tuile_libre_autour(devant) if not sl.grille.occupant(devant).is_empty() or sl.grille.bloque_passage(devant) else devant
+		sl.grille.placer(jl.id, jl.pos)
+		for i_d in sl.grille.largeur * sl.grille.hauteur_grille:
+			sl.grille.decouvert[i_d] = true
+		sl.maj_vision()
+		scene.joueur_id = jl.id
+		print("lieu : ", trouve_l.type, " / ", trouve_l.sous_type, " en ", trouve_l.emprise, " — joueur en ", jl.pos)
 	if ("--village" in args or "--ville" in args or not palier_vise.is_empty()) and scene.sim != null:   # --village : le village le plus proche du camp, le joueur sur sa place ; --ville : la plus grande agglomération à 40 cellules (Villes B1)
 		var sv = scene.sim
 		var c0: Vector2i = sv.monde.cellule_camp

@@ -153,3 +153,209 @@ static func _tirer_sous_type(sous: Dictionary, rng: RandomNumberGenerator) -> St
 		if r <= 0.0:
 			return str(id)
 	return str(ids[ids.size() - 1]) if not ids.is_empty() else ""
+
+
+# ---------------------------------------------------------------- l'estampage (39 ter, pas B — 2026-09-13)
+
+var _plans: Dictionary = {}   # id de lieu → plan
+
+
+## LE PLAN D'UN LIEU, en coordonnées MONDE : position → [genre, valeur]. Les genres sont ceux qu'un morceau sait poser :
+## `mur` (matière), `rocher` (matière), `porte`, `sol` (matière de sol), `meuble` (id), `entree` (l'entrée d'un donjon),
+## `degage` (on arrache l'arbre ou la roche, rien de plus). Calculé une fois à la graine du lieu : deux morceaux qui le
+## recoupent lisent exactement le même, et c'est ce qui rend l'estampage sans couture.
+func plan(lieu: Dictionary) -> Dictionary:
+	var id := str(lieu.get("id", ""))
+	_mutex.lock()
+	if _plans.has(id):
+		var deja: Dictionary = _plans[id]
+		_mutex.unlock()
+		return deja
+	_mutex.unlock()
+	var p := _tracer(lieu)
+	_mutex.lock()
+	_plans[id] = p
+	_mutex.unlock()
+	return p
+
+
+func _tracer(lieu: Dictionary) -> Dictionary:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(lieu.graine)
+	var r: Rect2i = lieu.emprise
+	var p := {}
+	var pierre := "granit" if rng.randf() < 0.5 else "calcaire"
+	match str(lieu.type):
+		"ruine":
+			_degager_rect(p, r)
+			match str(lieu.sous_type):
+				"tour_effondree":
+					_anneau(p, r.get_center(), mini(r.size.x, r.size.y) / 2 - 1, "mur", pierre, 0.55, rng)
+				"pont_brise":
+					var y0 := r.get_center().y
+					for x in range(r.position.x, r.end.x):
+						for dy in [-1, 1]:
+							if rng.randf() < 0.5:
+								p[Vector2i(x, y0 + dy)] = ["mur", pierre]
+						if rng.randf() < 0.7:
+							p[Vector2i(x, y0)] = ["sol", "calcaire"]
+				_:
+					_contour(p, r.grow(-1), "mur", pierre, 0.45, rng)
+					if str(lieu.sous_type) != "hameau_abandonne" and r.size.x > 14 and r.size.y > 14:
+						_contour(p, r.grow(-5), "mur", pierre, 0.35, rng)   # le fort et le temple : une enceinte, et un cœur
+			for y in range(r.position.y + 2, r.end.y - 2):
+				for x in range(r.position.x + 2, r.end.x - 2):
+					var q := Vector2i(x, y)
+					if p.has(q) and str(p[q][0]) != "degage":
+						continue
+					var t := rng.randf()
+					if t < 0.08:
+						p[q] = ["rocher", pierre]   # les gravats
+					elif t < 0.45:
+						p[q] = ["sol", "calcaire"]   # le dallage qui reste
+		"donjon_batiment":
+			var cote := mini(mini(r.size.x, r.size.y) - 4, 11)
+			var b := Rect2i(r.get_center() - Vector2i(cote / 2, cote / 2), Vector2i(cote, cote))
+			_degager_rect(p, r)
+			var matiere := "chene" if str(lieu.sous_type) == "mine_abandonnee" else pierre
+			var genre := "rocher" if str(lieu.sous_type) in ["mine_abandonnee", "grotte_inondee"] else "mur"
+			if str(lieu.sous_type) == "grotte_inondee":
+				_anneau(p, b.get_center(), cote / 2, "rocher", pierre, 1.0, rng)
+			else:
+				_contour(p, b, genre, matiere, 1.0, rng)
+			for y in range(b.position.y + 1, b.end.y - 1):
+				for x in range(b.position.x + 1, b.end.x - 1):
+					var q2 := Vector2i(x, y)
+					if not p.has(q2) or str(p[q2][0]) == "degage":
+						p[q2] = ["sol", "calcaire"]
+			var porte := Vector2i(b.get_center().x, b.end.y - 1)
+			p[porte] = ["porte", ""] if genre == "mur" else ["sol", "calcaire"]
+			p[porte + Vector2i(0, 1)] = ["sol", "calcaire"]
+			match str(lieu.sous_type):
+				"crypte":
+					for k in 4:
+						p[b.position + Vector2i(2 + k * 2, 2)] = ["meuble", "tombe"]
+				"temple_enfoui":
+					p[b.position + Vector2i(2, 2)] = ["meuble", "statue"]
+					p[Vector2i(b.end.x - 3, b.position.y + 2)] = ["meuble", "statue"]
+				"mine_abandonnee":
+					p[porte + Vector2i(-1, -1)] = ["meuble", "etai"]
+					p[porte + Vector2i(1, -1)] = ["meuble", "etai"]
+			p[b.get_center()] = ["entree", str(lieu.id)]
+		"hameau":
+			_degager_rect(p, r)
+			var n := 2 + rng.randi() % 3
+			var centre := r.get_center()
+			p[centre] = ["meuble", "puits"]
+			var coins := [Vector2i(-1, -1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(1, 1)]
+			for k in n:
+				var d: Vector2i = coins[k]
+				var o := centre + Vector2i(d.x * 3 + (0 if d.x > 0 else -6), d.y * 3 + (0 if d.y > 0 else -5))
+				var maison := Rect2i(o, Vector2i(6, 5))
+				if not r.encloses(maison):
+					continue
+				_contour(p, maison, "mur", "chene", 1.0, rng)
+				for y in range(maison.position.y + 1, maison.end.y - 1):
+					for x in range(maison.position.x + 1, maison.end.x - 1):
+						p[Vector2i(x, y)] = ["sol", "chene"]
+				var pm := Vector2i(maison.get_center().x, maison.end.y - 1 if d.y < 0 else maison.position.y)
+				p[pm] = ["porte", ""]
+				p[maison.position + Vector2i(1, 1)] = ["meuble", "lit_de_paille"]
+		"camp":
+			_degager_rect(p, r)
+			var c := r.get_center()
+			p[c] = ["meuble", "torchere"]
+			for k in 3 + rng.randi() % 3:
+				var a := TAU * float(k) / 5.0 + rng.randf() * 0.5
+				p[c + Vector2i(roundi(cos(a) * 3.0), roundi(sin(a) * 3.0))] = ["meuble", "lit_de_paille"]
+			if str(lieu.sous_type) == "bandits":
+				p[c + Vector2i(0, -2)] = ["meuble", "coffre"]
+			_anneau(p, c, mini(r.size.x, r.size.y) / 2 - 1, "rocher", pierre, 0.35, rng)
+		"sanctuaire":
+			var c2 := r.get_center()
+			match str(lieu.sous_type):
+				"cercle_de_pierres":
+					_anneau(p, c2, mini(r.size.x, r.size.y) / 2 - 1, "rocher", pierre, 0.7, rng)
+				_:
+					p[c2 + Vector2i(-2, 0)] = ["meuble", "statue"]
+					p[c2 + Vector2i(2, 0)] = ["meuble", "statue"]
+			p[c2] = ["meuble", "bassin" if str(lieu.sous_type) == "source_sacree" else "autel_rituel"]
+	return p
+
+
+static func _degager_rect(p: Dictionary, r: Rect2i) -> void:
+	for y in range(r.position.y, r.end.y):
+		for x in range(r.position.x, r.end.x):
+			p[Vector2i(x, y)] = ["degage", ""]
+
+
+static func _contour(p: Dictionary, r: Rect2i, genre: String, matiere: String, garde: float, rng: RandomNumberGenerator) -> void:
+	for x in range(r.position.x, r.end.x):
+		for y in [r.position.y, r.end.y - 1]:
+			if rng.randf() < garde:
+				p[Vector2i(x, y)] = [genre, matiere]
+	for y in range(r.position.y + 1, r.end.y - 1):
+		for x in [r.position.x, r.end.x - 1]:
+			if rng.randf() < garde:
+				p[Vector2i(x, y)] = [genre, matiere]
+
+
+static func _anneau(p: Dictionary, c: Vector2i, rayon: int, genre: String, matiere: String, garde: float, rng: RandomNumberGenerator) -> void:
+	if rayon < 2:
+		return
+	var vus := {}
+	for k in rayon * 8:
+		var a := TAU * float(k) / float(rayon * 8)
+		var q := c + Vector2i(roundi(cos(a) * rayon), roundi(sin(a) * rayon))
+		if vus.has(q):
+			continue
+		vus[q] = true
+		if rng.randf() < garde:
+			p[q] = [genre, matiere]
+
+
+## ESTAMPER UN MORCEAU : la part de chaque lieu qui recoupe la cellule `cell`, écrite dans le dictionnaire de cellule de
+## `Surface.generer_cellule`. On ne pose rien sur l'eau ; une entrée de donjon est notée dans `entrees_lieux`.
+func estamper(e: Dictionary, cell: Vector2i) -> void:
+	var tc := int(surface.planete.taille_cellule)
+	var base := cell * tc
+	var rect := Rect2i(base, Vector2i(tc, tc))
+	for lieu in dans(rect):
+		var pl := plan(lieu)
+		for q: Vector2i in pl.keys():
+			if not rect.has_point(q):
+				continue
+			var l := q - base
+			var i := l.y * tc + l.x
+			if e.get("eau", {}).has(i):
+				continue
+			var v: Array = pl[q]
+			match str(v[0]):
+				"degage":
+					e.arbres.erase(i)
+					e.rochers.erase(i)
+					e.filons.erase(i)
+					e.plantes.erase(i)
+					e.get("cueillette", {}).erase(i)
+				"mur":
+					Surface._degager_tuile(e, i)
+					e.murs[i] = str(v[1])
+					e.sol.erase(i)
+				"rocher":
+					Surface._degager_tuile(e, i)
+					e.rochers[i] = str(v[1])
+				"porte":
+					Surface._degager_tuile(e, i)
+					e.portes[i] = true
+				"sol":
+					Surface._degager_tuile(e, i)
+					e.sols[i] = str(v[1])
+				"meuble":
+					if GameData.catalogues.meubles.has(str(v[1])):
+						Surface._degager_tuile(e, i)
+						e.meubles[i] = str(v[1])
+				"entree":
+					Surface._degager_tuile(e, i)
+					if not e.has("entrees_lieux"):
+						e["entrees_lieux"] = {}
+					e.entrees_lieux[i] = str(v[1])

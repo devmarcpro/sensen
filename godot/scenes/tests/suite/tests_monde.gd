@@ -455,3 +455,90 @@ func test_registre_des_lieux() -> void:
 		verifier(reg.dans(r.grow(2)).any(func(l: Dictionary) -> bool: return str(l.id) == str(a1[0].id)), "et par la zone qu'il recoupe")
 	s.monde.fermer()
 	s2.monde.fermer()
+
+
+## L'ESTAMPAGE DES LIEUX (39 ter, pas B — 2026-09-13) : un lieu à cheval sur plusieurs morceaux s'estampe sans couture, un
+## donjon-bâtiment porte son entrée, et la fenêtre la pose comme une entrée de donjon.
+func test_estampage_des_lieux() -> void:
+	var s := Simulation.new(4251)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var reg: Lieux = surf.lieux()
+	var tc := int(surf.planete.taille_cellule)
+	var sect0 := Lieux.secteur_de_tuile(s.monde.pos_monde(s.monde.cellule_camp, Vector2i(0, 0)), tc)
+	var cheval := {}
+	var donjon := {}
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			for l in reg.secteur(sect0 + Vector2i(dx, dy)):
+				var r: Rect2i = l.emprise
+				var c0 := Vector2i(floori(float(r.position.x) / tc), floori(float(r.position.y) / tc))
+				var c1 := Vector2i(floori(float(r.end.x - 1) / tc), floori(float(r.end.y - 1) / tc))
+				if cheval.is_empty() and c0 != c1 and l.type == "ruine":
+					cheval = l
+				if donjon.is_empty() and l.type == "donjon_batiment" and l.sous_type != "grotte_inondee":
+					donjon = l
+	verifier(not cheval.is_empty() and not donjon.is_empty(), "une ruine à cheval sur deux morceaux et un donjon-bâtiment pour l'essai")
+	if cheval.is_empty() or donjon.is_empty():
+		s.monde.fermer()
+		return
+	# 1. SANS COUTURE : chaque mur du plan tombe dans le morceau qui le contient, et nulle part ailleurs.
+	var pl := reg.plan(cheval)
+	var murs_plan := 0
+	var cellules := {}
+	for q: Vector2i in pl.keys():
+		if str(pl[q][0]) == "mur":
+			murs_plan += 1
+			cellules[Vector2i(floori(float(q.x) / tc), floori(float(q.y) / tc))] = true
+	var murs_poses := 0
+	for c: Vector2i in cellules.keys():
+		var e := surf.generer_cellule(c.x, c.y)
+		for i in e.murs.keys():
+			var q2 := c * tc + Vector2i(int(i) % tc, int(i) / tc)
+			if pl.has(q2) and str(pl[q2][0]) == "mur":
+				murs_poses += 1
+	verifier(cellules.size() >= 2 and murs_plan > 0 and absi(murs_poses - murs_plan) <= murs_plan / 10, "la ruine %s traverse %d morceaux : %d murs au plan, %d posés (hors eau)" % [str(cheval.sous_type), cellules.size(), murs_plan, murs_poses])
+	# 2. LE DONJON-BÂTIMENT porte son entrée, et le monde sait à quel lieu elle mène.
+	var centre: Vector2i = reg.plan(donjon).keys().filter(func(q: Vector2i) -> bool: return str(reg.plan(donjon)[q][0]) == "entree")[0]
+	var cc := Vector2i(floori(float(centre.x) / tc), floori(float(centre.y) / tc))
+	var ed := surf.generer_cellule(cc.x, cc.y)
+	var li := centre - cc * tc
+	verifier(str(ed.get("entrees_lieux", {}).get(li.y * tc + li.x, "")) == str(donjon.id), "le donjon-bâtiment (%s) porte son entrée au cœur" % str(donjon.sous_type))
+	var g := s.monde.fenetre(cc, GameData.config("tile_contents"), s.regles.r.deplacement, int(s.regles.r.vision.hauteur_oeil))
+	verifier("entree_donjon" == str(g.contenu_ids[g.contenu[g.idx(centre)]]) and str(s.monde.entrees_lieux.get(centre, "")) == str(donjon.id), "et la fenêtre la pose comme une entrée de donjon qui mène à ce lieu")
+	s.monde.fermer()
+
+
+## LE DONJON-BÂTIMENT (39 ter, pas C — 2026-09-13) : y entrer charge le donjon du lieu, en ressortir ramène devant la porte.
+func test_donjon_batiment() -> void:
+	var s := Simulation.new(4252)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var tc := int(surf.planete.taille_cellule)
+	var sect0 := Lieux.secteur_de_tuile(s.monde.pos_monde(s.monde.cellule_camp, Vector2i(0, 0)), tc)
+	var lieu := {}
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			for l in surf.lieux().secteur(sect0 + Vector2i(dx, dy)):
+				if lieu.is_empty() and l.type == "donjon_batiment":
+					lieu = l
+	verifier(not lieu.is_empty(), "un donjon-bâtiment près du camp")
+	if lieu.is_empty():
+		s.monde.fermer()
+		return
+	var pl := surf.lieux().plan(lieu)
+	var porte: Vector2i = pl.keys().filter(func(q: Vector2i) -> bool: return str(pl[q][0]) == "entree")[0]
+	s.voyager(j, Vector2i(floori(float(porte.x) / tc), floori(float(porte.y) / tc)))
+	s.grille.liberer(j.pos, j.id)
+	j.pos = porte
+	s.grille.placer(j.id, j.pos)
+	verifier(str(s.monde.entrees_lieux.get(porte, "")) == str(lieu.id), "la porte du lieu est dans la fenêtre")
+	verifier(SimLieux._partir_en_expedition(s, j), "y entrer lance l'expédition")
+	verifier(s.lieu == "donjon" and str(s.donjon.get("lieu", "")) == str(lieu.id) and str(s.donjon.theme) == str(lieu.theme), "c'est le donjon DU LIEU (%s, thème %s)" % [str(lieu.sous_type), str(s.donjon.get("theme", ""))])
+	s.grille.liberer(j.pos, j.id)
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	verifier(SimLieux._remonter(s, j), "on remonte par l'entrée de l'étage 1")
+	verifier(s.lieu == "camp" and j.pos == porte, "et l'on ressort devant la porte (%s)" % str(j.pos))
+	s.monde.fermer()

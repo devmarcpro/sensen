@@ -68,6 +68,9 @@ func cellule_de(p: Vector2i) -> Vector2i:
 
 
 ## `local` peut porter une couche (y + z × BANDE_Z) : la position monde la garde.
+var entrees_lieux: Dictionary = {}   # position monde → id du lieu dont c'est l'entrée de donjon (39 ter) — se regénère, ne se sauve pas
+
+
 func pos_monde(cell: Vector2i, local: Vector2i) -> Vector2i:
 	return cell * taille + local
 
@@ -208,6 +211,10 @@ func _poser_cellule(g: Grille, cell: Vector2i, e: Dictionary) -> void:
 				if gi >= 0 and gi < g.niveaux_bat.size():
 					g.niveaux_bat[gi] = niveaux
 					g.bat_de[gi] = k
+	for i in e.get("entrees_lieux", {}).keys():   # l'entrée d'un donjon-bâtiment (39 ter) : elle mène au donjon DU LIEU
+		var pe := base + Vector2i(int(i) % taille, int(i) / taille)
+		g.poser_contenu(pe, "entree_donjon")
+		entrees_lieux[pe] = str(e.entrees_lieux[i])
 	if not gouffre_de(cell).is_empty():
 		e["a_donjon"] = true   # le gouffre de la région : une entrée permanente, dessinée comme les autres
 		e["gouffre"] = true

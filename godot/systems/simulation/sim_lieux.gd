@@ -424,6 +424,8 @@ static func entrer_donjon_corrompu(sim: Simulation, e: Dictionary) -> bool:
 static func _partir_en_expedition(sim: Simulation, e: Dictionary) -> bool:
 	if sim.lieu != "camp" or not ("entree_donjon" in sim.grille.contenu_de(e.pos).get("tags", [])):
 		return false
+	if sim.monde.entrees_lieux.has(e.pos):   # la porte d'un donjon-bâtiment (39 ter, pas C) : le donjon DU LIEU
+		return entrer_lieu(sim, e, str(sim.monde.entrees_lieux[e.pos]))
 	var cell := sim.monde.cellule_de(e.pos)
 	if _descendre_au_gouffre(sim, e, cell):
 		return true
@@ -446,6 +448,27 @@ static func _partir_en_expedition(sim: Simulation, e: Dictionary) -> bool:
 	sim.donjon = {"etages_fixes": fourchette, "corruption": corruption, "cellule": cell}
 	EventBus.emettre(&"journal", [&"journal.expedition_depart", {}])
 	charger_donjon(sim, theme, sim.graine, id, 1, e)
+	return true
+
+
+## ENTRER DANS UN DONJON-BÂTIMENT (ordre de travail 39 ter, pas C — 2026-09-13 ; designer : « des donjons bâtiments,
+## rentrer dedans fait aller dans le donjon »). Le donjon est celui DU LIEU : son thème, sa graine, et une profondeur
+## qui dépend de ce qu'il est — une tour ou une crypte sont courtes, un fort ou un temple enfoui descendent plus bas.
+## En ressortir ramène devant la porte, et un boss vaincu se note sur le lieu, plus sur la cellule.
+static func entrer_lieu(sim: Simulation, e: Dictionary, lieu_id: String) -> bool:
+	var lieu := sim.monde.surface.lieux().par_id(lieu_id)
+	if lieu.is_empty() or str(lieu.get("theme", "")).is_empty():
+		return false
+	var cell := sim.monde.cellule_de(e.pos)
+	e["retour"] = e.pos
+	_sauver_camp(sim, e)
+	sim.expedition = {}
+	sim.etages_visites.clear()
+	var cr: Dictionary = GameData.config("planete").corruption
+	var profonds := str(lieu.sous_type) in ["fort", "temple_enfoui", "mine_abandonnee"]
+	sim.donjon = {"etages_fixes": cr.etages_majeur if profonds else cr.etages_mineur, "corruption": sim.monde.corruption_de(cell), "cellule": cell, "lieu": lieu_id}
+	EventBus.emettre(&"journal", [&"journal.entree_lieu", {"lieu": "lieu.sous_type." + str(lieu.sous_type)}])
+	charger_donjon(sim, str(lieu.theme), sim.graine, int(lieu.graine) & 0x7fffffff, 1, e)
 	return true
 
 
@@ -587,7 +610,7 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	# un gouffre perdait déjà `gouffre`, ce qui rendait inatteignable le marquage de `gouffres_vides` quarante lignes
 	# plus bas, et un donjon de corruption vaincu ne se notait jamais comme nettoyé.
 	var identite := {}
-	for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes"]:
+	for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes", "lieu"]:
 		if sim.donjon.has(cle_id):
 			identite[cle_id] = sim.donjon[cle_id]
 	sim.donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
@@ -852,7 +875,10 @@ static func _sortir(sim: Simulation, e: Dictionary) -> bool:
 		charger_camp(sim, e)
 		SimCamp._tiquer_territoire(sim, sim.horloge_monde.ticks)   # les heures d'absence sont résolues au retour (Abstraction hors-site)
 		SimCamp._rapport_absence(sim)
-		if recap.boss_vaincu and sim.monde != null and cell_donjon != Vector2i(-9999, -9999):
+		if recap.boss_vaincu and sim.monde != null and sim.donjon.has("lieu"):
+			sim.monde.nettoyages[str(sim.donjon.lieu)] = SimVilles.jour_courant(sim)   # un donjon-bâtiment vaincu se note sur SON lieu (39 ter)
+			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])
+		elif recap.boss_vaincu and sim.monde != null and cell_donjon != Vector2i(-9999, -9999):
 			sim.monde.nettoyer(cell_donjon, sim.horloge_monde.ticks)   # Dérive de la corruption : foyer nettoyé
 			sim.monde.nettoyages[cell_donjon] = SimVilles.jour_courant(sim)   # un donjon de corruption vaincu retombe à son plancher (point 51)
 			EventBus.emettre(&"journal", [&"journal.donjon_nettoye", {}])

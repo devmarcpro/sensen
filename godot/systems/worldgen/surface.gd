@@ -956,6 +956,9 @@ func generer_cellule(cx: int, cy: int, camp: Dictionary = {}, bord: bool = true)
 	if not agglo.is_empty():
 		_poser_quartier(e, Vector2i(cx, cy), rng, agglo)
 	t_c = _top("cellule.village", t_c)
+	if camp.is_empty():
+		lieux().estamper(e, Vector2i(cx, cy))   # les ruines, les donjons-bâtiments, les hameaux… (39 ter, pas B)
+	t_c = _top("cellule.lieux", t_c)
 	_poser_route(e, Vector2i(cx, cy))
 	for d in [e.arbres, e.rochers, e.filons, e.eau]:
 		for i in d.keys():
@@ -2127,6 +2130,19 @@ func _composantes_marchables(e: Dictionary) -> Dictionary:
 ## du sol à sa dernière ligne — un arbre, un rocher, un filon.
 func _obstrue(e: Dictionary, i: int) -> bool:
 	return e.murs.has(i) or e.eau.has(i) or e.arbres.has(i) or e.rochers.has(i) or e.filons.has(i)
+
+
+## Libérer une tuile de tout ce que la génération y avait mis, eau exceptée (l'estampage des lieux, 39 ter).
+static func _degager_tuile(e: Dictionary, i: int) -> void:
+	e.arbres.erase(i)
+	e.rochers.erase(i)
+	e.filons.erase(i)
+	e.plantes.erase(i)
+	e.get("cueillette", {}).erase(i)
+	e.get("murs", {}).erase(i)
+	e.get("portes", {}).erase(i)
+	e.get("meubles", {}).erase(i)
+	e.sol[i] = true
 
 
 func _degager(e: Dictionary, i: int) -> void:

@@ -118,9 +118,11 @@ func test_camp() -> void:
 		var tags: Array = s.grille.contenu_de(t).get("tags", [])
 		if "arbre" in tags:
 			arbres += 1
-		if "entree_donjon" in tags:
+		# Une entrée de donjon peut désormais être celle d'un DONJON-BÂTIMENT voisin (39 ter, 2026-09-13) : ce qui reste
+		# interdit, c'est une entrée qui ne mène à aucun lieu, et toute entrée dans la cellule du camp elle-même.
+		if "entree_donjon" in tags and (not s.monde.entrees_lieux.has(t) or s.monde.cellule_de(t) == s.monde.cellule_camp):
 			entree = t
-	verifier(arbres >= 5 and entree == Vector2i(-1, -1), "des arbres (%d) et aucune entrée de donjon au camp" % arbres)
+	verifier(arbres >= 5 and entree == Vector2i(-1, -1), "des arbres (%d) et aucune entrée de donjon au camp — hors celles des donjons-bâtiments voisins" % arbres)
 	var base := Vector2i(s.monde.cellule_camp.x * tc, s.monde.cellule_camp.y * tc)   # la cellule du camp, où qu'elle soit
 	var coffre := base + Vector2i(tc / 2 - 2, tc / 2)   # le centre de la cellule du camp
 	verifier(s.contenants.get(s.grille.idx(coffre), []).size() >= 4, "le coffre de départ : hache, pioche, faucille, lit de paille, graines, étal")
