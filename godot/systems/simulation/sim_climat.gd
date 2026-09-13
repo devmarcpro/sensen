@@ -293,7 +293,9 @@ static func humidite_du_lieu(sim: Simulation, t: Vector2i) -> float:
 		return 0.5
 	if sim.lieu == "camp":
 		return humidite_sol(sim, sim.monde.cellule_de(t))
-	var cell: Vector2i = sim.donjon.get("cellule_mine", sim.donjon.get("cellule", Vector2i(-9999, -9999)))
+	var cell: Vector2i = sim.donjon.get("cellule_mine", Vector2i(-9999, -9999))
+	if cell.x == -9999:
+		cell = sim.donjon.get("cellule", Vector2i(-9999, -9999))
 	return 0.5 if cell.x == -9999 else humidite_sol(sim, cell)
 
 
@@ -316,6 +318,37 @@ static func tiquer(sim: Simulation, _tick: int) -> void:
 		for idx in sim.grille.modifies.keys():
 			sim.support_a_verifier[int(idx)] = true
 	sim.climat_detrempe = det
+	if det and sim.lieu != "camp":
+		suinter(sim, _tick)
+
+
+## L'EAU QUI TRAVERSE (2026-09-14) : sous terre, un sol détrempé au-dessus fait suinter les parois perméables — des flaques
+## naissent au pied d'une paroi de terre, jamais au pied du granit.
+static func suinter(sim: Simulation, tick: int) -> int:
+	var c: Dictionary = _cfg().get("suintement", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "suintement", tick])
+	var n0 := sim.grille.largeur * sim.grille.hauteur_grille
+	var poses := 0
+	for essai in int(c.get("essais", 30)):
+		var t := sim.grille.pos_de(rng.randi_range(0, n0 - 1))
+		if not sim.grille.dans(t) or sim.grille.bloque_passage(t) or sim.grille.niveau_liquide(t) > 0 or not sim.grille.occupant(t).is_empty():
+			continue
+		var perm := 0.0
+		for dd in Grille.DIRS:
+			var q: Vector2i = t + dd
+			if sim.grille.dans(q) and sim.grille.bloque_passage(q):
+				var mid := str(sim.grille.materiau_de(q))
+				if mid.is_empty():
+					mid = str(sim.grille.materiau_defaut)
+				perm = maxf(perm, float(GameData.catalogues.materials.get(mid, {}).get("stats", {}).get("permeabilite", 0)))
+		if perm < float(c.get("permeabilite_min", 35)):
+			continue
+		if rng.randf() < perm / 100.0 * float(c.get("chance", 0.5)):
+			SimTerrain._poser_eau(sim, t, 1)
+			sim.eau_active.erase(sim.grille.idx(t))   # une flaque de suintement ne s'écoule pas
+			poses += 1
+	return poses
 
 
 ## LES PNJ S'ABRITENT (2026-09-14) : la routine d'un habitant tient compte du temps qu'il fait. Sous la pluie, la place se

@@ -860,7 +860,7 @@ ui.capacites.ligne,"{nom} — {modules}"
 ui.capacites.nouvelle,+ New ability
 ui.carte.capitale," (capital)"
 ui.carte.depart,=== CHOOSE YOUR STARTING TILE — click a land cell (colour: biome · orange/red: danger · gold square: dungeon · black ring: the abyss) ===
-ui.carte.legende,"ochre line: road · circled green: your camp · circled blue: you are here · gold square: dungeon · black ring: the abyss · light dot: major vein · dark: never explored"
+ui.carte.legende,"ochre line: road · circled green: your camp · circled blue: you are here · gold square: dungeon · black ring: the abyss · light dot: major vein · dark: never explored · dots: known places (grey ruin, red dungeon, yellow hamlet, orange camp, blue shrine) · yellow dots: the journey"
 ui.carte.mer,sea
 ui.carte.royaume,"{nom} — {gouv}, {n} cells"
 ui.carte.survol,"({x},{y}) · {biome} · danger {danger}"

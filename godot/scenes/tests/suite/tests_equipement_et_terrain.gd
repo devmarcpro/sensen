@@ -1294,6 +1294,32 @@ func test_pnj_s_abritent() -> void:
 	s.monde.fermer()
 
 
+## L'EAU QUI TRAVERSE (22 ter — 2026-09-14) : sous terre, après l'orage, une galerie de terre prend l'eau ; une de granit non.
+func test_eau_qui_traverse() -> void:
+	var s := Simulation.new(4260)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.donjon = {"cellule": s.monde.cellule_de(j.pos)}
+	s.charger_donjon("terre", 4260, 77, 1, j)
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	verifier(s.lieu == "donjon" and SimClimat.humidite_du_lieu(s, j.pos) > 0.85, "sous terre, le sol du dessus est détrempé")
+	var _murs := func(matiere: String) -> void:
+		for i in s.grille.largeur * s.grille.hauteur_grille:
+			if s.grille.bloque_passage(s.grille.pos_de(i)):
+				s.grille.materiaux[i] = matiere
+	_murs.call("terre")
+	var flaques_terre := 0
+	for k in 6:
+		flaques_terre += SimClimat.suinter(s, 1000 + k)
+	_murs.call("granit")
+	var flaques_granit := 0
+	for k in 6:
+		flaques_granit += SimClimat.suinter(s, 2000 + k)
+	verifier(flaques_terre > 0 and flaques_granit == 0, "des parois de terre suintent (%d flaques), le granit non (%d)" % [flaques_terre, flaques_granit])
+	s.meteo_force = ""
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
