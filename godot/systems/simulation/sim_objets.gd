@@ -578,9 +578,15 @@ static func def_stats_c(sim: Simulation, cible: Dictionary) -> Dictionary:
 static func nom_objet(sim: Simulation, uid: String) -> Dictionary:
 	var it: Dictionary = sim.items.get(uid, {})
 	var nom: Dictionary = it.get("nom", {})
+	var fr_o := sim.fraicheur(it, sim.horloge_monde.ticks)   # l'inventaire dit ce qui tourne (le sac pourrit, 2026-09-13) — même sans savoir ce que c'est : ça se sent
 	if inconnu(sim, it):   # non identifié (designer 2026-09-01, point 52) : une apparence, pas un nom
-		return {"base": "objet.inconnu.%s" % str(it.get("type", "objet")), "affixe": "", "params": {"apparence": apparence_inconnue(sim, it)}, "rarete": "commun", "inconnu": true}
+		var inc := {"base": "objet.inconnu.%s" % str(it.get("type", "objet")), "affixe": "", "params": {"apparence": apparence_inconnue(sim, it)}, "rarete": "commun", "inconnu": true}
+		if fr_o != "frais":
+			inc["fraicheur"] = fr_o
+		return inc
 	var res := {"base": it.get("name_key", uid), "affixe": nom.get("affixe", ""), "params": nom.get("params", {}), "rarete": it.get("rarete", "commun")}
+	if fr_o != "frais":
+		res["fraicheur"] = fr_o
 	if nom.has("parchemin"):   # « Parchemin de Flamme (2 charges) » — le sort qu'il porte et ce qui reste
 		res["parchemin"] = {"module": str(nom.parchemin.module), "charges": int(it.get("charges", nom.parchemin.get("charges", 1)))}
 	if nom.has("de_creature"):   # « Statue de loup » : le nom porte la créature dont l'objet est tiré

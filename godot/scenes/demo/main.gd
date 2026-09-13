@@ -3650,6 +3650,13 @@ func _sur_fin_de_combat(_nom: String) -> void:
 ## Le nom d'un objet : « Épée de braise (une attaque sur 2 porte Feu) » — gabarit localisé,
 ## paramètres tirés (Loot — affixes : NOM ET PROVENANCE).
 func nom_objet(n: Dictionary) -> String:
+	var brut := _nom_objet_sans_fraicheur(n)
+	if n.has("fraicheur"):   # « Viande crue (rassis) » : ce qui tourne se lit dans le sac (le sac pourrit, 2026-09-13)
+		return "%s (%s)" % [brut, tr("fraicheur." + str(n.fraicheur))]
+	return brut
+
+
+func _nom_objet_sans_fraicheur(n: Dictionary) -> String:
 	var base := tr(str(n.base))
 	# Un matériau VIDE ne doit pas produire « Torche en  » : un objet sans matière connue garde son seul
 	# nom de base. Le défaut se voyait sur les objets dont aucune pièce n'était maîtresse, et sur les

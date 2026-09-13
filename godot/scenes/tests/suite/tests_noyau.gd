@@ -1992,6 +1992,9 @@ func test_pourriture() -> void:
 	verifier(int(viande.get("ne_tick", 0)) == t0 and Simulation.jours_de_vie(viande) == 3, "une viande naît datée et se garde trois jours (%d)" % Simulation.jours_de_vie(viande))
 	var fumee: Dictionary = GameData.catalogues.items.get("viande_fumee", {})
 	verifier(fumee.is_empty() or Simulation.jours_de_vie(fumee) == 0, "la viande fumée ne pourrit pas")
+	s.horloge_monde.ticks = t0 + 2 * jour
+	verifier(str(SimObjets.nom_objet(s, str(viande.uid)).get("fraicheur", "")) == "rassis" and not SimObjets.nom_objet(s, str(viande.uid)).get("base", "").is_empty(), "le nom de l'objet dit qu'elle est rassise, pour l'inventaire")
+	s.horloge_monde.ticks = t0
 	verifier(s.fraicheur(viande, t0 + jour) == "frais" and s.fraicheur(viande, t0 + 2 * jour) == "rassis" and s.fraicheur(viande, t0 + 3 * jour) == "pourri", "fraîche, rassise, pourrie : une lecture, aucun tick")
 	# Manger pourri nourrit moins
 	var fraiche := s.generer_objet("viande_crue", 1, {}, "commun", 0)
