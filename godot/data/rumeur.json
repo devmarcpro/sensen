@@ -22,5 +22,15 @@
     "actes_publics": [
       "conquete"
     ]
+  },
+  "disparition": {
+    "_doc": "L ABSENCE ET LE CORPS TROUVE (ordre de travail 29 quinquies, 2026-09-13). Un habitant tue SANS TEMOIN n est pas enterre : son corps reste. Chaque heure du monde, un civil vivant le TROUVE s il le voit a `vue_corps` tuiles (ligne de vue) ou s il le SENT — l odeur a sa tuile atteint `odeur_seuil` et son nez fonctionne. Trouve, il est enterre dans sa ville, qui porte le deuil, mais le tueur reste inconnu. Tant qu il ne l est pas, l absence se remarque par l heure de la mort : apres `jours_proches` jours, sa famille et ceux qui l aimaient (relation >= `relation_proche`) perdent `humeur_proches` ; apres `jours_ville` jours, toute sa ville perd `humeur_ville`. Les ossements ne sentent plus rien : cacher un corps est un DELAI, et le temps joue pour qui l a cache.",
+    "vue_corps": 6,
+    "odeur_seuil": 10.0,
+    "jours_proches": 1,
+    "jours_ville": 7,
+    "humeur_proches": -8,
+    "humeur_ville": -3,
+    "relation_proche": 20
   }
 }

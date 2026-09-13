@@ -4409,6 +4409,9 @@ journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
 journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.corps_trouve,"{trouveur} finds the body of {nom} — no one knows who killed them"
+journal.absence_proches,"Those close to {nom} are worried: nobody has seen them ({n})"
+journal.absence_ville,"In {village}, people wonder where {nom} has gone"
 journal.deuil_accuse,"in {village}, they know who killed him (reputation {reputation})"
 function.journalier.name,Day labourer
 function.portefaix.name,Porter

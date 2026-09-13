@@ -1185,6 +1185,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
 			SimObjets._perimer_butin(self, tick)
+			SimRumeur._tiquer_disparitions(self, tick)   # les corps cachés, trouvés ou regrettés (29 quinquies)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
@@ -2550,7 +2551,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		_monter_aggro(cible, source, float(degats) * float(regles.r.get("ia", {}).get("aggro_par_degat", 1.0)), true)
 	EventBus.emettre(&"damage_dealt", [source, cible.id, degats, detail])
 	var att: Dictionary = entites.get(source, {})
-	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []):
+	# UN MORT NE TÉMOIGNE PAS (29 quinquies) : frappé, le civil sait qui l'a frappé ; tué sans témoin, personne ne le sait.
+	var temoin_meurtre := "?"
+	if not att.is_empty() and cible.sante <= 0 and cible.camp == "civil" and bool(GameData.config("rumeur").get("temoin", {}).get("requis", false)):
+		temoin_meurtre = str(SimRumeur.temoin_de(self, att, cible.pos, int(GameData.config("rumeur").temoin.get("portee", 12))).get("id", ""))
+	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []) and temoin_meurtre != "":
 		SimPnj.reputation(self, att, cible, "tuer" if cible.sante <= 0 else "frapper")
 	if degats > 0 and cible.sante > 0 and not att.is_empty() and cible.camp == "civil":
 		SimRumeur.rapporter(self, att, "frapper_civil", cible.pos, [])   # frapper se raconte aussi, moins fort
@@ -2596,10 +2601,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		# LE FAIT QUE LE MONDE VA SE RACONTER (ordre de travail 29). Il ne juge rien : il pose des tags, et ce sont
 		# les valeurs des factions qui décideront qui s'en offusque. L'espèce en est un — c'est ainsi qu'une espèce
 		# devient une faction sans qu'on écrive un fichier par bête.
+		var temoin_mort := "public"   # sans auteur (la faim, une chute) : la mort n'a rien à cacher
 		if not att.is_empty():
 			var acte_f := "tuer_civil" if cible.camp == "civil" else ("tuer_bete_paisible" if est_faune_paisible(cible) else "tuer_bete")
 			var extra_f: Array = [] if cible.camp == "civil" else ["espece:" + str(cible.get("def", ""))]
-			SimRumeur.rapporter(self, att, acte_f, cible.pos, extra_f)
+			temoin_mort = SimRumeur.rapporter(self, att, acte_f, cible.pos, extra_f, temoin_meurtre)
 		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
 			monde.vacances[str(cible.royaume)] = monde.semaine_courante + int(SimTerritoire._ry(self).succession.semaines)
 			var h: String = SimRoyaumes.heritier_de(self, cible)
@@ -2613,7 +2619,13 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			SimPnj._mort_compagnon(self, cible)
 		_declencher(cible, "testament", cible.pos)   # la charge part quand le porteur tombe
 		SimObjets._drop(self, cible, source)
-		SimVilles.enterrer(self, cible, source)   # un habitant rejoint le cimetière de SA ville, qui apprend alors sa mort
+		# UN MEURTRE SANS TÉMOIN NE S'ENTERRE PAS TOUT SEUL (29 quinquies) : le corps reste où il est tombé, jusqu'à ce que
+		# quelqu'un le voie ou le sente — et alors on l'enterre sans savoir qui a frappé. Avec un témoin, la ville sait
+		# tout de suite, et sait QUI.
+		if temoin_mort.is_empty() and not att.is_empty() and "civil" in cible.get("tags", []) and not str(cible.get("village", "")).is_empty():
+			cible["mort_cachee"] = true
+		else:
+			SimVilles.enterrer(self, cible, source if not temoin_mort.is_empty() else "")   # un habitant rejoint le cimetière de SA ville, qui apprend alors sa mort
 		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":
 			expedition.tues = int(expedition.tues) + 1
 	# Déclencheurs à événement (Modules) : Ouverture au premier contact, Riposte quand le porteur est

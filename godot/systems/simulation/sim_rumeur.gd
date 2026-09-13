@@ -31,21 +31,28 @@ static func _cfg() -> Dictionary:
 
 ## UN ACTE LAISSE UN FAIT. `tags_extra` porte ce que le code seul sait — l'espèce de la bête, par exemple.
 ## Rien n'est jugé ici : on note ce qui s'est passé, et les valeurs des factions décideront.
-static func rapporter(sim: Simulation, auteur: Dictionary, acte: String, pos: Vector2i, tags_extra: Array = []) -> void:
+## Rend l'id du témoin (« public » pour un acte que le monde apprend de toute façon), ou "" si personne n'a rien vu.
+## `temoin_impose` : un témoin déjà cherché pour le même acte (« » s'il n'y en avait pas) — on ne relance pas les dés.
+static func rapporter(sim: Simulation, auteur: Dictionary, acte: String, pos: Vector2i, tags_extra: Array = [], temoin_impose: String = "?") -> String:
 	var cfg := _cfg()
 	if cfg.is_empty() or auteur.is_empty() or sim.monde == null:
-		return
+		return ""
 	var tags: Array = (sim.regles.r.get("faits", {}).get("actes", {}) as Dictionary).get(acte, []).duplicate()
 	if tags.is_empty() and tags_extra.is_empty():
-		return
+		return ""
 	# LE TÉMOIN (ordre de travail 29 quinquies) : sans quelqu'un qui a vu, il n'y a pas de fait — seulement un acte.
 	var tc: Dictionary = cfg.get("temoin", {})
 	var temoin_id := ""
 	if bool(tc.get("requis", false)) and not (acte in tc.get("actes_publics", [])):
-		var t := temoin_de(sim, auteur, pos, int(tc.get("portee", 12)))
-		if t.is_empty():
-			return
-		temoin_id = str(t.id)
+		if temoin_impose != "?":
+			if temoin_impose.is_empty():
+				return ""
+			temoin_id = temoin_impose
+		else:
+			var t := temoin_de(sim, auteur, pos, int(tc.get("portee", 12)))
+			if t.is_empty():
+				return ""
+			temoin_id = str(t.id)
 	tags.append_array(tags_extra)
 	var faits: Array = sim.monde.faits
 	faits.append({
@@ -59,6 +66,70 @@ static func rapporter(sim: Simulation, auteur: Dictionary, acte: String, pos: Ve
 	var plafond := int(cfg.get("faits_max", 240))
 	while faits.size() > plafond:
 		faits.remove_at(0)
+	return temoin_id if not temoin_id.is_empty() else "public"
+
+
+## L'ABSENCE QUI SE REMARQUE ET LE CORPS QUI SENT (ordre de travail 29 quinquies). Une passe par heure du monde sur les
+## habitants morts sans témoin : trouvé (vu ou senti), le corps est enterré et la ville porte le deuil — sans savoir qui ;
+## pas encore trouvé, son absence pèse sur ses proches au bout d'un jour, sur sa ville au bout d'une semaine. Tout se lit
+## sur `mort_tick` : un corps caché ne coûte rien à la simulation.
+static func _tiquer_disparitions(sim: Simulation, tick: int) -> void:
+	var dc: Dictionary = _cfg().get("disparition", {})
+	if dc.is_empty():
+		return
+	var jour := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)))
+	var vivants := sim.vivants()
+	for id_m: String in sim.entites.keys().duplicate():
+		var m: Dictionary = sim.entites[id_m]
+		if m.get("vivant", true) or not bool(m.get("mort_cachee", false)):
+			continue
+		# 1. QUELQU'UN LE TROUVE : il le voit de près, ou il le sent.
+		var trouveur: Dictionary = {}
+		for x in vivants:
+			if x.camp != "civil":
+				continue
+			var d := Grille.distance(x.pos, m.pos)
+			if d <= int(dc.get("vue_corps", 6)) and Etres.sens_actif(x, "vue") and sim.grille.ligne_de_vue(x.pos, m.pos):
+				trouveur = x
+				break
+			if Etres.sens_actif(x, "odorat") and SimTerrain.odeur_a(sim, x.pos) >= float(dc.get("odeur_seuil", 10.0)) and d <= 24:
+				trouveur = x
+				break
+		if not trouveur.is_empty():
+			m.erase("mort_cachee")
+			EventBus.emettre(&"journal", [&"journal.corps_trouve", {"nom": m.name_key, "trouveur": trouveur.name_key}])
+			SimVilles.enterrer(sim, m, "")   # enterré, pleuré — et le tueur reste inconnu : personne ne l'a vu
+			continue
+		# 2. PERSONNE NE L'A TROUVÉ : son absence se remarque, d'abord chez les siens.
+		var age := tick - int(m.get("mort_tick", tick))
+		var village := str(m.get("village", ""))
+		if village.is_empty():
+			continue
+		if age >= int(dc.get("jours_proches", 1)) * jour and not bool(m.get("absence_proches", false)):
+			m["absence_proches"] = true
+			var proches := {}
+			var fam: Dictionary = m.get("family", {})
+			for cle in ["child_of", "children", "parent_of", "spouse"]:
+				var v: Variant = fam.get(cle, [])
+				for pid in (v if v is Array else [v]):
+					if not str(pid).is_empty():
+						proches[str(pid)] = true
+			var n_p := 0
+			for x in vivants:
+				if proches.has(str(x.id)) or int(x.get("social", {}).get("relations", {}).get(id_m, 0)) >= int(dc.get("relation_proche", 20)):
+					x["humeur"] = clampi(int(x.get("humeur", 60)) + int(dc.get("humeur_proches", -8)), 0, 100)
+					n_p += 1
+			if n_p > 0:
+				EventBus.emettre(&"journal", [&"journal.absence_proches", {"nom": m.name_key, "n": n_p}])
+		if age >= int(dc.get("jours_ville", 7)) * jour and not bool(m.get("absence_ville", false)):
+			m["absence_ville"] = true
+			var n_v := 0
+			for x in vivants:
+				if str(x.get("village", "")) == village:
+					x["humeur"] = clampi(int(x.get("humeur", 60)) + int(dc.get("humeur_ville", -3)), 0, 100)
+					n_v += 1
+			if n_v > 0:
+				EventBus.emettre(&"journal", [&"journal.absence_ville", {"nom": m.name_key, "village": village}])
 
 
 ## QUI A VU ? Le civil le plus proche (à `portee` tuiles au plus) dont le champ de vue atteint l'auteur, s'il remporte
@@ -67,7 +138,7 @@ static func rapporter(sim: Simulation, auteur: Dictionary, acte: String, pos: Ve
 static func temoin_de(sim: Simulation, auteur: Dictionary, pos: Vector2i, portee: int) -> Dictionary:
 	var temoin: Dictionary = {}
 	for x in sim.vivants():
-		if x.id == auteur.id or x.camp != "civil" or Grille.distance(x.pos, pos) > portee or not sim.voit_ia(x, auteur):
+		if x.id == auteur.id or int(x.get("sante", 1)) <= 0 or x.camp != "civil" or Grille.distance(x.pos, pos) > portee or not sim.voit_ia(x, auteur):   # la victime qui tombe ne témoigne pas
 			continue
 		if temoin.is_empty() or Grille.distance(x.pos, pos) < Grille.distance(temoin.pos, pos):
 			temoin = x

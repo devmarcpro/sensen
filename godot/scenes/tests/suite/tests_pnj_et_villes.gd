@@ -140,6 +140,62 @@ func test_temoin() -> void:
 	s.monde.fermer()
 
 
+## L'ABSENCE QUI SE REMARQUE ET LE CORPS QUI SENT (ordre de travail 29 quinquies, 2026-09-13).
+func test_absence_et_corps() -> void:
+	var s := Simulation.new(4244)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	for x in s.vivants():   # personne autour : un meurtre sans témoin
+		if x.id != j.id and x.camp == "civil":
+			x.vivant = false
+			s.grille.liberer(x.pos)
+			x.erase("mort_cachee")
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var dc: Dictionary = GameData.config("rumeur").disparition
+	var forgeron := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	forgeron["village"] = "Bourgade"
+	forgeron["tags"] = ["civil"]
+	var fille := s.ajouter("villageois", j.pos + Vector2i(40, 0), "ia")   # loin, hors de vue
+	fille["village"] = "Bourgade"
+	fille["humeur"] = 60
+	forgeron["family"] = {"children": [str(fille.id)]}
+	fille["family"] = {"child_of": [str(forgeron.id)]}
+	var voisin := s.ajouter("villageois", j.pos + Vector2i(-40, 0), "ia")
+	voisin["village"] = "Bourgade"
+	voisin["humeur"] = 60
+	var rep0 := int(j.get("reputations", {}).get("Bourgade", 0))
+	s._appliquer_degats(forgeron, 9999, j.id, {})
+	verifier(not forgeron.vivant and bool(forgeron.get("mort_cachee", false)), "tué sans témoin, le forgeron n'est pas enterré : son corps reste où il est tombé")
+	verifier(int(j.get("reputations", {}).get("Bourgade", 0)) == rep0, "et personne ne sait rien : la réputation n'a pas bougé")
+	var t0: int = s.horloge_monde.ticks
+	SimRumeur._tiquer_disparitions(s, t0 + jour / 2)
+	verifier(int(fille.humeur) == 60, "une demi-journée : personne ne s'est encore aperçu de rien")
+	SimRumeur._tiquer_disparitions(s, t0 + jour * int(dc.jours_proches) + 1)
+	verifier(int(fille.humeur) == 60 + int(dc.humeur_proches) and int(voisin.humeur) == 60, "un jour : sa fille s'inquiète (%d), le voisin pas encore (%d)" % [int(fille.humeur), int(voisin.humeur)])
+	SimRumeur._tiquer_disparitions(s, t0 + jour * int(dc.jours_ville) + 1)
+	verifier(int(voisin.humeur) == 60 + int(dc.humeur_ville), "une semaine : toute la ville se demande où il est passé (%d)" % int(voisin.humeur))
+	# LE CORPS SENT : un passant hors de vue mais sous le vent le trouve.
+	var passant := s.ajouter("villageois", forgeron.pos + Vector2i(12, 0), "ia")
+	passant["village"] = "Ailleurs"
+	SimRumeur._tiquer_disparitions(s, t0 + jour * 8)
+	verifier(bool(forgeron.get("mort_cachee", false)), "hors de vue et sans odeur à sa tuile, le passant ne trouve rien")
+	SimTerrain.sentir(s, passant.pos, float(dc.odeur_seuil) + 5.0)   # le vent porte l'odeur jusqu'à lui : une source posée, puis un pas du champ
+	s.odeur_prochain_pas = 0
+	SimTerrain._tiquer_odeur(s, t0 + jour * 8)
+	SimRumeur._tiquer_disparitions(s, t0 + jour * 8 + 1)
+	verifier(not bool(forgeron.get("mort_cachee", false)) and int(j.get("reputations", {}).get("Bourgade", 0)) == rep0, "l'odeur mène le passant au corps : trouvé, enterré — et le tueur toujours inconnu")
+	# AVEC UN TÉMOIN, la ville sait tout de suite, et sait qui.
+	var oeil := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	oeil.corps.stats.perception = 200
+	var victime := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	victime["village"] = "Bourgade"
+	victime["tags"] = ["civil"]
+	s._appliquer_degats(victime, 9999, j.id, {})
+	verifier(not victime.vivant and not bool(victime.get("mort_cachee", false)), "sous les yeux d'un témoin, le mort est aussitôt pleuré : rien à cacher")
+	EventBus._file.clear()
+	s.monde.fermer()
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)

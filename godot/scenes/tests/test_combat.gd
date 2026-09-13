@@ -125,6 +125,7 @@ func _ready() -> void:
 	_lancer("test_pourriture")
 	_lancer("test_rumeur_et_factions")
 	_lancer("test_temoin")
+	_lancer("test_absence_et_corps")
 	_lancer("test_temps_long")
 	_lancer("test_infiltration")
 	_lancer("test_usure")

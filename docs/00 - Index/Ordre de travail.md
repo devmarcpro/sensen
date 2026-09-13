@@ -641,7 +641,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **CE QU'IL FAUDRAIT EN DONNÉES** : un `caractere` par village (paisible, laborieux, chaotique, dévot…), ses
     poids de routine, ses actes permis, et ce qu'il fait aux prix et à la garde. Le reste existe.
 
-29 quinquies. **LE TÉMOIN, ET L'ABSENCE QUI SE REMARQUE** *(designer 2026-09-10 : « tuer un robot devant tout le
+~~29 quinquies. **LE TÉMOIN, ET L'ABSENCE QUI SE REMARQUE**~~ — **FAIT le 2026-09-13, les trois parties.** (1) `SimRumeur.temoin_de` — le même regard que les lois — : sans témoin, un acte ne devient pas un fait, et un meurtre sans témoin ne touche pas la réputation. (2) Un habitant tué sans témoin **n'est plus enterré sur-le-champ** (ce qui démasquait le tueur « même sans témoin », décision du 2026-09-07 que celle-ci remplace) : son absence pèse sur ses proches au bout d'un jour, sur sa ville au bout d'une semaine, lue sur `mort_tick`. (3) Le corps est **trouvé** par qui le voit ou le sent — la pourriture le rend plus fort, les ossements plus du tout — puis enterré, et le tueur reste inconnu. *Limite écrite* : la passe ne regarde que les corps chargés ; une ville hors fenêtre ne remarque pas l'absence de ceux qui y sont morts. *(designer 2026-09-10 : « tuer un robot devant tout le
     village fait baisser la réputation drastiquement… mais si le robot est tué discrètement, caché dans un coin, et
     que le corps est débarrassé, les autres ne peuvent pas savoir donc pas de répercussions — mais les PNJ vont se
     demander où est passé le PNJ mort, ça va affecter tout le monde »).* **Noté, pas codé.**
