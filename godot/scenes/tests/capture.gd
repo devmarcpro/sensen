@@ -1250,7 +1250,88 @@ func _process(delta: float) -> void:
 				if str(k).begins_with("lumiere"):
 					lum[k] = scene.sim.chrono[k]
 			print("simulation (lumière) : ", str(lum))
+		if "--appels" in OS.get_cmdline_user_args():
+			set_process(false)
+			await _ventiler_appels()
 		get_tree().quit()
+
+
+## --appels : D'OÙ VIENNENT LES APPELS DE DESSIN (ordre de travail 45 ter : « à instrumenter avant de toucher quoi que
+## ce soit »). Une ablation, pas une estimation : chaque famille de nœuds dessinés (par script, sinon par classe) est
+## cachée à son tour, et l'on relit le compteur du serveur de rendu. La différence est ce que la famille coûte — elle
+## compte aussi ce qui pend sous elle, et c'est dit dans la ligne.
+func _ventiler_appels() -> void:
+	var familles := {}
+	var pile: Array[Node] = [get_tree().root]
+	while not pile.is_empty():
+		var n: Node = pile.pop_back()
+		for c in n.get_children():
+			pile.append(c)
+		if not (n is CanvasItem) or not (n as CanvasItem).is_visible_in_tree():
+			continue
+		var scr: Script = n.get_script()
+		var cle := n.get_class()
+		if scr != null and not str(scr.get_global_name()).is_empty():
+			cle = str(scr.get_global_name())
+		elif scr != null:
+			cle = scr.resource_path.get_file() if not scr.resource_path.get_file().is_empty() else "%s (script sous %s)" % [n.get_class(), str(n.get_parent().name)]
+		if n == scene:
+			continue   # la racine cache tout : sa ligne ne dirait rien
+		if n is Control:
+			cle = "Control:" + cle
+		if not familles.has(cle):
+			familles[cle] = []
+		familles[cle].append(n)
+	var mesurer := func() -> float:
+		var somme := 0.0
+		for _k in 4:
+			await get_tree().process_frame
+		for _k in 4:
+			await get_tree().process_frame
+			somme += float(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+		return somme / 4.0
+	var total: float = await mesurer.call()
+	var lignes: Array = []
+	for cle in familles.keys():
+		var cachees: Array = []
+		for n in familles[cle]:
+			if is_instance_valid(n) and (n as CanvasItem).visible:
+				(n as CanvasItem).visible = false
+				cachees.append(n)
+		var sans: float = await mesurer.call()
+		for n in cachees:
+			if is_instance_valid(n):
+				(n as CanvasItem).visible = true
+		lignes.append([total - sans, cle, (familles[cle] as Array).size()])
+	# Pourquoi les végétaux ne se regroupent pas : chaque hypothèse retirée à son tour.
+	var vegs: Array = (familles.get("Vegetal", []) as Array).filter(func(n): return is_instance_valid(n))
+	print("  végétaux encore vivants après l'ablation : %d sur %d" % [vegs.size(), (familles.get("Vegetal", []) as Array).size()])
+	if vegs.is_empty() and scene != null and "noeuds_vegetaux" in scene:
+		vegs = scene.noeuds_vegetaux.values().filter(func(n): return is_instance_valid(n) and (n as CanvasItem).is_visible_in_tree())
+		print("  végétaux relus dans la scène : %d" % vegs.size())
+	if not vegs.is_empty():
+		var mods := {}
+		for n in vegs:
+			mods[n] = (n as CanvasItem).modulate
+			(n as CanvasItem).modulate = Color.WHITE
+		print("  essai végétaux, même modulate : %.0f" % float(await mesurer.call()))
+		for n in mods.keys():
+			if is_instance_valid(n):
+				(n as CanvasItem).modulate = mods[n]
+		var zs := {}
+		for n in vegs:
+			if is_instance_valid(n):
+				zs[n] = (n as CanvasItem).z_index
+				(n as CanvasItem).z_index = 3000
+		print("  essai végétaux, même z_index : %.0f" % float(await mesurer.call()))
+		for n in zs.keys():
+			if is_instance_valid(n):
+				(n as CanvasItem).z_index = zs[n]
+	lignes.sort_custom(func(x: Array, y: Array) -> bool: return float(x[0]) > float(y[0]))
+	print("appels : %.0f par image, ventilés par ablation" % total)
+	for l in lignes:
+		if float(l[0]) >= 1.0:
+			print("  %6.0f  %-40s (%d nœuds)" % [float(l[0]), str(l[1]), int(l[2])])
 
 
 ## Ce qui se passe dans un écran entre deux prises d'un GIF (designer 2026-09-04 : « des GIF avec simulation complète »).
