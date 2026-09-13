@@ -1,6 +1,6 @@
 {
   "name_key": "recipe.vinifier.name",
-  "station": "alambic",
+  "station": "cuve",
   "craft_skill": "alchimie",
   "inputs": [
     {

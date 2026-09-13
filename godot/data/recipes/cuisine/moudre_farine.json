@@ -1,6 +1,6 @@
 {
   "name_key": "recipe.moudre_farine.name",
-  "station": "cuisine",
+  "station": "moulin",
   "craft_skill": "cuisine",
   "inputs": [
     {

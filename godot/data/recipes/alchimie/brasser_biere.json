@@ -1,6 +1,6 @@
 {
   "name_key": "recipe.brasser_biere.name",
-  "station": "alambic",
+  "station": "cuve",
   "craft_skill": "alchimie",
   "inputs": [
     {

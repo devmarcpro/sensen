@@ -1700,6 +1700,8 @@ stat.force,Strength
 stat.perception,Perception
 stat.volonte,Will
 station.alambic.name,Alembic
+station.moulin.name,Mill
+station.cuve.name,Vat
 station.atelier_tissage.name,Weaving bench
 station.cuisine.name,Kitchen
 station.enclume.name,Anvil

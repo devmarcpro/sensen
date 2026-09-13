@@ -1,0 +1,25 @@
+{
+  "name_key": "station.cuve.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "cuve",
+  "tags": [
+    "station"
+  ],
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "menuiserie",
+    "inputs": [
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 6
+      },
+      {
+        "category": "metal",
+        "forme": "lingot",
+        "amount": 1
+      }
+    ]
+  }
+}

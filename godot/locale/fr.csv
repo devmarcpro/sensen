@@ -487,6 +487,8 @@ station.scierie.name,Scierie
 station.tailleur_de_pierre.name,Tailleur de pierre
 station.atelier_tissage.name,Atelier de tissage
 station.alambic.name,Alambic
+station.moulin.name,Moulin
+station.cuve.name,Cuve
 station.cuisine.name,Cuisine
 station.table_enchantement.name,Table d'enchantement
 recipe.fondre_lingot.name,Fondre un lingot

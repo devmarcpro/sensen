@@ -2078,6 +2078,17 @@ func test_agriculture_refondue() -> void:
 	for iid in GameData.catalogues.items.keys():
 		if "cereale" in GameData.catalogues.items[iid].get("tags", []):
 			cereales += 1
+	# LA CUVE ET LE MOULIN SONT DES STATIONS (l'ancienne file, 2026-09-13) : on moulait sur une cuisine, on brassait dans
+	# un alambic, et le moulin des villes n'était qu'un décor.
+	verifier(str(recettes.moudre_farine.station) == "moulin" and str(recettes.brasser_biere.station) == "cuve" and str(recettes.vinifier.station) == "cuve", "le grain se moud au moulin, la bière et le vin se font en cuve")
+	verifier(GameData.catalogues.stations.has("moulin") and GameData.catalogues.stations.has("cuve") and GameData.catalogues.items.has("station_moulin") and GameData.catalogues.items.has("station_cuve"), "les deux stations existent, et leurs objets se fabriquent")
+	var pref_m: Dictionary = GameData.catalogues.village_buildings.moulin
+	var meule := false
+	for ligne_m in pref_m.plan:
+		for car in str(ligne_m):
+			if str(pref_m.get("stations", {}).get(car, "")) == "moulin":
+				meule = true
+	verifier(meule, "le moulin d'une ville porte une vraie meule : on y moud")
 	verifier(manquantes.is_empty() and cereales >= 9 and GameData.catalogues.items.has("fromage") and GameData.catalogues.items.has("vin") and "oleagineux" in GameData.catalogues.items.olive.get("tags", []), "les neuf transformations existent, %d grains portent le tag céréale, l'olive presse (%s)" % [cereales, str(manquantes)])
 	# « ensuite encore plus » : la conservation, la chandelle, les épices et les teintures, deux minerais réels.
 	var mats: Dictionary = GameData.catalogues.materials

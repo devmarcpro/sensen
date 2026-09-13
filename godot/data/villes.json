@@ -261,7 +261,8 @@
     "cuisine",
     "alambic",
     "tailleur_de_pierre",
-    "etabli"
+    "etabli",
+    "cuve"
   ],
   "fonctions": {
     "atelier": "artisan",

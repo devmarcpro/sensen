@@ -1,0 +1,25 @@
+{
+  "name_key": "station.moulin.name",
+  "type": "station",
+  "equip_slot": "",
+  "station": "moulin",
+  "tags": [
+    "station"
+  ],
+  "recipe": {
+    "station": "tailleur_de_pierre",
+    "craft_skill": "taille_de_pierre",
+    "inputs": [
+      {
+        "category": "roche",
+        "forme": "pierre_taillee",
+        "amount": 6
+      },
+      {
+        "category": "bois",
+        "forme": "planche",
+        "amount": 2
+      }
+    ]
+  }
+}
