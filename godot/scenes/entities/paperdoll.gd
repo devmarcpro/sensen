@@ -51,6 +51,8 @@ func _st_sprites() -> Dictionary:
 func configurer(p_e: Dictionary, p_rig: Dictionary, p_items: Dictionary, p_fonct: Dictionary, p_palette: Dictionary) -> void:
 	e = p_e
 	rig = p_rig
+	_rig_base = p_rig
+	_rig_cle = ""
 	items = p_items
 	fonctionnalites = p_fonct
 	palette = p_palette
@@ -120,7 +122,75 @@ func _top_pp(cle: String, t0: int) -> int:
 	return Time.get_ticks_usec()
 
 
+var _rig_base: Dictionary = {}
+var _rig_cle := ""
+
+
+## LES MUTATIONS SE DESSINENT (designer 2026-09-13). Le rig partagé, plus un segment par partie aléatoire : un bras sur
+## le torse, un œil sur la main. Rebâti seulement quand les mutations de l'être changent.
+func _rig_de_l_etre() -> void:
+	var muts: Array = e.get("corps", {}).get("mutations", [])
+	var cle := ",".join(muts)
+	if cle == _rig_cle:
+		return
+	_rig_cle = cle
+	_ancrages_lus.clear()
+	if _rig_base.is_empty():
+		_rig_base = rig
+	var aleatoires: Array = muts.filter(func(x) -> bool: return str(x).begins_with("rnd:"))
+	if aleatoires.is_empty():
+		rig = _rig_base
+		return
+	rig = _rig_base.duplicate(true)
+	var types: Dictionary = GameData.config("mutations").get("aleatoires", {}).get("types", {})
+	for code in aleatoires:
+		var corps_code := str(code).trim_prefix("rnd:")
+		var type := corps_code.get_slice("@", 0)
+		var hote := corps_code.get_slice("@", 1).get_slice("#", 0)
+		var n := corps_code.get_slice("#", 1)
+		var t: Dictionary = types.get(type, {})
+		var seg_hote := ""
+		for nom_s: String in rig.segments.keys():   # le segment qui dessine l'hôte : celui qui porte son nom, sinon le premier qui dessine cette partie
+			if str(rig.segments[nom_s].get("partie", "")) == hote and (seg_hote.is_empty() or nom_s == hote or nom_s.ends_with("_bas_D") or nom_s.ends_with("_bas_G")):
+				seg_hote = nom_s
+		if seg_hote.is_empty() or t.is_empty():
+			continue
+		var cle_ancre := "mut_" + n
+		var hs: Dictionary = rig.segments[seg_hote]
+		if not hs.has("ancrages"):
+			hs["ancrages"] = {}
+		hs.ancrages[cle_ancre] = [float(hs.get("longueur", 4.0)) * 0.5, 0.0, -1.0]   # le milieu du membre, un peu devant : le repli sans marqueur
+		if str(t.get("segment", "")) == "oeil":
+			var nom_o := "oeil~m" + n
+			rig.segments[nom_o] = {"parent": seg_hote, "ancrage": cle_ancre, "longueur": 2.4, "largeur": 2.4, "angle": float(hs.get("angle", 0.0)),
+				"ancrages": {}, "zone": str(hs.get("zone", "")), "partie": "oeil_mut_" + n, "oeil_mutant": true}
+			rig.ordre.append(nom_o)
+			continue
+		var parent_s := seg_hote
+		var ancre_s := cle_ancre
+		for modele_s in t.get("segments", []):
+			var src: Dictionary = _rig_base.segments.get(str(modele_s), {})
+			if src.is_empty():
+				break
+			var nom_c := "%s~m%s" % [str(modele_s), n]
+			var c: Dictionary = src.duplicate(true)
+			c["parent"] = parent_s
+			c["ancrage"] = ancre_s
+			var partie_src := str(src.get("partie", ""))
+			c["partie"] = "%s_mut_%s" % [partie_src.trim_suffix("_D").trim_suffix("_G"), n]
+			rig.segments[nom_c] = c
+			rig.ordre.append(nom_c)
+			# l'enfant suivant s'accroche à l'ancrage que son modèle utilisait sur celui-ci (coude, poignet, genou…)
+			var suivant := ""
+			var idx_m: int = (t.segments as Array).find(modele_s)
+			if idx_m + 1 < (t.segments as Array).size():
+				suivant = str(_rig_base.segments.get(str(t.segments[idx_m + 1]), {}).get("ancrage", ""))
+			parent_s = nom_c
+			ancre_s = suivant
+
+
 func _dessiner_etre() -> void:
+	_rig_de_l_etre()
 	if "vehicule" in e.get("tags", []):   # un train, une calèche : une caisse et des roues tant qu'il n'y a pas de sprite (Villes B4)
 		_dessine_vehicule()
 		return
@@ -356,6 +426,10 @@ func _ancrage_de(parent: String, enfant: String, ancrage: String) -> Array:
 		_ancrages_lus.clear()
 	if _ancrages_lus.has(enfant):
 		return _ancrages_lus[enfant]
+	if "~m" in enfant and str(rig.segments.get(enfant, {}).get("ancrage", "")).begins_with("mut_"):
+		var res_m := _ancrage_annexe(parent, enfant, defaut)   # une partie mutante s'accroche aux attaches ANNEXES de son hôte
+		_ancrages_lus[enfant] = res_m
+		return res_m
 	var res := _ancrage_lu(parent, enfant, ancrage, defaut)
 	_ancrages_lus[enfant] = res
 	return res
@@ -394,6 +468,34 @@ func _ancrage_lu(parent: String, enfant: String, ancrage: String, defaut: Array)
 	var k := cote / float(Planches.case())
 	return [l * 0.5 + cote * 0.5 - k * pt.y, k * pt.x - cote * 0.5,
 		float(defaut[2]) if defaut.size() > 2 else 0.0]
+
+
+## L'ATTACHE D'UNE PARTIE MUTANTE (designer 2026-09-10 puis 2026-09-13) : les marqueurs de rang 1 et au-delà, dessinés
+## « pour prévoir les mutations », dans la famille de la partie ajoutée (`oeil`, `bras`…) ou, à défaut, n'importe quel
+## marqueur annexe de l'hôte. Le numéro de la mutation choisit parmi eux. Sans marqueur annexe : le milieu du membre.
+func _ancrage_annexe(parent: String, enfant: String, defaut: Array) -> Array:
+	var base := parent.get_slice("~", 0).trim_suffix("_G").trim_suffix("_D")
+	var dossier := "membres/" + base
+	if Planches.variantes(dossier) <= 0:
+		return defaut
+	var variante := maxi(0, Planches.index_locus("carrure", str(_ap.get("carrure", "moyenne"))))
+	var famille := enfant.get_slice("~", 0).trim_suffix("_G").trim_suffix("_D").trim_suffix("_haut").trim_suffix("_bas")
+	var pts: Array = []
+	for rang in range(1, 4):
+		var mq: Dictionary = Planches.marqueurs_rang(dossier, variante, rang)
+		pts.append_array(mq.get(famille, []))
+		if pts.is_empty():
+			for f in mq.keys():
+				pts.append_array(mq[f])
+	if pts.is_empty():
+		return defaut
+	var n := int(enfant.get_slice("~m", 1)) if enfant.get_slice("~m", 1).is_valid_int() else 0
+	var pt: Vector2 = pts[posmod(n, pts.size())]
+	var sp: Dictionary = rig.segments[parent]
+	var l := float(sp.get("longueur", 0.0))
+	var cote := maxf(l, float(sp.get("largeur", l)))
+	var k := cote / float(Planches.case())
+	return [l * 0.5 + cote * 0.5 - k * pt.y, k * pt.x - cote * 0.5, float(defaut[2]) if defaut.size() > 2 else 0.0]
 
 
 ## L'ordre de dessin : du plus loin au plus près. `rig.ordre` ne sert qu'à départager deux segments à la même
@@ -611,6 +713,13 @@ func _couleur_materiau(materiau: String) -> Color:
 
 
 func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) -> void:
+	if bool((rig.segments.get(nom, {}) as Dictionary).get("oeil_mutant", false)):   # un œil poussé ailleurs que sur le visage
+		var c_o: Vector2 = m.origine
+		var r_o := maxf(1.2, float(m.largeur) * 0.5)
+		draw_circle(c_o, r_o, Color(0.95, 0.93, 0.88))
+		draw_circle(c_o, r_o * 0.45, Color(0.12, 0.1, 0.1))
+		draw_arc(c_o, r_o, 0.0, TAU, 12, col.darkened(0.45), maxf(0.6, contour))
+		return
 	var o: Vector2 = m.origine
 	var d: Vector2 = m.direction
 	var p: Vector2 = m.perp
@@ -665,7 +774,7 @@ func _planche_equipement(m: Dictionary, nom: String, info: Dictionary) -> void:
 
 
 func _planche_membre(nom: String, m: Dictionary, col: Color) -> bool:
-	var base := nom.trim_suffix("_G").trim_suffix("_D")
+	var base := nom.get_slice("~", 0).trim_suffix("_G").trim_suffix("_D")   # un segment mutant (`bras_haut_D~m2`) prend la planche de son modèle
 	var dossier := "membres/" + base
 	if Planches.variantes(dossier) <= 0:
 		return false

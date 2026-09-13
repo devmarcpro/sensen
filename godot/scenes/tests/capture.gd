@@ -989,6 +989,12 @@ func _ready() -> void:
 		# en jeu, ce qu'il faut pour juger l'anatomie ou le pantin d'un personnage donné. Les clés sont celles de
 		# l'apparence (`tete`, `yeux`, `bouche`, `oreilles`, `cheveux`, `nez`, `pilosite`, `carrure`, les teintes et
 		# les `couleur_<locus>`), plus `race` qui est sur l'être lui-même.
+		if args[i2] == "--mutant" and i2 + 1 < args.size() and scene.sim != null:   # --mutant N : N mutations aléatoires sur le joueur (designer 2026-09-13)
+			var j_m: Dictionary = scene.joueur()
+			var rng_m := RandomNumberGenerator.new()
+			rng_m.seed = 4242
+			for k_m in int(args[i2 + 1]):
+				print("capture : mutation %s" % SimMaladies.muter_aleatoire(scene.sim, j_m, rng_m))
 		if args[i2] == "--joueur" and i2 + 1 < args.size() and scene.sim != null:
 			var j_c: Dictionary = scene.joueur()
 			if not j_c.is_empty():

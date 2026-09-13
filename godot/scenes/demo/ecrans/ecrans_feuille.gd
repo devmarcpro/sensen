@@ -60,7 +60,7 @@ static func _ligne_partie(ec: Ecrans, j: Dictionary, nom: String, interne: bool)
 	if not intacte and nom in SimCadavres.prelevees(j):
 		cle = "ui.anatomie.prelevee"
 	ec.liste.add_item(ec.tr(cle).format({
-		"nom": ec.tr("partie." + nom), "pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
+		"nom": ec.tr(Etres.cle_nom_partie(nom)), "pv": Etres.sante_partie(j, nom), "pv_max": Etres.sante_partie_max(j, nom)}))
 	ec.entrees.append({"kind": "partie", "id": nom, "texte": ""})
 
 
@@ -75,7 +75,7 @@ static func texte_partie(ec: Ecrans, nom: String) -> String:
 	var p: Dictionary = plan.get("parties", {}).get(nom, {})
 	if p.is_empty():
 		return ""
-	var l: Array[String] = ["[b]" + ec.tr("partie." + nom) + "[/b]"]
+	var l: Array[String] = ["[b]" + ec.tr(Etres.cle_nom_partie(nom)) + "[/b]"]
 	var intacte := Etres.partie_intacte(j, nom)
 	if not intacte:
 		l.append(ec.tr("ui.anatomie.d_prelevee" if nom in SimCadavres.prelevees(j) else "ui.anatomie.d_perdue"))
@@ -87,7 +87,7 @@ static func texte_partie(ec: Ecrans, nom: String) -> String:
 	l.append(ec.tr("ui.anatomie.d_zone").format({"zone": ec.tr("zone." + str(p.get("zone", "torse"))), "poids": "%.2f" % float(p.get("poids_coup", 1.0))}))
 	var attache := str(p.get("contenant", p.get("parent", "")))
 	if not attache.is_empty():
-		l.append(ec.tr("ui.anatomie.d_attache").format({"nom": ec.tr("partie." + attache)}))
+		l.append(ec.tr("ui.anatomie.d_attache").format({"nom": ec.tr(Etres.cle_nom_partie(attache))}))
 	if not str(p.get("sens", "")).is_empty():
 		l.append(ec.tr("ui.anatomie.d_sens").format({
 			"sens": ec.tr("sens." + str(p.sens)),
@@ -105,9 +105,9 @@ static func texte_partie(ec: Ecrans, nom: String) -> String:
 	for autre: String in (plan.parties as Dictionary).keys():
 		var q: Dictionary = plan.parties[autre]
 		if str(q.get("parent", "")) == nom:
-			portees.append(ec.tr("partie." + autre))
+			portees.append(ec.tr(Etres.cle_nom_partie(autre)))
 		if str(q.get("contenant", "")) == nom:
-			logees.append(ec.tr("partie." + autre))
+			logees.append(ec.tr(Etres.cle_nom_partie(autre)))
 	if ec.anatomie_depouille():
 		# UNE OPTION ABSENTE DOIT DIRE POURQUOI. Sans ces deux lignes, une lame oubliée au camp et une chair trop
 		# avancée donneraient exactement le même écran muet — et le joueur conclurait que le prélèvement est cassé.

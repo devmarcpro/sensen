@@ -2134,6 +2134,43 @@ func test_mutations() -> void:
 		if "oeil_absent" in enfant.corps.get("mutations", []):
 			deforme += 1
 	verifier(passe > 0 and passe < 20 and deforme == 0, "héritable, la mutation passe à %d enfant(s) sur 20 ; la déformation à aucun" % passe)
+	# LES MUTATIONS ALÉATOIRES (designer 2026-09-13) : un œil sur la main, un bras sur le torse — de vraies parties.
+	var mut := s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(3, 0)), "ia")
+	var rng_m := RandomNumberGenerator.new()
+	rng_m.seed = 99
+	var codes: Array = []
+	var types_vus := {}
+	for k in 12:
+		var code := SimMaladies.muter_aleatoire(s, mut, rng_m)
+		if not code.is_empty():
+			codes.append(code)
+			types_vus[code.trim_prefix("rnd:").get_slice("@", 0)] = true
+	verifier(codes.size() >= 10 and types_vus.size() >= 3, "douze tirages, %d mutations de %d types différents (%s)" % [codes.size(), types_vus.size(), str(types_vus.keys())])
+	var parties_m: Dictionary = Etres.plan_corps(mut).parties
+	var ajoutees := 0
+	var accrochees := true
+	for nom_p: String in parties_m.keys():
+		if parties_m[nom_p].has("mutation"):
+			ajoutees += 1
+			if not parties_m.has(str(parties_m[nom_p].parent)):
+				accrochees = false
+	verifier(ajoutees >= codes.size() and accrochees, "chaque mutation est une vraie partie du plan, accrochée à un hôte qui existe (%d parties)" % ajoutees)
+	var oeil_code := ""
+	for cd in codes:
+		if str(cd).begins_with("rnd:oeil@"):
+			oeil_code = str(cd)
+	if not oeil_code.is_empty():
+		var nom_oeil := "oeil_mut_" + oeil_code.get_slice("#", 1)
+		verifier(str(parties_m.get(nom_oeil, {}).get("sens", "")) == "vue" and not bool(parties_m.get(nom_oeil, {}).get("interne", true)), "l'œil ajouté voit, et il est dehors, sur %s" % oeil_code.get_slice("@", 1).get_slice("#", 0))
+		Etres.blesser_partie(mut, nom_oeil, 9999)
+		verifier(not Etres.partie_intacte(mut, nom_oeil), "et il se crève comme un autre")
+	var petit := s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(3, 3)), "ia")
+	var herite := 0
+	for k in 10:
+		var pt := s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(3, 3)), "ia")
+		SimMaladies.heriter(s, pt, [mut])
+		herite += (pt.corps.get("mutations", []) as Array).filter(func(x) -> bool: return str(x).begins_with("rnd:")).size()
+	verifier(herite > 0, "les mutations aléatoires se transmettent (%d sur dix enfants)" % herite)
 	EventBus._file.clear()
 
 

@@ -59,5 +59,104 @@
         "perception": -2
       }
     }
+  },
+  "aleatoires": {
+    "_doc": "LES MUTATIONS ALEATOIRES (designer 2026-09-13). Un TYPE est tire au `poids`, puis un HOTE parmi les parties EXTERNES intactes dont le nom commence par un prefixe de `hotes`. La partie naît sur le modele des parties du plan (`modele` : la chaine de parties copiee, la premiere accrochee a l hote), sans emplacement d equipement ; un oeil garde son sens. `heritable` : l enfant la recoit sur le meme hote. `part_corruption` : la part des mutations de corruption qui sont aleatoires plutot que nommees.",
+    "heritable": true,
+    "part_corruption": 0.7,
+    "types": {
+      "oeil": {
+        "poids": 4,
+        "modele": [
+          "oeil_D"
+        ],
+        "hotes": [
+          "tete",
+          "torse",
+          "bras_",
+          "main_",
+          "jambe_",
+          "pied_"
+        ],
+        "segment": "oeil"
+      },
+      "bras": {
+        "poids": 2,
+        "modele": [
+          "bras_D",
+          "main_D"
+        ],
+        "hotes": [
+          "torse",
+          "bras_",
+          "jambe_"
+        ],
+        "segments": [
+          "bras_haut_D",
+          "bras_bas_D",
+          "main_D"
+        ]
+      },
+      "main": {
+        "poids": 2,
+        "modele": [
+          "main_D"
+        ],
+        "hotes": [
+          "bras_",
+          "jambe_",
+          "torse",
+          "tete"
+        ],
+        "segments": [
+          "main_D"
+        ]
+      },
+      "jambe": {
+        "poids": 2,
+        "modele": [
+          "jambe_D",
+          "pied_D"
+        ],
+        "hotes": [
+          "torse",
+          "jambe_",
+          "bras_"
+        ],
+        "segments": [
+          "jambe_haut_D",
+          "jambe_bas_D",
+          "pied_D"
+        ]
+      },
+      "pied": {
+        "poids": 1,
+        "modele": [
+          "pied_D"
+        ],
+        "hotes": [
+          "jambe_",
+          "bras_",
+          "torse"
+        ],
+        "segments": [
+          "pied_D"
+        ]
+      },
+      "tete": {
+        "poids": 1,
+        "modele": [
+          "tete"
+        ],
+        "hotes": [
+          "torse",
+          "bras_",
+          "jambe_"
+        ],
+        "segments": [
+          "tete"
+        ]
+      }
+    }
   }
 }

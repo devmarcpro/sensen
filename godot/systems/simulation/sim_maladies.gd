@@ -280,7 +280,7 @@ static func tiquer_drogues(sim: Simulation, tick: int) -> void:
 ## MUTER : le corps de CET être reçoit la mutation ; une partie avec laquelle on naît sans est inscrite perdue.
 static func muter(sim: Simulation, e: Dictionary, id: String) -> bool:
 	var m: Dictionary = GameData.config("mutations").get("liste", {}).get(id, {})
-	if m.is_empty() or not e.has("corps"):
+	if (m.is_empty() and not id.begins_with("rnd:")) or not e.has("corps"):
 		return false
 	var muts: Array = e.corps.get("mutations", [])
 	if id in muts:
@@ -306,7 +306,8 @@ static func heriter(sim: Simulation, enfant: Dictionary, parents: Array) -> void
 		if not (pa is Dictionary):
 			continue
 		for mid in (pa as Dictionary).get("corps", {}).get("mutations", []):
-			if not bool(liste.get(str(mid), {}).get("heritable", false)):
+			var heritable: bool = bool(cfg.get("aleatoires", {}).get("heritable", false)) if str(mid).begins_with("rnd:") else bool(liste.get(str(mid), {}).get("heritable", false))
+			if not heritable:
 				continue
 			var rng := RandomNumberGenerator.new()
 			rng.seed = hash([sim.graine, str(enfant.get("id", "")), str(pa.get("id", "")), str(mid)])
@@ -334,6 +335,52 @@ static func tiquer_mutations(sim: Simulation, tick: int) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash([sim.graine, str(e.id), "mutation", tick / heure])
 		if rng.randf() < float(cfg.get("chance_par_jour", 0.01)) / 24.0:
+			if rng.randf() < float(cfg.get("aleatoires", {}).get("part_corruption", 0.0)):
+				var code := muter_aleatoire(sim, e, rng)
+				if not code.is_empty() and e.controle == "joueur":
+					EventBus.emettre(&"journal", [&"journal.mutation_aleatoire", {"nom": e.name_key, "type": "mutation.type." + code.trim_prefix("rnd:").get_slice("@", 0), "partie": "partie." + code.get_slice("@", 1).get_slice("#", 0)}])
+				continue
 			var mid: String = ids[rng.randi() % ids.size()]
 			if muter(sim, e, mid) and e.controle == "joueur":
 				EventBus.emettre(&"journal", [&"journal.mutation", {"nom": e.name_key, "mutation": str(liste[mid].name_key)}])
+
+
+
+## UNE MUTATION AU HASARD (designer 2026-09-13) : un type au poids, un hôte parmi les parties externes intactes qu'il
+## accepte. Rend le code posé, ou "" si ce corps n'offre aucun hôte.
+static func muter_aleatoire(sim: Simulation, e: Dictionary, rng: RandomNumberGenerator) -> String:
+	var al: Dictionary = GameData.config("mutations").get("aleatoires", {})
+	var types: Dictionary = al.get("types", {})
+	if types.is_empty() or not e.has("corps"):
+		return ""
+	var cles: Array = types.keys()
+	cles.sort()
+	var total := 0.0
+	for k in cles:
+		total += float(types[k].get("poids", 1))
+	var r := rng.randf() * total
+	var type: String = str(cles[0])
+	for k in cles:
+		r -= float(types[k].get("poids", 1))
+		if r <= 0.0:
+			type = str(k)
+			break
+	var parties: Dictionary = Etres.plan_corps(e).get("parties", {})
+	var hotes: Array = []
+	for nom: String in parties.keys():
+		if bool(parties[nom].get("interne", false)) or not Etres.partie_intacte(e, nom):
+			continue
+		for pref in types[type].get("hotes", []):
+			if nom.begins_with(str(pref)):
+				hotes.append(nom)
+				break
+	if hotes.is_empty():
+		return ""
+	hotes.sort()
+	var hote: String = hotes[rng.randi() % hotes.size()]
+	var n := 1
+	for mid in e.corps.get("mutations", []):
+		if str(mid).begins_with("rnd:"):
+			n += 1
+	var code := "rnd:%s@%s#%d" % [type, hote, n]
+	return code if muter(sim, e, code) else ""

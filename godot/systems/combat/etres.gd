@@ -445,6 +445,14 @@ static func arme(e: Dictionary, items: Dictionary) -> Dictionary:
 ## membre indessinable et sa blessure invisible. Ce qui diffère, ce sont les **organes** : le dedans, que rien ne
 ## dessine et que l'écran d'anatomie montre. *Ils sont tous humanoïdes : un robot n'a pas d'autres membres qu'un
 ## homme, il a d'autres entrailles.*
+## LA CLÉ DE TRADUCTION DU NOM D'UNE PARTIE : `partie.<nom>`, et pour une partie mutante (`bras_mut_2`) le nom de son type
+## (« bras ») — elle n'a pas de fiche à elle, et « partie.bras_mut_2 » s'afficherait tel quel.
+static func cle_nom_partie(nom: String) -> String:
+	if "_mut_" in nom:
+		return "mutation.type." + nom.get_slice("_mut_", 0)
+	return "partie." + nom
+
+
 static func plan_corps(e: Dictionary) -> Dictionary:
 	var pr := str(GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("plan_corps", ""))
 	var base: Dictionary = GameData.catalogues.plans_corps[pr] if (not pr.is_empty() and GameData.catalogues.plans_corps.has(pr)) else GameData.catalogues.plans_corps.get(str(e.get("corps", {}).get("silhouette", "")), {})
@@ -467,6 +475,9 @@ static func _plan_mute(base: Dictionary, muts: Array) -> Dictionary:
 	var liste: Dictionary = GameData.config("mutations").get("liste", {})
 	var parties: Dictionary = plan.get("parties", {})
 	for mid in muts:
+		if str(mid).begins_with("rnd:"):   # une mutation aléatoire : une partie de plus, accrochée à son hôte
+			_ajouter_partie_aleatoire(parties, str(mid))
+			continue
 		var m: Dictionary = liste.get(str(mid), {})
 		for nom: String in (m.get("ajoute", {}) as Dictionary).keys():
 			var p: Dictionary = (m.ajoute[nom] as Dictionary).duplicate(true)
@@ -479,6 +490,34 @@ static func _plan_mute(base: Dictionary, muts: Array) -> Dictionary:
 					if mod.has("part_sante_mult"):
 						parties[nom2]["part_sante"] = float(parties[nom2].get("part_sante", 0.3)) * float(mod.part_sante_mult)
 	return plan
+
+
+## « rnd:<type>@<hote>#<n> » : la chaîne de parties du modèle, recopiée sous des noms à elle (`oeil_mut_1`,
+## `bras_mut_2` puis `main_mut_2`), la première accrochée à l'hôte, sans emplacement d'équipement — un œil garde son sens.
+static func _ajouter_partie_aleatoire(parties: Dictionary, code: String) -> void:
+	var corps_code := code.trim_prefix("rnd:")
+	var type := corps_code.get_slice("@", 0)
+	var hote := corps_code.get_slice("@", 1).get_slice("#", 0)
+	var n := corps_code.get_slice("#", 1)
+	var t: Dictionary = GameData.config("mutations").get("aleatoires", {}).get("types", {}).get(type, {})
+	if t.is_empty() or not parties.has(hote):
+		return
+	var parent := hote
+	for modele in t.get("modele", []):
+		var src: Dictionary = parties.get(str(modele), {})
+		if src.is_empty():
+			return
+		var nom := "%s_mut_%s" % [str(modele).trim_suffix("_D").trim_suffix("_G"), n]
+		var p: Dictionary = src.duplicate(true)
+		p["parent"] = parent
+		p["zone"] = str(parties[hote].get("zone", p.get("zone", "")))
+		p.erase("emplacements")
+		p.erase("contenant")
+		p.erase("vital")
+		p["interne"] = false
+		p["mutation"] = type
+		parties[nom] = p
+		parent = nom
 
 
 ## Les parties QUE CET ÊTRE A PERDUES. Comme pour les piles de tuiles, on ne stocke que l'exception : un corps

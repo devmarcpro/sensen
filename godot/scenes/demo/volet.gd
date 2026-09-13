@@ -151,7 +151,7 @@ func _corps(j: Dictionary, y: float, max_y: float) -> float:
 		var col := COL_PERDU
 		var txt := tr("partie.court." + nom)
 		if txt.begins_with("partie.court."):
-			txt = tr("partie." + nom).substr(0, 8)
+			txt = tr(Etres.cle_nom_partie(nom)).substr(0, 8)
 		if Etres.partie_intacte(j, nom):
 			var pv := Etres.sante_partie(j, nom)
 			var pmax := maxi(1, Etres.sante_partie_max(j, nom))
