@@ -1004,6 +1004,28 @@ func test_royaume_pays() -> void:
 	verifier(s._conditions_evenement("roy_a", ra, ea, {"guerre": true}) and not s._conditions_evenement("roy_a", ra, ea, {"guerre": false}), "les conditions lisent la guerre")
 	s._appliquer_evenement("roy_a", ra, ea, GameData.catalogues.royaumes_evenements.paix)
 	verifier(not s.en_guerre("roy_a", "roy_b") and ea.journal.size() == 3, "la paix la défait, le journal compte trois événements")
+	# UNE GUERRE QUI COÛTE (l'ancienne file : « une guerre qui ne fait rien », 2026-09-13). Borealis, une cité (6 soldats),
+	# contre Aurelia, un royaume « petit » (15) : semaine après semaine, la plus petite armée fond plus vite, et capitule.
+	var eb := s.etat_royaume("roy_b")
+	s._appliquer_evenement("roy_a", ra, ea, GameData.catalogues.royaumes_evenements.guerre)
+	s.monde.tresors_royaumes["roy_a"] = 1000
+	s.monde.tresors_royaumes["roy_b"] = 1000
+	var humeur_b0: int = int(eb.humeur)
+	var semaines := 0
+	var armee_b_min := 1 << 30
+	for k_g in 20:
+		if not s.en_guerre("roy_a", "roy_b"):
+			break
+		s._semaine_royaumes_pays()
+		semaines += 1
+		armee_b_min = mini(armee_b_min, int(eb.armee))
+	verifier(not s.en_guerre("roy_a", "roy_b") and semaines >= 2, "la guerre use les armées jusqu'à ce qu'un camp capitule (%d semaines)" % semaines)
+	verifier(eb.journal.any(func(j_e: Dictionary) -> bool: return str(j_e.cle) == "evenement.reddition") and not ea.journal.any(func(j_e: Dictionary) -> bool: return str(j_e.cle) == "evenement.reddition"), "c'est la plus petite armée qui capitule : Borealis")
+	verifier(int(s.monde.tresors_royaumes.roy_a) > int(s.monde.tresors_royaumes.roy_b), "le vainqueur empoche le tribut (%d contre %d)" % [int(s.monde.tresors_royaumes.roy_a), int(s.monde.tresors_royaumes.roy_b)])
+	verifier(float(eb.pertes) > 0.0 and armee_b_min < int(eb.get("armee_paix", 0)), "des soldats sont tombés (%.1f pertes, armée tombée à %d sur %d)" % [float(eb.pertes), armee_b_min, int(eb.get("armee_paix", 0))])
+	var pertes_fin: float = float(eb.pertes)
+	s._semaine_royaumes_pays()
+	verifier(float(eb.pertes) < pertes_fin, "en paix, les pertes se résorbent (%.1f → %.1f)" % [pertes_fin, float(eb.pertes)])
 	# Le blason sur un garde d'une ville de ce royaume.
 	var g := s.ajouter("garde_village", s._tuile_libre_autour(s.vivants()[0].pos), "ia")
 	g["royaume"] = "roy_a"
@@ -1013,7 +1035,7 @@ func test_royaume_pays() -> void:
 	var ere0 := str(ea.ere)
 	var av0 := int(ea.avenement)
 	s._nouvelle_ere("roy_a", {"nom": {"prenom": "Titus", "nom_famille": "Aurelius", "titre": "", "genre": "m", "culture": "latine", "name_order": "prenom_nom"}})
-	verifier(int(ea.avenement) == s.annee_courante() and str(ea.dirigeant) == "Titus Aurelius" and (str(ea.ere) != ere0 or GameData.catalogues.name_cultures.latine.eres.size() == 1) and ea.journal.size() == 4, "une succession ouvre une ère nouvelle (%s → %s, avènement %d → %d)" % [ere0, str(ea.ere), av0, int(ea.avenement)])
+	verifier(int(ea.avenement) == s.annee_courante() and str(ea.dirigeant) == "Titus Aurelius" and (str(ea.ere) != ere0 or GameData.catalogues.name_cultures.latine.eres.size() == 1) and ea.journal.size() == 5, "une succession ouvre une ère nouvelle (le journal : révolte, guerre, paix, la seconde guerre, l'ère) (%s → %s, avènement %d → %d)" % [ere0, str(ea.ere), av0, int(ea.avenement)])
 	# L'impôt de couronne : le trésor n'était nourri que par la ville que la simulation a sous les yeux, si bien
 	# qu'il restait à zéro pour tout le monde — et « tresor_pct » prélevait une part de rien (2026-09-07).
 	var pa: Dictionary = s._ry().pays

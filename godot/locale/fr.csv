@@ -3533,6 +3533,7 @@ evenement.levee_de_taxes,Le royaume de {royaume} lève de nouvelles taxes
 evenement.revolte,Révolte au royaume de {royaume} : le trésor pillé
 evenement.guerre,Le royaume de {royaume} déclare la guerre à {autre}
 evenement.paix,Paix entre {royaume} et {autre}
+evenement.reddition,"{royaume} capitule devant {autre} et lui verse {tribut} pièces de tribut"
 evenement.avenement,Un nouveau règne commence au royaume de {royaume} : l’ère de {ere}
 dialogue.rumeur_royaume.prefixe,"On dit que… {rumeur}."
 dialogue.rumeur_royaume.rien,"Rien de neuf au royaume, et c’est tant mieux."

@@ -3462,6 +3462,7 @@ evenement.levee_de_taxes,The kingdom of {royaume} raises new taxes
 evenement.revolte,Revolt in the kingdom of {royaume}: the treasury looted
 evenement.guerre,The kingdom of {royaume} declares war on {autre}
 evenement.paix,Peace between {royaume} and {autre}
+evenement.reddition,"{royaume} surrenders to {autre} and pays {tribut} coins of tribute"
 evenement.avenement,A new reign begins in the kingdom of {royaume}: the era of {ere}
 dialogue.rumeur_royaume.prefixe,"They say… {rumeur}."
 dialogue.rumeur_royaume.rien,"Nothing new in the kingdom, and good riddance."

@@ -1077,6 +1077,15 @@
       "unites_par_tuile": 10
     },
     "pays": {
+      "guerre": {
+        "_doc": "UNE GUERRE COUTE (l'ancienne file : « une guerre qui ne fait rien », 2026-09-13). Chaque semaine, chaque camp perd `taux_pertes` de l'armee ADVERSE en soldats (celui qui aligne le plus fait le plus de morts), paie la solde de son armee restante x `solde_mult` au lieu de x 1, et perd `humeur_semaine`. Les pertes s'accumulent dans `etat.pertes` et se retranchent de l'armee recomptee. Le premier dont l'armee tombe sous `seuil_reddition` de son armee de paix capitule : paix, et `tribut_pct` de son tresor passe au vainqueur. En paix, les pertes se resorbent de `recuperation_semaine` par semaine.",
+        "taux_pertes": 0.08,
+        "solde_mult": 1.5,
+        "humeur_semaine": -1,
+        "seuil_reddition": 0.4,
+        "tribut_pct": 0.3,
+        "recuperation_semaine": 0.1
+      },
       "humeur_base": 55,
       "humeur_retour": 3,
       "armee_base": {

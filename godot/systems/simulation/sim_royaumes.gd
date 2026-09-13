@@ -126,6 +126,7 @@ static func _semaine_royaumes_pays(sim: Simulation) -> void:
 			if etat.is_empty():
 				continue
 			_recompter_royaume(sim, str(id), roy, etat)
+			_semaine_de_guerre(sim, str(id), roy, etat, pays)
 			_impot_de_couronne(sim, str(id), roy, etat, pays)
 			# L'humeur des résidents chargés compte ; sinon elle revient vers sa base.
 			var n := 0
@@ -149,12 +150,55 @@ static func _semaine_royaumes_pays(sim: Simulation) -> void:
 			etat.humeur = clampi(int(etat.humeur), 0, 100)
 
 
+## UNE SEMAINE DE GUERRE (l'ancienne file : « une guerre qui ne fait rien », 2026-09-13). L'armée recomptée perd ce que
+## la guerre lui a coûté ; chaque ennemi lui tue `taux_pertes` de SA propre armée ; l'humeur s'use ; et le camp dont l'armée
+## tombe sous `seuil_reddition` de son armée de paix capitule — la paix, et un tribut au vainqueur. En paix, les pertes se
+## résorbent. Tout se joue sur l'état abstrait du royaume : la guerre existe là où le joueur n'est pas.
+static func _semaine_de_guerre(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary, pays: Dictionary) -> void:
+	var g: Dictionary = pays.get("guerre", {})
+	if g.is_empty():
+		return
+	var armee_paix := int(etat.get("armee", 0))
+	etat["armee_paix"] = armee_paix
+	var pertes := float(etat.get("pertes", 0.0))
+	var guerres: Array = etat.get("guerres", [])
+	if guerres.is_empty():
+		pertes = maxf(0.0, pertes - float(armee_paix) * float(g.get("recuperation_semaine", 0.1)))
+	else:
+		for autre in guerres.duplicate():
+			var e2 := etat_royaume(sim, str(autre))
+			if e2.is_empty():
+				continue
+			pertes += float(e2.get("armee", 0)) * float(g.get("taux_pertes", 0.08))
+		etat.humeur = clampi(int(etat.humeur) + int(g.get("humeur_semaine", -1)), 0, 100)
+	pertes = minf(pertes, float(armee_paix))
+	etat["pertes"] = pertes
+	etat.armee = maxi(0, armee_paix - int(round(pertes)))
+	if guerres.is_empty() or armee_paix <= 0:
+		return
+	if float(etat.armee) < float(armee_paix) * float(g.get("seuil_reddition", 0.4)):
+		var vainqueur := str(guerres[0])
+		guerres.erase(vainqueur)
+		var ev := etat_royaume(sim, vainqueur)
+		if not ev.is_empty():
+			ev.guerres.erase(id)
+		var tribut := int(round(float(sim.monde.tresors_royaumes.get(id, 0)) * float(g.get("tribut_pct", 0.3))))
+		sim.monde.tresors_royaumes[id] = int(sim.monde.tresors_royaumes.get(id, 0)) - tribut
+		sim.monde.tresors_royaumes[vainqueur] = int(sim.monde.tresors_royaumes.get(vainqueur, 0)) + tribut
+		etat.tresor = int(sim.monde.tresors_royaumes[id])
+		if not ev.is_empty():
+			ev.tresor = int(sim.monde.tresors_royaumes[vainqueur])
+		_noter_evenement(sim, id, roy, "evenement.reddition", {"autre": str(royaume_par_id(sim, vainqueur).get("nom", vainqueur)), "tribut": tribut})
+
+
 ## L'impôt de couronne d'une semaine : le royaume lève sa part sur la population qu'il n'a pas sous les yeux
 ## (celle des villes chargées paie déjà par `SimTerritoire._taxe_royaume`, on ne compte pas deux fois), puis il
 ## paie la solde de son armée. Sans cela le trésor restait à zéro et `tresor_pct` prélevait une part de rien.
 static func _impot_de_couronne(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary, pays: Dictionary) -> void:
 	var impot := int(round(float(etat.get("population_libre", 0)) * float(pays.get("impot_par_habitant", 0.6)) * float(roy.taxes.get("base_rate", 0.08))))
 	var solde := int(round(float(etat.get("armee", 0)) * float(pays.get("solde_par_soldat", 0.8))))
+	if not etat.get("guerres", []).is_empty():   # une armée en campagne coûte plus qu'une garnison
+		solde = int(round(float(solde) * float(pays.get("guerre", {}).get("solde_mult", 1.0))))
 	var tresor := int(sim.monde.tresors_royaumes.get(id, 0)) + impot
 	if tresor < solde:   # une caisse vide ne paie pas ses soldats, et cela se sait
 		etat.humeur = clampi(int(etat.humeur) + int(pays.get("humeur_caisse_vide", -2)), 0, 100)
