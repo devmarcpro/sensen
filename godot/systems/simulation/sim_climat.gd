@@ -255,3 +255,64 @@ static func etat_climat(sim: Simulation, e: Dictionary, ecart: float) -> void:
 	var id := "hypothermie" if ecart < 0.0 else "coup_de_chaleur"
 	if not Etres.a_statut_id(e, id):
 		sim.appliquer_statut(e, id, int(c.get("duree_ticks", 120000)), "")
+
+
+# ---------------------------------------------------------------- le vent qui pousse, la pluie qui lave, les murs qui boivent
+
+## LE VENT DU PAS DE CHAMP : celui de la cellule au centre de la fenêtre, à ciel ouvert seulement. Rend {dir, force} ; une
+## force nulle sous terre, où rien ne souffle.
+static func vent_du_lieu(sim: Simulation) -> Dictionary:
+	if sim.lieu != "camp" or sim.monde == null:
+		return {"dir": Vector2.ZERO, "force": 0.0}
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	return vent(sim, sim.monde.cellule_de(centre))
+
+
+## Le poids qu'un vent donne à une voisine dans la direction `d` : plus fort sous le vent, plus faible au vent. `k` est
+## l'effet par champ (le gaz file plus que l'odeur). Jamais négatif.
+static func biais(v: Dictionary, d: Vector2i, k: float) -> float:
+	var f := float(v.get("force", 0.0))
+	if f <= 0.0:
+		return 1.0
+	return maxf(0.1, 1.0 + f * (v.dir as Vector2).dot(Vector2(d).normalized()) * k)
+
+
+## LA PLUIE LAVE LA PISTE : sous une pluie à découvert, l'odeur s'efface plus vite.
+static func mult_lavage(sim: Simulation) -> float:
+	if sim.lieu != "camp" or sim.monde == null:
+		return 1.0
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	if SimTerrain.meteo(sim, sim.monde.cellule_de(centre)) in ["pluie", "orage", "tempete"]:
+		return float(_cfg().get("lavage", {}).get("pluie_mult", 4.0))
+	return 1.0
+
+
+## L'HUMIDITÉ DU LIEU : celle du sol de la cellule au camp, celle de la cellule du donjon ou de la mine sous terre.
+static func humidite_du_lieu(sim: Simulation, t: Vector2i) -> float:
+	if sim.monde == null:
+		return 0.5
+	if sim.lieu == "camp":
+		return humidite_sol(sim, sim.monde.cellule_de(t))
+	var cell: Vector2i = sim.donjon.get("cellule_mine", sim.donjon.get("cellule", Vector2i(-9999, -9999)))
+	return 0.5 if cell.x == -9999 else humidite_sol(sim, cell)
+
+
+## LES MURS QUI BOIVENT : ce qu'une matière perméable garde de sa portance dans un sol humide.
+static func mult_portance(sim: Simulation, t: Vector2i, stats: Dictionary) -> float:
+	var exces := clampf((humidite_du_lieu(sim, t) - 0.5) / 0.5, 0.0, 1.0)
+	if exces <= 0.0:
+		return 1.0
+	return 1.0 - float(_cfg().get("murs_boivent", {}).get("perte_max", 0.7)) * float(stats.get("permeabilite", 0)) / 100.0 * exces
+
+
+## L'HEURE DU CLIMAT : quand le sol du lieu bascule en détrempe, ce qui a été creusé est remis en question — une galerie
+## de terre tient par temps sec et s'effondre après l'orage.
+static func tiquer(sim: Simulation, _tick: int) -> void:
+	if sim.monde == null or sim.grille == null:
+		return
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	var det := humidite_du_lieu(sim, centre) > float(_cfg().get("sol", {}).get("detrempe_seuil", 0.85))
+	if det and not sim.climat_detrempe:
+		for idx in sim.grille.modifies.keys():
+			sim.support_a_verifier[int(idx)] = true
+	sim.climat_detrempe = det

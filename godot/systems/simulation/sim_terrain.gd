@@ -614,8 +614,10 @@ static func _tiquer_odeur(sim: Simulation, tick: int) -> void:
 	if sim.odeur_actif.is_empty() and sim.odeur_sources.is_empty():
 		return
 	_odeur_dimensionner(sim)
-	var fondu := clampf(float(cfg.get("fondu", 0.03)), 0.0, 1.0)
+	var fondu := clampf(float(cfg.get("fondu", 0.03)) * SimClimat.mult_lavage(sim), 0.0, 1.0)   # la pluie lave la piste (22 ter)
 	var diff := clampf(float(cfg.get("diffusion", 0.1)), 0.0, 1.0)
+	var vent_o := SimClimat.vent_du_lieu(sim)
+	var k_o := float(GameData.config("climat").get("pousse", {}).get("odeur", 1.2))
 	var plafond := int(cfg.get("tuiles_max", 4096))
 	# 1. Ce qui traîne s'efface, et s'étale un peu vers les quatre voisines libres.
 	var cles: Array = sim.odeur_actif.keys()
@@ -636,7 +638,7 @@ static func _tiquer_odeur(sim: Simulation, tick: int) -> void:
 			var q: Vector2i = t + d
 			if sim.grille.dans(q) and not sim.grille.bloque_passage(q):
 				var iq := sim.grille.idx(q)
-				ajouts[iq] = maxf(float(ajouts.get(iq, 0.0)), v * diff)
+				ajouts[iq] = maxf(float(ajouts.get(iq, 0.0)), minf(v, v * diff * SimClimat.biais(vent_o, d, k_o)))   # la piste se couche sous le vent
 	for i2 in ajouts.keys():
 		var i3 := int(i2)
 		if float(sim.carte_odeur[i3]) < float(ajouts[i2]):
@@ -937,7 +939,7 @@ static func _portee_max(sim: Simulation, t: Vector2i, cfg: Dictionary) -> float:
 	if mid.is_empty():
 		mid = str(sim.grille.materiau_defaut)
 	var st: Dictionary = GameData.catalogues.materials.get(mid, {}).get("stats", {})
-	var por := float(st.get("portance", float(cfg.get("portance_defaut", 60))))
+	var por := float(st.get("portance", float(cfg.get("portance_defaut", 60)))) * SimClimat.mult_portance(sim, t, st)   # une paroi perméable boit l'eau du sol (22 ter)
 	return float(cfg.get("portee_base", 1.0)) + float(cfg.get("portee_par_portance", 0.06)) * por
 
 
@@ -1298,6 +1300,8 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 	var eps := float(cfg.get("epsilon", 1.5))
 	var inertie_ref := float(cfg.get("inertie_ref", 8.0))
 	var etendre := sim.chaleur_active.size() < int(cfg.get("actives_max", 4096))
+	var vent_c := SimClimat.vent_du_lieu(sim)   # la chaleur vient davantage des voisines au vent : le feu court avec lui (22 ter)
+	var k_c := float(GameData.config("climat").get("pousse", {}).get("chaleur", 0.8))
 	var mats: Dictionary = GameData.catalogues.materials
 	var a_traiter := {}
 	for idx in sim.chaleur_active.keys():
@@ -1318,12 +1322,15 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 		var t := sim.grille.pos_de(i)
 		var somme := 0.0
 		var n_v := 0
+		var poids_c := 0.0
 		for dd in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var q: Vector2i = t + dd
 			if not sim.grille.dans(q):
 				continue
-			somme += chaleur_a(sim, q)
+			var w_c := SimClimat.biais(vent_c, -dd, k_c)   # une voisine au vent souffle sa chaleur vers nous
+			somme += chaleur_a(sim, q) * w_c
 			n_v += 1
+			poids_c += w_c
 		var cur := float(sim.carte_chaleur[i])
 		var v := cur
 		if n_v > 0:
@@ -1339,7 +1346,7 @@ static func _tiquer_chaleur(sim: Simulation, tick: int) -> void:
 			var iso := float(st.get("isolation", 0.0))
 			var dens := float(st.get("densite", inertie_ref))
 			var inertie := clampf(2.0 * inertie_ref / maxf(0.1, inertie_ref + dens), 0.25, 2.0)
-			v += diff * (iso_ref / maxf(1.0, iso_ref + iso)) * inertie * (somme / float(n_v) - cur)
+			v += diff * (iso_ref / maxf(1.0, iso_ref + iso)) * inertie * (somme / maxf(0.001, poids_c) - cur)
 		v += retour * (amb - v)
 		neuf[i] = v
 	for i in neuf.keys():
@@ -1413,6 +1420,8 @@ static func _tiquer_gaz(sim: Simulation, tick: int) -> void:
 	var dil_ouvert := float(champ.get("dilution_ouvert", 0.16))
 	var fuite := float(champ.get("fuite_legere", 0.55))
 	var eps := float(champ.get("epsilon", 0.02))
+	var vent_g := SimClimat.vent_du_lieu(sim)   # le vent pousse le nuage à ciel ouvert (22 ter)
+	var k_g := float(GameData.config("climat").get("pousse", {}).get("gaz", 1.4))
 	# 1. LES TUILES À VISITER : les chargées et leur bordure. La bordure est ce qui permet au nuage de GRANDIR ;
 	#    sans elle il diffuserait à l'intérieur de lui-même et ne bougerait jamais d'une tuile.
 	var a_traiter := {}
@@ -1452,6 +1461,8 @@ static func _tiquer_gaz(sim: Simulation, tick: int) -> void:
 				var iq := sim.grille.idx(q)
 				var h_q := int(sim.grille.hauteurs[iq]) if iq < sim.grille.hauteurs.size() else 0
 				var p := maxf(0.0, 1.0 + pente * float(h_q - h_ici) * (1.0 - masse))
+				if not clos:
+					p *= SimClimat.biais(vent_g, dd2, k_g)
 				poids.append([iq, p])
 				somme += p
 			var reste := charge
@@ -1575,6 +1586,18 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 			sim.grille.oter_danger(int(idx))
 			EventBus.emettre(&"tile_changed", [sim.grille.pos_de(int(idx))])
 		sim.feux.clear()
+		# LA PLUIE REFROIDIT AUSSI LES BRAISES (2026-09-14) : éteindre les flammes laissait le champ de chaleur brûlant — et,
+		# depuis que le vent y concentre la chaleur, une tuile restait dangereuse sous l'averse. À découvert, elle retombe
+		# à l'ambiante.
+		if not sim.carte_chaleur.is_empty():
+			var amb := ambiante_de(sim)
+			for idx_c in sim.chaleur_active.keys().duplicate():
+				var t_c := sim.grille.pos_de(int(idx_c))
+				if SimClimat.abrite(sim, t_c) or int(idx_c) >= sim.carte_chaleur.size():
+					continue
+				sim.carte_chaleur[int(idx_c)] = amb
+				sim.chaleur_active.erase(idx_c)
+				sim.grille.oter_danger(int(idx_c))
 		sim.lumiere_sale = true
 		EventBus.emettre(&"journal", [&"journal.feux_eteints", {"n": n}])
 		return

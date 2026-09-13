@@ -1,0 +1,115 @@
+{
+  "_doc": "LE VOYAGE A LA FALLOUT 1 (ordre de travail 39 ter, pas E — 2026-09-13 ; designer : « rajouter le deplacement carte du monde a la Fallout 1 », et le monde reste marchable). Un trajet va de la cellule du joueur a la destination, une cellule par segment ; chaque segment coute ce que couterait la marche (la distance en tuiles x le cout d un pas, la charge, la route) et l horloge avance d autant. `secondes_par_segment` : le rythme de l animation sur la carte. A chaque segment, une RENCONTRE a `chance_base` de chance, x `danger_mult` selon le danger de la cellule, x `route_mult` sur une route, x `nuit_mult` de nuit ; elle interrompt le trajet et pose le joueur dans le monde, a l endroit ou elle a lieu. `rencontres` : chaque type a son poids, un danger minimal, et ce qui apparait (`etres` : [id, min, max] ; `betes` : tirees parmi `betes_par_biome` ; `lieu` : le lieu le plus proche devient connu). On reprend la route ensuite.",
+  "secondes_par_segment": 0.25,
+  "chance_base": 0.06,
+  "danger_mult": [
+    0.6,
+    1.4,
+    2.4
+  ],
+  "route_mult": 0.5,
+  "nuit_mult": 1.5,
+  "distance_apparition": 6,
+  "rencontres": {
+    "bandits": {
+      "poids": 3,
+      "danger_min": 1,
+      "etres": [
+        [
+          "bandit",
+          2,
+          3
+        ],
+        [
+          "bandit_archer",
+          0,
+          1
+        ]
+      ]
+    },
+    "betes": {
+      "poids": 4,
+      "danger_min": 0,
+      "betes": [
+        1,
+        3
+      ]
+    },
+    "marchand": {
+      "poids": 2,
+      "danger_min": 0,
+      "etres": [
+        [
+          "marchand_itinerant",
+          1,
+          1
+        ]
+      ]
+    },
+    "voyageur": {
+      "poids": 2,
+      "danger_min": 0,
+      "etres": [
+        [
+          "etranger",
+          1,
+          2
+        ]
+      ]
+    },
+    "lieu": {
+      "poids": 3,
+      "danger_min": 0
+    }
+  },
+  "betes_par_biome": {
+    "foret_temperee": [
+      "loup",
+      "sanglier",
+      "ours_brun"
+    ],
+    "plaine_temperee": [
+      "loup",
+      "sanglier"
+    ],
+    "taiga": [
+      "loup",
+      "lynx",
+      "ours_brun"
+    ],
+    "toundra": [
+      "loup_blanc",
+      "ours_polaire"
+    ],
+    "montagne": [
+      "mouflon",
+      "lynx",
+      "aigle_royal"
+    ],
+    "marecage": [
+      "crocodile",
+      "sangsue_geante",
+      "serpent_venimeux"
+    ],
+    "marecage_corrompu": [
+      "sangsue_geante",
+      "rat_geant"
+    ],
+    "desert_aride": [
+      "scorpion",
+      "serpent_venimeux",
+      "vautour"
+    ],
+    "desert_de_cendres": [
+      "scorpion",
+      "rat_geant"
+    ],
+    "cote_plage": [
+      "crocodile",
+      "phoque"
+    ],
+    "_defaut": [
+      "loup"
+    ]
+  }
+}

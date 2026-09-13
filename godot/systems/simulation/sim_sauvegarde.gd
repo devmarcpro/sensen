@@ -102,7 +102,7 @@ static func sauvegarder(sim: Simulation, nom: String = "", en_fond: bool = false
 		"cellule_camp": sim.monde.cellule_camp, "camp": {"entree": sim.camp_sauve.get("entree", Vector2i.ZERO), "biome": sim.camp_sauve.get("biome", ""), "cellule": sim.camp_sauve.get("cellule", Vector2i.ZERO)}, "explores": sim.monde.explores,
 		"delta": sim.monde.delta, "foyers": sim.monde.foyers, "faune_densite": sim.monde.faune_densite, "semaine": sim.monde.semaine_courante, "peuplees": sim.monde.peuplees, "claims": sim.territoires.joueur.cellules, "territoire": sim.territoires.joueur, "territoires": sim.territoires, "tresors_royaumes": sim.monde.tresors_royaumes, "etats_royaumes": sim.monde.etats_royaumes, "vacances": sim.monde.vacances, "villages": sim.monde.villages, "faits": sim.monde.faits, "tombes": sim.monde.tombes, "heritiers": sim.monde.heritiers, "vacances_guildes": sim.monde.vacances_guildes,
 		"modifs_terrain": sim.modifs_terrain, "portails": sim.portails, "gouffres_vides": sim.gouffres_vides, "mines_creusees": sim.mines_creusees,
-		"nettoyages": sim.monde.nettoyages,
+		"nettoyages": sim.monde.nettoyages, "lieux_connus": sim.monde.lieux_connus,
 		"carte_cache": sim.monde.carte_cache_serialise()}   # indexés par position monde, donc valables au rechargement
 	var lots: Array = [["surface.json", surface], ["entities.json", {"entites": autres, "ordre": ordre_autres, "contenants": contenants_monde}],
 		["items.json", instances], ["players/joueur.json", {"fiche": sim.fiche_joueur, "etre": j}]]
@@ -212,6 +212,7 @@ static func charger_sauvegarde(sim: Simulation, nom: String = "") -> bool:
 	sim.monde.tombes = w.get("tombes", {})   # les morts enterres : le monde s en souvient, la cellule non
 	sim.monde.tresors_royaumes = w.get("tresors_royaumes", {})
 	sim.monde.etats_royaumes = w.get("etats_royaumes", {})
+	sim.monde.lieux_connus = w.get("lieux_connus", {})   # les lieux découverts en chemin (39 ter, pas E)
 	sim.monde.nettoyages = w.get("nettoyages", {})   # un donjon de corruption vaincu le RESTE (il revenait au rechargement)
 	# Ces quatre-là se lisaient APRÈS la branche « sauvegarde en donjon », qui sort par un `return` : recharger dans
 	# une mine oubliait donc la galerie creusée, la profondeur atteinte d'un gouffre et la carte du monde (2026-09-08).

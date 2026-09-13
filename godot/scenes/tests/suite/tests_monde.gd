@@ -542,3 +542,50 @@ func test_donjon_batiment() -> void:
 	verifier(SimLieux._remonter(s, j), "on remonte par l'entrée de l'étage 1")
 	verifier(s.lieu == "camp" and j.pos == porte, "et l'on ressort devant la porte (%s)" % str(j.pos))
 	s.monde.fermer()
+
+
+## LE VOYAGE À LA FALLOUT 1 (39 ter, pas E — 2026-09-13) : un trajet segment par segment, dont l'horloge avance, qui
+## arrive ; et une rencontre qui l'interrompt, pose le joueur dans le monde, et se reprend.
+func test_voyage_fallout() -> void:
+	var s := Simulation.new(4257)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var c0 := s.monde.cellule_de(j.pos)
+	var dest := Vector2i(-9999, -9999)
+	for r in range(5, 12):
+		for d in [Vector2i(r, 0), Vector2i(-r, 0), Vector2i(0, r), Vector2i(0, -r)]:
+			var ok := true
+			var c := c0
+			for k in r:
+				c += Vector2i(signi(d.x), signi(d.y))
+				if not s.monde.surface.terre_a(c):
+					ok = false
+			if ok and dest.x == -9999:
+				dest = c0 + d
+	verifier(dest.x != -9999, "une destination à cinq cellules au moins, par la terre")
+	if dest.x == -9999:
+		s.monde.fermer()
+		return
+	var cfg: Dictionary = GameData.config("voyage")
+	var chance0 := float(cfg.chance_base)
+	cfg["chance_base"] = 0.0
+	var t0 := s.horloge_monde.ticks
+	verifier(SimVoyage.commencer(s, j, dest), "le trajet commence")
+	var segments := 0
+	var issue := ""
+	while issue == "" and segments < 100:
+		issue = SimVoyage.avancer(s)
+		segments += 1
+	verifier(issue == "arrive" and s.monde.cellule_de(j.pos) == dest, "sans rencontre, on arrive (%s en %d segments)" % [issue, segments])
+	verifier(s.horloge_monde.ticks - t0 >= SimVoyage.cout_segment(s, j, dest) * (segments - 1), "et le temps a passé, segment par segment (%d ticks)" % (s.horloge_monde.ticks - t0))
+	# UNE RENCONTRE À COUP SÛR : elle interrompt, pose des êtres autour du joueur, et la route se reprend.
+	cfg["chance_base"] = 1000.0
+	var avant := s.vivants().size()
+	verifier(SimVoyage.commencer(s, j, c0), "on repart vers le camp")
+	issue = SimVoyage.avancer(s)
+	verifier(issue == "rencontre" and not SimVoyage.en_cours(s) and not s.trajet.is_empty(), "une rencontre interrompt le trajet")
+	verifier(s.vivants().size() >= avant or s.monde.lieux_connus.size() > 0, "et quelque chose se passe là où elle a lieu (%d → %d êtres, %d lieu(x) connu(s))" % [avant, s.vivants().size(), s.monde.lieux_connus.size()])
+	verifier(SimVoyage.reprendre(s, j) and SimVoyage.en_cours(s), "on reprend la route")
+	cfg["chance_base"] = chance0
+	s.trajet = {}
+	s.monde.fermer()

@@ -1243,6 +1243,33 @@ func test_eau_qui_change_d_etat() -> void:
 	s.monde.fermer()
 
 
+## LE VENT QUI POUSSE, LA PLUIE QUI LAVE, LES MURS QUI BOIVENT (22 ter, suite — 2026-09-13).
+func test_vent_pluie_murs() -> void:
+	var s := Simulation.new(4256)
+	s.charger_camp()
+	var v := {"dir": Vector2(1, 0), "force": 1.0}
+	verifier(SimClimat.biais(v, Vector2i(1, 0), 1.4) > 2.0 and SimClimat.biais(v, Vector2i(-1, 0), 1.4) < 0.2, "sous le vent une voisine reçoit bien plus, au vent presque rien")
+	verifier(is_equal_approx(SimClimat.biais({"dir": Vector2(1, 0), "force": 0.0}, Vector2i(1, 0), 1.4), 1.0), "sans vent, la diffusion reste isotrope")
+	s.meteo_force = "pluie"
+	var lave := SimClimat.mult_lavage(s)
+	s.meteo_force = "clair"
+	verifier(lave > 1.0 and is_equal_approx(SimClimat.mult_lavage(s), 1.0), "la pluie efface la piste plus vite (×%.1f)" % lave)
+	var terre: Dictionary = GameData.catalogues.materials.get("terre", {}).get("stats", {})
+	var granit: Dictionary = GameData.catalogues.materials.get("granit", {}).get("stats", {})
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	verifier(SimClimat.mult_portance(s, j.pos, terre) < SimClimat.mult_portance(s, j.pos, granit) and SimClimat.mult_portance(s, j.pos, terre) < 0.9, "après l'orage, la terre perd de sa portance (×%.2f), le granit à peine (×%.2f)" % [SimClimat.mult_portance(s, j.pos, terre), SimClimat.mult_portance(s, j.pos, granit)])
+	var idx := s.grille.idx(j.pos + Vector2i(3, 0))
+	s.grille.modifies[idx] = true
+	s.support_a_verifier.clear()
+	s.climat_detrempe = false
+	SimClimat.tiquer(s, s.horloge_monde.ticks)
+	verifier(s.support_a_verifier.has(idx), "et ce qu'on a creusé est remis en question quand le sol bascule en détrempe")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

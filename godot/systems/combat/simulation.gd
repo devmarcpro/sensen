@@ -178,6 +178,8 @@ func vivants() -> Array[Dictionary]:
 	return res
 
 
+var trajet: Dictionary = {}   # le voyage en cours sur la carte (39 ter, pas E) — ne se sauve pas : recharger pose le joueur où il est
+var climat_detrempe := false   # le sol du lieu était-il détrempé à la dernière heure (les murs qui boivent)
 var climat_cache: Dictionary = {}   # (cellule, tranche) → humidité du sol déduite (SimClimat) — un cache, jamais sauvé
 var _joueurs: Array[Dictionary] = []
 var _joueurs_cle := -1
@@ -1194,6 +1196,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			SimMaladies.tiquer_drogues(self, tick)   # le manque (28 quater)
 			SimMaladies.tiquer_mutations(self, tick)   # la corruption fait muter (28 quater)
 			SimVilles.tiquer_caracteres(self, tick)   # on boit et l'on se bat dans les villes qui le permettent (29 quater)
+			SimClimat.tiquer(self, tick)   # après l'orage, ce qu'on a creusé dans la terre est remis en question (22 ter)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))

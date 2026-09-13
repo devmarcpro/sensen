@@ -739,9 +739,34 @@ func _voyager(cell: Vector2i) -> void:
 		sim.revendiquer(joueur(), cell)
 		carte.dessin.queue_redraw()
 		return
-	if sim.voyager(joueur(), cell):
+	var j_v := joueur()
+	# LE VOYAGE À LA FALLOUT 1 (39 ter, pas E) : au-delà d'une cellule, un trajet qu'on voit avancer sur la carte, avec ses
+	# rencontres ; une cellule voisine reste un pas.
+	if not j_v.is_empty() and Grille.distance(sim.monde.cellule_de(j_v.pos), cell) > 1 and SimVoyage.commencer(sim, j_v, cell):
+		voyage_minuterie = 0.0
+		return
+	if sim.voyager(j_v, cell):
 		carte.fermer()
 		_apres_changement_de_grille()
+
+
+var voyage_minuterie := 0.0
+
+
+## Le trajet avance tant que la carte est ouverte : un segment toutes les `secondes_par_segment`, la carte suit.
+func _avancer_voyage(delta: float) -> void:
+	if sim == null or not SimVoyage.en_cours(sim):
+		return
+	voyage_minuterie -= delta
+	if voyage_minuterie > 0.0:
+		return
+	voyage_minuterie = float(GameData.config("voyage").get("secondes_par_segment", 0.25))
+	var issue := SimVoyage.avancer(sim)
+	if issue in ["arrive", "rencontre", "bloque"]:
+		carte.fermer()
+		_apres_changement_de_grille()
+	elif not sim.trajet.is_empty() and carte.ouverte:
+		carte.recentrer(sim.trajet.chemin[maxi(0, int(sim.trajet.i) - 1)])
 
 
 ## Un pas sur la carte du monde (designer, 2026-09-05, point 98) : le joueur marche jusqu'à la cellule voisine —
@@ -1158,6 +1183,7 @@ func _process(delta: float) -> void:
 	var t_proc := Time.get_ticks_usec()
 	_top_client("image.process", t_proc)   # marque l'entrée : le total du process se lit à la sortie
 	chrono["n.process"] = float(chrono.get("n.process", 0.0)) + 1.0
+	_avancer_voyage(delta)
 	_process_corps(delta)
 	_top_client("image.process_total", t_proc)
 
