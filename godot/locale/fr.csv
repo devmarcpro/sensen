@@ -672,9 +672,13 @@ partie.rein,Rein
 partie.rein_D,Rein droit
 partie.rein_G,Rein gauche
 partie.sacs_aeriens,Sacs aériens
+partie.cou,Cou
 partie.tete,Tête
 partie.torse,Torse
 journal.partie_perdue,"{nom} perd : {partie}"
+journal.membre_tombe,"{nom} perd : {partie} — tranché, il tombe au sol"
+journal.membre_broye,"{nom} perd : {partie} — broyé, il n'en reste rien"
+journal.membre_calcine,"{nom} perd : {partie} — calciné"
 journal.partie_vitale,"{partie} de {nom} est détruit — il s'effondre"
 journal.flaire,"{nom} flaire une piste et la suit"
 journal.depose,"{nom} dépose {def}"

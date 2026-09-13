@@ -450,6 +450,8 @@ func _ancrage_lu(parent: String, enfant: String, ancrage: String, defaut: Array)
 		return defaut
 	var famille := enfant.trim_suffix("_G").trim_suffix("_D").trim_suffix("_haut").trim_suffix("_bas")
 	var pts: Array = mq.get(famille, [])
+	if pts.is_empty() and famille == "cou":
+		pts = mq.get("tete", [])   # un torse dessiné avant le cou (2026-09-13) marquait la tête : le cou part de là
 	if pts.is_empty():
 		pts = mq.get("bout", [])
 	if pts.is_empty():
@@ -970,8 +972,9 @@ func _dessine_tenu_picto(it: Dictionary, pt: Vector2, haut: Vector2) -> void:
 	var prise := Vector2(float(prise_l[0]), float(prise_l[1])) * (cote / 10.0)
 	var local := Transform2D(haut.angle() - axe.angle(), Vector2.ZERO)
 	local.origin = pt - local.basis_xform(prise)
-	draw_set_transform_matrix(Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local)
-	Pictos.dessiner_objet(self, it, Rect2(Vector2.ZERO, Vector2(cote, cote)))
+	var repere := Transform2D(0.0, _decalage) * Transform2D().scaled(Vector2(_echelle_dessin, _echelle_dessin)) * local
+	draw_set_transform_matrix(repere)
+	Pictos.dessiner_objet(self, it, Rect2(Vector2.ZERO, Vector2(cote, cote)), repere)   # le repère : un membre tenu se dessine segment par segment dedans
 	draw_set_transform(_decalage, 0.0, Vector2(_echelle_dessin, _echelle_dessin))
 
 

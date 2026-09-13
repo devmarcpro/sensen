@@ -588,8 +588,10 @@ static func nom_picto(it: Dictionary) -> String:
 	return str(ALIAS_OBJET.get(nom, nom))
 
 
-static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2) -> void:
+static func dessiner_objet(ci: CanvasItem, it: Dictionary, r: Rect2, repere: Transform2D = Transform2D.IDENTITY) -> void:
 	if it.is_empty():
+		return
+	if _dessiner_membre(ci, it, r, repere):   # un membre détaché : tel qu'il était sur la créature (2026-09-13)
 		return
 	if _dessiner_assemblage(ci, it, r):   # un objet assemblé : ses composants, s'ils ont tous leur sprite
 		return
@@ -800,3 +802,100 @@ static func _dessiner_fantome(ci: CanvasItem, it: Dictionary, r: Rect2, _c: Colo
 		"amulette": ci.draw_colored_polygon(PackedVector2Array([p.call(5, 4), p.call(7.5, 6.5), p.call(5, 9), p.call(2.5, 6.5)]), g)
 		"carquois": ci.draw_colored_polygon(PackedVector2Array([p.call(3, 3), p.call(7, 3), p.call(6.5, 9), p.call(3.5, 9)]), g)
 		_: ci.draw_rect(Rect2(p.call(2, 2), Vector2(u * 6, u * 6)), g, false, 1.0)
+
+
+## UN MEMBRE DÉTACHÉ A L'APPARENCE QU'IL AVAIT SUR LA CRÉATURE (designer 2026-09-13). Ses segments sont ceux du rig qui
+## le dessinait, posés entre eux comme sur le corps (le coude, le poignet, la cheville) avec les angles du rig, puis
+## ajustés dans la case ; chacun prend la planche de son membre (`assets/membres/`) teintée de la peau d'origine, sinon
+## le polygone du pantin. Une tête reste un disque, un œil un œil. `repere` est la transformation que l'appelant a
+## déjà posée — le pantin dessine l'objet tenu dans le repère de la main, et une planche doit s'y composer.
+## Faux pour un objet qui n'est pas un membre, ou un organe : son pictogramme ordinaire reste.
+static func _dessiner_membre(ci: CanvasItem, it: Dictionary, r: Rect2, repere: Transform2D) -> bool:
+	var am: Dictionary = it.get("apparence_membre", {})
+	if am.is_empty() or bool(am.get("interne", false)):
+		return false
+	var col := Color.html("#" + str(am.get("teinte", "c8a080")).trim_prefix("#"))
+	var parties: Array = am.get("parties", [])
+	var rig: Dictionary = GameData.catalogues.get("rigs", {}).get(str(am.get("silhouette", "")), {})
+	var segs_rig: Dictionary = rig.get("segments", {})
+	var noms: Array = []
+	for p in parties:
+		var mutante := "_mut_" in str(p)
+		var base := str(p).get_slice("_mut_", 0)
+		for sn: String in segs_rig.keys():
+			var pc := str((segs_rig[sn] as Dictionary).get("partie", ""))
+			if (not mutante and pc == str(p)) or (mutante and pc.trim_suffix("_D").trim_suffix("_G") == base and not sn.ends_with("_G") and not (sn in noms)):
+				noms.append(sn)
+	if noms.is_empty():
+		if str(parties[0] if not parties.is_empty() else "").begins_with("oeil"):   # un œil mutant : un œil
+			var c_o := r.get_center()
+			var r_o := r.size.x * 0.3
+			ci.draw_circle(c_o, r_o, Color(0.95, 0.93, 0.88))
+			ci.draw_circle(c_o, r_o * 0.45, Color(0.12, 0.1, 0.1))
+			ci.draw_arc(c_o, r_o, 0.0, TAU, 16, col.darkened(0.45), 1.0)
+			return true
+		return false
+	# LA POSE À PLAT : la racine à l'origine, chaque enfant à l'ancrage de son parent, l'angle du rig tel quel.
+	var poses := {}
+	var restants := noms.duplicate()
+	var garde := 16
+	while not restants.is_empty() and garde > 0:
+		garde -= 1
+		for sn in restants.duplicate():
+			var s: Dictionary = segs_rig[sn]
+			var a := deg_to_rad(float(s.get("angle", 90.0)))
+			var d := Vector2(cos(a), sin(a))
+			var parent := str(s.get("parent", ""))
+			var o := Vector2.ZERO
+			if parent in noms:
+				if not poses.has(parent):
+					continue
+				var pp: Dictionary = poses[parent]
+				var anc: Array = (segs_rig[parent] as Dictionary).get("ancrages", {}).get(str(s.get("ancrage", "")), [pp.l, 0.0])
+				o = Vector2(pp.o) + Vector2(pp.d) * float(anc[0]) + Vector2(-pp.d.y, pp.d.x) * float(anc[1])
+			poses[sn] = {"o": o, "d": d, "l": float(s.get("longueur", 4.0)), "w": float(s.get("largeur", 3.0))}
+			restants.erase(sn)
+	var boite := Rect2()
+	var premier := true
+	for sn in poses.keys():
+		var q: Dictionary = poses[sn]
+		var n: Vector2 = Vector2(-q.d.y, q.d.x) * float(q.w) * 0.5
+		var qo: Vector2 = q.o
+		var qd: Vector2 = q.d
+		for pt: Vector2 in [qo + n, qo - n, qo + qd * float(q.l) + n, qo + qd * float(q.l) - n]:
+			if premier:
+				boite = Rect2(pt, Vector2.ZERO)
+				premier = false
+			else:
+				boite = boite.expand(pt)
+	var marge := r.size.x * 0.1
+	var ech := minf((r.size.x - 2.0 * marge) / maxf(0.01, boite.size.x), (r.size.y - 2.0 * marge) / maxf(0.01, boite.size.y))
+	var centre := r.get_center()
+	var cote_c := float(Planches.case())
+	for sn in noms:
+		if not poses.has(sn):
+			continue
+		var q: Dictionary = poses[sn]
+		var o: Vector2 = centre + (Vector2(q.o) - boite.get_center()) * ech
+		var d: Vector2 = q.d
+		var p := Vector2(-d.y, d.x)
+		var l: float = q.l * ech
+		var w: float = q.w * ech
+		if str(sn).begins_with("tete"):
+			ci.draw_circle(o + d * l * 0.5, l * 0.5, col)
+			ci.draw_arc(o + d * l * 0.5, l * 0.5, 0.0, TAU, 16, col.darkened(0.45), 1.0)
+			continue
+		var dossier := "membres/" + str(sn).trim_suffix("_G").trim_suffix("_D")
+		if Planches.variantes(dossier) > 0:   # la même boîte que le pantin : carrée, du bas (l'articulation) vers le haut (le bout)
+			var cote := maxf(l, w)
+			var k := cote / cote_c
+			var miroir := str(sn).ends_with("_G")
+			var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * (l * 0.5 + cote * 0.5) + p * (cote * 0.5) * (1.0 if miroir else -1.0))
+			ci.draw_set_transform_matrix(repere * local)
+			Planches.dessiner(ci, dossier, 0, Rect2(0, 0, cote_c, cote_c), col)
+			ci.draw_set_transform_matrix(repere)
+			continue
+		var poly := PackedVector2Array([o - p * w * 0.5, o + p * w * 0.5, o + d * l + p * w * 0.5, o + d * l - p * w * 0.5])
+		ci.draw_colored_polygon(poly, col)
+		ci.draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), col.darkened(0.45), 1.0)
+	return true

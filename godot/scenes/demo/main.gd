@@ -2600,7 +2600,11 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 		match genre:
 			1:   # la traverse et la poignée d'une porte
 				_porte_details(ci, g, t, c, g.contenu_de(t), teinte)
-			2:   # un contenant : une caisse
+			2:   # un contenant : une caisse — ou le membre qu'il porte, tel qu'il était sur la créature (2026-09-13)
+				var membre_sol := _membre_au_sol(g, t) if not ("coffre" in g.contenu_de(t).get("tags", [])) else {}
+				if not membre_sol.is_empty():
+					Pictos.dessiner_objet(ci, membre_sol, Rect2(c + Vector2(-9, -14), Vector2(18, 18)))
+					continue
 				var cc := (Color(0.55, 0.38, 0.18) if "coffre" in g.contenu_de(t).get("tags", []) else Color(0.75, 0.65, 0.3)) * teinte
 				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
@@ -2885,8 +2889,23 @@ func _dessine_tuile(ci: CanvasItem, t: Vector2i) -> void:
 	if "contenant" in contenu.get("tags", []):   # coffre ou butin : une caisse
 		var cc := (Color(0.55, 0.38, 0.18) if "coffre" in contenu.tags else Color(0.75, 0.65, 0.3)) * teinte
 		_lot_vider(ci)
+		var membre_sol := _membre_au_sol(g, t) if not ("coffre" in contenu.tags) else {}
+		if not membre_sol.is_empty():   # un membre posé au sol se voit tel qu'il était sur la créature (designer 2026-09-13)
+			Pictos.dessiner_objet(ci, membre_sol, Rect2(c + Vector2(-9, -14), Vector2(18, 18)))
+			return
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
 		ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
+
+## Le premier membre détaché d'un butin posé sur cette tuile, ou {}.
+func _membre_au_sol(g: Grille, t: Vector2i) -> Dictionary:
+	if sim == null or g != sim.grille:
+		return {}
+	for uid in sim.contenants.get(g.idx(t), []):
+		var o: Dictionary = sim.items.get(str(uid), {})
+		if not (o.get("apparence_membre", {}) as Dictionary).is_empty():
+			return o
+	return {}
+
 
 ## Le sprite d'un meuble ou d'une station posés (Direction artistique, 2026-09-05) : `meuble_<id>.png` ou
 ## `station_<id>.png` dans le dossier des sprites, dressé sur la tuile par-dessus le bloc de couleur — s'il existe.
@@ -3425,7 +3444,7 @@ func _dessiner_bulle(ci: CanvasItem) -> void:
 func _lignes_bulle(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var res: Array[String] = [tr("ui.bulle.pv").format({"nom": tr(cible.name_key), "pv": int(cible.sante), "max": int(cible.sante_max)})]
 	var arme := Etres.arme(j, sim.items)
-	if not arme.is_empty():
+	if not arme.is_empty() and sim.fonctionnalites.has(str(arme.get("functionality", ""))):   # ce qu'on tient n'est pas toujours une arme (un membre, 2026-09-13)
 		var fonct: Dictionary = sim.fonctionnalites[arme.functionality]
 		var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))
 		var piece := Etres.piece_zone(cible, zone.zone, sim.items)
@@ -3452,7 +3471,7 @@ func _lignes_bulle(j: Dictionary, cible: Dictionary) -> Array[String]:
 func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var res: Array[String] = []
 	var arme := Etres.arme(j, sim.items)
-	if arme.is_empty():
+	if arme.is_empty() or not sim.fonctionnalites.has(str(arme.get("functionality", ""))):
 		return res
 	var fonct: Dictionary = sim.fonctionnalites[arme.functionality]
 	var zone: Dictionary = sim.regles.zone_de_coup(g_h(j.pos), g_h(cible.pos))

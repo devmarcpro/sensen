@@ -300,7 +300,7 @@ static func texte_objet(ec: Ecrans, uid: String) -> String:
 			l.append("   %s : %s — %s (%s %.2f)" % [ec.tr("slotc." + str(slot)), ec.tr(GameData.entree("components", str(c.composant)).name_key), ec.tr(GameData.entree("materials", str(c.materiau)).name_key), ec.tr("qualite." + sim.regles.palier_qualite(float(c.qualite))), float(c.qualite)])
 	if it.get("type", "") == "composant":
 		l.append(ec.tr("ui.objet.composant").format({"materiau": ec.tr(GameData.entree("materials", str(it.materiau)).name_key)}))
-	if it.get("type", "") == "materiau":
+	if it.get("type", "") == "materiau" and GameData.catalogues.materials.has(str(it.get("materiau", ""))):   # un membre, un organe : une matière sans matériau (2026-09-13)
 		var m: Dictionary = GameData.entree("materials", str(it.materiau))
 		l.append(ec.tr("ui.objet.materiau").format({"categorie": ec.tr("categorie." + str(m.category)), "forme": ec.tr("forme." + str(it.get("forme", "brut"))).format({"materiau": ec.tr(m.name_key)}), "quantite": int(it.quantite)}))
 	if it.has("stats") and it.stats is Dictionary and not it.stats.is_empty():
@@ -308,7 +308,7 @@ static func texte_objet(ec: Ecrans, uid: String) -> String:
 		for k in it.stats.keys():
 			st.append("%s %d" % [ec.tr("mstat." + str(k)), roundi(float(it.stats[k]))])
 		l.append(ec.tr("ui.objet.stats").format({"liste": " · ".join(st)}))
-	elif it.get("type", "") == "materiau":
+	elif it.get("type", "") == "materiau" and GameData.catalogues.materials.has(str(it.get("materiau", ""))):
 		var m2: Dictionary = GameData.entree("materials", str(it.materiau))
 		var st2: Array[String] = []
 		for k in m2.stats.keys():

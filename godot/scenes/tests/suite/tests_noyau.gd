@@ -1814,6 +1814,53 @@ func test_cadavres() -> void:
 	verifier(hash([s.graine, "prelever", str(cible.id), membre]) == g0, "et le jet ne dépend pas de l'heure : réessayer plus tard ne changerait rien")
 
 
+## LE COU ET LE MEMBRE DÉTACHÉ (designer 2026-09-13) : un cou entre le torse et la tête, et un membre qui garde de
+## quoi se redessiner tel qu'il était sur la créature.
+func test_cou_et_membre_detache() -> void:
+	var s := Simulation.new(4248)
+	s.charger_camp()
+	var j := joueur_de(s)
+	var plan := Etres.plan_corps(j)
+	verifier(plan.parties.has("cou") and str(plan.parties.tete.parent) == "cou" and str(plan.parties.cou.parent) == "torse", "la tête tient sur un cou, le cou sur le torse")
+	verifier("amulette" in plan.parties.cou.get("emplacements", []) and not ("amulette" in plan.parties.tete.get("emplacements", [])), "l'amulette pend au cou, pas au crâne")
+	verifier(bool(plan.parties.cou.get("vital", false)) and float(plan.parties.cou.part_sante) >= 2.0, "comme la tête, le cou est le corps lui-même : vital et hors de portée, le compteur global tue seul")
+	var rig: Dictionary = GameData.catalogues.rigs.humanoide
+	verifier(str(rig.segments.cou.partie) == "cou" and str(rig.segments.tete.parent) == "cou", "le pantin dessine le cou, et la tête s'y accroche")
+	var a_bras := Etres.apparence_membre(j, "bras_D")
+	verifier(a_bras.get("parties", []) == ["bras_D", "main_D"] and str(a_bras.get("silhouette", "")) == "humanoide" and Color.html(str(a_bras.get("teinte", ""))) != Color.WHITE, "un bras détaché emporte sa main, sa silhouette et sa peau (%s)" % str(a_bras))
+	var a_cou := Etres.apparence_membre(j, "cou")
+	verifier("tete" in a_cou.get("parties", []) and not ("cerveau" in a_cou.get("parties", [])), "un cou emporte la tête ; les organes ne se dessinent pas")
+	Etres.perdre_partie(j, "main_D")
+	verifier(Etres.apparence_membre(j, "bras_D").get("parties", []) == ["bras_D"], "une main déjà perdue ne revient pas avec le bras")
+	verifier(Etres.apparence_membre(j, "main_D").is_empty(), "et une partie perdue n'a plus d'apparence à prêter")
+	# ÇA DÉPEND DE LA BLESSURE (designer 2026-09-13) : tranché, le membre tombe au sol ; broyé ou brûlé, rien ne reste.
+	verifier(str(SimCadavres.issue_blessure({"type": "tranchant"}).issue) == "tombe" and str(SimCadavres.issue_blessure({"type": "contondant"}).issue) == "broye" and str(SimCadavres.issue_blessure({"type": "feu"}).issue) == "calcine" and str(SimCadavres.issue_blessure({"chute": true}).issue) == "broye", "la table des blessures : tranché tombe, contondant broie, le feu calcine, une chute broie")
+	var cible := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var au_sol := func() -> Array:
+		var r: Array = []
+		for uid in s.contenants.get(s.grille.idx(cible.pos), []):
+			if not (s.items.get(str(uid), {}).get("apparence_membre", {}) as Dictionary).is_empty():
+				r.append(s.items[str(uid)])
+		return r
+	cible.sante = 100000   # le compteur global hors d'atteinte ; les réserves des parties restent celles de sa santé maximale
+	s._appliquer_degats(cible, Etres.sante_partie(cible, "jambe_G"), str(j.id), {"type": "contondant", "element": {}, "zone": "jambes"})
+	var broyee := not Etres.partie_intacte(cible, "jambe_G") or not Etres.partie_intacte(cible, "jambe_D") or not Etres.partie_intacte(cible, "pied_G") or not Etres.partie_intacte(cible, "pied_D")
+	verifier(au_sol.call().is_empty(), "un coup de masse qui emporte un membre ne laisse rien à ramasser (membre tombé : %s)" % str(broyee))
+	var avant := Etres.apparence_membre(cible, "bras_G")
+	Etres.blesser_partie(cible, "bras_G", Etres.sante_partie(cible, "bras_G") - 1)
+	for k in 20:
+		if not Etres.partie_intacte(cible, "bras_G"):
+			break
+		cible.sante = 100000
+		s._appliquer_degats(cible, Etres.sante_partie_max(cible, "bras_G"), str(j.id), {"type": "tranchant", "element": {}, "zone": "bras"})
+	var tombes: Array = au_sol.call()
+	verifier(not tombes.is_empty(), "une lame qui tranche un membre le laisse au sol")
+	if not tombes.is_empty():
+		var am: Dictionary = tombes[0].apparence_membre
+		verifier(str(am.silhouette) == "humanoide" and str(am.teinte) == str(avant.teinte) and not (am.parties as Array).is_empty(), "et il garde l'apparence qu'il avait sur la créature (%s)" % str(am))
+	s.monde.fermer()
+
+
 ## L'HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l'hydratation aussi »). Elle est la
 ## faim en plus pressant, et c'est ce que le test vérifie d'abord : les nombres, pas seulement la mécanique. Puis
 ## ce qui la rend intéressante — elle est le seul manque que le corps déclarait ENCORE, sur les reins.
@@ -2310,7 +2357,7 @@ func test_paperdoll_et_tutoriels() -> void:
 				lacets_ok = false
 		verifier(rig.segments.has(rig.racine) and lacets_ok and rig.ordre.size() == rig.segments.size(), "rig %s : racine, %d orientation(s) déclarée(s) avec un lacet valide (%s), un ordre de départage complet" % [id, oris.size(), ", ".join(PackedStringArray(oris.keys()))])
 	var h: Dictionary = GameData.entree("rigs", "humanoide")
-	verifier(h.segments.size() == 15 and h.racine == "bassin" and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 15 segments depuis la coupe du bassin, le casque peint la tête, l'arme à la main droite")
+	verifier(h.segments.size() == 16 and h.racine == "bassin" and h.slots_segments.casque == ["tete"] and h.prise_arme == "main_D", "rig humanoïde : 16 segments depuis la coupe du bassin (le cou compris, 2026-09-13), le casque peint la tête, l'arme à la main droite")
 	verifier(GameData.config("palette_materiaux").has("cuir") and GameData.config("palette_materiaux").cuir.hex == "#8A5A33", "palette : Cuir #8A5A33")
 	var s := nouvelle_sim("plaine_au_talus")
 	var j := joueur_de(s)
@@ -2323,7 +2370,7 @@ func test_paperdoll_et_tutoriels() -> void:
 	var teinte_attendue := Color.html(str(pal.hex)) if pal.has("hex") else Color(0.6, 0.6, 0.6)
 	verifier(not str(peints.torse.construction).is_empty() and peints.torse.couleur == teinte_attendue, "la construction donne la forme, le matériau (%s) la teinte" % mat_torse)
 	var monde := pd._poser_segments()
-	verifier(monde.size() == 15 and monde.has("main_D") and monde.has("bassin"), "les 15 segments se placent depuis la racine (le bassin)")
+	verifier(monde.size() == 16 and monde.has("main_D") and monde.has("bassin"), "les 16 segments se placent depuis la racine (le bassin)")
 	# LA PROFONDEUR (designer 2026-09-08, ordre de travail 26 quater bis) : de face, les deux épaules s'écartent à
 	# l'écran ; de profil, elles se superposent et leur écart passe en PROFONDEUR — et c'est la profondeur, non plus
 	# une liste écrite à la main, qui envoie le bras du fond derrière le torse.

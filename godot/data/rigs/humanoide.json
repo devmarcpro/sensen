@@ -39,7 +39,7 @@
    "angle": -90,
    "ancrages": {
     "cou": [
-     9,
+     8,
      0,
      -1
     ],
@@ -63,9 +63,26 @@
    "epaisseur": 6,
    "partie": "torse"
   },
-  "tete": {
+  "cou": {
    "parent": "torse",
    "ancrage": "cou",
+   "longueur": 2.5,
+   "largeur": 3.5,
+   "angle": -90,
+   "ancrages": {
+    "tete": [
+     2.5,
+     0,
+     0
+    ]
+   },
+   "zone": "tete",
+   "epaisseur": 3,
+   "partie": "cou"
+  },
+  "tete": {
+   "parent": "cou",
+   "ancrage": "tete",
    "longueur": 8,
    "largeur": 8,
    "angle": -90,
@@ -273,6 +290,7 @@
   "pied_D",
   "bassin",
   "torse",
+  "cou",
   "tete",
   "bras_haut_D",
   "bras_bas_D",

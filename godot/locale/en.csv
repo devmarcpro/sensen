@@ -2033,9 +2033,13 @@ partie.rein,Kidney
 partie.rein_D,Right kidney
 partie.rein_G,Left kidney
 partie.sacs_aeriens,Air sacs
+partie.cou,Neck
 partie.tete,Head
 partie.torse,Torso
 journal.partie_perdue,"{nom} loses: {partie}"
+journal.membre_tombe,"{nom} loses: {partie} — severed, it falls to the ground"
+journal.membre_broye,"{nom} loses: {partie} — crushed to nothing"
+journal.membre_calcine,"{nom} loses: {partie} — burnt to ashes"
 journal.partie_vitale,"{nom}'s {partie} is destroyed — they collapse"
 journal.flaire,"{nom} catches a scent and follows it"
 journal.depose,"{nom} sets {def} down"

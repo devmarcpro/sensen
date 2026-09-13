@@ -75,5 +75,37 @@
     ],
     "valeur_base": 8.0,
     "mult_vital": 3.0
+  },
+  "blessures": {
+    "_doc": "CE QUE DEVIENT UN MEMBRE PERDU AU COMBAT (designer 2026-09-13 : « ca depend de la blessure »). Le TYPE du coup qui l a fait tomber decide : `tombe` le laisse au sol comme un objet qui garde l apparence qu il avait sur la creature, sa valeur multipliee par `valeur_mult` (une coupe nette vaut plus qu un membre arrache) ; `broye` et `calcine` le detruisent — il n y a rien a ramasser, et le journal dit pourquoi. Un type absent de la table prend `defaut`. Un organe ne tombe jamais : il reste dans le corps. Une chute ou un eboulement n ont pas de type et comptent comme `chute`.",
+    "par_type": {
+      "tranchant": {
+        "issue": "tombe",
+        "valeur_mult": 1.0
+      },
+      "perforant": {
+        "issue": "tombe",
+        "valeur_mult": 0.5
+      },
+      "contondant": {
+        "issue": "broye"
+      },
+      "chute": {
+        "issue": "broye"
+      },
+      "effondrement": {
+        "issue": "broye"
+      },
+      "feu": {
+        "issue": "calcine"
+      },
+      "lave": {
+        "issue": "calcine"
+      },
+      "chaleur": {
+        "issue": "calcine"
+      }
+    },
+    "defaut": "broye"
   }
 }

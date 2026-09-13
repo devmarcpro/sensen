@@ -112,6 +112,49 @@
           "minimum": 0
         }
       }
+    },
+    "blessures": {
+      "type": "object",
+      "required": [
+        "par_type",
+        "defaut"
+      ],
+      "properties": {
+        "_doc": {
+          "type": "string"
+        },
+        "par_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "issue"
+            ],
+            "properties": {
+              "issue": {
+                "type": "string",
+                "enum": [
+                  "tombe",
+                  "broye",
+                  "calcine"
+                ]
+              },
+              "valeur_mult": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "defaut": {
+          "type": "string",
+          "enum": [
+            "tombe",
+            "broye",
+            "calcine"
+          ]
+        }
+      }
     }
   }
 }

@@ -995,6 +995,26 @@ func _ready() -> void:
 			rng_m.seed = 4242
 			for k_m in int(args[i2 + 1]):
 				print("capture : mutation %s" % SimMaladies.muter_aleatoire(scene.sim, j_m, rng_m))
+		if args[i2] == "--tenir-membre" and i2 + 1 < args.size() and scene.sim != null:   # --tenir-membre bras_D : le joueur tient ce membre d'un PNJ, et en a un second au sol (2026-09-13)
+			var j_t: Dictionary = scene.joueur()
+			var source: Dictionary = {}
+			for x in scene.sim.vivants():
+				if x.controle != "joueur" and not Etres.apparence_membre(x, str(args[i2 + 1])).is_empty():
+					source = x
+					break
+			if source.is_empty():
+				source = j_t
+			for k_t in 2:
+				var o_t := SimObjets.generer_objet(scene.sim, "membre", 1, {}, "commun", 0)
+				o_t["apparence_membre"] = Etres.apparence_membre(source, str(args[i2 + 1]))
+				print("capture : membre tenu ", o_t.apparence_membre)
+				if k_t == 0:
+					j_t.equipement["main_principale"] = str(o_t.uid)
+				else:
+					scene.sim._poser_contenant(j_t.pos + Vector2i(1, 0), [str(o_t.uid)], "butin")
+					j_t.sac.append(str(o_t.uid))
+			if scene.noeuds.has(str(j_t.id)):
+				scene.noeuds[str(j_t.id)].set_meta("signature", -1)
 		if args[i2] == "--joueur" and i2 + 1 < args.size() and scene.sim != null:
 			var j_c: Dictionary = scene.joueur()
 			if not j_c.is_empty():

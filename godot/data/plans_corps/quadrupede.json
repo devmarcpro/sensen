@@ -15,15 +15,24 @@
         "accessoire_2"
       ]
     },
-    "tete": {
+    "cou": {
       "zone": "tete",
       "parent": "torse",
       "vital": true,
-      "poids_coup": 2.0,
+      "poids_coup": 0.5,
       "part_sante": 2.0,
       "emplacements": [
-        "casque",
         "amulette"
+      ]
+    },
+    "tete": {
+      "zone": "tete",
+      "parent": "cou",
+      "vital": true,
+      "poids_coup": 1.5,
+      "part_sante": 2.0,
+      "emplacements": [
+        "casque"
       ]
     },
     "patte_AV_D": {

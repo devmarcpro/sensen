@@ -32,9 +32,27 @@
    "epaisseur": 6,
    "partie": "torse"
   },
-  "tete": {
+  "cou": {
    "parent": "torse",
    "ancrage": "cou",
+   "longueur": 2,
+   "largeur": 2.5,
+   "angle": -90,
+   "ancrages": {
+    "tete": [
+     2,
+     0,
+     0
+    ]
+   },
+   "zone": "tete",
+   "profondeur": 80,
+   "epaisseur": 2.5,
+   "partie": "cou"
+  },
+  "tete": {
+   "parent": "cou",
+   "ancrage": "tete",
    "longueur": 4,
    "largeur": 4,
    "angle": -90,
@@ -70,6 +88,7 @@
  "ordre": [
   "aile_D",
   "torse",
+  "cou",
   "tete",
   "aile_G"
  ],

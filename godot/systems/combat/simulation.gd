@@ -2577,9 +2577,12 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 			zone_c = Etres.zone_au_hasard(regles, des_corps)
 		var quelle := Etres.partie_touchee(cible, zone_c, des_corps)
 		if not quelle.is_empty():
+			# CE QUI TOMBE SE LIT AVANT DE TOMBER : l'apparence du membre, seulement si ce coup peut l'emporter (2026-09-13).
+			var apparence_q := Etres.apparence_membre(cible, quelle) if Etres.sante_partie(cible, quelle) <= degats else {}
 			var issue := Etres.blesser_partie(cible, quelle, degats)
 			if issue == "perdue":
-				EventBus.emettre(&"journal", [&"journal.partie_perdue", {"nom": cible.name_key, "partie": "partie." + quelle}])
+				var devenir := SimCadavres.membre_perdu_au_combat(self, cible, quelle, apparence_q, detail)   # ça dépend de la blessure
+				EventBus.emettre(&"journal", [StringName("journal.membre_" + devenir) if not devenir.is_empty() else &"journal.partie_perdue", {"nom": cible.name_key, "partie": Etres.cle_nom_partie(quelle)}])
 			elif issue == "vitale":
 				EventBus.emettre(&"journal", [&"journal.partie_vitale", {"nom": cible.name_key, "partie": "partie." + quelle}])
 				cible.sante = 0

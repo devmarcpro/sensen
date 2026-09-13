@@ -103,6 +103,7 @@ static func prelever(sim: Simulation, e: Dictionary, c: Dictionary, nom: String,
 	e.compteur = tick + int(pr.get("ticks", 1500))
 	# CE QUI EST OUVERT NE SE REFERME PAS : la pièce quitte le corps dans les deux cas. `perdre_partie` emporte avec
 	# elle ce qu'elle portait — prendre un bras prend la main —, et c'est le même chemin que la perte au combat.
+	var apparence := Etres.apparence_membre(c, nom)   # avant qu'elle quitte le corps : ce qu'elle emporte, et sa peau (2026-09-13)
 	Etres.perdre_partie(c, nom)
 	var corps: Dictionary = c.get("corps", {})
 	var prises: Array = corps.get("prelevees", [])
@@ -112,18 +113,58 @@ static func prelever(sim: Simulation, e: Dictionary, c: Dictionary, nom: String,
 	if jet < int(pr.get("dd_organe" if interne else "dd_membre", 10)):
 		EventBus.emettre(&"journal", [&"journal.preleve_rate", {"nom": e.name_key, "partie": "partie." + nom}])
 		return true
-	var o := SimObjets.generer_objet(sim, str(pr.get("item_organe" if interne else "item_membre", "")), SimObjets.niveau_loot(sim), {"creature": c.name_key}, "commun", 0)
+	var o := objet_de_partie(sim, c, nom, apparence, 1.0)
 	if o.is_empty():
 		return true
-	SimObjets.identifier(sim, o)   # ce qu'on a tiré de sa main n'est pas un mystère
+	e.sac.append(o.uid)
+	EventBus.emettre(&"journal", [&"journal.preleve", {"nom": e.name_key, "partie": "partie." + nom, "def": c.name_key}])
+	return true
+
+
+## L'OBJET QU'UNE PARTIE DEVIENT hors du corps — prélevée sur une dépouille ou tombée au combat : sa pièce, son poids et
+## sa valeur tirés de la bête, et l'apparence qu'elle avait sur elle (lue par l'appelant AVANT qu'elle ne tombe).
+static func objet_de_partie(sim: Simulation, c: Dictionary, nom: String, apparence: Dictionary, valeur_mult: float) -> Dictionary:
+	var pr: Dictionary = _cfg().get("prelevement", {})
+	var p: Dictionary = Etres.plan_corps(c).get("parties", {}).get(nom, {})
+	var interne := bool(p.get("interne", false))
+	var o := SimObjets.generer_objet(sim, str(pr.get("item_organe" if interne else "item_membre", "")), SimObjets.niveau_loot(sim), {"creature": c.name_key}, "commun", 0)
+	if o.is_empty():
+		return {}
+	SimObjets.identifier(sim, o)   # ce qu'on a tiré d'un corps n'est pas un mystère
 	o["espece"] = str(c.get("def", ""))
-	o["nom"] = {"partie": "partie." + nom, "de_creature": str(c.name_key)}
+	o["nom"] = {"partie": Etres.cle_nom_partie(nom), "de_creature": str(c.name_key)}
+	if not apparence.is_empty():
+		o["apparence_membre"] = apparence
 	# LA TAILLE DE LA BÊTE PÈSE ET SE PAIE : un membre de troll n'est pas un membre de lièvre, et le seul nombre qui
 	# dise la carrure sans table à côté est la santé maximale du corps dont il vient.
 	var bornes: Array = pr.get("poids_bornes", [0.3, 4.0])
 	var f := clampf(float(c.get("sante_max", 10)) / maxf(1.0, float(pr.get("sante_reference", 40.0))), float(bornes[0]), float(bornes[1]))
 	o["poids"] = float(pr.get("poids_organe" if interne else "poids_membre", 1.0)) * f
-	o["valeur"] = maxf(1.0, float(pr.get("valeur_base", 8.0)) * f * (float(pr.get("mult_vital", 3.0)) if bool(p.get("vital", false)) else 1.0))
-	e.sac.append(o.uid)
-	EventBus.emettre(&"journal", [&"journal.preleve", {"nom": e.name_key, "partie": "partie." + nom, "def": c.name_key}])
-	return true
+	o["valeur"] = maxf(1.0, float(pr.get("valeur_base", 8.0)) * f * (float(pr.get("mult_vital", 3.0)) if bool(p.get("vital", false)) else 1.0) * valeur_mult)
+	return o
+
+
+## CE QUE DEVIENT UN MEMBRE PERDU AU COMBAT (designer 2026-09-13 : « ça dépend de la blessure ») : la ligne de
+## `blessures.par_type` du type du coup — `tombe` (avec `valeur_mult`), `broye` ou `calcine`.
+static func issue_blessure(detail: Dictionary) -> Dictionary:
+	var bl: Dictionary = _cfg().get("blessures", {})
+	var type := str(detail.get("type", ""))
+	if type.is_empty() and bool(detail.get("chute", false)):
+		type = "chute"
+	var ligne: Dictionary = bl.get("par_type", {}).get(type, {})
+	if ligne.is_empty():
+		ligne = {"issue": str(bl.get("defaut", "broye"))}
+	return ligne
+
+
+## Un membre vient de tomber au combat : selon la blessure, il reste au sol — tel qu'il était sur la créature — ou il
+## n'en reste rien. Rend l'issue (`tombe`, `broye`, `calcine`) pour le journal.
+static func membre_perdu_au_combat(sim: Simulation, c: Dictionary, nom: String, apparence: Dictionary, detail: Dictionary) -> String:
+	var ligne := issue_blessure(detail)
+	var issue := str(ligne.get("issue", "broye"))
+	if issue != "tombe" or apparence.is_empty() or bool(apparence.get("interne", false)):
+		return issue if not bool(apparence.get("interne", false)) else ""
+	var o := objet_de_partie(sim, c, nom, apparence, float(ligne.get("valeur_mult", 1.0)))
+	if not o.is_empty():
+		sim._poser_contenant(c.pos, [str(o.uid)], "butin")
+	return issue

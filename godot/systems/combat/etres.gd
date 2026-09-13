@@ -520,6 +520,37 @@ static func _ajouter_partie_aleatoire(parties: Dictionary, code: String) -> void
 		parent = nom
 
 
+## L'APPARENCE D'UN MEMBRE DÉTACHÉ (designer 2026-09-13 : « qu'un membre dans l'inventaire/main/au sol ait l'apparence
+## que le membre a sur une créature »). Ce qu'il faut pour le redessiner loin du corps : la silhouette dont le rig le
+## dessinait, les parties EXTERNES qui partent avec lui et étaient encore là (prendre un bras prend la main, pas une
+## main déjà perdue), et la teinte de la peau qui les couvrait. À lire AVANT de retirer la partie.
+static func apparence_membre(e: Dictionary, nom: String) -> Dictionary:
+	var parties: Dictionary = plan_corps(e).get("parties", {})
+	if not parties.has(nom) or not partie_intacte(e, nom):
+		return {}
+	var emportees: Array = [nom]
+	var ajoute := true
+	while ajoute:
+		ajoute = false
+		for p: String in parties.keys():
+			if p in emportees or bool((parties[p] as Dictionary).get("interne", false)):
+				continue
+			if str((parties[p] as Dictionary).get("parent", "")) in emportees and partie_intacte(e, p):
+				emportees.append(p)
+				ajoute = true
+	var t: Array = e.get("teinte", [0.8, 0.65, 0.5])
+	var col := Color(float(t[0]), float(t[1]), float(t[2]))
+	var peau := str(e.get("apparence", {}).get("teinte_peau", ""))
+	if peau.begins_with("#"):
+		col = Color.html(peau)
+	elif not peau.is_empty():
+		for tp in GameData.config("apparence").get("teintes_peau", []):
+			if str(tp.id) == peau:
+				col = Color(float(tp.rgb[0]), float(tp.rgb[1]), float(tp.rgb[2]))
+	return {"silhouette": str(e.get("corps", {}).get("silhouette", "")), "parties": emportees, "teinte": "#" + col.to_html(false),
+		"interne": bool((parties[nom] as Dictionary).get("interne", false))}
+
+
 ## Les parties QUE CET ÊTRE A PERDUES. Comme pour les piles de tuiles, on ne stocke que l'exception : un corps
 ## entier ne coûte rien de plus qu'avant, et la liste vide est le cas de tout le monde.
 static func parties_perdues(e: Dictionary) -> Array:

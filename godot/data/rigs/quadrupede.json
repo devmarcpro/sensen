@@ -47,9 +47,27 @@
    "epaisseur": 9,
    "partie": "torse"
   },
-  "tete": {
+  "cou": {
    "parent": "torse",
    "ancrage": "cou",
+   "longueur": 3,
+   "largeur": 3.5,
+   "angle": -90,
+   "ancrages": {
+    "tete": [
+     3,
+     0,
+     0
+    ]
+   },
+   "zone": "tete",
+   "profondeur": 80,
+   "epaisseur": 3.5,
+   "partie": "cou"
+  },
+  "tete": {
+   "parent": "cou",
+   "ancrage": "tete",
    "longueur": 7,
    "largeur": 6,
    "angle": -90,
@@ -186,6 +204,7 @@
   "pied_AR_G",
   "patte_AV_G",
   "pied_AV_G",
+  "cou",
   "tete"
  ],
  "slots_segments": {
