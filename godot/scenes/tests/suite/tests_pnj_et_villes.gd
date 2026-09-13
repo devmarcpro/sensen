@@ -196,6 +196,42 @@ func test_absence_et_corps() -> void:
 	s.monde.fermer()
 
 
+## LES SOUS-RACES ET LEURS SOUS-FACTIONS (ordre de travail 29 ter, 2026-09-13) : le mécanisme, sur deux sous-races
+## déclarées par le test — le contenu et les visages restent au designer.
+func test_sous_factions() -> void:
+	var races: Dictionary = GameData.catalogues.races
+	var base: Dictionary = races.get("homme_bete", {})
+	verifier(not base.is_empty(), "la race des hommes-bêtes existe")
+	if base.is_empty():
+		return
+	var chat: Dictionary = base.duplicate(true)
+	chat["parent"] = "homme_bete"
+	var chien: Dictionary = base.duplicate(true)
+	chien["parent"] = "homme_bete"
+	races["homme_chat_test"] = chat
+	races["homme_chien_test"] = chien
+	var e_chat := {"race": "homme_chat_test", "tags": ["civil"]}
+	var e_chien := {"race": "homme_chien_test", "tags": ["civil"]}
+	var f_chat := SimRumeur.factions_de(e_chat)
+	verifier("race:homme_chat_test" in f_chat and "race:homme_bete" in f_chat, "un homme-chat est des chats ET des hommes-bêtes (%s)" % str(f_chat))
+	var tags := SimRumeur.tags_de_peuple(e_chat)
+	var somme := func(e: Dictionary) -> float:
+		var v := 0.0
+		for fid in SimRumeur.factions_de(e):
+			for tag in tags:
+				v += SimRumeur.valeur_de(str(fid), str(tag))
+		return v
+	var v_chat: float = somme.call(e_chat)
+	var v_chien: float = somme.call(e_chien)
+	verifier(v_chat < v_chien and v_chien < 0.0, "frapper un homme-chat fâche les chats (%.0f) plus que les chiens (%.0f), qui s'en offusquent quand même en hommes-bêtes" % [v_chat, v_chien])
+	var e_humain := {"race": "humain", "tags": ["civil"]}
+	verifier(is_zero_approx(somme.call(e_humain)), "un humain n'est pas touché par ce qu'on fait aux hommes-bêtes")
+	chat["parent"] = "homme_chat_test"   # une boucle dans les données
+	verifier(SimRumeur.lignee_de_race("homme_chat_test").size() == 1, "une lignée qui boucle s'arrête au premier retour")
+	races.erase("homme_chat_test")
+	races.erase("homme_chien_test")
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)

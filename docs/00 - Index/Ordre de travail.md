@@ -602,7 +602,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Ce qui reste** : les ROYAUMES ne
     portent toujours pas de valeurs — `_lier_royaumes` reste une fonction pure de la graine, et c'est la
     moitié de l'analyse d'origine qui n'est pas comblée ; le dialogue ne colporte pas encore.
-29 ter. **LES SOUS-RACES, ET CHACUNE SA SOUS-FACTION** *(designer 2026-09-10 : « sous classes (homme bêtes =
+29 ter. **LES SOUS-RACES, ET CHACUNE SA SOUS-FACTION** — **LE MÉCANISME FAIT le 2026-09-13** : une race porte un `parent` ; un être appartient aux factions implicites `race:<id>` de toute sa lignée, et un acte contre lui pose les tags de toute sa lignée — un homme-chat frappé fâche les chats (−12) plus que les chiens (−6). *Reste au designer* : les fichiers de sous-race et leurs visages. — *(designer 2026-09-10 : « sous classes (homme bêtes =
     homme chats, hommes chiens, etc.), chacun a sa sous faction »).* **Noté, pas codé.**
     **CE QUI EXISTE DÉJÀ, ET C'EST PRESQUE TOUT LE MÉCANISME** : `SimRumeur.factions_de` DÉRIVE déjà une faction
     d'espèce (`espece:<id>`) sans qu'aucun fichier ne la déclare, et la réputation est une **somme sur toutes les

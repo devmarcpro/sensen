@@ -182,6 +182,10 @@ static func factions_de(e: Dictionary) -> Array[String]:
 					break
 		if dedans:
 			res.append(fid)
+	# UNE RACE EST UNE FACTION, ET UNE SOUS-RACE EN HÉRITE (ordre de travail 29 ter, 2026-09-13) : un homme-chat est de
+	# `race:homme_chat` ET de `race:homme_bete`. La somme des appartenances sait déjà additionner — rien d'autre à écrire.
+	for rid in lignee_de_race(race):
+		res.append("race:" + rid)
 	# UNE ESPÈCE EST UNE FACTION. Une bête appartient à celle de son espèce, qui n'existe dans aucun fichier : elle
 	# est déduite de son `def`, et ne value que le tag que les actes contre cette espèce posent.
 	var def := str(e.get("def", ""))
@@ -190,11 +194,32 @@ static func factions_de(e: Dictionary) -> Array[String]:
 	return res
 
 
+## LA LIGNÉE D'UNE RACE : elle-même, puis son `parent`, puis le parent de celui-ci (ordre de travail 29 ter). Une boucle
+## dans les données s'arrête au premier retour plutôt que de geler le jeu.
+static func lignee_de_race(race: String) -> Array[String]:
+	var res: Array[String] = []
+	var r := race
+	while not r.is_empty() and GameData.catalogues.get("races", {}).has(r) and not (r in res):
+		res.append(r)
+		r = str(GameData.catalogues.races[r].get("parent", ""))
+	return res
+
+
+## Les tags qu'un acte contre cet être pose au nom de son peuple : `race:<id>` pour lui et chacun de ses ancêtres.
+static func tags_de_peuple(e: Dictionary) -> Array:
+	var res: Array = []
+	for rid in lignee_de_race(str(e.get("race", ""))):
+		res.append("race:" + rid)
+	return res
+
+
 ## Ce que vaut un tag pour une faction — nommée ou implicite. Une faction d'espèce ne connaît qu'un seul tag : le
 ## sien. C'est ce qui fait qu'on peut fâcher les loups sans fâcher les cerfs.
 static func valeur_de(fid: String, tag: String) -> float:
 	if fid.begins_with("espece:"):
 		return -6.0 if tag == "espece:" + fid.trim_prefix("espece:") else 0.0
+	if fid.begins_with("race:"):   # un peuple ne connaît que ce qu'on fait aux siens (29 ter)
+		return -6.0 if tag == fid else 0.0
 	# UN ROYAUME JUGE PAR SA GOUVERNANCE (ordre de travail 29 bis, 2026-09-09). Il n'a pas de table à lui : une
 	# dictature militaire ne pardonne pas le désordre où qu'elle règne, et c'est bien ce qu'on veut dire par
 	# « gouvernance ». Le royaume est un observateur de plus, et `SimRumeur` savait déjà tout faire pour lui.

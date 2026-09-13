@@ -2558,7 +2558,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 	if not att.is_empty() and att.controle == "joueur" and cible.camp == "civil" and "civil" in cible.get("tags", []) and temoin_meurtre != "":
 		SimPnj.reputation(self, att, cible, "tuer" if cible.sante <= 0 else "frapper")
 	if degats > 0 and cible.sante > 0 and not att.is_empty() and cible.camp == "civil":
-		SimRumeur.rapporter(self, att, "frapper_civil", cible.pos, [])   # frapper se raconte aussi, moins fort
+		SimRumeur.rapporter(self, att, "frapper_civil", cible.pos, SimRumeur.tags_de_peuple(cible))   # frapper se raconte aussi, moins fort ; son peuple s'en souvient (29 ter)
 	# LA SANTÉ PAR PARTIE (designer 2026-09-09 : « il y a bien de la santé par parties »). Le coup a déjà été
 	# retranché du compteur global, qui décide de la mort ; il frappe maintenant UNE partie, tirée dans la zone
 	# touchée au poids de chacune. Les organes y sont, avec un poids faible : c'est ainsi qu'un coup chanceux perce
@@ -2604,7 +2604,7 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		var temoin_mort := "public"   # sans auteur (la faim, une chute) : la mort n'a rien à cacher
 		if not att.is_empty():
 			var acte_f := "tuer_civil" if cible.camp == "civil" else ("tuer_bete_paisible" if est_faune_paisible(cible) else "tuer_bete")
-			var extra_f: Array = [] if cible.camp == "civil" else ["espece:" + str(cible.get("def", ""))]
+			var extra_f: Array = SimRumeur.tags_de_peuple(cible) if cible.camp == "civil" else ["espece:" + str(cible.get("def", ""))]
 			temoin_mort = SimRumeur.rapporter(self, att, acte_f, cible.pos, extra_f, temoin_meurtre)
 		if str(cible.get("fonction", "")) == "dirigeant" and not str(cible.get("royaume", "")).is_empty() and monde != null:
 			monde.vacances[str(cible.royaume)] = monde.semaine_courante + int(SimTerritoire._ry(self).succession.semaines)
