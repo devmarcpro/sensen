@@ -1396,7 +1396,10 @@ func test_budgets() -> void:
 	# un tiers du total, et ça renvoie à la question ouverte des 42 coffres par étage.
 	# 2026-09-04 : remesuré à 88-96 ms sur six passages de la suite, 94-96 ms à la sonde (un objet généré 0,080 ms au lieu de 0,157) —
 	# le budget est tenu aujourd'hui. Le garde reste à 260 (la machine chargée fausse la mesure) ; le message dit l'état du jour.
-	verifier(dt_etage < 260.0, "É2 : un étage de donjon généré en %.0f ms — budget 100 ms %s, garde contre l'aggravation à 260" % [dt_etage, "tenu" if dt_etage < 100.0 else "NON TENU"])
+	# LA GARDE REVIENT AU BUDGET (ordre de travail 47, 2026-09-13) : 260 ms, c'était 2,6 fois le budget — un garde-fou posé
+	# quand l'étage en coûtait 150, et resté là quand il est tombé à 50. Un test qui tolère 2,6 fois sa cible ne voit une
+	# aggravation qu'après qu'elle a quintuplé. Le budget est tenu avec deux fois de marge : il redevient le critère.
+	verifier(dt_etage < 100.0, "É2 : un étage de donjon généré en %.0f ms (budget 100 ms)" % dt_etage)
 	t0 = Time.get_ticks_usec()
 	for k in 100:
 		s.generer_objet("proto_epee", 3)
@@ -1408,16 +1411,30 @@ func test_budgets() -> void:
 		Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
 	var dt_stats := (Time.get_ticks_usec() - t0) / 1000.0 / 100.0
 	verifier(dt_stats < 0.5, "É4 : recalcul complet des stats en %.3f ms (< 0.5 ms)" % dt_stats)
+	# LE BUDGET DE TICK POUVAIT DISPARAÎTRE EN SILENCE (ordre de travail 47, 2026-09-13) : `if pas_faits > 0` sautait la
+	# vérification, et elle sautait toujours — le joueur est le premier dû, `pas` s'arrête sur lui pour attendre son
+	# intention, zéro pas. On le met hors du tour (son compteur au loin) : les créatures de l'étage agissent seules.
+	j.compteur = s.horloge_monde.ticks + 1000000000
+	s.chrono.clear()
+	var pics: Array[float] = []
 	t0 = Time.get_ticks_usec()
 	var pas_faits := 0
 	for k in 200:   # l'horloge du donjon est à l'action : chaque pas fait agir une entité due
 		s.attente.clear()
+		var tp := Time.get_ticks_usec()
 		if not s.pas("monde"):
 			break
+		pics.append((Time.get_ticks_usec() - tp) / 1000.0)
 		pas_faits += 1
-	if pas_faits > 0:
-		var dt_tick := (Time.get_ticks_usec() - t0) / 1000.0 / float(pas_faits)
-		verifier(dt_tick < 8.0, "tick : %d pas de simulation à %.2f ms pièce (< 8 ms)" % [pas_faits, dt_tick])
+	pics.sort()
+	var ch_k: Array = s.chrono.keys()
+	ch_k.sort_custom(func(a, b): return float(s.chrono[a]) > float(s.chrono[b]))
+	print("    tick, où passe le temps (ms cumulées sur %d pas) : %s" % [pics.size(), str(ch_k.slice(0, 8).map(func(c): return "%s=%.0f" % [c, float(s.chrono[c])]))])
+	if not pics.is_empty():
+		print("    tick : médiane %.2f ms, 90e centile %.2f ms, pire %.2f ms, premier %.2f ms" % [pics[pics.size() / 2], pics[pics.size() * 9 / 10], pics.back(), pics[0]])
+	verifier(pas_faits >= 50, "le budget de tick se mesure vraiment : %d pas faits (au moins 50)" % pas_faits)
+	var dt_tick := (Time.get_ticks_usec() - t0) / 1000.0 / float(maxi(1, pas_faits))
+	verifier(dt_tick < 8.0, "tick : %d pas de simulation à %.2f ms pièce (< 8 ms)" % [pas_faits, dt_tick])
 
 
 func test_sauvegarde_partout() -> void:
@@ -1863,14 +1880,35 @@ func test_gemmes_et_livres() -> void:
 	var dur := s.generer_objet("grimoire", 4)
 	dur.difficulte = 200
 	s.donner(j, dur.uid)
-	var pv: int = j.sante
-	var mana: int = j.mana
 	j.compteur = s.horloge_monde.ticks
 	s.horloge_monde.avancer(100)
 	var connus_avant: int = j.modules_connus.size()
 	verifier(s.intention(j.id, {"type": "lire", "objet": dur.uid}), "tenter un livre impossible")
 	verifier(not (dur.uid in j.sac) and j.modules_connus.size() == connus_avant, "échec : livre perdu, rien d'appris")
 	verifier(int(j.xp.competence.get("lecture", 0)) == 15 * 5 + 200 * 2, "XP de Lecture : difficulté × 5 (succès) + × 2 (échec)")
+	# L'ÉCHEC LAISSE UNE TRACE (ordre de travail 47, 2026-09-13) : `pv` et `mana` étaient relevés ici et jamais relus, et
+	# l'effet était effacé trois lignes plus bas. Le dé choisit l'effet ; on éprouve donc chaque entrée des deux tables.
+	var table_g: Array = GameData.config("reading_failures").grave
+	var table_m: Array = GameData.config("reading_failures").mineur
+	verifier(not table_g.is_empty() and not table_m.is_empty(), "deux tables d'échec : mineur et grave")
+	# Chaque effet, entrée par entrée — le dé qui choisit est ôté, pas la règle.
+	for ef_l: Dictionary in table_m + table_g:
+		j.statuts.clear()
+		j.anti_stunlock_jusqua = -1
+		j.mana = j.mana_max
+		var pos_l: Vector2i = j.pos
+		var n_vivants := s.vivants().size()
+		SimObjets.appliquer_effet_echec(s, j, ef_l)
+		var ok_l := true
+		if ef_l.has("statut"):
+			ok_l = ok_l and j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == str(ef_l.statut))
+		if ef_l.has("mana"):
+			ok_l = ok_l and int(j.mana) == maxi(0, int(j.mana_max) + int(ef_l.mana))
+		if ef_l.get("teleportation", false):
+			ok_l = ok_l and j.pos != pos_l
+		if ef_l.has("invocation"):
+			ok_l = ok_l and s.vivants().size() == n_vivants + 1
+		verifier(ok_l, "effet d'échec %s : il a lieu" % str(ef_l))
 	# Le livre de module (designer, 2026-08-31), lu de bout en bout : le module précis est appris.
 	j.statuts.clear()   # l'échec de lecture précédent peut avoir posé un statut bloquant (effet d'échec)
 	j.competences["lecture"] = 100

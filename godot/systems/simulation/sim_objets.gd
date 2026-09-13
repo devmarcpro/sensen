@@ -981,7 +981,12 @@ static func _effet_echec_lecture(sim: Simulation, e: Dictionary, grave: bool, ti
 	var table: Array = GameData.config("reading_failures").get("grave" if grave else "mineur", [])
 	if table.is_empty():
 		return
-	var ef: Dictionary = table[sim.des.entier(0, table.size() - 1)]
+	appliquer_effet_echec(sim, e, table[sim.des.entier(0, table.size() - 1)])
+
+
+## UN effet d'échec de lecture (data/reading_failures.json), sans le dé qui le choisit : c'est ce qu'un test éprouve
+## entrée par entrée (ordre de travail 47 — le test les provoquait puis les effaçait sans rien vérifier).
+static func appliquer_effet_echec(sim: Simulation, e: Dictionary, ef: Dictionary) -> void:
 	if ef.has("statut"):
 		sim.appliquer_statut(e, str(ef.statut), int(ef.get("duree_ticks", 20)), "")
 	if ef.has("mana"):

@@ -1074,9 +1074,13 @@ func _fin_de_pas(nom: String) -> void:
 	for e in vs:
 		if e.horloge == nom and not e.statuts.is_empty():
 			_tiquer_statuts(e, h.ticks)
+	t0 = Time.get_ticks_usec()
 	_tiquer_differes(nom, h.ticks)
+	t0 = _top("fin.differes", t0)
 	_verifier_desengagements()
+	t0 = _top("fin.desengagements", t0)
 	EventBus.dispatcher()
+	_top("fin.dispatcher", t0)
 
 
 func differe_clear() -> void:
@@ -1097,6 +1101,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		else:
 			restants.append(d)
 	differes = restants
+	var t_d := Time.get_ticks_usec()
 	var g_restants: Array[Dictionary] = []
 	for gl in glyphes:
 		var src: Dictionary = entites.get(gl.source, {})
@@ -1105,26 +1110,40 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		else:
 			SimTalents._oublier_glyphe(self, gl.pos)   # expiré : la marque au sol s'efface
 	glyphes = g_restants
+	t_d = _top("fin.glyphes", t_d)
 	SimLieux._tiquer_zones(self, tick)
+	t_d = _top("fin.zones", t_d)
 	for x in vivants():   # les relevés du Fossoyeur retournent à la terre
 		if x.has("fin_invocation") and x.horloge == nom and int(x.fin_invocation) <= tick:
 			x.vivant = false
 			grille.liberer(x.pos, x.id)
 			EventBus.emettre(&"journal", [&"journal.releve_fin", {"nom": x.name_key}])
+	t_d = _top("fin.releves", t_d)
 	SimTalents._tirs_d_affuts(self, nom, tick)
+	t_d = _top("fin.affuts", t_d)
 	SimTerrain._maj_etats_meteo(self)
+	t_d = _top("fin.etats_meteo", t_d)
 	if nom == "monde":
+		var t_c := Time.get_ticks_usec()   # un compteur par champ : « pas.fin » seul ne disait pas QUI coûtait (ordre de travail 47)
 		if tick >= eau_prochain_pas:
 			SimTerrain._tiquer_courant(self, tick)
 		SimTerrain._tiquer_eau(self, tick)
+		t_c = _top("fin.eau", t_c)
 		SimTerrain._tiquer_lave(self, tick)
 		SimTerrain._tiquer_feux(self, tick)
+		t_c = _top("fin.lave_feux", t_c)
 		SimTerrain._tiquer_gaz(self, tick)
+		t_c = _top("fin.gaz", t_c)
 		SimTerrain._tiquer_chaleur(self, tick)
+		t_c = _top("fin.chaleur", t_c)
 		SimTerrain._tiquer_danger(self, tick)
+		t_c = _top("fin.danger", t_c)
 		SimTerrain._tiquer_support(self, tick)
+		t_c = _top("fin.support", t_c)
 		SimTerrain._tiquer_sonore(self, tick)
+		t_c = _top("fin.sonore", t_c)
 		SimTerrain._tiquer_odeur(self, tick)
+		t_c = _top("fin.odeur", t_c)
 		var h_per := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if tick / h_per != peremption_heure:
 			peremption_heure = tick / h_per
@@ -1147,9 +1166,13 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			if tick / h_ticks != arrachage_heure and "arrache_fragiles" in GameData.catalogues.weather_states.get(met, {}).get("effects", []):
 				arrachage_heure = tick / h_ticks
 				SimTerrain._arrachage(self, tick)
+	t_d = Time.get_ticks_usec()
 	SimTalents._tiquer_vampires(self, nom, tick)
+	t_d = _top("fin.vampires", t_d)
 	SimTalents._tiquer_armes_fantomes(self, nom, tick)
+	t_d = _top("fin.fantomes", t_d)
 	SimTerrain._tiquer_souffle(self, nom, tick)
+	_top("fin.souffle", t_d)
 	var o_restants: Array[Dictionary] = []
 	for o in obstacles:
 		var src: Dictionary = entites.get(o.source, {})

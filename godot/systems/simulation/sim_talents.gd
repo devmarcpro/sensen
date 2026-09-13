@@ -282,9 +282,17 @@ static func _tiquer_vampires(sim: Simulation, nom: String, tick: int) -> void:
 	var nuit: bool = SimTerrain.est_nuit(sim)
 	var refresh := int(sim.regles.r.talents.get("soif_de_sang", {}).get("refresh_ticks", 200))
 	for e in sim.vivants():
-		if e.horloge != nom and a_talent(sim, e, "soif_de_sang"):
+		# LES TALENTS UNE FOIS PAR ÊTRE, PAS QUATRE (ordre de travail 47, 2026-09-13) : `a_talent` rebâtit la liste des
+		# talents à chaque appel, et ce balayage le faisait jusqu'à quatre fois par être, à chaque pas de chaque horloge.
+		# Mesuré à 1,6 ms par pas d'un étage de donjon — un cinquième du budget de tick, pour une règle qui ne concerne
+		# que les vampires et les lycanthropes. Un être sans talent ni statut n'a rien à faire ici.
+		var tal := talents_de(sim, e)
+		if tal.is_empty() and e.statuts.is_empty():
 			continue
-		if a_talent(sim, e, "soif_de_sang"):
+		var vampire: bool = "soif_de_sang" in tal
+		if e.horloge != nom and vampire:
+			continue
+		if vampire:
 			if nuit:
 				sim.appliquer_statut(e, "sang_de_la_nuit", refresh, e.id)
 				_retirer_statut(sim, e, "soleil")
@@ -294,7 +302,7 @@ static func _tiquer_vampires(sim: Simulation, nom: String, tick: int) -> void:
 					sim.appliquer_statut(e, "soleil", refresh, e.id)
 		elif not nuit and Etres.a_statut_tag(e, "morsure", sim.statuts_defs):
 			_devenir_vampire(sim, e)
-		if a_talent(sim, e, "lune"):   # la lune : une nuit sur trente, la bête s'impose
+		if "lune" in tal:   # la lune : une nuit sur trente, la bête s'impose
 			var jour_idx := int(sim.horloge_monde.ticks / int(SimTerrain._cycle(sim).get("ticks_par_jour", 24000)))
 			if nuit and jour_idx > 0 and jour_idx % int(sim.regles.r.talents.lune.nuit_forcee_toutes_les) == 0 and not bool(e.get("forme_forcee", false)):   # jamais la première nuit
 				if not bool(e.get("forme_bestiale", false)):
