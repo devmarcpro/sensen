@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.rouler_chique.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "tabac",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "chique_de_tabac",
+    "amount": 2
+  },
+  "fuel": null
+}

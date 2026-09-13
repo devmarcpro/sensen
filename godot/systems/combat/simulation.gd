@@ -985,7 +985,8 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		e["huile_feu"] = true
 		EventBus.emettre(&"journal", [&"journal.huile", {"nom": e.name_key}])
 	elif not statut.is_empty():
-		appliquer_statut(e, statut, int(float(it.get("statut_ticks", 0)) * float(it.get("qualite", 1.0))), e.id, float(it.get("puissance", 1.0)))
+		var duree_st := SimMaladies.prendre(self, e, it, tick) if it.has("drogue") else int(it.get("statut_ticks", 0))   # une drogue : l'habitude monte, l'effet s'émousse (28 quater)
+		appliquer_statut(e, statut, int(float(duree_st) * float(it.get("qualite", 1.0))), e.id, float(it.get("puissance", 1.0)))
 		if "potion" in it.get("tags", []) and SimTalents.a_talent(self, e, "fiole_vive"):   # Fiole vive (Talents de classe) : les alliés adjacents aussi
 			var n_all := 0
 			for x in vivants():
@@ -1189,6 +1190,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			SimObjets._perimer_butin(self, tick)
 			SimRumeur._tiquer_disparitions(self, tick)   # les corps cachés, trouvés ou regrettés (29 quinquies)
 			SimMaladies.tiquer(self, tick)   # la contagion, les symptômes, les guérisons (28 quater)
+			SimMaladies.tiquer_drogues(self, tick)   # le manque (28 quater)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))

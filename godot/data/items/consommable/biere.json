@@ -5,8 +5,8 @@
   "nutrition": 6,
   "soin_des": "",
   "mana": 0,
-  "statut": "",
-  "statut_ticks": 0,
+  "statut": "ivresse",
+  "statut_ticks": 500000,
   "risque": {},
   "potentiel": {
     "charisme": 1
@@ -23,5 +23,6 @@
     "eau": 0.6,
     "bois": 0.4
   },
-  "hydratation": 25
+  "hydratation": 25,
+  "drogue": "alcool"
 }

@@ -216,3 +216,60 @@ static func soigner_par_objet(sim: Simulation, e: Dictionary, it: Dictionary) ->
 			e["immunites"] = {}
 		e.immunites[str(id)] = true
 		EventBus.emettre(&"journal", [&"journal.vaccine", {"nom": e.name_key, "maladie": str(_cfg().get("liste", {}).get(str(id), {}).get("name_key", id))}])
+
+
+# ---------------------------------------------------------------- les drogues (28 quater, 2026-09-13)
+
+## L'accoutumance d'un être à une drogue, maintenant : la valeur de la dernière dose éteinte par demi-vie.
+static func accoutumance(sim: Simulation, e: Dictionary, id: String, tick: int) -> float:
+	var d: Dictionary = GameData.config("drogues").get("liste", {}).get(id, {})
+	var a: Dictionary = (e.get("accoutumances", {}) as Dictionary).get(id, {})
+	if d.is_empty() or a.is_empty():
+		return 0.0
+	var jour := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)))
+	var ecoule := maxi(0, tick - int(a.get("tick", tick)))
+	return float(a.get("niveau", 0.0)) * pow(0.5, float(ecoule) / maxf(1.0, float(d.get("demi_vie_jours", 2.0)) * float(jour)))
+
+
+## UNE DOSE : l'accoutumance monte, le manque se lève, et l'effet cherché dure d'autant moins qu'on y est habitué.
+## Rend la durée de l'effet à poser.
+static func prendre(sim: Simulation, e: Dictionary, it: Dictionary, tick: int) -> int:
+	var id := str(it.get("drogue", ""))
+	var d: Dictionary = GameData.config("drogues").get("liste", {}).get(id, {})
+	var duree := int(it.get("statut_ticks", 0))
+	if d.is_empty():
+		return duree
+	var avant := accoutumance(sim, e, id, tick)
+	var mx := float(d.get("max", 100.0))
+	duree = roundi(float(duree) * lerpf(1.0, float(d.get("tolerance", 1.0)), clampf(avant / maxf(1.0, mx), 0.0, 1.0)))
+	if not e.has("accoutumances"):
+		e["accoutumances"] = {}
+	e.accoutumances[id] = {"niveau": minf(mx, avant + float(d.get("accoutumance_par_dose", 10.0))), "tick": tick}
+	SimTalents._retirer_statut(sim, e, str(d.get("statut_manque", "")))
+	return duree
+
+
+## LE MANQUE, à la passe horaire : il s'installe chez l'habitué privé de sa dose, et se lève quand l'habitude retombe.
+static func tiquer_drogues(sim: Simulation, tick: int) -> void:
+	var liste: Dictionary = GameData.config("drogues").get("liste", {})
+	if liste.is_empty():
+		return
+	var heure := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)) / 24)
+	for e in sim.vivants():
+		if not e.has("accoutumances"):
+			continue
+		for id in (e.accoutumances as Dictionary).keys():
+			var d: Dictionary = liste.get(str(id), {})
+			if d.is_empty():
+				continue
+			var niv := accoutumance(sim, e, str(id), tick)
+			var sans := tick - int(e.accoutumances[id].get("tick", tick))
+			var st := str(d.get("statut_manque", ""))
+			var en_manque: bool = e.statuts.any(func(s0: Dictionary) -> bool: return str(s0.id) == st)
+			if niv >= float(d.get("seuil_manque", 40.0)) and sans >= int(d.get("manque_apres_heures", 12)) * heure:
+				if not en_manque:
+					sim.appliquer_statut(e, st, int(sim.statuts_defs.get(st, {}).get("duree_ticks", 2400000)), e.id)
+					if e.controle == "joueur":
+						EventBus.emettre(&"journal", [&"journal.manque", {"nom": e.name_key}])
+			elif en_manque and niv < float(d.get("seuil_manque", 40.0)):
+				SimTalents._retirer_statut(sim, e, st)

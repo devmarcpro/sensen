@@ -1,0 +1,23 @@
+{
+  "_doc": "LES DROGUES (ordre de travail 28 quater, 2026-09-13). Un objet qui porte `drogue: <id>` pose son `statut` (l effet cherche) ET nourrit une ACCOUTUMANCE : `accoutumance_par_dose` s ajoute a ce qui reste de la precedente, qui s eteint par demi-vie (`demi_vie_jours`) — rien ne se tique. Au-dessus de `seuil_manque`, passe `manque_apres_heures` sans dose, le MANQUE s installe (`statut_manque`) et ne se leve qu a la dose suivante ou quand l accoutumance est retombee sous le seuil. L accoutumance fait aussi baisser l effet : un habitue boit pour ne pas etre en manque, plus pour l ivresse (`tolerance` : a pleine accoutumance, la duree de l effet x `tolerance`).",
+  "liste": {
+    "alcool": {
+      "accoutumance_par_dose": 14.0,
+      "seuil_manque": 45.0,
+      "manque_apres_heures": 18,
+      "demi_vie_jours": 2.0,
+      "statut_manque": "manque_alcool",
+      "tolerance": 0.4,
+      "max": 100.0
+    },
+    "tabac": {
+      "accoutumance_par_dose": 10.0,
+      "seuil_manque": 35.0,
+      "manque_apres_heures": 10,
+      "demi_vie_jours": 1.5,
+      "statut_manque": "manque_tabac",
+      "tolerance": 0.5,
+      "max": 100.0
+    }
+  }
+}

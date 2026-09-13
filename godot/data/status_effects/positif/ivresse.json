@@ -1,0 +1,27 @@
+{
+  "name_key": "status.ivresse.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100000,
+  "duree_ticks": 800000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:charisme",
+      "add": 2
+    },
+    {
+      "cible": "stat:perception",
+      "add": -2
+    },
+    {
+      "cible": "stat:dexterite",
+      "add": -1
+    }
+  ],
+  "tags": [
+    "positif",
+    "drogue"
+  ]
+}

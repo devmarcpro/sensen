@@ -1,0 +1,19 @@
+{
+  "name_key": "status.apaisement.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100000,
+  "duree_ticks": 600000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:volonte",
+      "add": 2
+    }
+  ],
+  "tags": [
+    "positif",
+    "drogue"
+  ]
+}

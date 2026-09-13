@@ -2065,6 +2065,46 @@ func test_maladies() -> void:
 	EventBus._file.clear()
 
 
+## LES DROGUES (ordre de travail 28 quater, 2026-09-13) : un effet, une accoutumance, un manque.
+func test_drogues() -> void:
+	var d: Dictionary = GameData.config("drogues").get("liste", {}).get("alcool", {})
+	verifier(not d.is_empty() and str(GameData.catalogues.items.biere.get("drogue", "")) == "alcool", "l'alcool est une drogue, et la bière en est")
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var heure := jour / 24
+	var t0: int = heure * 1000
+	s.horloge_monde.ticks = t0
+	var boire := func(t: int) -> int:
+		var b := s.generer_objet("biere", 1, {}, "commun", 0)
+		j.sac.append(b.uid)
+		j.statuts = j.statuts.filter(func(x: Dictionary) -> bool: return str(x.id) != "ivresse")
+		s._manger(j, str(b.uid), t)
+		var dur := 0
+		for st in j.statuts:
+			if str(st.id) == "ivresse":
+				dur = int(st.get("fin", st.get("duree", 0)))
+		return dur
+	boire.call(t0)
+	verifier(j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == "ivresse") and SimMaladies.accoutumance(s, j, "alcool", t0) > 0.0, "une bière : l'ivresse, et une première habitude (%.0f)" % SimMaladies.accoutumance(s, j, "alcool", t0))
+	var a1 := SimMaladies.accoutumance(s, j, "alcool", t0 + int(float(d.demi_vie_jours) * jour))
+	verifier(is_equal_approx(a1, SimMaladies.accoutumance(s, j, "alcool", t0) / 2.0), "l'habitude s'éteint par demi-vie, sans tick (%.1f)" % a1)
+	# boire tous les soirs
+	for k in 6:
+		boire.call(t0 + k * heure * 6)
+	var niv := SimMaladies.accoutumance(s, j, "alcool", t0 + 36 * heure)
+	verifier(niv >= float(d.seuil_manque), "à force, l'habitude passe le seuil du manque (%.0f)" % niv)
+	var dern: int = int(j.accoutumances.alcool.tick)
+	SimMaladies.tiquer_drogues(s, dern + heure)
+	verifier(not j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == "manque_alcool"), "juste après une dose, pas de manque")
+	var sans: int = dern + int(d.manque_apres_heures) * heure + 1
+	SimMaladies.tiquer_drogues(s, sans)
+	verifier(j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == "manque_alcool"), "privé de sa dose, l'habitué entre en manque")
+	boire.call(sans + 10)
+	verifier(not j.statuts.any(func(x: Dictionary) -> bool: return str(x.id) == "manque_alcool"), "une dose lève le manque — et c'est tout le piège")
+	EventBus._file.clear()
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")
