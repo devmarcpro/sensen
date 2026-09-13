@@ -1188,7 +1188,8 @@ static func _semaine_population(sim: Simulation) -> void:
 			break
 		if str(x.get("fonction", "")) in ["dirigeant", "maitre_de_guilde"] or str(x.get("ai_profile", "")) == "garde":
 			continue
-		if sim.horloge_monde.ticks < int(x.get("migre_avant", 0)) or int(x.get("humeur", 60)) >= int(cfg.migration_humeur_seuil):
+		var seuil_m := int(cfg.get("migration_humeur_seuil_chomeur", cfg.migration_humeur_seuil)) if SimTerritoire.chomeur(sim, x) else int(cfg.migration_humeur_seuil)
+		if sim.horloge_monde.ticks < int(x.get("migre_avant", 0)) or int(x.get("humeur", 60)) >= seuil_m:
 			continue
 		if rng.randf() >= float(cfg.migration_chance_semaine):
 			continue

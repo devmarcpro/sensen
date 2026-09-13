@@ -859,7 +859,7 @@ sa carte entière au changement de grille).
 
 47. ~~**Les tests qui ne prouvent rien**~~ — **FAIT le 2026-09-13** (section 8 de [[Vers la production]], entière : l'XP d'armure, la fourchette de dégâts, le froid et le chaud, les échecs de lecture, les budgets — dont un budget de tick jamais mesuré qui a levé le courant —, huit assertions toujours vraies, les sondes à code 0). *Reste de cette ligne : l'ancienne file.* —, dont plusieurs **cachent** des défauts réparés en chemin, et ~~**le coffre qui se
     contredit**~~ — **FAIT le 2026-09-13**, les onze contradictions du balayage (voir [[Vers la production]], section 9) ; une seule a demandé du code : la Méditation, dont la réserve promise n'avait jamais été codée.
-    Plus **l'ancienne file** jamais revue : les saisonniers, le chômage qui pousse à migrer, les tombes qui
+    Plus **l'ancienne file** jamais revue : les saisonniers, ~~le chômage qui pousse à migrer~~ *(fait le 2026-09-13)*, les tombes qui
     vieillissent, les événements en zone logique, ~~**une guerre qui ne fait rien**~~ *(faite le 2026-09-13 : pertes, solde de campagne, reddition et tribut)*, le nom de la vocation à l'écran,
     l'irrigation construite, les mauvaises récoltes, la cuve et le moulin, les descriptions de modules non traduisibles.
 

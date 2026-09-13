@@ -1315,6 +1315,32 @@ func test_population_villes() -> void:
 	if not la_bas.is_empty():
 		var m: Dictionary = la_bas[0]
 		verifier(not s.entites.has(m.id) and s.monde.dormants.get(loin, []).has(m) and str(m.village) == "Ailleurs" and m.lit == Vector2i(-1, -1) and s.horloge_monde.ticks < int(m.migre_avant), "le migrant dort dans sa nouvelle ville, sans lit, et ne repartira pas de sitôt")
+	# LE CHÔMAGE POUSSE À MIGRER (l'ancienne file, 2026-09-13). Deux adultes de la même humeur (40) : l'un a un métier,
+	# l'autre est oisif. Le seuil ordinaire (25) les garde tous deux ; celui du chômeur (50) laisse partir l'oisif seul.
+	cfg.migration_humeur_seuil = 25
+	var occupe: Dictionary = {}
+	var oisif: Dictionary = {}
+	for x_c in s._dans_territoire(nom, func() -> Array: return s.residents()):
+		if float(x_c.get("age", 30.0)) < float(s.regles.r.age.adulte) or int(x_c.get("migre_avant", 0)) > s.horloge_monde.ticks:
+			continue
+		if occupe.is_empty():
+			occupe = x_c
+		elif oisif.is_empty():
+			oisif = x_c
+	if not occupe.is_empty() and not oisif.is_empty():
+		occupe.fonction = "fermier"
+		oisif.fonction = "oisif"
+		verifier(s._dans_territoire(nom, func() -> bool: return SimTerritoire.chomeur(s, oisif)) and not s._dans_territoire(nom, func() -> bool: return SimTerritoire.chomeur(s, occupe)), "l'oisif adulte d'une ville est un chômeur, le fermier non")
+		t2.agglomeration.population = 50   # de la place là-bas
+		for x_r in s._dans_territoire(nom, func() -> Array: return s.residents()):
+			x_r.humeur = 90   # tous heureux…
+			x_r["migre_avant"] = s.horloge_monde.ticks + 1000000000   # …et retenus, sauf nos deux
+		occupe.humeur = 40
+		oisif.humeur = 40
+		occupe.migre_avant = 0
+		oisif.migre_avant = 0
+		s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+		verifier(str(oisif.get("village", "")) == "Ailleurs" and str(occupe.get("village", "")) != "Ailleurs", "à humeur égale, le chômeur part chercher ailleurs et le fermier reste (%s / %s)" % [str(oisif.get("village", "")), str(occupe.get("village", ""))])
 	cfg.merge(sauve, true)
 	s.monde.fermer()
 

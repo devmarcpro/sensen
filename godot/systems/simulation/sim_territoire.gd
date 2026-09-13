@@ -625,7 +625,15 @@ static func _recalculer_humeurs(sim: Simulation) -> void:
 			h += int(pc.co_occupant) * (int(lits_par_piece[cell].get(k_piece, 1)) - 1)   # les autres qui dorment dans la même pièce
 		if bool(x.get("affame", false)):   # le repas de la semaine a manqué (_nourrir_residents)
 			h += int(ry.get("faim_pnj", -10))
+		if chomeur(sim, x):   # le chômage (l'ancienne file, 2026-09-13) : n'avoir rien à faire pèse, et pousse à partir
+			h += int(ry.get("chomage_pnj", 0))
 		x.humeur = h
+
+
+## Un CHÔMEUR : un adulte oisif d'une VILLE. Dans la base du joueur, « oisif » est un rôle qu'il donne, pas un manque.
+static func chomeur(sim: Simulation, x: Dictionary) -> bool:
+	return sim.territoire.has("agglomeration") and str(x.get("fonction", "oisif")) == "oisif" \
+		and float(x.get("age", 30.0)) >= float(sim.regles.r.get("age", {}).get("adulte", 18)) and not ("bete" in x.get("tags", []))
 
 
 ## Le repas hebdomadaire des résidents (Faim des PNJ, 2026-09-04) : une unité par résident, au garde-manger d'abord,

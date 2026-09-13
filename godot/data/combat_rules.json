@@ -951,6 +951,7 @@
       "fill_max": 1024
     },
     "faim_pnj": -10,
+    "chomage_pnj": -12,
     "betail": {
       "abri_rayon": 3,
       "retrogradation_relation": -30,
