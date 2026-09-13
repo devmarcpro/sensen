@@ -12,6 +12,12 @@ extends Node
 ## lettre qu'on affiche doit être celle qu'on tape.
 
 const FICHIER := "user://options.cfg"
+## Les tailles de fenêtre proposées, et les facteurs de taille du texte (palier 3, 2026-09-13). Le texte agrandit la
+## police PAR DÉFAUT du thème de la fenêtre : ce qui porte une taille écrite à la main (une vingtaine d'étiquettes)
+## garde la sienne — c'est dit, pas caché.
+const RESOLUTIONS := ["1280x800", "1600x900", "1920x1080", "2560x1440"]
+const TAILLES_TEXTE := [1.0, 1.15, 1.3, 0.85]
+const POLICE_DE_BASE := 16
 
 var options := {}
 var remappages := {}   # action → nom de touche choisi par le joueur
@@ -90,6 +96,31 @@ func appliquer() -> void:
 		TranslationServer.set_locale(str(options.langue))
 	if bool(options.get("plein_ecran", false)):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	if DisplayServer.get_name() == "headless":
+		return   # sans fenêtre, ni taille ni thème à poser
+	if options.has("resolution") and DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_WINDOWED:
+		var r := str(options.resolution).split("x")
+		if r.size() == 2:
+			var taille := Vector2i(int(r[0]), int(r[1]))
+			var ecran := DisplayServer.screen_get_usable_rect()
+			taille = Vector2i(mini(taille.x, ecran.size.x), mini(taille.y, ecran.size.y))   # jamais plus grand que l'écran
+			DisplayServer.window_set_size(taille)
+			DisplayServer.window_set_position(ecran.position + (ecran.size - taille) / 2)
+	var fenetre := get_tree().root if is_inside_tree() else null
+	if fenetre != null:
+		var f := float(options.get("taille_texte", 1.0))
+		if is_equal_approx(f, 1.0):
+			fenetre.theme = null
+		else:
+			var th := Theme.new()
+			th.default_font_size = roundi(float(POLICE_DE_BASE) * f)
+			fenetre.theme = th
+
+
+## La valeur suivante d'une liste de choix, en boucle — la ligne d'option joue ce pas à chaque Entrée.
+static func suivant(liste: Array, actuel: Variant) -> Variant:
+	var i := liste.find(actuel)
+	return liste[(i + 1) % liste.size()] if i >= 0 else liste[0]
 
 
 func charger() -> void:

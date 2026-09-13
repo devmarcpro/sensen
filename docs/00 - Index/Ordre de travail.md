@@ -111,7 +111,7 @@ défauts du palier, plus la purge des objets du palier 11.
 ## ~~Palier 3~~ — la séance `main.gd` : le jeu redevient un jeu — **FAIT le 2026-09-08**
 
 > [!success] Pause, écran de mort, `InputMap` et réglages persistés — prouvés par `sonde_ecrans`, qui monte `main.tscn` en entier. Voir [[Écrans d'interface]] (callout du 2026-09-08).
-> **Ce qui reste de ce palier** : le **rappel des touches en jeu** (il peut maintenant LIRE l'InputMap au lieu d'être une troisième liste à la main), l'**écran d'options complété** (résolution, taille de texte, remappage à la souris), et **Options + Quitter au menu Tab**. Le socle est là ; il ne manque que l'écran qui l'affiche.
+> ~~**Ce qui restait**~~ — **FAIT le 2026-09-13** : l'écran d'options offre la **fenêtre** (quatre tailles, jamais plus grande que l'écran), la **taille du texte** (la police par défaut du thème ; une vingtaine d'étiquettes à taille écrite gardent la leur) et **une ligne par touche remappable** — Entrée, puis la touche ; Échap annule. Options et Quitter étaient déjà au menu, l'aide lisait déjà l'InputMap. `sonde_ecrans` parcourt le remappage par l'écran. *Trouvé en chemin* : derrière l'écran principal, l'horloge du camp tournait (le retour anticipé ne l'arrêtait pas) — elle s'arrête. — *L'énoncé :* **Ce qui reste de ce palier** : le **rappel des touches en jeu** (il peut maintenant LIRE l'InputMap au lieu d'être une troisième liste à la main), l'**écran d'options complété** (résolution, taille de texte, remappage à la souris), et **Options + Quitter au menu Tab**. Le socle est là ; il ne manque que l'écran qui l'affiche.
 
 Quatre lignes dans deux fonctions du même fichier, plus une séance sur les écrans. **Deux chaînes de dépendance
 internes**, et elles comptent.

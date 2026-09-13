@@ -1172,6 +1172,7 @@ func _process_corps(delta: float) -> void:
 	if j.is_empty():
 		return
 	if titre_ouvert:   # écran principal : rien n'avance derrière
+		sim.horloge_monde.active = false   # le retour seul ne suffisait pas : au camp l'horloge tourne d'elle-même (vu par la sonde fenêtrée, 2026-09-13)
 		return
 	if chargement_restant > 0.0:   # écran de chargement : le monde est en pause, le temps sert à pré-générer
 		chargement_restant -= delta

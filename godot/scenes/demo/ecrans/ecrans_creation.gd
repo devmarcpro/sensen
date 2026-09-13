@@ -480,7 +480,7 @@ static func _construire_monde(ec: Ecrans) -> void:
 	ec.entrees.append({"kind": "monde", "id": "retour", "texte": ""})
 
 
-## Les options : la langue (à chaud), le plein écran.
+## Les options : la langue (à chaud), le plein écran, la résolution, la taille du texte, et une ligne par touche remappable.
 static func _construire_options(ec: Ecrans) -> void:
 	ec.titre.text = ec.tr("ui.ecran.options")
 	ec.liste.add_item(ec.tr("ui.options.langue").format({"langue": TranslationServer.get_locale().substr(0, 2)}))
@@ -488,6 +488,19 @@ static func _construire_options(ec: Ecrans) -> void:
 	var plein: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 	ec.liste.add_item(ec.tr("ui.options.plein_ecran").format({"etat": ec.tr("ui.triche.oui" if plein else "ui.triche.non")}))
 	ec.entrees.append({"kind": "options", "id": "plein_ecran", "texte": ""})
+	# LA RÉSOLUTION, LE TEXTE, LES TOUCHES (palier 3, ce qui restait — 2026-09-13).
+	var taille_f := DisplayServer.window_get_size()
+	ec.liste.add_item(ec.tr("ui.options.resolution").format({"valeur": str(Reglages.options.get("resolution", "%dx%d" % [taille_f.x, taille_f.y]))}))
+	ec.entrees.append({"kind": "options", "id": "resolution", "texte": ec.tr("ui.options.d_resolution")})
+	ec.liste.add_item(ec.tr("ui.options.taille_texte").format({"valeur": "%d %%" % roundi(float(Reglages.options.get("taille_texte", 1.0)) * 100.0)}))
+	ec.entrees.append({"kind": "options", "id": "taille_texte", "texte": ec.tr("ui.options.d_taille_texte")})
+	for nom: String in Reglages.actions().keys():
+		var a: Dictionary = Reglages.actions()[nom]
+		if not bool(a.get("rebindable", true)):
+			continue
+		var touche := ec.tr("ui.options.appuyer") if ec.touche_attendue == nom else Reglages.touche_de(nom)
+		ec.liste.add_item(ec.tr("ui.options.touche").format({"action": ec.tr(str(a.get("nom_cle", nom))), "touche": touche}))
+		ec.entrees.append({"kind": "options", "id": "touche:" + nom, "texte": ec.tr("ui.options.d_touche")})
 	ec.liste.add_item(ec.tr("ui.options.retour"))
 	ec.entrees.append({"kind": "options", "id": "retour", "texte": ""})
 

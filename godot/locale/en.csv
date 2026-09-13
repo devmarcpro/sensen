@@ -2482,6 +2482,13 @@ ui.ecran.options,OPTIONS
 ui.options.langue,"Language: {langue} (Enter: switch)"
 ui.options.d_langue,"Français / English, live."
 ui.options.plein_ecran,"Fullscreen: {etat}"
+ui.options.resolution,"Window: {valeur}"
+ui.options.d_resolution,"Window size, when not fullscreen. Enter: next size."
+ui.options.taille_texte,"Text size: {valeur}"
+ui.options.d_taille_texte,"Enlarges screen text. Enter: next size."
+ui.options.touche,"{action}: {touche}"
+ui.options.d_touche,"Enter, then the new key. Escape cancels."
+ui.options.appuyer,"… press a key"
 ui.options.retour,Back
 ui.menu.titre,Back to the main screen
 ui.composer.taille_courte,size

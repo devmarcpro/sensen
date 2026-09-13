@@ -818,9 +818,16 @@ static func _action_defaut(ec: Ecrans, en: Dictionary) -> void:
 					var plein: bool = DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 					Reglages.regler("plein_ecran", not plein)
 					DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if plein else DisplayServer.WINDOW_MODE_FULLSCREEN)
+				"resolution":
+					Reglages.regler("resolution", Reglages.suivant(Reglages.RESOLUTIONS, str(Reglages.options.get("resolution", ""))))
+				"taille_texte":
+					Reglages.regler("taille_texte", Reglages.suivant(Reglages.TAILLES_TEXTE, float(Reglages.options.get("taille_texte", 1.0))))
 				"retour":
 					ec.ouvrir("titre" if ec.main.titre_ouvert else "menu")
 					return
+				_:
+					if str(en.id).begins_with("touche:"):   # la prochaine touche pressée remplace celle de l'action
+						ec.touche_attendue = str(en.id).trim_prefix("touche:")
 		"charger_slot":
 			if str(en.id).is_empty():
 				ec.ouvrir("titre")

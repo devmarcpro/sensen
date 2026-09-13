@@ -11,6 +11,7 @@ const PART := Vector2(0.94, 0.92)
 var main: Node                          # la scène principale (sim, joueur(), nom_objet())
 var voile: ColorRect                    # le voile sous tout écran ouvert : grise le jeu, absorbe la souris (designer 2026-09-04)
 var courant := ""                       # "inventaire" | "atelier" | "feuille" | ""
+var touche_attendue := ""               # l'action dont l'écran d'options attend la nouvelle touche (palier 3, 2026-09-13)
 var panneau: PanelContainer
 var titre: Label
 var liste: ItemList
@@ -296,6 +297,15 @@ func _process(delta: float) -> void:
 
 ## Touches quand un écran est ouvert ; true si consommée.
 func touche(ev: InputEventKey) -> bool:
+	if not touche_attendue.is_empty():   # ON REMAPPE : la touche pressée est la réponse, pas une commande — Échap annule
+		var action := touche_attendue
+		touche_attendue = ""
+		if ev.keycode != KEY_ESCAPE:
+			var physique := bool(Reglages.actions().get(action, {}).get("physique", true))
+			var code: int = ev.physical_keycode if physique and ev.physical_keycode != KEY_NONE else ev.keycode
+			Reglages.remapper(action, OS.get_keycode_string(code))
+		EcransListe.rafraichir(self)
+		return true
 	if courant == "creation" and EcransCreation._touche_creation(self, ev):
 		return true
 	if ev.keycode == KEY_TAB:

@@ -42,6 +42,7 @@ func _ready() -> void:
 	await _verifier_ecran_mort(scene, ec)
 	_verifier_controles()
 	await _verifier_aide(scene, ec)
+	await _verifier_options(scene, ec)
 	for f in fautes:
 		print(f)
 	if not fautes.is_empty():
@@ -250,6 +251,42 @@ func _verifier_aide(_scene: Node, ec) -> void:
 		fautes.append("  aide : l'ecran n'a pas suivi le remappage — il n'est donc pas branche sur l'InputMap")
 	else:
 		print("  aide : %d lignes, et l'ecran suit le remappage (il LIT l'InputMap)" % lignes)
+
+
+## L'ÉCRAN D'OPTIONS REMAPPE POUR DE BON (palier 3, ce qui restait — 2026-09-13). On parcourt le chemin du joueur : la
+## ligne d'une action, Entrée, puis une touche ; l'InputMap doit la porter. Et la taille du texte pose bien un thème.
+func _verifier_options(_scene: Node, ec) -> void:
+	ec.ouvrir("options")
+	await get_tree().process_frame
+	var ligne := {}
+	for en in ec.entrees:
+		if str(en.get("id", "")) == "touche:ramasser":
+			ligne = en
+	if ligne.is_empty():
+		fautes.append("  options : aucune ligne pour remapper « ramasser »")
+		ec.fermer()
+		return
+	EcransListe._action_defaut(ec, ligne)
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_J
+	ev.physical_keycode = KEY_J
+	ev.pressed = true
+	ec.touche(ev)
+	var prise := Reglages.touche_de("ramasser")
+	Reglages.remappages.erase("ramasser")
+	Reglages.construire_input_map()
+	Reglages.enregistrer()
+	var texte_avant: Variant = Reglages.options.get("taille_texte", 1.0)
+	Reglages.regler("taille_texte", 1.3)
+	var theme_pose: bool = get_tree().root.theme != null and get_tree().root.theme.default_font_size > Reglages.POLICE_DE_BASE
+	Reglages.regler("taille_texte", texte_avant)
+	ec.fermer()
+	if prise != "J":
+		fautes.append("  options : Entrée puis J n'a pas remappé « ramasser » (%s)" % prise)
+	elif not theme_pose and DisplayServer.get_name() != "headless":
+		fautes.append("  options : la taille du texte n'a posé aucun thème")
+	else:
+		print("  options : une ligne par touche, Entrée puis une touche remappe, la taille du texte agrandit la police")
 
 
 ## ÉQUIPER UN OBJET PAR L'ÉCRAN (designer 2026-09-09 : « impossible d'équiper d'interagir avec les items dans

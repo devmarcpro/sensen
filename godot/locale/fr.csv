@@ -2553,6 +2553,13 @@ ui.ecran.options,OPTIONS
 ui.options.langue,"Langue : {langue} (Entrée : changer)"
 ui.options.d_langue,"Français / English, à chaud."
 ui.options.plein_ecran,"Plein écran : {etat}"
+ui.options.resolution,"Fenêtre : {valeur}"
+ui.options.d_resolution,"La taille de la fenêtre, hors plein écran. Entrée : la suivante."
+ui.options.taille_texte,"Taille du texte : {valeur}"
+ui.options.d_taille_texte,"Agrandit le texte des écrans. Entrée : la taille suivante."
+ui.options.touche,"{action} : {touche}"
+ui.options.d_touche,"Entrée, puis la nouvelle touche. Échap annule."
+ui.options.appuyer,"… appuyez sur une touche"
 ui.options.retour,Retour
 ui.menu.titre,Retour à l'écran principal
 ui.composer.taille_courte,taille
