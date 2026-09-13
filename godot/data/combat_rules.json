@@ -1919,6 +1919,18 @@
     "version": 2,
     "echelle_v1_vers_v2": 100
   },
+  "frayeur": {
+    "_doc": "LA PEUR QUI DURE (ordre de travail 31). Le sang-froid est une jauge de COMBAT ; la frayeur est sa TRACE : ce qui reste d un choc une fois le combat fini. On garde une valeur (`effroi`, 0 a `max`) et l heure du dernier choc ; elle s eteint par DEMI-VIE, deduite a la lecture, rien ne se tique. Deux chocs : passer sous `proche_mort_seuil_pct` % de sa sante (`proche_mort` points), et voir mourir un allie a `allie_distance` tuiles ou moins (`allie_mort`). Ce qu elle fait : le sang-froid revient moins vite — a pleine frayeur, x `regen_sang_froid_min` —, parce qu on ne retient pas son souffle quand on tremble. Une nuit dans un lit la multiplie par `sommeil_mult`. Le volet ne la montre qu au-dela de `seuil_volet`. Elle ne touche que le camp du joueur : la faune et les PNJ ont deja leur fuite (`seuil_fuite_sante`).",
+    "demi_vie_ticks": 1200000,
+    "max": 100,
+    "proche_mort_seuil_pct": 25,
+    "proche_mort": 40,
+    "allie_mort": 30,
+    "allie_distance": 12,
+    "regen_sang_froid_min": 0.25,
+    "sommeil_mult": 0.5,
+    "seuil_volet": 20
+  },
   "sommeil": {
     "_doc": "LE SOMMEIL (ordre de travail 31). LA FATIGUE N EST PAS UNE JAUGE QU ON DECREMENTE : c est le temps ecoule depuis le reveil, lu a la demande (`veille_depuis`), comme la pourriture d un cadavre se lit depuis sa mort. Trois paliers, en ticks de veille (un jour = 2 400 000) : `ticks_conseil` le journal previent (seize heures debout), `ticks_stats` toutes les stats x `malus_stats` (un jour entier), `ticks_epuisement` x `malus_epuisement` a la place (deux jours). Il ne tue pas : on ne meurt pas de ne pas dormir en deux jours, on devient mauvais a tout. Dormir dans un lit remet le compteur au reveil. Il se cumule a la faim et a la soif : trois manques, trois malus.",
     "ticks_conseil": 1600000,

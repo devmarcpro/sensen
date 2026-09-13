@@ -706,14 +706,15 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **ET IL Y A UN CHEMIN DE RETOUR** : un mécanisme qui ne fait que dégrader est un impôt, pas une règle. Une unité
     de la matière de l'objet, à une station de sa recette, et l'usure retombe — *on ne rend jamais un objet NEUF, on
     le maintient.* Le plafond tient l'autre bout : un objet usé est mauvais, il n'est jamais inutile.
-31. **Les besoins au-delà de la faim** : ~~soif~~, sommeil, peur qui dure (aucun bloqueur non plus).
+~~31. **Les besoins au-delà de la faim** : soif, sommeil, peur qui dure~~ — **LIGNE ENTIÈRE le 2026-09-13.**
     ~~**L'HYDRATATION**~~ — **FAITE le 2026-09-09 au soir** *(designer : « on rajoutera l'hydratation aussi »).*
     Elle est la faim avec des nombres plus courts — trois semaines sans manger, trois jours sans boire —, les deux
     malus de stats se cumulent, et elle n'a demandé **aucune règle nouvelle**. On boit à même l'eau (gratuit,
     abondant, risqué : une eau de mare passe le jet d'infection de la viande crue) ou un objet qui porte
     `hydratation` sur sa fiche. **Et les reins ont cessé d'attendre** : leur bloc `perdu` a remplacé leur `attend`
     — un rein en moins fait boire plus souvent. C'était le seul manque ÉCRIT du plan de corps.
-    **Restent** : ~~le **sommeil**~~ et la **peur qui dure** (le sang-froid est une jauge de combat, pas une trace).
+    ~~**Restent** : le **sommeil** et la **peur qui dure**~~ — faits tous deux le 2026-09-13.
+    ~~**LA PEUR QUI DURE**~~ — **FAITE le 2026-09-13.** Le sang-froid est la jauge du combat ; la **frayeur** est sa **trace**. Même patron que le sommeil : une valeur et l'heure du dernier choc, **éteinte par demi-vie** (une demi-journée) déduite à la lecture. Deux chocs — frôler la mort (passer sous 25 % : 40 points), voir tomber un des siens à 12 tuiles (30) — et un effet : **le sang-froid revient moins vite** (au quart, à pleine frayeur), parce qu'on ne retient pas son souffle quand on tremble. Une nuit la divise par deux. **Seul le camp du joueur en garde une trace** : la faune et les PNJ ont déjà leur fuite.
     ~~**LE SOMMEIL**~~ — **FAIT le 2026-09-13.** **La fatigue n'est pas une jauge qu'on décrémente : c'est le temps écoulé depuis le réveil**, lu à la demande — la règle du coffre, *ce qui peut se déduire ne se balaie pas*, comme la pourriture d'un cadavre se lit depuis sa mort. On ne garde que `veille_depuis` et le palier atteint (pour recalculer les stats et le dire au journal). Seize heures debout : on bâille ; un jour : toutes les stats × 0,9 ; deux jours : × 0,75 **à la place** — et **il ne tue pas**, on devient mauvais à tout. Une nuit dans un lit remet le compteur. Il se cumule à la faim et à la soif : trois manques, trois malus. Le volet n'affiche une ligne que fatigué. **Le test éprouve la déduction elle-même** : sauter deux jours d'un coup donne le même palier que les vivre.
     **UN DÉFAUT JUMEAU, TROUVÉ ET LAISSÉ** : `Etres.creer` pose `faim_tick: 0` — une valeur de fiche, pas une heure.
     Un être créé alors que l'horloge du monde en est à cinq millions de ticks se voit donc retirer d'un coup tout

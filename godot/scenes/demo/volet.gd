@@ -214,6 +214,10 @@ func _maux(sim, j: Dictionary) -> Array:
 	var p_som := int(j.get("fatigue_palier", 0))   # le sommeil (ordre de travail 31) : la ligne n'apparaît que fatigué
 	if p_som > 0:
 		res.append([tr("volet.mal.fatigue_%d" % p_som), COL_GRAVE if p_som >= 2 else COL_BLESSE])
+	if j.has("effroi"):   # la peur qui dure (ordre de travail 31)
+		var fr_v := Simulation.effroi(j, sim.horloge_monde.ticks, r)
+		if fr_v >= float(r.get("frayeur", {}).get("seuil_volet", 20)):
+			res.append([tr("volet.mal.effroi").format({"n": roundi(fr_v)}), COL_GRAVE if fr_v >= 60.0 else COL_BLESSE])
 	var pd: Dictionary = sim.poids_de(j)
 	if float(pd.facteur) > 1.0:
 		res.append([tr("volet.mal.charge").format({"poids": "%.0f" % float(pd.poids), "capacite": "%.0f" % float(pd.capacite)}), COL_BLESSE])

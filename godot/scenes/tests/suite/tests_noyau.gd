@@ -1847,6 +1847,45 @@ func test_sommeil() -> void:
 		verifier(int(j.fatigue_palier) == 0 and int(j.veille_depuis) >= t0 + int(f.ticks_epuisement) and int(j.stats_eff.force) == for0, "une nuit dans un lit : reposé, les forces reviennent (%d)" % int(j.stats_eff.force))
 
 
+## LA PEUR QUI DURE (ordre de travail 31) : un choc laisse une trace qui s'éteint par demi-vie, déduite à la lecture.
+func test_frayeur() -> void:
+	var f: Dictionary = GameData.config("combat_rules").get("frayeur", {})
+	verifier(not f.is_empty(), "la frayeur a ses nombres en données")
+	if f.is_empty():
+		return
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var t0: int = maxi(1, s.horloge_monde.ticks)
+	s.horloge_monde.ticks = t0
+	# 1. FRÔLER LA MORT : passer sous le seuil laisse une trace ; rester au-dessus, rien.
+	j.sante = j.sante_max
+	s._appliquer_degats(j, 1, "", {})
+	verifier(Simulation.effroi(j, t0, s.regles.r) == 0.0, "une égratignure ne fait pas peur")
+	var sous: int = int(float(j.sante_max) * float(f.proche_mort_seuil_pct) / 100.0) - 1
+	s._appliquer_degats(j, int(j.sante) - sous, "", {})
+	var e0 := Simulation.effroi(j, t0, s.regles.r)
+	verifier(j.vivant and is_equal_approx(e0, float(f.proche_mort)), "frôler la mort : %d points de frayeur (%.0f)" % [int(f.proche_mort), e0])
+	# 2. ELLE S'ÉTEINT PAR DEMI-VIE, et c'est une lecture : aucun tick entre les deux.
+	var e1 := Simulation.effroi(j, t0 + int(f.demi_vie_ticks), s.regles.r)
+	verifier(is_equal_approx(e1, e0 / 2.0), "une demi-vie plus tard, la moitié (%.1f)" % e1)
+	# 3. ELLE RALENTIT LE SANG-FROID : deux êtres identiques, l'un effrayé.
+	var j2: Dictionary = j.duplicate(true)
+	j2.erase("effroi")
+	j.sang_froid = 0
+	j2.sang_froid = 0
+	j.tick_vigueur = t0
+	j2.tick_vigueur = t0
+	j.effroi = float(f.max)
+	j.effroi_tick = t0 + 2000
+	s._regenerer(j, t0 + 2000)
+	s._regenerer(j2, t0 + 2000)
+	verifier(int(j.sang_froid) < int(j2.sang_froid), "effrayé, le sang-froid revient moins vite (%d contre %d)" % [int(j.sang_froid), int(j2.sang_froid)])
+	# 4. HORS DU CAMP DU JOUEUR, AUCUNE TRACE : la faune a déjà sa fuite.
+	var bete: Dictionary = {"camp": "ia", "vivant": true, "name_key": "x"}
+	s.effrayer(bete, 50.0, "proche_mort")
+	verifier(not bete.has("effroi"), "une bête ne garde pas de frayeur")
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

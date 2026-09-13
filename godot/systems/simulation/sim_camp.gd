@@ -321,6 +321,9 @@ static func _dormir(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -
 	e.vigueur = e.vigueur_max
 	e.tick_vigueur = sim.horloge_monde.ticks
 	e["veille_depuis"] = maxi(1, sim.horloge_monde.ticks)   # le sommeil (ordre de travail 31) : on s'éveille maintenant
+	if e.has("effroi"):   # une nuit apaise la peur, elle ne l'efface pas
+		e["effroi"] = Simulation.effroi(e, sim.horloge_monde.ticks, sim.regles.r) * float(sim.regles.r.get("frayeur", {}).get("sommeil_mult", 0.5))
+		e["effroi_tick"] = sim.horloge_monde.ticks
 	if int(e.get("fatigue_palier", 0)) != 0:
 		e["fatigue_palier"] = 0
 		Etres.recalculer(e, sim.items, sim.affixes_defs, sim.regles)

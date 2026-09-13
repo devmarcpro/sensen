@@ -722,6 +722,27 @@ func _tiquer_soif(tick: int) -> void:
 		e.soif_tick = tick
 
 
+## LA PEUR QUI DURE (ordre de travail 31). Une valeur et l'heure du dernier choc ; la décroissance se déduit (demi-vie).
+static func effroi(e: Dictionary, tick: int, regles_r: Dictionary) -> float:
+	var f: Dictionary = regles_r.get("frayeur", {})
+	var v := float(e.get("effroi", 0.0))
+	if f.is_empty() or v <= 0.0:
+		return 0.0
+	var ecoule := maxi(0, tick - int(e.get("effroi_tick", tick)))
+	return v * pow(0.5, float(ecoule) / maxf(1.0, float(f.get("demi_vie_ticks", 1200000))))
+
+
+## Un choc : ce qui reste de la peur d'avant, plus celle-ci, borné. Seul le camp du joueur garde une trace.
+func effrayer(e: Dictionary, points: float, raison: String) -> void:
+	var f: Dictionary = regles.r.get("frayeur", {})
+	if f.is_empty() or points <= 0.0 or str(e.get("camp", "")) != "joueur" or not e.vivant:
+		return
+	var t := horloge_monde.ticks
+	e["effroi"] = minf(float(f.get("max", 100)), effroi(e, t, regles.r) + points)
+	e["effroi_tick"] = t
+	EventBus.emettre(&"journal", [StringName("journal.effroi_" + raison), {"nom": e.name_key}])
+
+
 ## LE SOMMEIL (ordre de travail 31). La fatigue n'est pas une jauge : c'est le temps écoulé depuis le réveil, lu ici.
 ## On ne garde que l'heure du réveil (`veille_depuis`) et le palier atteint (`fatigue_palier`), parce que franchir un
 ## palier doit recalculer les stats et le dire — rien d'autre ne se tique.
@@ -1198,7 +1219,12 @@ func _regenerer(e: Dictionary, tick: int) -> void:
 		var sf_r: Dictionary = regles.r.get("sang_froid", {})
 		var immobile_sf := tick - int(e.get("immobile_depuis", tick))
 		if not en_combat(e) or immobile_sf >= int(sf_r.get("seuil_ticks", 6)):
-			e["sang_froid"] = mini(int(e.get("sang_froid_max", 0)), int(e.get("sang_froid", 0)) + int(round(float(ecoules) * float(sf_r.get("regen_par_tick", 1)))))
+			# LA PEUR QUI DURE (ordre de travail 31) : on ne retient pas son souffle quand on tremble encore.
+			var peur_sf := 1.0
+			if e.has("effroi"):
+				var fr: Dictionary = regles.r.get("frayeur", {})
+				peur_sf = lerpf(1.0, float(fr.get("regen_sang_froid_min", 0.25)), clampf(effroi(e, tick, regles.r) / maxf(1.0, float(fr.get("max", 100))), 0.0, 1.0))
+			e["sang_froid"] = mini(int(e.get("sang_froid_max", 0)), int(e.get("sang_froid", 0)) + int(round(float(ecoules) * float(sf_r.get("regen_par_tick", 1)) * peur_sf)))
 		if not en_combat(e):   # Le soin par partie : le corps se répare hors du combat, lentement (2026-09-09)
 			Etres.soigner_parties(e, ecoules, regles)
 		var f_faim: Dictionary = regles.r.faim
@@ -2366,6 +2392,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		SimTalents._retirer_statut(self, cible, "reserve")
 		EventBus.emettre(&"journal", [&"journal.reserve", {"nom": cible.name_key, "soin": reserve}])
 	cible.sante = maxi(0, cible.sante - degats)
+	var fr_c: Dictionary = regles.r.get("frayeur", {})
+	if not fr_c.is_empty() and cible.sante > 0 and str(cible.get("camp", "")) == "joueur":   # frôler la mort laisse une trace
+		var seuil_fr := float(fr_c.get("proche_mort_seuil_pct", 25)) / 100.0
+		if avant_pct >= seuil_fr and float(cible.sante) / float(cible.sante_max) < seuil_fr:
+			effrayer(cible, float(fr_c.get("proche_mort", 40)), "proche_mort")
 	if float(detail.get("erosion", 0.0)) > 0.0 and degats > 0:   # Érosif : une part des dégâts rogne les PV max, pour le combat
 		var rogne := maxi(1, roundi(float(degats) * float(detail.erosion)))
 		cible["erosion"] = int(cible.get("erosion", 0)) + rogne
@@ -2430,6 +2461,11 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		SimTerrain.sonner_de(self, cible.pos, "mort")   # un cri porte plus loin qu'un coup (Émergence — le champ sonore)
 		EventBus.emettre(&"journal", [&"journal.mort", {"nom": cible.name_key}])
 		EventBus.emettre(&"creature_killed", [cible.id, source])
+		if str(cible.get("camp", "")) == "joueur" and regles.r.has("frayeur"):   # voir tomber un des siens
+			var fr_m: Dictionary = regles.r.frayeur
+			for x_m in vivants():
+				if str(x_m.get("camp", "")) == "joueur" and x_m.id != cible.id and Grille.distance(x_m.pos, cible.pos) <= int(fr_m.get("allie_distance", 12)) and grille.ligne_de_vue(x_m.pos, cible.pos):
+					effrayer(x_m, float(fr_m.get("allie_mort", 30)), "allie_mort")
 		SimPnj._quetes_sur_mort(self, cible, source)
 		if not att.is_empty() and att.controle == "joueur" and bool(cible.get("spawn_faune", false)) and est_faune_paisible(cible):
 			_rarefier_faune(cible.pos)   # massacrer la faune vide la forêt (Créatures, 2026-09-04)
