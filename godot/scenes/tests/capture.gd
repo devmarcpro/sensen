@@ -1274,7 +1274,7 @@ func _ventiler_appels() -> void:
 		if scr != null and not str(scr.get_global_name()).is_empty():
 			cle = str(scr.get_global_name())
 		elif scr != null:
-			cle = scr.resource_path.get_file() if not scr.resource_path.get_file().is_empty() else "%s (script sous %s)" % [n.get_class(), str(n.get_parent().name)]
+			cle = scr.resource_path.get_file() if not scr.resource_path.get_file().is_empty() else ("%s %s" % [n.get_class(), str(n.name)]) if n.get_parent() == scene else "%s (script sous %s)" % [n.get_class(), str(n.get_parent().name).get_slice("@", 1)]
 		if n == scene:
 			continue   # la racine cache tout : sa ligne ne dirait rien
 		if n is Control:

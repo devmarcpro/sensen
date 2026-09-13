@@ -2610,9 +2610,17 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
 			3:   # le sprite d'un meuble ou d'une station
 				_dessiner_sprite_tuile(ci, g, t, c, teinte)
-	if pts.size() > debut:
-		_soumettre_triangles(rid, pts, cols, uvs, debut, pts.size())
-	_franges_matieres(rid, g, coin, p, teinte, coupures)
+	# LES FRANGES PARTENT AVEC LA DERNIÈRE TRANCHE (45 ter, 2026-09-13) : elles étaient une commande de plus par morceau,
+	# soumise juste après cette tranche — les coller au bout ne change pas l'ordre de dessin, et retire un appel.
+	var fr: Array = _franges_matieres(g, coin, p, teinte, coupures)
+	if pts.size() > debut or not (fr[0] as PackedVector2Array).is_empty():
+		var q_pts: PackedVector2Array = pts.slice(debut)
+		var q_cols: PackedColorArray = cols.slice(debut)
+		var q_uvs: PackedVector2Array = uvs.slice(debut)
+		q_pts.append_array(fr[0])
+		q_cols.append_array(fr[1])
+		q_uvs.append_array(fr[2])
+		_soumettre_triangles(rid, q_pts, q_cols, q_uvs, 0, q_pts.size())
 	for idx in res.vegetaux:
 		_assurer_vegetal(g.pos_de(idx))
 
@@ -2628,10 +2636,10 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 ## Le coût est d'un triangle par arête qui change de matière : aucun sur les grandes plages uniformes, quatre au plus
 ## sur une tuile isolée. Et tous partent en UNE commande, parce que le style d'une matière voyage dans les UV et non
 ## dans un uniforme — un seul lot suffit pour toutes les matières du morceau.
-func _franges_matieres(rid: RID, g: Grille, coin: Vector2i, p: Dictionary, teinte: Color, coupures: PackedInt32Array) -> void:
+func _franges_matieres(g: Grille, coin: Vector2i, p: Dictionary, teinte: Color, coupures: PackedInt32Array) -> Array:
 	var stg: Dictionary = GameData.config("styles").get("grain", {})
 	if not bool(stg.get("fondu_tuiles", true)):
-		return
+		return [PackedVector2Array(), PackedColorArray(), PackedVector2Array()]
 	var force := float(stg.get("fondu_tuiles_force", 0.85))
 	var tw2 := float(TW) * 0.5
 	var th2 := float(TH) * 0.5
@@ -2682,8 +2690,7 @@ func _franges_matieres(rid: RID, g: Grille, coin: Vector2i, p: Dictionary, teint
 				uvs.append(Vector2(st_n + float(l.x) + 0.5, uvh + float(l.y) + 0.5))
 				uvs.append(Vector2(st_n + float(l.x) + a.x, uvh + float(l.y) + a.y))
 				uvs.append(Vector2(st_n + float(l.x) + b.x, uvh + float(l.y) + b.y))
-	if not pts.is_empty():
-		_soumettre_triangles(rid, pts, cols, uvs, 0, pts.size())
+	return [pts, cols, uvs]
 
 
 ## La couleur du sol d'une tuile — la MÊME formule que la passe du terrain, pour que la frange d'un voisin soit
