@@ -1,14 +1,17 @@
 ---
-aliases: ["F.4", "Annexe F.4", "Statuts", "status_effects", "14 statuts"]
+aliases: ["F.4", "Annexe F.4", "Statuts", "status_effects", "catalogue des statuts"]
 tags: [contenu, combat, catalogue, décidé]
 domaine: contenu
 statut: décidé
 etape: 0
 ---
 
-Les 17 statuts de départ, en données.
+Les statuts, en données. **83 fiches au 2026-09-13** dans `data/status_effects/` — 8 de contrôle, 28 négatifs, 29 positifs, 18 potions ; les 17 de départ sont décrits ci-dessous.
 
-`data/status_effects/` (17) :
+> [!note] Trois nombres pour un catalogue — corrigé le 2026-09-13 (le coffre qui se contredit, ordre de travail 47)
+> Ce coffre disait **14** (le prototype), **17** (la note de départ) et **67** (le rafraîchissement du 2026-08-31) ; le dossier en compte **83**. Un compte écrit vieillit à chaque fiche : *le dossier fait foi, et `ls` le dit en une seconde.*
+
+Les 17 de départ :
 
 **Ajoutés le 2026-08-26** ([[Talents de classe]]) : **Dissimulé** (hors du cône de détection tant qu'on n'attaque pas ; rompu par l'attaque — [[IA des créatures]]) · **Saisi** (porté par un autre : ne peut agir, libère sa tuile, projetable — effet `saisie`) · **Retardé** (marqueur visible d'un compteur repoussé — effet `tempo` ; **compte dans le budget anti-stunlock**, [[Statuts de contrôle et anti-stunlock]]).
 

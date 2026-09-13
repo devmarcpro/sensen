@@ -311,8 +311,11 @@ func test_regen_longue() -> void:
 	var attendu := int(float(tranches) * float(r.chance))
 	var succes := int(j.get("xp_depuis_repos", {}).get("meditation", 0))
 	verifier(succes == attendu or succes == attendu + 1, "%d tranches rattrapées d'un coup : %d succès, l'espérance (%d ou %d)" % [tranches, succes, attendu, attendu + 1])
-	# L'XP de Méditation recalcule les stats, et le plafond de mana redevient celui de la volonté : le mana est au plafond.
-	verifier(int(j.mana) == int(j.mana_max) and int(j.mana) > 0, "le mana rendu est au plafond (%d / %d)" % [int(j.mana), int(j.mana_max)])
+	# L'XP de Méditation recalcule les stats, et le plafond de mana redevient celui de la volonté ET de la Méditation
+	# (2026-09-13) : le mana était rempli au plafond, puis chaque niveau gagné en chemin a relevé le plafond de deux
+	# points sans remplir la différence — on ne gagne pas de mana en progressant, on gagne de la place.
+	var marge_medit: int = s.regles.niveau(j.competences_eff, "meditation") * int(s.regles.r.stats.get("mana_max_par_meditation", 0))
+	verifier(int(j.mana) > 0 and int(j.mana) >= int(j.mana_max) - marge_medit, "le mana rendu est au plafond, moins la place gagnée en méditant (%d / %d, marge %d)" % [int(j.mana), int(j.mana_max), marge_medit])
 	print("  régénération longue : %d tranches en %.2f ms" % [tranches, duree])
 	# En dessous du seuil : tranche par tranche, avec le RNG — jamais plus de succès que de tranches, jamais de mana sans succès.
 	j.mana = 0
@@ -1884,6 +1887,20 @@ func test_frayeur() -> void:
 	var bete: Dictionary = {"camp": "ia", "vivant": true, "name_key": "x"}
 	s.effrayer(bete, 50.0, "proche_mort")
 	verifier(not bete.has("effroi"), "une bête ne garde pas de frayeur")
+
+
+## LE COFFRE QUI SE CONTREDISAIT (ordre de travail 47) : la Méditation agrandit la réserve de mana, deux points par niveau.
+func test_reserve_de_mana() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var par: int = int(GameData.config("combat_rules").stats.get("mana_max_par_meditation", 0))
+	verifier(par == 2, "la décision est en données : +%d de mana par niveau de Méditation" % par)
+	j.competences["meditation"] = 0
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	var m0: int = int(j.mana_max)
+	j.competences["meditation"] = 10
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	verifier(int(j.mana_max) == m0 + 10 * par, "dix niveaux de Méditation : %d → %d" % [m0, int(j.mana_max)])
 
 
 func test_hydratation() -> void:

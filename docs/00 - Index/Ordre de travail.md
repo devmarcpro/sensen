@@ -857,8 +857,8 @@ sa carte entière au changement de grille).
 
 ## Palier 12 — les tests, le coffre, et l'ancienne file
 
-47. **Les tests qui ne prouvent rien**, dont plusieurs **cachent** des défauts réparés en chemin, et **le coffre qui se
-    contredit** (le mana de la Méditation, le portefeuille du roi, trois nombres pour le catalogue des statuts).
+47. **Les tests qui ne prouvent rien**, dont plusieurs **cachent** des défauts réparés en chemin, et ~~**le coffre qui se
+    contredit**~~ — **FAIT le 2026-09-13**, les onze contradictions du balayage (voir [[Vers la production]], section 9) ; une seule a demandé du code : la Méditation, dont la réserve promise n'avait jamais été codée.
     Plus **l'ancienne file** jamais revue : les saisonniers, le chômage qui pousse à migrer, les tombes qui
     vieillissent, les événements en zone logique, **une guerre qui ne fait rien**, le nom de la vocation à l'écran,
     l'irrigation construite, les mauvaises récoltes, la cuve et le moulin, les descriptions de modules non traduisibles.

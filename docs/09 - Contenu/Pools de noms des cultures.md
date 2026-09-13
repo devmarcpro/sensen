@@ -11,6 +11,7 @@ etape: 9
 
 > [!warning] Corrigé le 2026-08-26 — les pools sont **genrés**
 > Le premier jet ne séparait pas les terminaisons masculines des féminines, ce qui produisait des « Tariq » femmes et des « Freydis » hommes. `prenom_b` devient **`prenom_b_m` / `prenom_b_f`**, et `famille_b` est genré là où la langue l'exige : nordique **-sson ⟋ -sdottir**, slave **-ov ⟋ -ova**, **-sky ⟋ -ska**. Ailleurs les deux listes sont identiques. Découvert en générant des PNJ ([[Exemples — dix PNJ générés]]).
+> **Annulé pour les noms de famille le 2026-09-07, 19 h** (designer : « un nom de famille n'a pas de sexe ») — voir la décision plus bas : `Noms.famille` ne lit plus que `famille_b_m`, pour tous ; `famille_b_f` reste dans les fiches sans être lu. *Relevé le 2026-09-13 : cette note fondatrice disait encore l'inverse.*
 
 Les pools A+B des 7 cultures ([[Cultures de nommage]]) — la Sino est déjà écrite en [[Culture de nommage — schéma]]. *(Sylvestre, Ignée et Résonance sont retirées avec les races inventées — [[Races]].)* Concaténation directe ([[Génération de noms]]) ; titres au format m ⟋ f.
 

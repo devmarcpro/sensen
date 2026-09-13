@@ -10,7 +10,7 @@ Les contrôles durs se mesurent en ticks, s'affichent, et ne peuvent jamais ench
 
 **Statuts de contrôle** : étourdissement, enracinement, **saisie** et **retard de tempo** ([[Talents de classe]]) se mesurent **en ticks**, avec la durée affichée. *Le tempo compte dans ce budget : un compteur repoussé est un contrôle dur déguisé.* Aucun contrôle dur ne dépasse **20 ticks** sur le joueur, et ne peut se réappliquer dans les **50 ticks** suivant sa fin (anti-stunlock), **joueur comme créatures**.
 
-**Catalogue des statuts complets :** voir [[Statuts]] (14 statuts en données, `data/status_effects/`).
+**Catalogue des statuts complets :** voir [[Statuts]] (en données, `data/status_effects/` — le dossier fait foi).
 
 **Application ([[Pipeline de résolution du combat]]) :** les statuts sont appliqués par tags des modules, tickés en phase 2 de la [[Boucle de tick]].
 
@@ -20,7 +20,7 @@ Les contrôles durs se mesurent en ticks, s'affichent, et ne peuvent jamais ench
 > Chaque être porte `anti_stunlock_jusqua` : un contrôle dur (statut `controle: true` ou effet `tempo` positif) est **refusé** avant ce tick ; sinon sa durée est plafonnée à **20 ticks** et le verrou est posé à `fin + 50`. Le tempo subi laisse un marqueur *Retardé* visible. Les tempos négatifs (Célérité, sur un allié) ne sont pas plafonnés. Chiffres dans `combat_rules.json` (`anti_stunlock`).
 
 > [!note] Chiffre rafraîchi le 2026-08-31
-> « 14 statuts en données » date du prototype : `data/status_effects/` en compte 67 (contrôle, négatifs, positifs, potions).
+> « 14 statuts en données » date du prototype : `data/status_effects/` en compte 67 (contrôle, négatifs, positifs, potions). **83 le 2026-09-13** — d'où le compte retiré du texte ci-dessus.
 
 > [!success] Codé depuis l'étape 0 — trace ajoutée le 2026-09-04
 > Les statuts de contrôle (`status_effects/`, drapeau `controle`) passent par le budget `combat_rules.anti_stunlock` : un être déjà contrôlé résiste de plus en plus dans la fenêtre. Le test « statut terreur en données » et les tests de tempo le couvrent.

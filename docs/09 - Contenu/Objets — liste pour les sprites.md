@@ -62,10 +62,11 @@ Par voie (la stat de la compétence de l'arme). Dés, type de dégâts et porté
 | **Tambour** | `craft_tambour`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Charisme · Musique | 2 | 1d6 · contondant · 1–1.0 · zone 3 | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
 | **Vielle** | `craft_vielle`<br>`composants/monture.png + composants/manche_court.png + composants/corde.png` | Charisme · Musique | 2 | 2d4 · contondant · 1–1.0 · zone 2 | `tete` → **Monture** — lingot de métal, or ou argent (lingot), os<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`corde` → **Corde** — fibre (lin, chanvre, coton), soie |
 
-## 2. Les outils (11) et les boucliers (2)
+## 2. Les outils (12) et les boucliers (2)
 
 | Outil | id · sprite | Fonction | Mains · emplacement | Composants |
 |---|---|---|---|---|
+| **Chandelle** | `chandelle`<br>`chandelle.png` | — · lumière 40 | 1 · Main secondaire | — |
 | **Faucille** | `craft_faucille`<br>`composants/lame_courte.png + composants/poignee.png` | Faucille | 1 · Main principale | `tete` → **Lame courte** — lingot de métal, obsidienne taillée, or ou argent (lingot), os, verre<br>`manche` → **Poignée** — bois (planche), ivoire, lingot de métal, os |
 | **Faucille de fer** *(fortune, fer)* | `proto_faucille`<br>`— (pictogramme)` | Faucille | 1 · Main principale | — |
 | **Hache** | `craft_hache`<br>`composants/tete_outil.png + composants/manche_court.png` | Hache | 1 · Main principale | `tete` → **Tête d'outil** — lingot de métal, obsidienne taillée, os massif, roche taillée<br>`manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os |
@@ -77,7 +78,7 @@ Par voie (la stat de la compétence de l'arme). Dés, type de dégâts et porté
 | **Seau** | `craft_seau`<br>`composants/plaque.png + composants/sangles.png` | Seau | 1 · Main principale | `tete` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
 | **Seau de bois** *(fortune, chene)* | `proto_seau`<br>`— (pictogramme)` | Seau | 1 · Main principale | — |
 | **Torche** | `torche`<br>`composants/manche_court.png + composants/sangles.png` | — · lumière 70 | 1 · Main secondaire | `manche` → **Manche court** — bois (planche), ivoire, lingot de métal, os<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
-| **Bouclier** | `craft_bouclier`<br>`composants/plaque.png + composants/sangles.png` | Bouclier · bras, plaque | 1 · Main secondaire | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
+| **Bouclier** | `craft_bouclier`<br>`composants/plaque.png + composants/sangles.png` | Bouclier · Bras, plaque | 1 · Main secondaire | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie |
 | **Bouclier** *(fortune, chene)* | `proto_bouclier`<br>`— (pictogramme)` | Bouclier | 1 · Main secondaire | — |
 
 ## 3. Armures et vêtements (21)
@@ -86,27 +87,27 @@ L'emplacement dit où la pièce se porte, la zone ce qu'elle couvre, la construc
 
 | Pièce | id · sprite | Emplacement · zone | Construction | Composants |
 |---|---|---|---|---|
-| **Bottes** | `craft_bottes`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Bottes · pieds | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Brassards** | `craft_brassards`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Brassards · bras | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cape** | `cape`<br>`cape.png` | Dos · torse | matelassée | dos, cape |
-| **Capuche** | `craft_capuche`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Casque · tête | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Casque** | `craft_casque`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Casque · tête | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Casque de cuir** *(fortune, cuir)* | `proto_casque_cuir`<br>`— (pictogramme)` | Casque · tête | cuir | fortune |
-| **Casque de fer** *(fortune, fer)* | `proto_casque_fer`<br>`— (pictogramme)` | Casque · tête | plaque | fortune |
-| **Chausses** | `craft_chausses`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Jambières · jambes | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Chaussons** | `craft_chaussons`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Bottes · pieds | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Coiffe** | `craft_coiffe`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Casque · tête | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cuirasse** | `craft_cuirasse`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Cuirasse · torse | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Cuirasse de cuir** *(fortune, cuir)* | `proto_cuirasse_cuir`<br>`— (pictogramme)` | Cuirasse · torse | cuir | fortune |
-| **Cuirasse de mailles** *(fortune, fer)* | `proto_cuirasse_mailles`<br>`— (pictogramme)` | Cuirasse · torse | mailles | fortune |
-| **Gambison** | `craft_gambison`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Cuirasse · torse | matelassée | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Jambières** | `craft_jambieres`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Jambières · jambes | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Jambières de cuir** *(fortune, cuir)* | `proto_jambieres_cuir`<br>`— (pictogramme)` | Jambières · jambes | cuir | fortune |
-| **Manchettes** | `craft_manchettes`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Brassards · bras | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Robe** | `craft_robe`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Cuirasse · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Sac à dos** | `sac_a_dos`<br>`sac_a_dos.png` | Dos · torse | matelassée | dos, sac |
-| **Tunique** | `craft_tunique`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Cuirasse · torse | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
-| **Étole** | `craft_etole`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Dos · torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Bottes** | `craft_bottes`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Bottes · Pieds | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Brassards** | `craft_brassards`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Brassards · Bras | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cape** | `cape`<br>`cape.png` | Dos · Torse | matelassée | dos, cape |
+| **Capuche** | `craft_capuche`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Casque · Tête | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Casque** | `craft_casque`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Casque · Tête | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Casque de cuir** *(fortune, cuir)* | `proto_casque_cuir`<br>`— (pictogramme)` | Casque · Tête | cuir | fortune |
+| **Casque de fer** *(fortune, fer)* | `proto_casque_fer`<br>`— (pictogramme)` | Casque · Tête | plaque | fortune |
+| **Chausses** | `craft_chausses`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Jambières · Jambes | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Chaussons** | `craft_chaussons`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Bottes · Pieds | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Coiffe** | `craft_coiffe`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Casque · Tête | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cuirasse** | `craft_cuirasse`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Cuirasse · Torse | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Cuirasse de cuir** *(fortune, cuir)* | `proto_cuirasse_cuir`<br>`— (pictogramme)` | Cuirasse · Torse | cuir | fortune |
+| **Cuirasse de mailles** *(fortune, fer)* | `proto_cuirasse_mailles`<br>`— (pictogramme)` | Cuirasse · Torse | mailles | fortune |
+| **Gambison** | `craft_gambison`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Cuirasse · Torse | matelassée | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Jambières** | `craft_jambieres`<br>`composants/plaque.png + composants/sangles.png + composants/doublure.png` | Jambières · Jambes | plaque | `plaque` → **Plaque** — écaille, lingot de métal, os massif<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Jambières de cuir** *(fortune, cuir)* | `proto_jambieres_cuir`<br>`— (pictogramme)` | Jambières · Jambes | cuir | fortune |
+| **Manchettes** | `craft_manchettes`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Brassards · Bras | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Robe** | `craft_robe`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Cuirasse · Torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Sac à dos** | `sac_a_dos`<br>`sac_a_dos.png` | Dos · Torse | matelassée | dos, sac |
+| **Tunique** | `craft_tunique`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Cuirasse · Torse | tissu | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
+| **Étole** | `craft_etole`<br>`composants/etoffe.png + composants/sangles.png + composants/doublure.png` | Dos · Torse | rituel | `plaque` → **Étoffe** — cuir, fibre (lin, chanvre, coton), soie<br>`sangles` → **Sangles** — cuir, fibre (lin, chanvre, coton), soie<br>`doublure` → **Doublure** — cuir, fibre (lin, chanvre, coton) |
 
 ## 4. Bijoux (4) et gemmes (10)
 
@@ -178,7 +179,7 @@ Chaque composant est une pièce à part entière (elle se fabrique, se ramasse, 
 | **Grimoire** | `grimoire` | grimoire | livre |
 | **Parchemin** | `parchemin` | parchemin | empilable |
 
-## 8. Consommables (67)
+## 8. Consommables (158)
 
 Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences : trouble, irisée, fumeuse, laiteuse, sombre, pétillante, terne, ambrée. Identifiée, elle prend le nom de son distillat. Les ingrédients (herbes, champignons, cultures, parties de bêtes) sont ce qu'on cueille, récolte ou dépèce.
 
@@ -201,15 +202,18 @@ Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences 
 | **Potion de vision nocturne** | `potion_vision_nocturne` | potion | — | — |
 | **Potion de volonté** | `potion_volonte` | potion | — | — |
 
-### Plats cuisinés (5)
+### Plats cuisinés (8)
 
 | Objet | id | Tags | Élément(s) | Distillat |
 |---|---|---|---|---|
+| **Fromage** | `fromage` | ingrédient, plat | Terre 50 %, Eau 30 %, Métal 20 % | — |
 | **Pain** | `pain` | plat | Bois 60 %, Terre 25 %, Feu 15 % | — |
 | **Poisson grillé** | `poisson_grille` | plat | Eau 80 %, Bois 20 % | — |
 | **Ragoût** | `ragout` | plat | Bois 50 %, Eau 50 % | — |
 | **Ration de voyage** | `ration_de_voyage` | plat | Bois 50 %, Eau 50 % | — |
+| **Viande fumée** | `viande_fumee` | plat, viande, conserve | Feu 50 %, Bois 50 % | — |
 | **Viande grillée** | `viande_grillee` | plat, viande | Bois 50 %, Eau 50 % | — |
+| **Viande salée** | `viande_salee` | plat, viande, conserve | Métal 40 %, Eau 30 %, Bois 30 % | — |
 
 ### Viandes (1)
 
@@ -217,24 +221,78 @@ Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences 
 |---|---|---|---|---|
 | **Viande crue** | `viande_crue` | viande | Bois 50 %, Eau 50 % | — |
 
-### Cultures (récoltes des champs) (12)
+### Cultures (récoltes des champs) (66)
 
 | Objet | id | Tags | Élément(s) | Distillat |
 |---|---|---|---|---|
-| **Blé** | `ble` | culture, ingrédient | Bois 70 %, Terre 30 % | — |
-| **Carotte** | `carotte` | culture, ingrédient | Terre 60 %, Bois 40 % | — |
-| **Chou** | `chou` | culture, ingrédient | Bois 80 %, Eau 20 % | — |
-| **Citrouille** | `citrouille` | culture, ingrédient | Terre 50 %, Bois 50 % | — |
-| **Framboisier** | `framboisier` | buisson, ingrédient, culture | Bois 80 %, Eau 20 % | — |
-| **Houblon** | `houblon` | buisson, ingrédient, culture | Bois 80 %, Terre 20 % | — |
-| **Myrtillier** | `myrtillier` | buisson, ingrédient, culture | Bois 70 %, Eau 30 % | — |
-| **Oignon** | `oignon` | culture, ingrédient | Feu 50 %, Terre 50 % | — |
-| **Orge** | `orge` | culture, ingrédient | Bois 70 %, Terre 30 % | — |
-| **Pomme de terre** | `pomme_de_terre` | culture, ingrédient | Terre 70 %, Bois 30 % | — |
-| **Tomate** | `tomate` | culture, ingrédient | Bois 50 %, Eau 50 % | — |
-| **Vigne** | `vigne` | buisson, ingrédient, culture | Bois 60 %, Feu 20 %, Terre 20 % | — |
+| **Ail** | `ail` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Aneth** | `aneth` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Aubergine** | `aubergine` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Avoine** | `avoine` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Basilic** | `basilic` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Betterave** | `betterave` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Blé** | `ble` | culture, ingrédient, cereale | Bois 70 %, Terre 30 % | — |
+| **Canne à sucre** | `canne_a_sucre` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Carotte** | `carotte` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Chou** | `chou` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Citrouille** | `citrouille` | culture, ingrédient, legume | Terre 50 %, Bois 50 % | — |
+| **Concombre** | `concombre` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Coriandre** | `coriandre` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Courge** | `courge` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Courgette** | `courgette` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Feuilles d'indigo** | `indigo` | culture, ingrédient, teinture | Eau 50 %, Bois 50 % | — |
+| **Feuilles de pastel** | `pastel` | culture, ingrédient, teinture | Eau 50 %, Bois 50 % | — |
+| **Feuilles de tabac** | `tabac` | culture, ingrédient, tabac | Feu 60 %, Terre 40 % | — |
+| **Framboisier** | `framboisier` | buisson, ingrédient, culture, fruit | Bois 80 %, Eau 20 % | — |
+| **Fève** | `feve` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Gingembre** | `gingembre` | culture, ingrédient, epice | Feu 70 %, Bois 30 % | — |
+| **Graines de colza** | `colza` | culture, ingrédient, oleagineux | Feu 40 %, Bois 60 % | — |
+| **Graines de tournesol** | `tournesol` | culture, ingrédient, oleagineux | Feu 40 %, Bois 60 % | — |
+| **Haricot** | `haricot` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Houblon** | `houblon` | buisson, ingrédient, culture, fruit | Bois 80 %, Terre 20 % | — |
+| **Igname** | `igname` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Laitue** | `laitue` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Lavande** | `lavande` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Lentille** | `lentille` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Manioc** | `manioc` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Maïs** | `mais` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Melon** | `melon` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Millet** | `millet` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Myrtillier** | `myrtillier` | buisson, ingrédient, culture, fruit | Bois 70 %, Eau 30 % | — |
+| **Navet** | `navet` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Oignon** | `oignon` | culture, ingrédient, legume | Feu 50 %, Terre 50 % | — |
+| **Orge** | `orge` | culture, ingrédient, cereale | Bois 70 %, Terre 30 % | — |
+| **Origan** | `origan` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Panais** | `panais` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Pastèque** | `pasteque` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Patate douce** | `patate_douce` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Persil** | `persil` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Poireau** | `poireau` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Pois** | `pois` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Pois chiche** | `pois_chiche` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Poivre** | `poivre` | culture, ingrédient, epice | Feu 70 %, Bois 30 % | — |
+| **Poivron** | `poivron` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
+| **Pomme de terre** | `pomme_de_terre` | culture, ingrédient, racine | Terre 70 %, Bois 30 % | — |
+| **Quinoa** | `quinoa` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Racine de garance** | `garance` | culture, ingrédient, teinture | Eau 50 %, Bois 50 % | — |
+| **Radis** | `radis` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Riz** | `riz` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Romarin** | `romarin` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Safran** | `safran` | culture, ingrédient, epice | Feu 70 %, Bois 30 % | — |
+| **Sarrasin** | `sarrasin` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Seigle** | `seigle` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Soja** | `soja` | culture, ingrédient, legumineuse | Bois 70 %, Terre 30 % | — |
+| **Sorgho** | `sorgho` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Taro** | `taro` | culture, ingrédient, racine | Terre 60 %, Bois 40 % | — |
+| **Thym** | `thym` | culture, ingrédient, aromate | Bois 60 %, Feu 40 % | — |
+| **Tiges de chanvre** | `tige_de_chanvre` | culture, ingrédient, fibre | Bois 100 % | — |
+| **Tiges de lin** | `tige_de_lin` | culture, ingrédient, fibre | Bois 100 % | — |
+| **Tomate** | `tomate` | culture, ingrédient, legume | Bois 50 %, Eau 50 % | — |
+| **Vigne** | `vigne` | buisson, ingrédient, culture, fruit | Bois 60 %, Feu 20 %, Terre 20 % | — |
+| **Épeautre** | `epeautre` | culture, ingrédient, cereale | Bois 60 %, Terre 40 % | — |
+| **Épinard** | `epinard` | culture, ingrédient, legume | Bois 80 %, Eau 20 % | — |
 
-### Herbes, champignons et buissons (cueillette) (10)
+### Herbes, champignons et buissons (cueillette) (13)
 
 | Objet | id | Tags | Élément(s) | Distillat |
 |---|---|---|---|---|
@@ -243,11 +301,14 @@ Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences 
 | **Belladone** | `belladone` | herbe, ingrédient | Bois 50 %, Eau 30 %, Terre 20 % | Potion de vision nocturne |
 | **Camomille** | `camomille` | herbe, ingrédient | Bois 60 %, Eau 40 % | Antipoison |
 | **Champignon des prés** | `champignon_des_pres` | champignon, ingrédient | Terre 60 %, Eau 40 % | — |
+| **Cèpe** | `cepe` | champignon, ingrédient | Terre 50 %, Eau 50 % | — |
 | **Fleurs sauvages** | `fleurs_sauvages` | décoratif, ingrédient, herbe | Bois 60 %, Feu 40 % | Potion de charisme |
+| **Girolle** | `girolle` | champignon, ingrédient | Terre 50 %, Eau 50 % | — |
 | **Menthe** | `menthe` | herbe, ingrédient | Bois 50 %, Eau 50 % | Potion de résistance au feu |
 | **Ortie** | `ortie` | herbe, ingrédient | Bois 80 %, Feu 20 % | Potion de résistance au froid |
 | **Roseau** | `roseau` | décoratif, ingrédient, herbe | Bois 50 %, Eau 50 % | Potion de respiration aquatique |
 | **Sauge** | `sauge` | herbe, ingrédient | Bois 60 %, Métal 20 %, Eau 20 % | Potion de mana |
+| **Truffe** | `truffe` | champignon, ingrédient | Terre 50 %, Eau 50 % | — |
 
 ### Parties de créatures (10)
 
@@ -264,27 +325,58 @@ Une potion non identifiée se montre comme une **fiole** d'une des 8 apparences 
 | **Écaille** | `ecaille` | ingrédient, partie | — | Potion de dextérité |
 | **Œil** | `oeil` | ingrédient, partie | — | Potion de perception |
 
-### Autres (15)
+### Autres (46)
 
 | Objet | id | Tags | Élément(s) | Distillat |
 |---|---|---|---|---|
+| **Abricot** | `abricotier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Amande** | `amandier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Ananas** | `ananas` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Antidote** | `antidote` | soin | — | — |
 | **Baies** | `baies` | ingrédient | Bois 60 %, Eau 40 % | — |
+| **Banane** | `bananier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Bandage** | `bandage` | soin | — | — |
+| **Beurre** | `beurre` | ingrédient | Eau 40 %, Terre 40 %, Feu 20 % | — |
+| **Bière** | `biere` | boisson | Eau 60 %, Bois 40 % | — |
 | **Bombe** | `bombe` | bombe | — | — |
+| **Cannelle** | `cannelle` | fruit, ingrédient, epice | Feu 70 %, Bois 30 % | — |
+| **Cassis** | `cassissier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Cerise** | `cerise` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Champignon bleu** | `champignon_bleu` | ingrédient | Terre 60 %, Bois 40 % | — |
+| **Châtaigne** | `chataigne` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Citron** | `citronnier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Coing** | `cognassier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Datte** | `dattier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Essence de mana** | `essence_de_mana` | — | — | — |
+| **Farine** | `farine` | ingrédient, farine | Terre 60 %, Bois 40 % | — |
+| **Figue** | `figuier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Fiole de soin** | `fiole_de_soin` | soin | — | — |
+| **Fraise** | `fraisier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Fruit de mana** | `fruit_de_mana` | — | — | — |
+| **Gourde d'eau** | `gourde_eau` | boisson | Eau 100 % | — |
 | **Grande fiole de soin** | `grande_fiole_de_soin` | soin | — | — |
+| **Grenade** | `grenadier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Groseille** | `groseillier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Huile d'arme** | `huile_d_arme` | — | — | — |
 | **Miel** | `miel` | ingrédient | Bois 60 %, Terre 40 % | — |
+| **Mûre** | `murier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Noisette** | `noisette` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Noix** | `noix` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Olive** | `olive` | fruit, ingrédient, oleagineux | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Orange** | `oranger` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Poire** | `poirier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Pomme** | `pomme` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Prune** | `prunier` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
+| **Pêche** | `pecher` | fruit, ingrédient | Bois 50 %, Eau 30 %, Feu 20 % | — |
 | **Ration moisie** | `ration_moisie` | — | — | — |
 | **Spécimen** | `specimen` | spécimen, élevage | — | — |
+| **Sucre** | `sucre` | ingrédient, sucre | Feu 50 %, Bois 50 % | — |
+| **Vin** | `vin` | boisson | Eau 50 %, Feu 30 %, Bois 20 % | — |
 | **Âme d'un compagnon** | `ame` | âme | — | — |
 | **Élixir de hâte** | `elixir_de_hate` | — | — | — |
+| **Œuf** | `oeuf` | ingrédient, animal | Eau 50 %, Terre 50 % | — |
 
-## 9. Les matériaux : 245 matières, 6 formes
+## 9. Les matériaux : 247 matières, 6 formes
 
 Une matière brute ou transformée est un objet empilable : un sprite par **forme** (teinté par la matière) suffit — `assets/objets/matieres/<forme>.png`. Formes : `brut`, `lingot`, `pierre_taillee`, `planche`, `taillee`, `tissu`.
 
@@ -297,13 +389,13 @@ Une matière brute ou transformée est un objet empilable : un sprite par **form
 | **liquide** (18) | Alcool, Boue, Eau, Eau salée, Encre, Essence de térébenthine, Goudron, Huile, Lait, Lave, Lessive de cendre, Mercure, Miel, Sang, Saumure, Sève, Venin, Vinaigre |
 | **métal** (32) | Acier, Acier au tungstène, Acier au vanadium, Acier damassé, Acier inoxydable, Acier trempé, Aluminium (bauxite), Antimoine, Argent, Bismuth, Bronze, Chrome (chromite), Cobalt, Cuivre, Fer, Fonte, Laiton, Magnésium, Maillechort, Manganèse, Molybdène, Nickel, Or, Palladium, Platine, Plomb, Titane, Tungstène, Vanadium, Zinc, Électrum, Étain |
 | **météorologique** (4) | Givre, Glace, Grêle, Neige |
-| **minéral** (31) | Alun, Ambre, Amiante, Anthracite, Argile réfractaire, Azurite, Bitume, Borax, Chaux, Cinabre, Fluorine, Galène, Graphite, Guano/salpêtre de grotte, Houille, Hématite, Lapis-lazuli, Lignite, Magnétite, Malachite, Mica, Ocre, Phosphorite, Potasse, Pyrite, Salpêtre, Sel gemme, Sel marin, Soufre, Tourbe compactée, Turquoise |
+| **minéral** (33) | Alun, Ambre, Amiante, Anthracite, Argile réfractaire, Azurite, Bitume, Borax, Chaux, Cinabre, Fluorine, Galène, Graphite, Guano/salpêtre de grotte, Houille, Hématite, Kaolin, Lapis-lazuli, Lignite, Magnétite, Malachite, Mica, Ocre, Phosphorite, Potasse, Pyrite, Salpêtre, Sel gemme, Sel marin, Soufre, Tourbe compactée, Turquoise, Uraninite |
 | **roche** (29) | Andésite, Ardoise, Basalte, Brèche volcanique, Calcaire, Calcite (spath), Conglomérat, Craie, Diorite, Dolomie, Gneiss, Granit, Granit noir (gabbro), Grès, Gypse, Kimberlite, Marbre, Obsidienne, Pierre, Pierre de lave, Pierre ponce, Péridotite, Quartzite, Rhyolite, Schiste, Serpentinite, Silex, Travertin, Tuf volcanique |
 | **synthétique** (19) | Brique, Brique réfractaire, Béton, Caoutchouc, Charbon de bois, Chaume tressé, Cire, Colle d'os, Cuir bouilli, Feutre, Papier, Parchemin, Plâtre, Poix, Porcelaine, Savon, Scorie, Verre, Verre trempé |
 | **terre** (12) | Argile, Cendre, Gravier, Humus, Latérite, Limon, Marne, Sable, Sable noir, Terre, Terre fertile, Tourbe |
 | **végétal et fibre** (15) | Amidon, Chanvre, Coton, Gomme arabique, Jute, Latex, Lin, Osier, Paille, Rotin, Résine, Sisal, Tanin, Varech, Écorce |
 
-## 10. Meubles (25) et stations portatives (11)
+## 10. Meubles (26) et stations portatives (11)
 
 Un meuble se pose sur une tuile (il a une emprise et parfois une lumière) ; une station portative se porte dans le sac et se pose pour fabriquer. Les matières de recette disent de quoi ils ont l'air.
 
@@ -333,6 +425,7 @@ Un meuble se pose sur une tuile (il a une emprise et parfois une lumière) ; une
 | **Tourelle** | `meuble_tourelle` | 4 bois (planche), 2 métal (lingot) | — · oui |
 | **Trophée** | `meuble_trophee` | 2 bois (planche), 1  () | — · oui |
 | **Vivarium** | `meuble_vivarium` | 3 bois (planche) | 1 · oui |
+| **Étai** | `meuble_etai` | 2 bois (planche) | — · non |
 | **Étal de vente** | `meuble_etal_de_vente` | 3 bois (planche) | — · oui |
 
 | Station | id | Recette (matières) | Compétence |

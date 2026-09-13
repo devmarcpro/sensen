@@ -11,9 +11,11 @@ Les chiffres de l'économie : portefeuilles PNJ, taxes de guilde, entretien du r
 ```
 PORTEFEUILLE PNJ (marchands ET clients, règle unifiée) :
   or_max = base(métier) * (1 + rang*0.5)
-    base : villageois/client 30, marchand 300, maître de guilde 2000,
-    roi 15000 — indexé sur la FONCTION du PNJ (Fonctions), pas sur
-    son espèce (Profils de PNJ)
+    base : le `portefeuille` de la FICHE DE FONCTION (data/functions/),
+    pas l'espèce (Profils de PNJ). Au 2026-09-13 : journalier et
+    portefaix 12, villageois/fermier/mineur/aventurier 30, artisan et
+    garde 60, marchand et maire 300, commandant 400, prêtre 500,
+    syndic 600, seigneur 800, maître de guilde et dirigeant 2000
   recharge hebdomadaire : +15 % de or_max (plafonné à or_max)
   Vente du joueur refusée en or au-delà du stock du PNJ → PROPOSITION
     DE TROC automatique : objets de son inventaire ≈ valeur équivalente
@@ -36,6 +38,9 @@ ENTRETIEN DU ROYAUME (hebdomadaire, prélevé sur le trésor du royaume,
   Trésor du royaume alimenté par les boutiques passives (E.8) du
     territoire, consultable dans l'écran de gestion de claim (E.13).
 ```
+
+> [!note] Le roi à 15 000 n'a jamais existé en données — corrigé le 2026-09-13 (le coffre qui se contredit, ordre de travail 47)
+> Cette note annonçait un **roi à 15 000** ; la fiche du dirigeant porte **2 000** depuis qu'elle existe, à égalité avec le maître de guilde. La note est réécrite sur la donnée plutôt que l'inverse : aucun test ni aucune boucle économique ne s'est jamais appuyé sur 15 000, et le trésor d'un royaume vit dans le royaume, pas dans la bourse de son dirigeant. *Si le designer veut un roi plus riche, c'est un nombre dans `functions/dirigeant.json`.*
 
 **Coût naturel du cumul de guildes ([[Quêtes et guildes]]) :** *les taxes hebdomadaires par guilde sont le coût naturel du cumul* — toutes les guildes sont cumulables au lancement.
 

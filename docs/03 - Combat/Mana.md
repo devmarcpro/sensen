@@ -53,6 +53,9 @@ Monter un module en niveau le rend plus puissant ET moins coûteux (puissance : 
 > [!success] Décidé le 2026-09-03 — le mana **appartient à la volonté**, le charisme en est l'**invité**
 > Trois monnaies depuis ce jour, une par paire de stats, selon la **philosophie des paires** du designer : chaque monnaie a un propriétaire dont tout le combat en dépend et qui porte la réserve, et un invité qui s'en sert en bonus. Pour le mana : la **volonté** (le mage ne fait que ça, `mana_max = 20 + volonté × 3`, inchangé) et le **charisme** (buffs, débuffs, invocations — quinze noyaux triés le même jour, et six instruments qui sont des focus de mana). Les deux autres : [[Endurance]] (la vigueur, à la force et à l'endurance) et [[Sang-froid]] (à la dextérité et à la perception — l'inverse du mana : elle ne se gagne pas en agissant). Le tableau complet est dans [[Structure compétences-modules-slots]].
 
+> [!success] Codé le 2026-09-13 — la Méditation agrandit enfin la réserve (le coffre qui se contredit, ordre de travail 47)
+> La décision « Pool de mana : résolu » disait `20 + Volonté×3 + Méditation×2` ; le code n'avait jamais porté que les deux premiers termes, et la note du 2026-09-03 recopiait « `20 + volonté × 3`, inchangé » sans voir qu'il manquait le troisième. **C'est la décision qui a gagné**, pas le code : `stats.mana_max_par_meditation` (2), lu au niveau **effectif** de Méditation, comme la régénération. Un mage qui médite a donc à la fois plus de réserve et plus de retour — les deux usages que la compétence promettait.
+
 ## Liens
 - **Dépend de** : [[Stats de personnage]], [[Progression par l'usage]], [[Boucle de tick]]
 - **Alimente** : [[Structure compétences-modules-slots]], [[Pipeline de résolution du combat]], [[Armes fantomatiques]], [[Modules]]

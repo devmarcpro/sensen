@@ -323,7 +323,11 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	# Les maxima dérivés des stats effectives ; la valeur courante est clampée, plancher 1 pour la santé.
 	e.sante_max = maxi(1, regles.sante_max(stats) + sante_bonus - int(e.get("erosion", 0)))   # Érosion : PV max rognés pour le combat
 	e.sante = clampi(int(e.sante), 1, int(e.sante_max)) if int(e.sante) > 0 else int(e.sante)
-	e.mana_max = regles.mana_max(stats) + mana_bonus
+	# LA MÉDITATION AGRANDIT LA RÉSERVE (le coffre qui se contredit, ordre de travail 47, 2026-09-13) : la décision
+	# « Pool de mana : résolu » disait `20 + Volonté×3 + Méditation×2`, et le code n'en donnait que les deux premiers
+	# termes. Le niveau EFFECTIF, comme la régénération le lit : un anneau de Méditation compte aussi.
+	var n_medit := regles.niveau(e.get("competences_eff", e.get("competences", {})), "meditation")
+	e.mana_max = regles.mana_max(stats) + mana_bonus + n_medit * int(regles.r.stats.get("mana_max_par_meditation", 0))
 	if e.has("mana_max_mult"):   # contrepartie d'un talent (Le Passeur)
 		e.mana_max = maxi(1, roundi(float(e.mana_max) * float(e.mana_max_mult)))
 	e.mana = mini(int(e.mana), int(e.mana_max))

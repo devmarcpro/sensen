@@ -6,14 +6,15 @@ statut: décidé
 etape: 7
 ---
 
-La jauge de faim : une mécanique de survie active, mais qui ne tue jamais.
+La jauge de faim : une mécanique de survie active — **et qui tue** depuis le 2026-09-01 (voir plus bas ; « ne tue jamais » était l'énoncé d'origine, corrigé ici le 2026-09-13).
 
 ```
 Jauge 0–100, départ 100. Baisse de 1 point / 90 s de jeu actif
 (pauses et menus exclus). Effets :
   < 50 : -10 % régénération de santé
   < 25 : -10 % à toutes les stats, plus de régén de santé
-  = 0  : perte de 1 % de santé max / 30 s (ne tue pas en dessous de 1 PV)
+  = 0  : la famine ronge les PV par paliers (faim.periode_zero, pct_sante_max,
+         degats_par_palier) JUSQU'À LA MORT — plus de plancher à 1 PV
 Manger restaure selon l'aliment (valeur nutritive en données).
 ```
 

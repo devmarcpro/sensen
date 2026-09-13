@@ -71,7 +71,7 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 > [!important] Décidé le 2026-09-07, 14 h — un village garde des bêtes : l'enclos descend au centre des petites agglomérations
 > La revue en images (`capture.tscn -- --palier village --sur enclos`) a répondu « AUCUN enclos trouvé ». Ce n'était pas un défaut de l'outil : les enclos ne se posaient que dans les quartiers **agricoles**, qui n'apparaissent qu'à partir du bourg (quatre cellules). Un hameau et un village n'avaient donc **aucune bête** — alors que ce sont précisément les plus petites agglomérations qui vivent de leur troupeau.
 > Le centre d'un hameau ou d'un village reçoit désormais son enclos, comme il reçoit déjà ses champs (`champs.quartiers` contient « centre » depuis B2). Le cœur d'un bourg et plus reste sans enclos (`enclos.paliers_sans_centre`) : ses bêtes sont dans ses quartiers agricoles, et l'on ne parque pas un troupeau sur le parvis d'un château.
-> Ce que la capture montre : un enclos clôturé, ses bêtes dedans (un mouflon, un sanglier — l'élevage du jeu domestique des espèces sauvages, il n'y a pas de vache au catalogue), le champ en damier à côté. Cela se lit.
+> Ce que la capture montre : un enclos clôturé, ses bêtes dedans (un mouflon, un sanglier — l'élevage du jeu domestique des espèces sauvages, il n'y a pas de vache au catalogue *— vrai à 14 h, faux à 18 h 45 : la décision juste en dessous a ajouté la vache et treize autres bêtes domestiques*), le champ en damier à côté. Cela se lit.
 
 > [!important] Décidé le 2026-09-07, 18 h 45 — chaque plante a ses nombres, chaque bête les siens (designer : « rajoute du bétail, des grains, des légumes, des fruits, etc. Refonte de l'agriculture pour que chaque plant ait des stats uniques — temps de pousse, conditions, stats »)
 > Huit cultures et quatre buissons partageaient quatre nombres et une table par biome tenue à la main ; le bétail était sept espèces sauvages « domestiquées » qui produisaient toutes selon la même ligne de `villes.json`. Le monde réel est plus riche, et c'est lui le catalogue :
@@ -87,6 +87,28 @@ Toute gestion de ville/village/base (cultures, élevage, boutique passive — [[
 > - **Arroser** (`arroser`, option sur une parcelle non mûre, avec un **seau** en main) : la pousse avance de `arrosage.avance` (un cinquième du temps restant) et la parcelle est marquée arrosée pour la journée — un second seau le même jour ne fait rien. C'est le pendant manuel de la pluie, et ce qui sauve une culture en canicule.
 > - **Planter un arbre** : une plante de catégorie `buisson` semée par le joueur donne une **parcelle de verger** (`verger: true` sur la culture) — à la cueillette, **elle repart d'elle-même**, comme les vergers des villes : on plante une fois, on cueille des années. Un pommier n'est donc plus une culture annuelle.
 > **Ce que ça ne fait pas** : pas d'outil dédié (la houe est l'outil de récolte du sol, le seau existe déjà), pas d'irrigation construite (canaux, puits), et un arbre planté reste un buisson au sens du dessin — les arbres hauts qui bloquent la vue restent une question ouverte.
+
+## Le catalogue des plantes, nommé
+
+> [!note] Ajouté le 2026-09-13 (le coffre qui se contredit, ordre de travail 47) — **103 plantes** dans `data/plants/`, dont vingt-sept que ce coffre ne nommait nulle part (dix-sept cultures semées et dix arbres fruitiers). La liste ci-dessous est un **relevé**, pas une source : les fiches font foi, et `tools/gen_agriculture.py` les écrit.
+
+| Catégorie | Famille | Plantes |
+|---|---|---|
+| buisson | epice | Cannelier |
+| buisson | fruit | Abricotier, Amandier, Ananas, Bananier, Cassissier, Cerisier, Châtaignier, Citronnier, Cognassier, Dattier, Figuier, Fraisier, Framboisier, Grenadier, Groseillier, Houblon, Mûrier, Myrtillier, Noisetier, Noyer, Olivier, Oranger, Pêcher, Poirier, Pommier, Prunier, Vigne |
+| champignon | champignon | Amanite, Cèpe, Champignon des prés, Girolle, Truffe |
+| culture | aromate | Aneth, Basilic, Coriandre, Lavande, Origan, Persil, Romarin, Thym |
+| culture | cereale | Avoine, Blé, Canne à sucre, Épeautre, Maïs, Millet, Orge, Quinoa, Riz, Sarrasin, Seigle, Sorgho |
+| culture | epice | Gingembre, Poivrier, Safran |
+| culture | fibre | Chanvre, Lin |
+| culture | legume | Ail, Aubergine, Chou, Citrouille, Concombre, Courge, Courgette, Épinard, Laitue, Melon, Oignon, Pastèque, Poireau, Poivron, Tomate |
+| culture | legumineuse | Fève, Haricot, Lentille, Pois, Pois chiche, Soja |
+| culture | oleagineux | Colza, Tournesol |
+| culture | racine | Betterave, Carotte, Igname, Manioc, Navet, Panais, Patate douce, Pomme de terre, Radis, Taro |
+| culture | tabac | Tabac |
+| culture | teinture | Garance, Indigotier, Pastel |
+| decorative | decorative | Fleurs sauvages, Roseau |
+| herbe | herbe | Achillée, Belladone, Camomille, Menthe, Ortie, Sauge |
 
 ## Liens
 - **Dépend de** : [[Schéma unifié créature-PNJ]], [[Biomes — schéma]], [[Rôles de cases]], [[Application des stats de matériau]]

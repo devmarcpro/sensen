@@ -203,11 +203,12 @@
     }
   },
   "stats": {
-    "_doc": "Stats de personnage · Exemples — dix PNJ générés (sante_max = 20 + End×4) · Mana",
+    "_doc": "Stats de personnage · Exemples — dix PNJ générés (sante_max = 20 + End×4) · Mana (mana_max = 20 + Vol×3 + Méditation×2, la Méditation au niveau effectif — codée le 2026-09-13, la décision la promettait depuis la Structure compétences-modules-slots)",
     "sante_max_base": 20,
     "sante_max_par_endurance": 4,
     "mana_max_base": 20,
-    "mana_max_par_volonte": 3
+    "mana_max_par_volonte": 3,
+    "mana_max_par_meditation": 2
   },
   "mana": {
     "_doc": "Mana (A.5) : régénération tous les 10 ticks, 1 chance sur 8, 1 + N_meditation × 0.2 ; surchauffe = déficit × 2 en PV | tranches_exactes (2026-09-06) : au-delà de ce nombre de tranches à rattraper d'un coup (un réveil après une nuit, une semaine passée en accéléré), la régénération prend son espérance (tranches × chance, la fraction tirée une fois) au lieu de jouer chaque tranche — une nuit de deux cents dormeurs, c'était cent soixante mille jets",
