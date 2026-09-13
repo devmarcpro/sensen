@@ -279,6 +279,64 @@ func test_caractere_des_villes() -> void:
 	s.monde.fermer()
 
 
+## LES MAUVAISES RÉCOLTES (l'ancienne file, 2026-09-13) : une année par région, tirée à la graine.
+func test_mauvaises_recoltes() -> void:
+	var aa: Dictionary = GameData.config("villes").champs.annee_agricole
+	var s := Simulation.new(4246)
+	s.charger_camp()
+	var mauvaises := 0
+	var bonnes := 0
+	var n := 0
+	for ry in 20:
+		for rx in 20:
+			var cell := Vector2i(rx * int(aa.region_cellules), ry * int(aa.region_cellules))
+			var f := SimVilles.annee_agricole(s, cell)
+			n += 1
+			if f < 1.0:
+				mauvaises += 1
+			elif f > 1.0:
+				bonnes += 1
+	verifier(mauvaises > n * 0.06 and mauvaises < n * 0.2 and bonnes > n * 0.06, "sur %d régions, %d mauvaises années et %d bonnes — la plupart ordinaires" % [n, mauvaises, bonnes])
+	var c0 := Vector2i(1, 1)
+	var voisine := c0 + Vector2i(1, 2)
+	verifier(is_equal_approx(SimVilles.annee_agricole(s, c0), SimVilles.annee_agricole(s, voisine)), "deux cellules d'une même région vivent la même année")
+	var f_an := SimVilles.annee_agricole(s, c0)
+	var change := false
+	for k in 12:
+		s.horloge_monde.ticks += Calendrier.jours_par_an() * int(GameData.config("planete").cycle.ticks_par_jour)
+		if not is_equal_approx(SimVilles.annee_agricole(s, c0), f_an):
+			change = true
+	verifier(change, "et l'année suivante n'est pas forcément la même")
+	s.monde.fermer()
+
+
+## LES SAISONNIERS (l'ancienne file, 2026-09-13) : à la moisson, les oisifs d'une ville comptent aux champs.
+func test_saisonniers() -> void:
+	var s := Simulation.new(4247)
+	s.charger_camp()
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var saisons: Array = GameData.config("planete").cycle.saisons.liste if GameData.config("planete").cycle.has("saisons") else GameData.config("planete").saisons.liste
+	var jour_moisson := -1
+	var jour_hors := -1
+	for sa in saisons:
+		if str(sa[0]) in GameData.config("villes").champs.saisonniers.saisons and jour_moisson < 0:
+			jour_moisson = int(sa[1]) + 1
+		if str(sa[0]) == "printemps":
+			jour_hors = int(sa[1]) + 1
+	verifier(jour_moisson >= 0 and jour_hors >= 0, "une saison de moisson et une autre existent au calendrier")
+	var base: int = s.horloge_monde.ticks - posmod(s.horloge_monde.ticks, 360 * jour)
+	verifier(SimVilles.en_moisson(s, base + jour_moisson * jour) and not SimVilles.en_moisson(s, base + jour_hors * jour), "la moisson a sa saison, le printemps n'en est pas")
+	# LA ROUTINE : un oisif qui a reçu sa parcelle y va pendant la moisson, et reste sur la place hors saison.
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var o := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	o["fonction"] = "oisif"
+	o["champ_saisonnier"] = j.pos + Vector2i(5, 5)
+	var profil_o := {"horaires": {"0-24": "poste"}}
+	verifier(s._cible_routine(o, profil_o, base + jour_moisson * jour) == j.pos + Vector2i(5, 5), "à la moisson, l'oisif part à sa parcelle")
+	verifier(s._cible_routine(o, profil_o, base + jour_hors * jour) != j.pos + Vector2i(5, 5), "au printemps, il n'y va pas")
+	s.monde.fermer()
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)
@@ -1633,6 +1691,10 @@ func test_champs_saisons_et_troupeau() -> void:
 		g.poser_contenu(mouille, "")
 	# 4. Le rendement : hors saison il baisse, irrigué il monte, la rotation le hausse.
 	var pm: Vector2i = j.pos + Vector2i(4, 4)
+	# L'ANNÉE AGRICOLE EST NEUTRALISÉE ICI (2026-09-13) : ce test compare la saison, l'irrigation et la rotation entre
+	# elles ; une mauvaise année tirée à la graine écrase le rendement au plancher d'une unité et rend tout égal.
+	var annee_sauve: Dictionary = (GameData.config("villes").champs as Dictionary).get("annee_agricole", {})
+	GameData.config("villes").champs.erase("annee_agricole")
 	SimVilles._semer_tuile(s, pm, "ble", s.horloge_monde.ticks)
 	var base := SimVilles._rendement_parcelle(s, pm, {})
 	var r_irr := SimVilles._rendement_parcelle(s, pm, {"irrigue": true})
@@ -1641,6 +1703,7 @@ func test_champs_saisons_et_troupeau() -> void:
 	SimVilles._semer_tuile(s, pm, "ble", s.horloge_monde.ticks)
 	var r_hors := SimVilles._rendement_parcelle(s, pm, {})
 	verifier(bool(s.territoire.cultures[pm].hors_saison) and r_hors < base and r_irr >= base and r_rot > base, "rendement : base %d, irrigué %d, rotation %d, hors saison %d" % [base, r_irr, r_rot, r_hors])
+	GameData.config("villes").champs["annee_agricole"] = annee_sauve
 	s.territoire.cultures.erase(pm)
 	# 5. La jachère : un champ qui a beaucoup donné se repose, sa fertilité remonte.
 	s.horloge_monde.ticks = 10 * jour

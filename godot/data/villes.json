@@ -547,6 +547,22 @@
     },
     "legumineuse": {
       "fertilite_rendue": 6
+    },
+    "annee_agricole": {
+      "_doc": "LES MAUVAISES RECOLTES (l ancienne file, 2026-09-13). Chaque REGION (un carre de `region_cellules` cellules de cote) tire son annee a la graine, une fois par annee du calendrier : `mauvaise_chance` d une annee mauvaise (toute recolte x `mauvaise_mult`), `bonne_chance` d une bonne (x `bonne_mult`). Rien ne se stocke, deux parties de meme graine vivent les memes disettes. Les villes le paient en nourriture, donc en faim, donc en humeur — la famine n a demande aucune regle de plus.",
+      "region_cellules": 6,
+      "mauvaise_chance": 0.12,
+      "mauvaise_mult": 0.4,
+      "bonne_chance": 0.12,
+      "bonne_mult": 1.3
+    },
+    "saisonniers": {
+      "_doc": "LES SAISONNIERS (l ancienne file, 2026-09-13). Pendant les `saisons` de moisson, chaque adulte OISIF d une ville compte pour `part_fermier` d un fermier dans le quota de recolte de la semaine, et ses heures de travail le menent a un champ de la ville plutot qu a la place.",
+      "saisons": [
+        "fin_ete",
+        "automne"
+      ],
+      "part_fermier": 0.5
     }
   },
   "anneau_moyen": {

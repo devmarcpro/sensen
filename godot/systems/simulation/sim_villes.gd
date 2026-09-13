@@ -591,7 +591,26 @@ static func _rendement_parcelle(sim: Simulation, pm: Vector2i, champ: Dictionary
 		q *= 1.0 + float(cfg.get("irrigation", {}).get("bonus", 0.35)) * float(pl.get("besoin_eau", 0.5))
 	if SimTerrain.meteo(sim, cell) == "canicule" and not irrigue:
 		q *= float(SimTerritoire._ry(sim).agriculture.canicule_facteur)
+	q *= annee_agricole(sim, cell)   # une mauvaise année pèse sur toute la région (l'ancienne file, 2026-09-13)
 	return maxi(1, roundi(q))
+
+
+## L'ANNÉE AGRICOLE d'une région : ×`mauvaise_mult`, ×1 ou ×`bonne_mult`, tirée par (graine, région, année) — rien ne
+## se stocke, et une disette frappe toutes les parcelles d'une même région la même année.
+static func annee_agricole(sim: Simulation, cell: Vector2i) -> float:
+	var aa: Dictionary = GameData.config("villes").get("champs", {}).get("annee_agricole", {})
+	if aa.is_empty():
+		return 1.0
+	var t := maxi(1, int(aa.get("region_cellules", 6)))
+	var region := Vector2i(int(floor(float(cell.x) / float(t))), int(floor(float(cell.y) / float(t))))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "annee_agricole", region, sim.annee_courante()])
+	var r := rng.randf()
+	if r < float(aa.get("mauvaise_chance", 0.0)):
+		return float(aa.get("mauvaise_mult", 1.0))
+	if r > 1.0 - float(aa.get("bonne_chance", 0.0)):
+		return float(aa.get("bonne_mult", 1.0))
+	return 1.0
 
 
 ## Les fermiers des périmètres de champs récoltent les parcelles mûres du territoire et les ressèment (Villes B2) —
@@ -600,10 +619,18 @@ static func _recolter_champs(sim: Simulation) -> void:
 	var cfg: Dictionary = GameData.config("villes").get("champs", {})
 	var types: Dictionary = SimTerritoire._ry(sim).get("perimetres", {}).get("types", {})
 	var quota := 0
+	var moisson := en_moisson(sim)
 	for x in SimTerritoire.residents(sim):
 		var per: Dictionary = SimPerimetres.perimetres(sim).get(str(x.assignation.get("perimetre", "")), {})
 		if not per.is_empty() and bool(types.get(str(per.type), {}).get("champs", false)):
 			quota += int(cfg.get("tuiles_par_fermier_semaine", 30))
+		elif moisson and SimTerritoire.chomeur(sim, x):   # la moisson appelle tout le monde aux champs (l'ancienne file, 2026-09-13)
+			quota += roundi(float(cfg.get("tuiles_par_fermier_semaine", 30)) * float(cfg.get("saisonniers", {}).get("part_fermier", 0.5)))
+			if not sim.territoire.cultures.is_empty():   # et c'est à une parcelle qu'il passera ses heures de travail
+				var parcelles: Array = sim.territoire.cultures.keys()
+				x["champ_saisonnier"] = Vector2i(parcelles[posmod(str(x.id).hash(), parcelles.size())])
+		elif x.has("champ_saisonnier") and not moisson:
+			x.erase("champ_saisonnier")
 	if quota <= 0:
 		return
 	var recoltes := {}
@@ -1400,3 +1427,10 @@ static func tiquer_caracteres(sim: Simulation, tick: int) -> void:
 						sim._appliquer_degats(y, degats, str(x.id), {"type": "contondant", "rixe": true})
 						EventBus.emettre(&"journal", [&"journal.rixe", {"a": x.name_key, "b": y.name_key}])
 					break
+
+
+
+## LA SAISON DES MOISSONS (l'ancienne file, 2026-09-13) : celle où les oisifs d'une ville deviennent saisonniers.
+static func en_moisson(sim: Simulation, tick: int = -1) -> bool:
+	var sc: Dictionary = GameData.config("villes").get("champs", {}).get("saisonniers", {})
+	return not sc.is_empty() and SimTerrain.saison(sim, tick) in sc.get("saisons", [])

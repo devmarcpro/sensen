@@ -4409,6 +4409,7 @@ journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
 journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.mauvaise_annee,"A bad year: the land yields little across the region"
 journal.rixe,"{a} and {b} come to blows in the square"
 mutation.second_coeur.name,"Second heart"
 mutation.poumons_larges.name,"Wide lungs"

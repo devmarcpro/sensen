@@ -538,6 +538,10 @@ static func _recolter_culture(sim: Simulation, e: Dictionary, vers: Vector2i, ti
 		* sim.regles.skill_factor(sim.regles.niveau(e.competences_eff, str(ag.get("competence", "agriculture"))))
 	if SimTerrain.meteo(sim, cell) == "canicule":
 		q *= float(SimTerritoire._ry(sim).agriculture.canicule_facteur)
+	var annee := SimVilles.annee_agricole(sim, cell)   # la même année que les villes voisines (l'ancienne file, 2026-09-13)
+	q *= annee
+	if annee < 1.0:
+		EventBus.emettre(&"journal", [&"journal.mauvaise_annee", {}])
 	var n := maxi(1, roundi(q))
 	for k in n:
 		var o: Dictionary = SimObjets.generer_objet(sim, str(c.plante), 1, {}, "commun", 0)

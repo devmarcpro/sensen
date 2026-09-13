@@ -131,6 +131,8 @@ func _ready() -> void:
 	_lancer("test_absence_et_corps")
 	_lancer("test_sous_factions")
 	_lancer("test_caractere_des_villes")
+	_lancer("test_mauvaises_recoltes")
+	_lancer("test_saisonniers")
 	_lancer("test_temps_long")
 	_lancer("test_infiltration")
 	_lancer("test_usure")
