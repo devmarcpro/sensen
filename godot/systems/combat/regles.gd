@@ -241,17 +241,30 @@ func degats_finaux(bruts: float, zone_mult: float, armure: float, garde_tient: b
 ## ×2.2 en lourde, ×0.6 à zéro d'endurance.
 func degats_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, des: Des, lourde: bool, vigueur_a_zero: bool, des_bonus: int = 0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Dictionary:
 	var jet := des.jet(fonct.degats_des, des_bonus)
-	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
-	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
+	var ms := _mult_stat_arme(stats, arme, fonct, competences, vecteur)
+	var bruts := (float(jet) * ms.x + ms.y) * _k_arme(lourde, vigueur_a_zero)
+	return {"jet": jet, "mult": ms.x, "stat": int(ms.y), "bruts": bruts, "lourde": lourde, "des": fonct.degats_des}
+
+
+## Les bruts d'une arme aux deux bouts du jet — LA MÊME formule que `degats_arme`, pour la prévisualisation.
+func bruts_arme_bornes(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, vigueur_a_zero: bool, des_bonus: int = 0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Vector2:
+	var f := Des.fourchette(fonct.degats_des, des_bonus)
+	var ms := _mult_stat_arme(stats, arme, fonct, competences, vecteur)
+	var k := _k_arme(lourde, vigueur_a_zero)
+	return Vector2((float(f.x) * ms.x + ms.y) * k, (float(f.y) * ms.x + ms.y) * k)
+
+
+## (multiplicateur de l'arme, bonus de stat). Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas
+## une arme ne doit pas arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
+func _mult_stat_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, competences: Dictionary, vecteur: Dictionary) -> Vector2:
 	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * qualite_utile(arme) * facteur_competences(competences, fonct, vecteur)
 	var distance := portee_de(fonct).y > 1 and int(fonct.get("portee_min", 1)) > 1
 	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
-	var bruts := float(jet) * mult + float(stat)
-	if lourde:
-		bruts *= float(r.actions.lourde_mult_degats)
-	if vigueur_a_zero:
-		bruts *= float(r.vigueur.a_zero_degats_mult)
-	return {"jet": jet, "mult": mult, "stat": stat, "bruts": bruts, "lourde": lourde, "des": fonct.degats_des}
+	return Vector2(mult, float(stat))
+
+
+func _k_arme(lourde: bool, vigueur_a_zero: bool) -> float:
+	return (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.vigueur.a_zero_degats_mult) if vigueur_a_zero else 1.0)
 
 
 ## Dégâts bruts d'une action de créature : jet(dés + dés bonus) + For/4, ×0.6 à zéro d'endurance.
@@ -262,20 +275,6 @@ func degats_action(stats: Dictionary, action: Dictionary, des: Des, vigueur_a_ze
 	if vigueur_a_zero:
 		bruts *= float(r.vigueur.a_zero_degats_mult)
 	return {"jet": jet, "mult": 1.0, "stat": stat, "bruts": bruts, "lourde": false, "des": action.get("degats_des")}
-
-
-## Fourchette [min, max] des dégâts finaux d'une arme (prévisualisation UI, détail du calcul).
-## `k_ext` : facteur externe (Wu Xing : domination × gain × chaîne).
-func fourchette_arme(stats: Dictionary, arme: Dictionary, fonct: Dictionary, lourde: bool, zone_mult: float, armure: float, vigueur_a_zero: bool, k_ext: float = 1.0, competences: Dictionary = {}, vecteur: Dictionary = {}) -> Vector2i:
-	var f := Des.fourchette(fonct.degats_des)
-	# Ni la dureté ni la qualité ne se lisent en dur : un objet qui n'est pas une arme ne doit pas
-	# arrêter le tick, il doit compter comme un poing (fuzz, graines 55 et 777).
-	var mult := float(arme.get("durete_base", 1)) / float(r.degats.durete_reference) * qualite_utile(arme) * facteur_competences(competences, fonct, vecteur)
-	var distance := int(fonct.get("portee_min", 1)) > 1
-	var stat := int(stats.dexterite if distance else stats.force) / int(r.degats.stat_div)
-	var k := (float(r.actions.lourde_mult_degats) if lourde else 1.0) * (float(r.vigueur.a_zero_degats_mult) if vigueur_a_zero else 1.0) * k_ext
-	return Vector2i(degats_finaux((f.x * mult + stat) * k, zone_mult, armure, false),
-		degats_finaux((f.y * mult + stat) * k, zone_mult, armure, false))
 
 
 # ---------------------------------------------------------------- garde

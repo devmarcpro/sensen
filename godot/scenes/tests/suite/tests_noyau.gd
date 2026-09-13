@@ -1915,6 +1915,72 @@ func test_reserve_de_mana() -> void:
 	verifier(int(j.mana_max) == m0 + 10 * par, "dix niveaux de Méditation : %d → %d" % [m0, int(j.mana_max)])
 
 
+## LA FOURCHETTE DE DÉGÂTS DIT LA VÉRITÉ (ordre de travail 47, 2026-09-13). Elle n'était testée nulle part et recopiait
+## le calcul à la main ; le coup avait grandi sans elle (dés de statut, affixes, huile, élasticité…). On la confronte au
+## coup lui-même : sur des centaines de frappes, chaque dégât hors critique tombe dans [min, max], et les deux bouts sont
+## atteints ou approchés.
+func test_fourchette_dit_vrai() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var cible: Dictionary = {}
+	for x in s.vivants():
+		if x.id != j.id and x.camp != j.camp:
+			cible = x
+			break
+	verifier(not cible.is_empty(), "une cible dans l'arène")
+	if cible.is_empty():
+		return
+	# un dé de plus par statut (Béni) : l'ancienne copie du calcul l'ignorait
+	s.appliquer_statut(j, "beni", 900000, j.id)
+	cible.garde = false
+	var arme := Etres.arme(j, s.items)
+	if arme.is_empty():
+		arme = s.arme_mains_nues()
+	var fonct: Dictionary = s.fonctionnalites.get(arme.functionality, {})
+	for lourde in [false, true]:
+		var ap: Dictionary = {}
+		var vus_min := 1 << 30
+		var vus_max := -1
+		var hors := 0
+		var n := 0
+		var au_min := 0
+		var au_max := 0
+		for k in 400:
+			cible.sante = cible.sante_max
+			cible.vivant = true
+			j.vigueur = j.vigueur_max
+			var crit0 := int(j.get("coups_critiques", 0))
+			var rate0 := int(j.get("coups_rates", 0))
+			if j.has("chaine"):   # la jauge Wu Xing monte à chaque coup : on compare coup par coup, jauge vide
+				j.chaine.segments.clear()
+			if cible.get("corps", {}).has("sante_parties"):
+				cible.corps.sante_parties.clear()
+			ap = s.apercu_arme(j, cible, lourde)
+			var pv0: int = int(cible.sante)
+			s._frapper_arme(j, cible, arme, fonct, lourde, 0)
+			# le critique multiplie, le raté annule, et un organe vital percé tue d'un coup (28 bis) : hors fourchette par nature
+			if int(j.get("coups_critiques", 0)) != crit0 or int(j.get("coups_rates", 0)) != rate0 or not cible.vivant:
+				continue
+			var d: int = pv0 - int(cible.sante)
+			n += 1
+			vus_min = mini(vus_min, d)
+			vus_max = maxi(vus_max, d)
+			if d < int(ap.min) or d > int(ap.max):
+				hors += 1
+			if d == int(ap.min):
+				au_min += 1
+			if d == int(ap.max):
+				au_max += 1
+		verifier(n > 200 and hors == 0, "%s : %d coups, aucun hors de la fourchette affichée avant lui (la dernière %d–%d ; vus %d–%d)" % ["lourde" if lourde else "normal", n, int(ap.min), int(ap.max), vus_min, vus_max])
+		# Un bout au moins doit tomber : une fourchette juste mais trop large mentirait aussi. Les deux ne sont pas exigés —
+		# avec un dé de Béni, trois dés au plancher, c'est une chance sur deux cent seize, et la compétence d'arme monte en
+		# chemin (chaque coup donne de l'XP), si bien que la fourchette du coup suivant n'est plus tout à fait la même.
+		verifier(au_min + au_max > 0, "%s : la fourchette n'est pas trop large — un de ses bouts tombe (%d fois le min, %d fois le max)" % ["lourde" if lourde else "normal", au_min, au_max])
+	# Huit cents coups ont empilé leurs signaux (journal, dégâts, critiques) sans que personne ne vide la file : un test
+	# suivant les recevrait comme les siens — le tutoriel du premier combat s'affichait deux fois. On vide la file ici.
+	EventBus._file.clear()
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

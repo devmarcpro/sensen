@@ -3430,9 +3430,10 @@ func _lignes_bulle(j: Dictionary, cible: Dictionary) -> Array[String]:
 		var a_zero: bool = j.vigueur <= 0
 		var vecteur := sim.vecteur_arme(arme)
 		var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
-		var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
-		var fl := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
-		res.append(tr("ui.bulle.arme").format({"min": f.x, "max": f.y, "lmin": fl.x, "lmax": fl.y}))
+		var ap: Dictionary = sim.apercu_arme(j, cible, false)   # la fourchette lit le calcul du coup lui-même (ordre de travail 47)
+		var apl: Dictionary = sim.apercu_arme(j, cible, true)
+		armure = float(ap.get("armure", armure))
+		res.append(tr("ui.bulle.arme").format({"min": int(ap.get("min", 0)), "max": int(ap.get("max", 0)), "lmin": int(apl.get("min", 0)), "lmax": int(apl.get("max", 0))}))
 		if not vecteur.is_empty():
 			var el_c: Dictionary = cible.get("elements", {}) if cible.get("elements") is Dictionary else {}
 			res.append(tr("ui.bulle.wuxing").format({"element": tr("element." + sim.wuxing.dominante(vecteur)), "cible": tr("element." + sim.wuxing.dominante(el_c)) if not el_c.is_empty() else "—", "dom": "%.2f" % wx.dom}))
@@ -3457,13 +3458,16 @@ func _preview(j: Dictionary, cible: Dictionary) -> Array[String]:
 	var a_zero: bool = j.vigueur <= 0
 	var vecteur := sim.vecteur_arme(arme)
 	var wx: Dictionary = sim._facteur_wuxing(j, cible, vecteur, sim.horloge_de(j).ticks)
-	var f := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, false, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
+	var ap: Dictionary = sim.apercu_arme(j, cible, false)   # la fourchette lit le calcul du coup lui-même (ordre de travail 47)
+	var f := Vector2i(int(ap.get("min", 0)), int(ap.get("max", 0)))
+	armure = float(ap.get("armure", armure))
 	var stat := int(j.stats_eff.force) / int(sim.regles.r.degats.stat_div)
 	res.append("  " + tr("ui.preview").format({"nom": tr(arme.name_key), "des": fonct.degats_des,
 		"dur": "%.2f" % (float(arme.durete_base) / float(sim.regles.r.degats.durete_reference) * float(arme.qualite)),
 		"stat": stat, "zone": zone.zone, "mult": zone.mult, "armure": "%.1f" % armure,
 		"min": f.x, "max": f.y, "ticks": sim.regles.ticks_attaque(fonct, false, arme)}))
-	var fl := sim.regles.fourchette_arme(j.stats_eff, arme, fonct, true, zone.mult, armure, a_zero, wx.total, j.competences_eff, vecteur)
+	var apl: Dictionary = sim.apercu_arme(j, cible, true)
+	var fl := Vector2i(int(apl.get("min", 0)), int(apl.get("max", 0)))
 	res.append("  " + tr("ui.preview.lourde").format({"lourde": "%d–%d" % [fl.x, fl.y], "ticks": sim.regles.ticks_attaque(fonct, true, arme)}))
 	if not vecteur.is_empty():
 		var contre: Array[String] = []

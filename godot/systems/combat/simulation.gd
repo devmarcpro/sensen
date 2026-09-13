@@ -1896,7 +1896,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 			mult_coup *= float(regles.r.talents.dissimulation.face_mult)
 		if not bool(e.get("sans_trace", false)):   # Sans trace / Silencieux : ce coup-là ne trahit pas son auteur
 			e.statuts = e.statuts.filter(func(s0: Dictionary) -> bool: return str(s0.id) != "dissimule")
-	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)) - (int(regles.r.nage.des_malus) if SimTerrain.dans_l_eau(self, e.pos) else 0), e.competences_eff, vecteur)   # Béni : +dés ; dans l'eau : −dés
+	var d := regles.degats_arme(e.stats_eff, arme, fonct, des, lourde, a_zero, _des_bonus_arme(e, ax), e.competences_eff, vecteur)   # Béni : +dés ; dans l'eau : −dés
 	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
 	var dom := wuxing.dominante(vecteur)
 	var plat := int(e.get("degats_element", {}).get(dom, 0))
@@ -1906,14 +1906,7 @@ func _frapper_arme(e: Dictionary, cible: Dictionary, arme: Dictionary, fonct: Di
 	# elasticite / 250)). La note le decidait depuis longtemps et le code ne l'avait jamais lue : sur les
 	# treize stats de matiere, quatre ne servaient a rien. Un arc d'if — elastique — vaut desormais
 	# nettement plus qu'un arc de pierre, ce que tout le monde attend d'un arc.
-	var mult_elastique := 1.0
-	if est_projectile(fonct) or est_jet(fonct):
-		var sm: Dictionary = regles.r.get("stats_materiau", {})
-		# La corde d'abord : c'est elle qui se tend. A defaut — une fronde de fortune, une arme sans
-		# piece dediee — on retombe sur la moyenne de l'objet.
-		var elas := float(arme.get("elasticite_corde", arme.get("stats", {}).get("elasticite", 0.0)))
-		mult_elastique = float(sm.get("arc_elasticite_base", 0.8)) + elas / float(sm.get("arc_elasticite_div", 250.0))
-	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * mult_elastique * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
+	var res := _resoudre_coup(e, cible, (d.bruts + float(plat)) * wx.total * float(ax.mult) * mult_coup * _mult_elastique(arme, fonct) * Etres.mult_statuts(e, "degats", statuts_defs), fonct.type_degats, lourde, vecteur, float(ax.ignore_armure))
 	res.merge(wx)
 	res["competence"] = str(fonct.get("combat_skill", ""))
 	var cle := &"journal.attaque_lourde" if lourde else &"journal.attaque"
@@ -1936,7 +1929,8 @@ func _portee_effective(e: Dictionary, arme: Dictionary, fonct: Dictionary) -> Ve
 
 ## Ce que les affixes de l'arme changent AVANT le jet : {vecteur, des, mult, ignore_armure}.
 ## Les compteurs rythmiques avancent ici (une attaque = un cran, jamais par cible).
-func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> Dictionary:
+## `apercu` : la prévisualisation lit le PROCHAIN coup sans l'avancer — aucun compteur de cadence ni état ne bouge.
+func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary, apercu: bool = false) -> Dictionary:
 	var r := {"vecteur": _vecteur_arme_de(e, arme), "des": 0, "mult": 1.0, "ignore_armure": 0.0, "plat": 0}
 	# Bonus armés par les coups précédents (riposte à cadence, combo Wu Xing) — lus sans être consommés
 	# (la prévisualisation passe ici aussi) ; _frapper_arme les vide après le coup qui les dépense.
@@ -1955,13 +1949,17 @@ func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> D
 		var p: Dictionary = ax.params
 		match str(d.effet.type):
 			"cadence_element", "cadence_des", "cadence_percant", "cadence_statut":
-				ax.compteur = int(ax.compteur) + 1
-				if int(ax.compteur) % int(p.n) == 0:
+				var c_cad := int(ax.compteur) + 1
+				if not apercu:
+					ax.compteur = c_cad
+				if c_cad % int(p.n) == 0:
 					match str(d.effet.type):
 						"cadence_element": r.vecteur = {str(p.element): 1.0}
 						"cadence_des": r.des += int(p.des)
 						"cadence_percant": r.ignore_armure = maxf(r.ignore_armure, float(p.pct) / 100.0)
-						"cadence_statut": ax.etat["declenche"] = true
+						"cadence_statut":
+							if not apercu:
+								ax.etat["declenche"] = true
 			"cond_pv":
 				if float(e.sante) / float(e.sante_max) * 100.0 < float(p.pct_pv):
 					r.des += int(p.des)
@@ -1979,7 +1977,8 @@ func _affixes_offensifs(e: Dictionary, arme: Dictionary, cible: Dictionary) -> D
 				var courant: String = str(ax.etat.get("element", wuxing.dominante(r.vecteur)))
 				if not courant.is_empty():
 					r.vecteur = {courant: 1.0}
-					ax.etat["element"] = str(wuxing.w.engendre[courant])
+					if not apercu:
+						ax.etat["element"] = str(wuxing.w.engendre[courant])
 			"wuxing_ajout":
 				r.vecteur = _ajouter_element(r.vecteur, str(p.element), float(p.pct) / 100.0)
 			"wuxing_purification":
@@ -2181,10 +2180,10 @@ func _poser_segment(e: Dictionary, v_att: Dictionary, tick: int, origine: String
 			"position": p.position, "capacite": e.chaine.capacite, "transition": "%.2f" % p.transition}])
 
 
-## Un coup contre une cible : zone par dénivelé, garde (frontale / bouclier), armure de zone.
-func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant, ignore_armure: float = 0.0) -> Dictionary:
-	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
-	var piece := Etres.piece_zone(cible, zone.zone, items)
+## L'ARMURE QU'UN COUP RENCONTRE sur une zone — la pièce, les statuts, les affixes, la carapace, la garde de l'arme.
+## Lue par le coup ET par sa prévisualisation (ordre de travail 47) : une seule formule, pour qu'elles ne divergent plus.
+func _armure_du_coup(cible: Dictionary, zone: String, type_degats: String, ignore_armure: float) -> float:
+	var piece := Etres.piece_zone(cible, zone, items)
 	var armure := (regles.armure_piece(piece, type_degats) + Etres.add_statuts(cible, "armure", statuts_defs)) \
 		* float(Etres.mult_statuts(cible, "armure", statuts_defs))   # Rupture : −50 % de réduction de zone
 	for ax in Etres.affixes_equipes(cible, items, affixes_defs, "meca_armure"):
@@ -2195,7 +2194,64 @@ func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degat
 	# endroit (designer 2026-09-03, option C — chaque troisieme piece a un effet mecanique propre).
 	for slot_g in ["main_principale", "main_secondaire"]:
 		armure += float(items.get(cible.get("equipement", {}).get(slot_g, ""), {}).get("garde_armure", 0.0))
-	armure *= 1.0 - ignore_armure
+	return armure * (1.0 - ignore_armure)
+
+
+## Les dés en plus d'un coup d'arme : affixes, statuts (Béni), moins la nage.
+func _des_bonus_arme(e: Dictionary, ax: Dictionary) -> int:
+	return int(ax.des) + int(Etres.add_statuts(e, "des", statuts_defs)) - (int(regles.r.nage.des_malus) if SimTerrain.dans_l_eau(self, e.pos) else 0)
+
+
+## L'ELASTICITE fait la puissance d'un arc (« Application des stats de materiau » : degats x (0,8 + elasticite / 250)).
+## La corde d'abord : c'est elle qui se tend. A defaut — une fronde de fortune — la moyenne de l'objet.
+func _mult_elastique(arme: Dictionary, fonct: Dictionary) -> float:
+	if not (est_projectile(fonct) or est_jet(fonct)):
+		return 1.0
+	var sm: Dictionary = regles.r.get("stats_materiau", {})
+	var elas := float(arme.get("elasticite_corde", arme.get("stats", {}).get("elasticite", 0.0)))
+	return float(sm.get("arc_elasticite_base", 0.8)) + elas / float(sm.get("arc_elasticite_div", 250.0))
+
+
+## CE QUE LE PROCHAIN COUP D'ARME FERA, hors critique, hors garde (ordre de travail 47). La fourchette affichée au joueur
+## ne disait pas la vérité : elle recopiait le calcul à la main, et le coup avait grandi sans elle. Elle lit maintenant
+## les mêmes morceaux que `_frapper_arme` — dés, affixes (sans avancer leurs cadences), statuts, huile, élasticité,
+## talents, Wu Xing, armure.
+func apercu_arme(e: Dictionary, cible: Dictionary, lourde: bool) -> Dictionary:
+	var arme := Etres.arme(e, items)
+	if arme.is_empty():
+		arme = arme_mains_nues()
+	var fonct: Dictionary = fonctionnalites.get(arme.get("functionality", ""), {})
+	if fonct.is_empty():
+		return {}
+	var a_zero: bool = e.vigueur <= 0
+	var ax := _affixes_offensifs(e, arme, cible, true)
+	var vecteur: Dictionary = ax.vecteur
+	var mult_coup := 1.0
+	if bool(arme.get("fantome", false)):
+		mult_coup *= float(regles.r.armes_fantomes.degats_mult)
+	if SimTalents.a_talent(self, e, "jauge_de_sang"):
+		mult_coup *= 1.0 + (float(regles.r.talents.jauge_de_sang.mult_max) - 1.0) * float(e.get("sang", 0)) / float(regles.r.talents.jauge_de_sang.max)
+	if SimTalents.a_talent(self, e, "dissimulation") and Regles.direction_relative(cible.orientation, e.pos - cible.pos) == "front":
+		mult_coup *= float(regles.r.talents.dissimulation.face_mult)
+	var b := regles.bruts_arme_bornes(e.stats_eff, arme, fonct, lourde, a_zero, _des_bonus_arme(e, ax), e.competences_eff, vecteur)
+	var wx := _facteur_wuxing(e, cible, vecteur, tick_de(e))
+	var p0 := int(e.get("degats_element", {}).get(wuxing.dominante(vecteur), 0))
+	var plat := Vector2i(p0, p0)
+	for el_h in e.get("degats_element_bonus", {}).keys():
+		plat += Des.fourchette(str(e.degats_element_bonus[el_h]))
+	var k := float(wx.total) * float(ax.mult) * mult_coup * _mult_elastique(arme, fonct) * Etres.mult_statuts(e, "degats", statuts_defs)
+	var zone: Dictionary = regles.zone_de_coup(grille.h(e.pos), grille.h(cible.pos))
+	var armure := _armure_du_coup(cible, str(zone.zone), str(fonct.type_degats), float(ax.ignore_armure))
+	return {"min": regles.degats_finaux((b.x + float(plat.x)) * k, zone.mult, armure, false),
+		"max": regles.degats_finaux((b.y + float(plat.y)) * k, zone.mult, armure, false),
+		"zone": zone, "armure": armure, "wx": wx, "vecteur": vecteur}
+
+
+## Un coup contre une cible : zone par dénivelé, garde (frontale / bouclier), armure de zone.
+func _resoudre_coup(att: Dictionary, cible: Dictionary, bruts: float, type_degats: String, lourde: bool, element: Variant, ignore_armure: float = 0.0) -> Dictionary:
+	var zone: Dictionary = regles.zone_de_coup(grille.h(att.pos), grille.h(cible.pos))
+	var piece := Etres.piece_zone(cible, zone.zone, items)   # la construction touchée gagne ce qu'elle épargne
+	var armure := _armure_du_coup(cible, str(zone.zone), type_degats, ignore_armure)
 	var direction := Regles.direction_relative(cible.orientation, att.pos - cible.pos)
 	var bouclier := Etres.a_bouclier(cible, items)
 	var tient: bool = cible.garde and regles.garde_tient(direction, bouclier, lourde) and not Etres.bloque_statuts(cible, "garde", statuts_defs)
