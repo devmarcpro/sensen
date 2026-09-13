@@ -344,6 +344,7 @@ static func _acheter_monture(sim: Simulation, e: Dictionary, id: String, tick: i
 static func _peupler_fenetre(sim: Simulation) -> void:
 	if sim.monde == null:
 		return
+	Lieux.peupler(sim)   # les hameaux, les camps, les sanctuaires ont leurs habitants (39 ter, pas D)
 	var cfg: Dictionary = GameData.config("villes")
 	for dy in range(-sim.monde.rayon, sim.monde.rayon + 1):
 		for dx in range(-sim.monde.rayon, sim.monde.rayon + 1):

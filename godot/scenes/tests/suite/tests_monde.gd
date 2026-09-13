@@ -589,3 +589,32 @@ func test_voyage_fallout() -> void:
 	cfg["chance_base"] = chance0
 	s.trajet = {}
 	s.monde.fermer()
+
+
+## LES LIEUX SONT HABITÉS (39 ter, pas D — 2026-09-14) : un lieu qui entre dans la fenêtre reçoit ses habitants une fois,
+## logés dans les lits de son plan.
+func test_lieux_habites() -> void:
+	var s := Simulation.new(4259)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var tc := int(surf.planete.taille_cellule)
+	var sect0 := Lieux.secteur_de_tuile(j.pos, tc)
+	var hameau := {}
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			for l in surf.lieux().secteur(sect0 + Vector2i(dx, dy)):
+				if hameau.is_empty() and l.type == "hameau":
+					hameau = l
+	verifier(not hameau.is_empty(), "un hameau près du camp")
+	if hameau.is_empty():
+		s.monde.fermer()
+		return
+	s.voyager(j, Vector2i(floori(float(hameau.centre.x) / tc), floori(float(hameau.centre.y) / tc)))
+	var gens := s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("lieu", "")) == str(hameau.id))
+	verifier(gens.size() >= 2, "le hameau a ses habitants (%d)" % gens.size())
+	verifier(gens.any(func(x: Dictionary) -> bool: return x.has("lit")), "et au moins l'un d'eux dort dans un lit du plan")
+	var n := gens.size()
+	SimVilles._peupler_fenetre(s)
+	verifier(s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("lieu", "")) == str(hameau.id)).size() == n, "repasser ne les double pas")
+	s.monde.fermer()

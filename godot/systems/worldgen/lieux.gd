@@ -359,3 +359,57 @@ func estamper(e: Dictionary, cell: Vector2i) -> void:
 					if not e.has("entrees_lieux"):
 						e["entrees_lieux"] = {}
 					e.entrees_lieux[i] = str(v[1])
+
+
+# ---------------------------------------------------------------- les habitants (39 ter, pas D — 2026-09-14)
+
+## Qui vit dans ce lieu : la liste `habitants` de son sous-type, sinon de son type.
+static func habitants_de(lieu: Dictionary) -> Array:
+	var h: Dictionary = _cfg().get("habitants", {})
+	return h.get(str(lieu.type) + "/" + str(lieu.sous_type), h.get(str(lieu.type), []))
+
+
+## PEUPLER LES LIEUX DE LA FENÊTRE : une fois par lieu, quand son centre y entre. Les lits du plan logent les habitants,
+## la place est le centre du lieu, le poste une tuile libre autour.
+static func peupler(sim: Simulation) -> void:
+	if sim.monde == null or sim.grille == null:
+		return
+	var rect := Rect2i(sim.grille.origine, Vector2i(sim.grille.largeur, sim.grille.hauteur_grille))
+	var reg: Lieux = sim.monde.surface.lieux()
+	for lieu in reg.dans(rect):
+		var id := str(lieu.id)
+		if not rect.has_point(lieu.centre):
+			continue
+		sim.monde.lieux_connus[id] = true   # passé dans les parages, on sait qu'il est là : la carte le montre
+		if sim.monde.peuplees.has(id):
+			continue
+		sim.monde.peuplees[id] = true
+		var liste := habitants_de(lieu)
+		if liste.is_empty():
+			continue
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([int(lieu.graine), "habitants"])
+		var pl := reg.plan(lieu)
+		var lits: Array = []
+		for q: Vector2i in pl.keys():
+			if str(pl[q][0]) == "meuble" and str(pl[q][1]).begins_with("lit"):
+				lits.append(q)
+		lits.sort()
+		var k_lit := 0
+		for spec in liste:
+			if not GameData.catalogues.creatures.has(str(spec[0])):
+				continue
+			for n in rng.randi_range(int(spec[1]), int(spec[2])):
+				var pos := sim._tuile_libre_autour(lieu.centre)
+				if not sim.grille.dans(pos):
+					continue
+				var x := SimObjets.ajouter(sim, str(spec[0]), pos, "ia")
+				if x.is_empty():
+					continue
+				x["lieu"] = id
+				x["place"] = lieu.centre
+				x["poste"] = sim._tuile_libre_autour(lieu.centre + Vector2i(rng.randi_range(-4, 4), rng.randi_range(-4, 4)))
+				if k_lit < lits.size():
+					x["lit"] = lits[k_lit]
+					k_lit += 1
+				x.ancre = x.poste if sim.grille.dans(x.poste) else pos

@@ -151,6 +151,7 @@ func _ready() -> void:
 	_lancer("test_estampage_des_lieux")
 	_lancer("test_donjon_batiment")
 	_lancer("test_voyage_fallout")
+	_lancer("test_lieux_habites")
 	_lancer("test_carte_et_voyage")
 	_lancer("test_corruption")
 	_lancer("test_cycle_et_meteo")

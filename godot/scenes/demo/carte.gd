@@ -500,6 +500,34 @@ func _dessiner() -> void:
 		dessin.draw_rect(r.grow(-2), Color(1.0, 0.95, 0.6), false, 2.0)
 		if case_px >= 6.0:
 			dessin.draw_string(ThemeDB.fallback_font, r.position + Vector2(-10.0, -3.0), str(cap.nom), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(1.0, 0.95, 0.7))
+	# LES LIEUX CONNUS (39 ter) : une pastille par lieu découvert, sa couleur dit son type — la carte se remplit de ce qu'on a
+	# croisé en chemin, pas de ce que la graine a posé.
+	var tc_c := int(sim.monde.taille)
+	var couleurs_lieux := {"ruine": Color(0.7, 0.66, 0.6), "donjon_batiment": Color(0.85, 0.3, 0.3), "hameau": Color(0.95, 0.8, 0.45), "camp": Color(0.9, 0.5, 0.2), "sanctuaire": Color(0.6, 0.8, 1.0)}
+	for id_l in sim.monde.lieux_connus.keys():
+		var l: Dictionary = surf.lieux().par_id(str(id_l))
+		if l.is_empty():
+			continue
+		var cl := Vector2i(floori(float(l.centre.x) / tc_c), floori(float(l.centre.y) / tc_c))
+		if not vis.has_point(cl):
+			continue
+		var fin := Vector2(float(posmod(l.centre.x, tc_c)), float(posmod(l.centre.y, tc_c))) / float(tc_c)
+		var pc := _ecran(cl) + fin * case_px
+		var rayon := clampf(case_px * 0.18, 2.0, 6.0)
+		dessin.draw_circle(pc, rayon, couleurs_lieux.get(str(l.type), Color.WHITE))
+		dessin.draw_arc(pc, rayon, 0.0, TAU, 12, Color(0.05, 0.05, 0.05), 1.0)
+	# LE TRAJET EN COURS (39 ter, pas E) : la route qui reste, en pointillés, et où l'on en est.
+	if not sim.trajet.is_empty():
+		var chemin: Array = sim.trajet.chemin
+		var i0 := int(sim.trajet.i)
+		var prec := _ecran(cj) + Vector2(case_px * 0.5, case_px * 0.5) if i0 == 0 else _ecran(chemin[i0 - 1]) + Vector2(case_px * 0.5, case_px * 0.5)
+		if i0 > 0:
+			dessin.draw_circle(prec, clampf(case_px * 0.3, 3.0, 8.0), Color(1.0, 0.9, 0.3))
+		for k in range(i0, chemin.size()):
+			var suiv := _ecran(chemin[k]) + Vector2(case_px * 0.5, case_px * 0.5)
+			if k % 2 == 0:
+				dessin.draw_line(prec, suiv, Color(1.0, 0.9, 0.3, 0.8), 2.0)
+			prec = suiv
 	if vis.has_point(cj):
 		var r := Rect2(_ecran(cj), Vector2(case_px - 1.0, case_px - 1.0))
 		dessin.draw_rect(r.grow(-3), Color(0.3, 0.8, 1.0), false, 2.0)
