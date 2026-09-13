@@ -1192,6 +1192,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			SimMaladies.tiquer(self, tick)   # la contagion, les symptômes, les guérisons (28 quater)
 			SimMaladies.tiquer_drogues(self, tick)   # le manque (28 quater)
 			SimMaladies.tiquer_mutations(self, tick)   # la corruption fait muter (28 quater)
+			SimVilles.tiquer_caracteres(self, tick)   # on boit et l'on se bat dans les villes qui le permettent (29 quater)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
@@ -5033,6 +5034,7 @@ func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector
 	var activite := str(_plage_routine(profil, fposmod(SimTerrain.heure(self, tick) - SimPnj.trait_somme(self, e, "horaires_decalage"), 24.0)).activite)   # le lève-tôt vit deux heures en avance (traits)
 	if activite == "poste" and bool(profil.get("fetes", false)) and e.has("place") and not Calendrier.fetes_du_jour(Calendrier.date(int((horloge_monde.ticks if tick < 0 else tick) / maxi(1, int(SimTerrain._cycle(self).ticks_par_jour)))), str(e.get("social", {}).get("culture", ""))).is_empty():
 		activite = "social"   # un jour de fête, la place toute la journée (Calendrier)
+	activite = SimVilles.activite_selon_caractere(self, e, activite, tick)   # le caractère de la ville repondère la routine (29 quater)
 	match activite:
 		"lit":
 			return e.get("lit", e.ancre)

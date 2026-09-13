@@ -232,6 +232,53 @@ func test_sous_factions() -> void:
 	races.erase("homme_chien_test")
 
 
+## LES VILLES SONT VRAIMENT VIVANTES (ordre de travail 29 quater, 2026-09-13) : un caractère déduit, une routine
+## repondérée, des actes — boire, se battre — qui passent par les règles déjà écrites.
+func test_caractere_des_villes() -> void:
+	var s := Simulation.new(4245)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var chaos := s.creer_territoire("Chaosville", "", 0)
+	chaos["agglomeration"] = {"palier": "village", "population": 20, "centre": s.monde.cellule_de(j.pos), "culture": "", "gouvernance": "anarchie", "vocation": "commune"}
+	var calme := s.creer_territoire("Calmeville", "", 0)
+	calme["agglomeration"] = {"palier": "village", "population": 20, "centre": s.monde.cellule_de(j.pos), "culture": "", "gouvernance": "monarchie_hereditaire", "vocation": "commune"}
+	var mine := s.creer_territoire("Minebourg", "", 0)
+	mine["agglomeration"] = {"palier": "village", "population": 20, "centre": s.monde.cellule_de(j.pos), "culture": "", "gouvernance": "monarchie_hereditaire", "vocation": "miniere"}
+	verifier(SimVilles.caractere_de(s, "Chaosville") == "chaotique" and SimVilles.caractere_de(s, "Minebourg") == "laborieux" and SimVilles.caractere_de(s, "Calmeville") in ["paisible", "chaotique"], "le caractère se déduit : l'anarchie est chaotique, la mine laborieuse (%s, %s, %s)" % [SimVilles.caractere_de(s, "Chaosville"), SimVilles.caractere_de(s, "Minebourg"), SimVilles.caractere_de(s, "Calmeville")])
+	# LA ROUTINE REPONDÉRÉE : sur cent heures de travail, le chaotique en passe une bonne part sur la place.
+	var fou := {"id": "fou_test", "village": "Chaosville"}
+	var sage := {"id": "sage_test", "village": "Minebourg"}
+	var heure := int(GameData.config("planete").cycle.ticks_par_jour) / 24
+	var place_fou := 0
+	var poste_sage := 0
+	for k in 100:
+		if SimVilles.activite_selon_caractere(s, fou, "poste", k * heure) == "social":
+			place_fou += 1
+		if SimVilles.activite_selon_caractere(s, sage, "social", k * heure) == "poste":
+			poste_sage += 1
+	verifier(place_fou > 25 and place_fou < 75 and poste_sage > 25, "dans une ville chaotique, une heure de travail sur deux se passe sur la place (%d/100) ; dans une ville laborieuse, une heure de loisir sur deux au travail (%d/100)" % [place_fou, poste_sage])
+	# LES ACTES : deux habitants sur la place d'une ville chaotique finissent par boire et se battre — sans jamais se tuer.
+	var a := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var b := s.ajouter("villageois", s._tuile_libre_autour(a.pos), "ia")
+	for x in [a, b]:
+		x["village"] = "Chaosville"
+		x["place"] = x.pos
+		x.sante = x.sante_max
+	var pv0 := int(a.sante) + int(b.sante)
+	var ivres := false
+	for k in 200:
+		SimVilles.tiquer_caracteres(s, (1000 + k) * heure)
+		a.sante = maxi(int(a.sante), 5)
+		b.sante = maxi(int(b.sante), 5)
+		for x in [a, b]:
+			if x.statuts.any(func(st: Dictionary) -> bool: return str(st.id) == "ivresse"):
+				ivres = true
+	verifier(ivres and a.vivant and b.vivant, "sur la place de Chaosville, on boit — et personne n'en meurt")
+	verifier(int(a.get("accoutumances", {}).get("alcool", {}).get("niveau", 0.0)) > 0 or int(b.get("accoutumances", {}).get("alcool", {}).get("niveau", 0.0)) > 0, "et l'habitude de l'alcool vient avec")
+	EventBus._file.clear()
+	s.monde.fermer()
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)

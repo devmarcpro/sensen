@@ -622,7 +622,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     homme-chat fâchera les chats plus fort que les hommes-bêtes en général, et un village d'hommes-chiens s'en
     souviendra autrement qu'un village mêlé.
 
-29 quater. **LES VILLES SONT VRAIMENT VIVANTES** *(designer 2026-09-10 : « les villes sont vraiment vivantes, par
+~~29 quater. **LES VILLES SONT VRAIMENT VIVANTES**~~ — **FAIT le 2026-09-13** (`villes.caracteres`) : un caractère DÉDUIT de ce qu'est la ville (l'anarchie ou une forte corruption la rendent chaotique, la théocratie dévote, la mine, le grenier et la forêt laborieuse), qui repondère la routine (une heure de travail sur deux sur la place d'une ville chaotique) et débloque deux actes sur la place — boire, avec l'habitude de l'alcool, et la rixe, qui passe par le chemin ordinaire des coups donc par le témoin et les factions. *Le registre « cyberjunkie » reste une question au designer.* — *(designer 2026-09-10 : « les villes sont vraiment vivantes, par
     exemple les villes cyberjunkie sont en chaos constant, les PNJ se jettent des bouteilles d'alcool, se battent,
     se droguent »).* **Noté, pas codé.**
     **CE N'EST PAS UNE IA NOUVELLE, ET C'EST CE QUI LA REND ABORDABLE.** Un PNJ suit déjà une routine à trois

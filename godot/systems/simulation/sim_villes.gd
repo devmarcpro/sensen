@@ -1318,3 +1318,85 @@ static func _migrer(sim: Simulation, x: Dictionary, vers: String) -> void:
 		sim.monde.dormants[centre] = []
 	x["dormant_depuis"] = sim.horloge_monde.ticks
 	sim.monde.dormants[centre].append(x)
+
+
+# ---------------------------------------------------------------- le caractère d'une ville (29 quater, 2026-09-13)
+
+## LE CARACTÈRE D'UNE VILLE, déduit de ce qu'elle est : sa gouvernance, sa corruption, sa vocation. Rien ne se stocke.
+static func caractere_de(sim: Simulation, village: String) -> String:
+	var cfg: Dictionary = GameData.config("villes").get("caracteres", {})
+	if cfg.is_empty() or village.is_empty() or not sim.territoires.has(village):
+		return str(cfg.get("defaut", "paisible"))
+	var ag: Dictionary = sim.territoires[village].get("agglomeration", {})
+	if ag.is_empty():
+		return str(cfg.get("defaut", "paisible"))
+	var centre: Vector2i = ag.get("centre", Vector2i.ZERO)
+	var corruption := sim.monde.corruption_de(centre) if sim.monde != null else 0.0
+	var vocation := str(ag.get("vocation", ""))
+	if vocation.is_empty() and sim.monde != null:
+		vocation = str(sim.monde.surface.agglomeration_de(centre).get("vocation", ""))
+	for r in cfg.get("regles", []):
+		var si: Dictionary = r.get("si", {})
+		var ok := true
+		if si.has("gouvernance") and not (str(ag.get("gouvernance", "")) in si.gouvernance):
+			ok = false
+		if si.has("corruption_min") and corruption < float(si.corruption_min):
+			ok = false
+		if si.has("vocation") and not (vocation in si.vocation):
+			ok = false
+		if ok:
+			return str(r.get("caractere", cfg.get("defaut", "paisible")))
+	return str(cfg.get("defaut", "paisible"))
+
+
+## La routine repondérée par le caractère : une heure de travail passée sur la place, ou l'inverse — tirée par (être, heure).
+static func activite_selon_caractere(sim: Simulation, e: Dictionary, activite: String, tick: int) -> String:
+	if activite != "poste" and activite != "social":
+		return activite
+	var car: Dictionary = GameData.config("villes").get("caracteres", {}).get("liste", {}).get(caractere_de(sim, str(e.get("village", ""))), {})
+	var p := float(car.get("social_au_lieu_du_poste", 0.0)) if activite == "poste" else float(car.get("poste_au_lieu_du_social", 0.0))
+	if p <= 0.0:
+		return activite
+	var heure := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)) / 24)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, str(e.id), "caractere", (sim.horloge_monde.ticks if tick < 0 else tick) / heure])
+	if rng.randf() < p:
+		return "social" if activite == "poste" else "poste"
+	return activite
+
+
+## LES ACTES D'UNE VILLE, une heure : ceux qui traînent sur la place d'une ville qui le permet boivent, et en viennent
+## aux mains. Une rixe passe par le chemin ordinaire des coups — le témoin la voit, les factions la jugent.
+static func tiquer_caracteres(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("villes").get("caracteres", {})
+	if cfg.is_empty() or sim.lieu != "camp":
+		return
+	var heure := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)) / 24)
+	var civils: Array = []
+	for x in sim.vivants():
+		if x.camp == "civil" and not str(x.get("village", "")).is_empty() and x.controle == "ia":
+			civils.append(x)
+	var par_village := {}
+	for x in civils:
+		var v := str(x.village)
+		if not par_village.has(v):
+			par_village[v] = caractere_de(sim, v)
+	for x in civils:
+		var car: Dictionary = cfg.get("liste", {}).get(str(par_village[str(x.village)]), {})
+		if car.get("rixe_par_heure", 0.0) == 0.0 and car.get("boire_par_heure", 0.0) == 0.0:
+			continue
+		if Grille.distance(x.pos, sim._coin_de_place(x)) > int(GameData.config("villes").get("rayon_place", 6)) + 2:
+			continue   # on boit et on se bat sur la place, pas au poste
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([sim.graine, str(x.id), "actes", tick / heure])
+		if rng.randf() < float(car.get("boire_par_heure", 0.0)):
+			var dose := {"drogue": "alcool", "statut_ticks": 500000}
+			sim.appliquer_statut(x, "ivresse", SimMaladies.prendre(sim, x, dose, tick), x.id)
+		if rng.randf() < float(car.get("rixe_par_heure", 0.0)):
+			for y in civils:
+				if y.id != x.id and y.vivant and Grille.distance(x.pos, y.pos) <= 2:
+					var degats := mini(sim.des.jet(str(car.get("rixe_degats", "1d3"))), int(y.sante) - 1)   # une rixe blesse, elle ne tue pas
+					if degats > 0:
+						sim._appliquer_degats(y, degats, str(x.id), {"type": "contondant", "rixe": true})
+						EventBus.emettre(&"journal", [&"journal.rixe", {"a": x.name_key, "b": y.name_key}])
+					break
