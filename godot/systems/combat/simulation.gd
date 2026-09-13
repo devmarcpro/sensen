@@ -2467,6 +2467,28 @@ func _tuile_libre_autour(pos: Vector2i) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
+## UNE TUILE LIBRE À CÔTÉ, PAS DERRIÈRE (designer 2026-09-13 : « il y a un PNJ derrière le personnage du joueur »).
+## `_tuile_libre_autour` balaie son anneau depuis le coin nord-ouest — la tuile que l'isométrie dessine juste DERRIÈRE, et
+## qu'un corps haut de deux tuiles recouvre. Pour poser quelqu'un qu'on doit voir à côté de soi, on préfère la même
+## profondeur (dx + dy proche de 0, donc côte à côte à l'écran), à deux pas, la droite de l'écran d'abord.
+func _tuile_libre_a_cote(pos: Vector2i) -> Vector2i:
+	for r in range(2, 5):
+		var anneau: Array[Vector2i] = []
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) == r:
+					anneau.append(Vector2i(dx, dy))
+		anneau.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+			if absi(a.x + a.y) != absi(b.x + b.y):
+				return absi(a.x + a.y) < absi(b.x + b.y)
+			return (a.x - a.y) > (b.x - b.y))
+		for d in anneau:
+			var t := pos + d
+			if grille.dans(t) and not grille.bloque_passage(t) and grille.occupant(t).is_empty():
+				return t
+	return _tuile_libre_autour(pos)
+
+
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
 	if invincible and cible.controle == "joueur":
 		return   # menu de triche

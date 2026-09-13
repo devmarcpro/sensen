@@ -185,7 +185,7 @@ static func charger_camp(sim: Simulation, joueur: Dictionary = {}, cellule_chois
 	sim.camp_sauve = {"entree": entree, "biome": e.biome, "cellule": depart}
 	SimVilles._peupler_fenetre(sim)
 	for pnj_id in cfg.get("pnj_depart", []):   # les PNJ posés au camp à la première venue (camp.pnj_depart)
-		var ou_pnj := sim._tuile_libre_autour(entree)
+		var ou_pnj := sim._tuile_libre_a_cote(entree)   # à côté du joueur, pas dans son dos (2026-09-13)
 		if sim.grille.dans(ou_pnj):
 			SimObjets.ajouter(sim, str(pnj_id), ou_pnj, "ia")
 	for id in ordre_sauves:
