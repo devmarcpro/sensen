@@ -229,6 +229,7 @@ func _ready() -> void:
 	_lancer("test_climat_vivant")
 	_lancer("test_eau_qui_change_d_etat")
 	_lancer("test_vent_pluie_murs")
+	_lancer("test_pnj_s_abritent")
 	_lancer("test_odeur")
 	_lancer("test_support")
 	_lancer("test_support_etages")

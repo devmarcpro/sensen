@@ -316,3 +316,19 @@ static func tiquer(sim: Simulation, _tick: int) -> void:
 		for idx in sim.grille.modifies.keys():
 			sim.support_a_verifier[int(idx)] = true
 	sim.climat_detrempe = det
+
+
+## LES PNJ S'ABRITENT (2026-09-14) : la routine d'un habitant tient compte du temps qu'il fait. Sous la pluie, la place se
+## vide ; sous la tempête, les ateliers aussi — la garde tient. Le PNJ va « au lit », c'est-à-dire chez lui.
+static func activite_selon_temps(sim: Simulation, e: Dictionary, activite: String, tick: int) -> String:
+	if sim.lieu != "camp" or sim.monde == null or activite == "lit" or not e.has("lit"):
+		return activite
+	var c: Dictionary = _cfg().get("abri_pnj", {})
+	if str(e.get("fonction", "")) in c.get("sauf_fonctions", []) or e.get("ai_profile", "") == "garde":
+		return activite
+	var etat := SimTerrain.meteo(sim, sim.monde.cellule_de(e.pos), tick)
+	if activite == "social" and etat in c.get("fuit_social", []):
+		return "lit"
+	if activite == "poste" and etat in c.get("fuit_poste", []):
+		return "lit"
+	return activite

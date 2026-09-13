@@ -5069,6 +5069,7 @@ func _cible_routine(e: Dictionary, profil: Dictionary, tick: int = -1) -> Vector
 	if activite == "poste" and bool(profil.get("fetes", false)) and e.has("place") and not Calendrier.fetes_du_jour(Calendrier.date(int((horloge_monde.ticks if tick < 0 else tick) / maxi(1, int(SimTerrain._cycle(self).ticks_par_jour)))), str(e.get("social", {}).get("culture", ""))).is_empty():
 		activite = "social"   # un jour de fête, la place toute la journée (Calendrier)
 	activite = SimVilles.activite_selon_caractere(self, e, activite, tick)   # le caractère de la ville repondère la routine (29 quater)
+	activite = SimClimat.activite_selon_temps(self, e, activite, tick)   # sous la pluie on rentre, sous la tempête on ferme boutique (22 ter)
 	if activite == "poste" and str(e.get("fonction", "")) == "oisif" and e.has("champ_saisonnier") and SimVilles.en_moisson(self, tick):
 		return Vector2i(e.champ_saisonnier)   # le saisonnier : aux champs pendant la moisson (l'ancienne file, 2026-09-13)
 	match activite:

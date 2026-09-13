@@ -249,6 +249,7 @@ func test_village_vivant() -> void:
 	var s := Simulation.new(4242)
 	s.planete_options = _planete_test()
 	s.charger_camp()
+	s.meteo_force = "clair"   # la routine juge la routine : sous la pluie, depuis le 2026-09-14, l'habitant rentre chez lui
 	var surf: Surface = s.monde.surface
 	var camp_r: Vector2i = s.monde.cellule_camp
 	var cell_v := Vector2i(-1, -1)

@@ -1270,6 +1270,30 @@ func test_vent_pluie_murs() -> void:
 	s.monde.fermer()
 
 
+## LES PNJ S'ABRITENT (22 ter — 2026-09-14) : sous la pluie la place se vide, sous la tempête les ateliers aussi, la garde tient.
+func test_pnj_s_abritent() -> void:
+	var s := Simulation.new(4258)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var v := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	v["lit"] = j.pos + Vector2i(4, 4)
+	v["place"] = j.pos + Vector2i(-4, 0)
+	v["poste"] = j.pos + Vector2i(0, -4)
+	var social := {"horaires": {"0-24": "social"}}
+	var poste := {"horaires": {"0-24": "poste"}}
+	s.meteo_force = "clair"
+	var dehors := s._cible_routine(v, social)
+	s.meteo_force = "pluie"
+	verifier(dehors != v.lit and s._cible_routine(v, social) == v.lit, "sous la pluie, l'habitant quitte la place et rentre chez lui")
+	verifier(s._cible_routine(v, poste) == v.poste, "mais une averse ne ferme pas l'atelier")
+	s.meteo_force = "tempete"
+	verifier(s._cible_routine(v, poste) == v.lit, "la tempête, si")
+	v["fonction"] = "garde"
+	verifier(s._cible_routine(v, poste) != v.lit, "et la garde tient sous la tempête")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
