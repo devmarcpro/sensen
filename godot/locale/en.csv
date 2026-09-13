@@ -3455,6 +3455,14 @@ opinion,(opinion)
 ui.carte.survol_pays," · {dirigeant}, year {an} of the era of {ere} · {population} souls · army {armee} · mood {humeur}{guerre}"
 ui.carte.guerre, · at war with {autre}
 volet.royaume,"{nom} — {gouv} · {dirigeant}, year {an} of the era of {ere}"
+volet.ville,"{nom} — {palier}, {vocation}"
+vocation.commune,"a town like any other"
+vocation.miniere,"it lives off its mines"
+vocation.forestiere,"it lives off its forests"
+vocation.portuaire,"it lives off its harbour"
+vocation.grenier,"the granary of the region"
+vocation.pastorale,"it lives off its herds"
+vocation.marchande,"it lives off trade"
 ui.fiche.blason,arms: {couleur} with {motif}
 evenement.disette,Famine in the kingdom of {royaume}: the people grumble
 evenement.bonne_recolte,Good harvest in the kingdom of {royaume}

@@ -281,6 +281,9 @@ func _lignes_monde(sim, j: Dictionary) -> Array[String]:
 		var cell: Vector2i = sim.monde.cellule_de(j.pos)
 		var biome := str(sim.monde.cellule(cell).get("biome", ""))
 		l.append(tr("volet.lieu_camp").format({"x": cell.x, "y": cell.y, "biome": tr(GameData.catalogues.biomes.get(biome, {}).get("name_key", biome))}))
+		var agglo_v: Dictionary = sim.monde.surface.agglomeration_de(cell)   # la ville où l'on se tient, et ce dont elle vit (l'ancienne file, 2026-09-13)
+		if not agglo_v.is_empty():
+			l.append(tr("volet.ville").format({"nom": str(agglo_v.get("nom", "")), "palier": tr("palier." + str(agglo_v.get("palier", "hameau"))), "vocation": tr("vocation." + str(agglo_v.get("vocation", "commune")))}))
 		var roy_v: Dictionary = sim.monde.surface.royaume_de(cell)   # le pays où l'on se tient (D)
 		if not roy_v.is_empty():
 			var etat_v: Dictionary = sim.etat_royaume(str(roy_v.id))

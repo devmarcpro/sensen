@@ -3526,6 +3526,14 @@ opinion,(opinion)
 ui.carte.survol_pays," · {dirigeant}, an {an} de l’ère de {ere} · {population} âmes · armée {armee} · humeur {humeur}{guerre}"
 ui.carte.guerre, · en guerre avec {autre}
 volet.royaume,"{nom} — {gouv} · {dirigeant}, an {an} de l’ère de {ere}"
+volet.ville,"{nom} — {palier}, {vocation}"
+vocation.commune,"une ville comme les autres"
+vocation.miniere,"elle vit de ses mines"
+vocation.forestiere,"elle vit de ses forêts"
+vocation.portuaire,"elle vit de son port"
+vocation.grenier,"le grenier de la région"
+vocation.pastorale,"elle vit de ses troupeaux"
+vocation.marchande,"elle vit du commerce"
 ui.fiche.blason,blason : {couleur} au {motif}
 evenement.disette,Disette au royaume de {royaume} : le peuple gronde
 evenement.bonne_recolte,Bonne récolte au royaume de {royaume}
