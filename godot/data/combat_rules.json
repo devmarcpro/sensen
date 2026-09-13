@@ -1919,6 +1919,14 @@
     "version": 2,
     "echelle_v1_vers_v2": 100
   },
+  "sommeil": {
+    "_doc": "LE SOMMEIL (ordre de travail 31). LA FATIGUE N EST PAS UNE JAUGE QU ON DECREMENTE : c est le temps ecoule depuis le reveil, lu a la demande (`veille_depuis`), comme la pourriture d un cadavre se lit depuis sa mort. Trois paliers, en ticks de veille (un jour = 2 400 000) : `ticks_conseil` le journal previent (seize heures debout), `ticks_stats` toutes les stats x `malus_stats` (un jour entier), `ticks_epuisement` x `malus_epuisement` a la place (deux jours). Il ne tue pas : on ne meurt pas de ne pas dormir en deux jours, on devient mauvais a tout. Dormir dans un lit remet le compteur au reveil. Il se cumule a la faim et a la soif : trois manques, trois malus.",
+    "ticks_conseil": 1600000,
+    "ticks_stats": 2400000,
+    "malus_stats": 0.9,
+    "ticks_epuisement": 4800000,
+    "malus_epuisement": 0.75
+  },
   "soif": {
     "_doc": "L HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l hydratation aussi »). LA MEME MECANIQUE QUE LA FAIM, EN PLUS PRESSANT : on tient trois semaines sans manger et trois jours sans boire, donc `ticks_par_point` est la MOITIE de celui de la faim (calibre le 2026-09-09 au soir : le tiers vidait la jauge en 1,25 jour de monde et tuait le joueur au milieu d un test d agriculture qui court sur plusieurs jours — le rapport reel, trois semaines contre trois jours, donnerait une demi-journee, injouable a cote d une faim aussi genereuse ; c est la coherence de ressenti qui tranche, pas la biologie) et `periode_zero` sa moitie. `gorgee_tuile` est ce qu une gorgee d eau libre rend ; `risque_eau_libre` est ce qu elle coute — une eau de mare n est pas potable, et elle passe le meme jet d infection que la viande crue. Un objet desaltere de ce que sa fiche porte en `hydratation` : une biere moins qu une gourde, et c est sur la fiche, pas dans le code.",
     "ticks_par_point": 45000,

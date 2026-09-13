@@ -320,6 +320,10 @@ static func _dormir(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -
 	e.mana = e.mana_max
 	e.vigueur = e.vigueur_max
 	e.tick_vigueur = sim.horloge_monde.ticks
+	e["veille_depuis"] = maxi(1, sim.horloge_monde.ticks)   # le sommeil (ordre de travail 31) : on s'éveille maintenant
+	if int(e.get("fatigue_palier", 0)) != 0:
+		e["fatigue_palier"] = 0
+		Etres.recalculer(e, sim.items, sim.affixes_defs, sim.regles)
 	e["repose_jusqua"] = sim.horloge_monde.ticks + int(cp.repose_ticks)
 	e["xp_mult"] = float(cp.repose_xp_mult)
 	# +potentiel aux compétences consommées récemment (Potentiel : Reposé).

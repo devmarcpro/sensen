@@ -1802,6 +1802,51 @@ func test_cadavres() -> void:
 ## L'HYDRATATION (ordre de travail 31 ; designer 2026-09-09 : « on rajoutera l'hydratation aussi »). Elle est la
 ## faim en plus pressant, et c'est ce que le test vérifie d'abord : les nombres, pas seulement la mécanique. Puis
 ## ce qui la rend intéressante — elle est le seul manque que le corps déclarait ENCORE, sur les reins.
+## LE SOMMEIL (ordre de travail 31). La fatigue se DÉDUIT de l'heure du réveil : rien ne se décrémente, et c'est ce que
+## le test éprouve d'abord — sauter un jour d'un coup donne le même palier que le vivre tick à tick.
+func test_sommeil() -> void:
+	var f: Dictionary = GameData.config("combat_rules").get("sommeil", {})
+	verifier(not f.is_empty(), "le sommeil a ses nombres en données")
+	if f.is_empty():
+		return
+	verifier(int(f.ticks_conseil) < int(f.ticks_stats) and int(f.ticks_stats) < int(f.ticks_epuisement), "trois paliers dans l'ordre : on bâille, on faiblit, on s'effondre")
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var t0: int = maxi(1, s.horloge_monde.ticks)
+	s._tiquer_sommeil(t0)
+	verifier(int(j.get("veille_depuis", 0)) > 0 and int(j.veille_depuis) <= t0 and int(j.get("fatigue_palier", 0)) == 0, "on s'éveille à l'entrée dans le monde, jamais « au tick zéro » (%d)" % int(j.get("veille_depuis", 0)))
+	j.veille_depuis = t0   # la suite compte depuis ici
+	var for0: int = int(j.stats_eff.force)
+	# 1. SEIZE HEURES : le journal prévient, les stats ne bougent pas.
+	s._tiquer_sommeil(t0 + int(f.ticks_conseil))
+	verifier(int(j.fatigue_palier) == 1 and int(j.stats_eff.force) == for0, "seize heures debout : on bâille, sans rien perdre (force %d)" % int(j.stats_eff.force))
+	# 2. UN JOUR : un malus. DEUX JOURS : un malus plus lourd, À LA PLACE du premier — et le saut d'un coup suffit.
+	s._tiquer_sommeil(t0 + int(f.ticks_stats))
+	var for1: int = int(j.stats_eff.force)
+	verifier(int(j.fatigue_palier) == 2 and for1 < for0, "un jour debout : les forces baissent (%d → %d)" % [for0, for1])
+	s._tiquer_sommeil(t0 + int(f.ticks_epuisement) + 10)
+	var for2: int = int(j.stats_eff.force)
+	verifier(int(j.fatigue_palier) == 3 and for2 < for1 and j.vivant, "deux jours : épuisé, plus faible encore — mais vivant (%d)" % for2)
+	# 3. DORMIR REMET LE COMPTEUR, et les forces reviennent.
+	var lit := Vector2i(-1, -1)
+	for dd in Grille.DIRS:
+		var q: Vector2i = j.pos + dd
+		if s.grille.dans(q) and not s.grille.bloque_passage(q) and s.grille.occupant(q).is_empty() and not s.grille.meubles.has(s.grille.idx(q)):
+			lit = q
+			break
+	var id_lit := ""
+	for mid: String in GameData.catalogues.meubles.keys():
+		if bool(GameData.catalogues.meubles[mid].get("dormir", false)):
+			id_lit = mid
+			break
+	verifier(lit.x >= 0 and not id_lit.is_empty(), "un lit à poser à côté (%s)" % id_lit)
+	if lit.x >= 0 and not id_lit.is_empty():
+		s.grille.poser_meuble(s.grille.idx(lit), id_lit)
+		s.horloge_monde.ticks = t0 + int(f.ticks_epuisement) + 10
+		SimCamp._dormir(s, j, lit, s.horloge_monde.ticks)
+		verifier(int(j.fatigue_palier) == 0 and int(j.veille_depuis) >= t0 + int(f.ticks_epuisement) and int(j.stats_eff.force) == for0, "une nuit dans un lit : reposé, les forces reviennent (%d)" % int(j.stats_eff.force))
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

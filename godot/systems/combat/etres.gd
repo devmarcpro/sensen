@@ -261,6 +261,13 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	if not s_soif.is_empty() and int(e.get("soif", 100)) < int(s_soif.get("seuil_stats", 25)):
 		for k_s in stats.keys():
 			stats[k_s] = maxi(1, roundi(float(stats[k_s]) * float(s_soif.get("malus_stats", 0.9))))
+	# LE SOMMEIL (ordre de travail 31) : un jour debout rogne tout, deux jours rognent davantage — l'un OU l'autre.
+	var s_som: Dictionary = regles.r.get("sommeil", {})
+	var p_som := int(e.get("fatigue_palier", 0))
+	if not s_som.is_empty() and p_som >= 2:
+		var m_som: float = float(s_som.get("malus_epuisement", 0.75)) if p_som >= 3 else float(s_som.get("malus_stats", 0.9))
+		for k_f in stats.keys():
+			stats[k_f] = maxi(1, roundi(float(stats[k_f]) * m_som))
 	if int(e.get("faim", 100)) < int(regles.r.faim.seuil_stats):   # Faim < 25 : −10 % à toutes les stats
 		for k in stats.keys():
 			stats[k] = maxi(1, roundi(float(stats[k]) * float(regles.r.faim.malus_stats)))

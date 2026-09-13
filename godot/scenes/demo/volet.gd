@@ -211,6 +211,9 @@ func _maux(sim, j: Dictionary) -> Array:
 	var sc: Dictionary = r.get("soif", {})
 	if not sc.is_empty() and soif < int(sc.get("seuil_conseil", 60)):
 		res.append([tr("volet.mal.soif").format({"n": soif}), COL_GRAVE if soif < int(sc.get("seuil_stats", 25)) else COL_BLESSE])
+	var p_som := int(j.get("fatigue_palier", 0))   # le sommeil (ordre de travail 31) : la ligne n'apparaît que fatigué
+	if p_som > 0:
+		res.append([tr("volet.mal.fatigue_%d" % p_som), COL_GRAVE if p_som >= 2 else COL_BLESSE])
 	var pd: Dictionary = sim.poids_de(j)
 	if float(pd.facteur) > 1.0:
 		res.append([tr("volet.mal.charge").format({"poids": "%.0f" % float(pd.poids), "capacite": "%.0f" % float(pd.capacite)}), COL_BLESSE])

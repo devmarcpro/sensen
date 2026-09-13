@@ -462,6 +462,7 @@ func _sur_avancee_monde(_de: int, _a: int) -> void:
 	t0 = _top("pas", t0)
 	_tiquer_faim(horloge_monde.ticks)
 	_tiquer_soif(horloge_monde.ticks)
+	_tiquer_sommeil(horloge_monde.ticks)
 	t0 = _top("faim", t0)
 	_tiquer_monde(horloge_monde.ticks)
 	t0 = _top("monde", t0)
@@ -719,6 +720,39 @@ func _tiquer_soif(tick: int) -> void:
 					EventBus.emettre(&"journal", [&"journal.mort", {"nom": e.name_key}])
 					EventBus.emettre(&"creature_killed", [e.id, e.id])
 		e.soif_tick = tick
+
+
+## LE SOMMEIL (ordre de travail 31). La fatigue n'est pas une jauge : c'est le temps écoulé depuis le réveil, lu ici.
+## On ne garde que l'heure du réveil (`veille_depuis`) et le palier atteint (`fatigue_palier`), parce que franchir un
+## palier doit recalculer les stats et le dire — rien d'autre ne se tique.
+static func palier_fatigue(e: Dictionary, tick: int, regles_r: Dictionary) -> int:
+	var f: Dictionary = regles_r.get("sommeil", {})
+	if f.is_empty() or int(e.get("veille_depuis", 0)) <= 0:
+		return 0
+	var veille: int = tick - int(e.veille_depuis)
+	if veille >= int(f.get("ticks_epuisement", 4800000)):
+		return 3
+	if veille >= int(f.get("ticks_stats", 2400000)):
+		return 2
+	return 1 if veille >= int(f.get("ticks_conseil", 1600000)) else 0
+
+
+func _tiquer_sommeil(tick: int) -> void:
+	if not regles.r.has("sommeil"):
+		return
+	for e in joueurs():
+		if not e.vivant:
+			continue
+		if int(e.get("veille_depuis", 0)) <= 0:   # la même garde que la soif : on s'éveille à l'entrée dans le monde, pas au tick zéro
+			e["veille_depuis"] = maxi(1, tick)
+		var p := palier_fatigue(e, tick, regles.r)
+		var avant := int(e.get("fatigue_palier", 0))
+		if p == avant:
+			continue
+		e["fatigue_palier"] = p
+		Etres.recalculer(e, items, affixes_defs, regles)
+		if p > avant:
+			EventBus.emettre(&"journal", [StringName("journal.fatigue_%d" % p), {"nom": e.name_key}])
 
 
 ## BOIRE À MÊME L'EAU. Gratuit, abondant — et risqué : une eau de mare n'est pas potable, et elle passe le même jet

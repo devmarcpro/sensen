@@ -713,8 +713,8 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     abondant, risqué : une eau de mare passe le jet d'infection de la viande crue) ou un objet qui porte
     `hydratation` sur sa fiche. **Et les reins ont cessé d'attendre** : leur bloc `perdu` a remplacé leur `attend`
     — un rein en moins fait boire plus souvent. C'était le seul manque ÉCRIT du plan de corps.
-    **Restent** : le **sommeil** (le cycle existe, la fatigue non) et la **peur qui dure** (le sang-froid est une
-    jauge de combat, pas une trace).
+    **Restent** : ~~le **sommeil**~~ et la **peur qui dure** (le sang-froid est une jauge de combat, pas une trace).
+    ~~**LE SOMMEIL**~~ — **FAIT le 2026-09-13.** **La fatigue n'est pas une jauge qu'on décrémente : c'est le temps écoulé depuis le réveil**, lu à la demande — la règle du coffre, *ce qui peut se déduire ne se balaie pas*, comme la pourriture d'un cadavre se lit depuis sa mort. On ne garde que `veille_depuis` et le palier atteint (pour recalculer les stats et le dire au journal). Seize heures debout : on bâille ; un jour : toutes les stats × 0,9 ; deux jours : × 0,75 **à la place** — et **il ne tue pas**, on devient mauvais à tout. Une nuit dans un lit remet le compteur. Il se cumule à la faim et à la soif : trois manques, trois malus. Le volet n'affiche une ligne que fatigué. **Le test éprouve la déduction elle-même** : sauter deux jours d'un coup donne le même palier que les vivre.
     **UN DÉFAUT JUMEAU, TROUVÉ ET LAISSÉ** : `Etres.creer` pose `faim_tick: 0` — une valeur de fiche, pas une heure.
     Un être créé alors que l'horloge du monde en est à cinq millions de ticks se voit donc retirer d'un coup tout
     le temps écoulé **depuis le début du monde**. La soif l'a révélé en tuant des PNJ à leur naissance ; sa cadence
