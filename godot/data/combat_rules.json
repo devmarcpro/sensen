@@ -1942,6 +1942,25 @@
     "sommeil_mult": 0.5,
     "seuil_volet": 20
   },
+  "pourriture": {
+    "_doc": "LA NOURRITURE POURRIT (l'ancienne file : « le sac du joueur qui ne pourrit pas », 2026-09-13). Rien ne se tique : un aliment perissable porte `ne_tick`, l'heure ou il est apparu, et sa fraicheur se lit a la demande — comme la pourriture d'un cadavre depuis sa mort. `jours_par_tag` : la duree de vie par tag d'objet (la plus courte l'emporte) ; sans tag perissable, ou avec un tag de `sauf_tags` (la viande fumee, le fromage affine), il ne pourrit pas. Rassis a la moitie de sa vie, pourri au-dela : `nutrition_pourrie` de sa nutrition, et les risques de `risque_pourri` en plus des siens. Deux piles qui se fondent gardent l'age de la plus vieille.",
+    "jours_par_tag": {
+      "viande": 3,
+      "champignon": 3,
+      "plat": 4,
+      "animal": 5,
+      "fruit": 6,
+      "legume": 8,
+      "racine": 20
+    },
+    "sauf_tags": [
+      "conserve"
+    ],
+    "nutrition_pourrie": 0.3,
+    "risque_pourri": {
+      "poison": 0.4
+    }
+  },
   "sommeil": {
     "_doc": "LE SOMMEIL (ordre de travail 31). LA FATIGUE N EST PAS UNE JAUGE QU ON DECREMENTE : c est le temps ecoule depuis le reveil, lu a la demande (`veille_depuis`), comme la pourriture d un cadavre se lit depuis sa mort. Trois paliers, en ticks de veille (un jour = 2 400 000) : `ticks_conseil` le journal previent (seize heures debout), `ticks_stats` toutes les stats x `malus_stats` (un jour entier), `ticks_epuisement` x `malus_epuisement` a la place (deux jours). Il ne tue pas : on ne meurt pas de ne pas dormir en deux jours, on devient mauvais a tout. Dormir dans un lit remet le compteur au reveil. Il se cumule a la faim et a la soif : trois manques, trois malus.",
     "ticks_conseil": 1600000,

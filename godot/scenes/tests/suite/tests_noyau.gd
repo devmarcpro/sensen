@@ -1981,6 +1981,43 @@ func test_fourchette_dit_vrai() -> void:
 	EventBus._file.clear()
 
 
+## LE SAC POURRIT (l'ancienne file, 2026-09-13) : une viande porte l'heure où elle est née, sa fraîcheur se déduit.
+func test_pourriture() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var t0: int = maxi(100000, s.horloge_monde.ticks)   # loin du zéro : la « vieille » pile ci-dessous doit être plus ancienne
+	s.horloge_monde.ticks = t0
+	var viande := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	verifier(int(viande.get("ne_tick", 0)) == t0 and Simulation.jours_de_vie(viande) == 3, "une viande naît datée et se garde trois jours (%d)" % Simulation.jours_de_vie(viande))
+	var fumee: Dictionary = GameData.catalogues.items.get("viande_fumee", {})
+	verifier(fumee.is_empty() or Simulation.jours_de_vie(fumee) == 0, "la viande fumée ne pourrit pas")
+	verifier(s.fraicheur(viande, t0 + jour) == "frais" and s.fraicheur(viande, t0 + 2 * jour) == "rassis" and s.fraicheur(viande, t0 + 3 * jour) == "pourri", "fraîche, rassise, pourrie : une lecture, aucun tick")
+	# Manger pourri nourrit moins
+	var fraiche := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	fraiche.ne_tick = t0 + 3 * jour
+	j.sac.append(fraiche.uid)
+	j.faim = 10
+	s._manger(j, str(fraiche.uid), t0 + 3 * jour)
+	var gain_frais: int = int(j.faim) - 10
+	j.sac.append(viande.uid)
+	j.faim = 10
+	s._manger(j, str(viande.uid), t0 + 3 * jour)
+	var gain_pourri: int = int(j.faim) - 10
+	verifier(gain_pourri < gain_frais, "la viande pourrie nourrit moins que la fraîche (%d contre %d)" % [gain_pourri, gain_frais])
+	# Deux piles fondues gardent l'âge de la plus vieille
+	var vieille := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	vieille.ne_tick = 5
+	var neuve := s.generer_objet("viande_crue", 1, {}, "commun", 0)
+	neuve.ne_tick = t0
+	var p := s.ajouter("villageois", j.pos + Vector2i(2, 0), "ia")
+	SimObjets.donner(s, p, str(neuve.uid))
+	SimObjets.donner(s, p, str(vieille.uid))
+	var pile: Dictionary = s.items.get(str(neuve.uid), {})
+	verifier(not pile.is_empty() and int(pile.quantite) == 2 and int(pile.ne_tick) == 5, "la pile fondue garde l'âge de la plus vieille (%s)" % str(pile.get("ne_tick", "?")))
+	EventBus._file.clear()
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

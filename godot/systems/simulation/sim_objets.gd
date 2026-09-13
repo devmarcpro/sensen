@@ -112,6 +112,8 @@ static func generer_objet(sim: Simulation, base_id: String, profondeur: int, pro
 	if inst.is_empty():
 		return {}
 	var t_r := Time.get_ticks_usec()
+	if Simulation.jours_de_vie(inst) > 0 and not inst.has("ne_tick"):   # un aliment naît maintenant : sa fraîcheur se lira dessus
+		inst["ne_tick"] = maxi(1, sim.horloge_monde.ticks)
 	sim.objets[inst.uid] = inst
 	sim.items[inst.uid] = inst
 	_top("objet.rangement", t_r)
@@ -556,6 +558,8 @@ static func donner(sim: Simulation, e: Dictionary, uid: String) -> void:
 				pile = {}
 			if not pile.is_empty():
 				pile.quantite = int(pile.quantite) + int(it.get("quantite", 1))
+				if it.has("ne_tick") and (not pile.has("ne_tick") or int(it.ne_tick) < int(pile.ne_tick)):
+					pile["ne_tick"] = int(it.ne_tick)   # deux piles fondues gardent l'âge de la plus vieille
 				sim.items.erase(uid)
 				EventBus.emettre(&"journal", [&"journal.loot", {"nom": e.name_key, "objet": nom_objet(sim, pile.uid)}])
 				return

@@ -2717,6 +2717,7 @@ ui.soif,"thirst {soif}"
 barre.soif,Thirst
 option.boire,Drink
 journal.boit,"{nom} drinks — thirst {soif}"
+journal.mange_pourri,"{nom} eats something rotten"
 journal.boit_eau_libre,"{nom} drinks straight from the water — thirst {soif}"
 journal.soif_conseil,"{nom}'s throat is dry: time to drink"
 journal.soif_stats,"{nom} is dehydrated: their strength fails"

@@ -725,6 +725,34 @@ func _tiquer_soif(tick: int) -> void:
 		e.soif_tick = tick
 
 
+## LA FRAÎCHEUR D'UN ALIMENT (l'ancienne file, 2026-09-13) : « frais », « rassis » (passé la moitié de sa vie) ou « pourri ».
+## Elle se lit sur `ne_tick` ; un objet qui n'en porte pas (d'avant, ou imputrescible) est frais.
+func fraicheur(it: Dictionary, tick: int) -> String:
+	var jours := jours_de_vie(it)
+	if jours <= 0 or not it.has("ne_tick"):
+		return "frais"
+	var vie := jours * int(SimTerrain._cycle(self).get("ticks_par_jour", 24000))
+	var age := tick - int(it.ne_tick)
+	if age >= vie:
+		return "pourri"
+	return "rassis" if age * 2 >= vie else "frais"
+
+
+## Combien de jours un objet se garde : le plus court de ses tags périssables ; 0 s'il ne pourrit pas.
+static func jours_de_vie(it: Dictionary) -> int:
+	var pr: Dictionary = GameData.config("combat_rules").get("pourriture", {})
+	var tags: Array = it.get("tags", [])
+	for t in pr.get("sauf_tags", []):
+		if t in tags:
+			return 0
+	var jours := 0
+	for t in tags:
+		var j := int(pr.get("jours_par_tag", {}).get(str(t), 0))
+		if j > 0 and (jours == 0 or j < jours):
+			jours = j
+	return jours
+
+
 ## LA PEUR QUI DURE (ordre de travail 31). Une valeur et l'heure du dernier choc ; la décroissance se déduit (demi-vie).
 static func effroi(e: Dictionary, tick: int, regles_r: Dictionary) -> float:
 	var f: Dictionary = regles_r.get("frayeur", {})
@@ -920,6 +948,10 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		return false
 	var cru := bool(it.get("cru", false))
 	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0) * float(it.get("harmonie", 1.0))
+	var pourri := fraicheur(it, tick) == "pourri"   # la nourriture pourrit (l'ancienne file, 2026-09-13)
+	if pourri:
+		nutrition *= float(regles.r.get("pourriture", {}).get("nutrition_pourrie", 0.3))
+		EventBus.emettre(&"journal", [&"journal.mange_pourri", {"nom": e.name_key}])
 	var extra: Array[String] = []
 	if float(it.get("harmonie", 1.0)) > 1.0:
 		EventBus.emettre(&"journal", [&"journal.harmonie", {}])
@@ -963,6 +995,11 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	for risque in it.get("risque", {}).keys():
 		if des.reel() < float(it.risque[risque]):
 			appliquer_statut(e, str(risque), 0, e.id)
+	if pourri:
+		var rp: Dictionary = regles.r.get("pourriture", {}).get("risque_pourri", {})
+		for risque_p in rp.keys():
+			if des.reel() < float(rp[risque_p]):
+				appliquer_statut(e, str(risque_p), 0, e.id)
 	if not cru:
 		var q := float(it.get("qualite", 1.0))
 		for stat in it.get("potentiel", {}).keys():

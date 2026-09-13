@@ -2788,6 +2788,7 @@ ui.soif,"soif {soif}"
 barre.soif,Soif
 option.boire,Boire
 journal.boit,"{nom} boit — soif {soif}"
+journal.mange_pourri,"{nom} mange quelque chose de pourri"
 journal.boit_eau_libre,"{nom} boit à même l'eau — soif {soif}"
 journal.soif_conseil,"{nom} a la gorge sèche : il faudrait boire"
 journal.soif_stats,"{nom} est déshydraté : ses forces le quittent"
