@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required": [
+    "liste"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "liste": {
+      "type": "object"
+    }
+  }
+}

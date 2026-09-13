@@ -178,6 +178,11 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 				stats[nom_stat] = int(stats.get(nom_stat, 0)) + roundi(float(mod.add) * float(s.get("puissance", 1.0)))
 			elif str(mod.cible) == "tag" and mod.has("grant"):   # un statut accorde un tag (Potions : vision nocturne, antipoison)
 				tags.append(str(mod.grant))
+	# LES MUTATIONS (28 quater) : ce que le corps est devenu s'ajoute à ce qu'il était.
+	var liste_mut: Dictionary = GameData.config("mutations").get("liste", {})
+	for mid in e.get("corps", {}).get("mutations", []):
+		for nom_m: String in (liste_mut.get(str(mid), {}).get("bonus_stats", {}) as Dictionary).keys():
+			stats[nom_m] = maxi(1, int(stats.get(nom_m, 0)) + int(liste_mut[str(mid)].bonus_stats[nom_m]))
 	# Serments tenus (point Nen, designer 2026-09-01) : leurs bonus de stat s'ajoutent tant qu'ils tiennent.
 	for sid in e.get("serments", []):
 		if str(sid) in e.get("serments_rompus", []):
@@ -442,9 +447,38 @@ static func arme(e: Dictionary, items: Dictionary) -> Dictionary:
 ## homme, il a d'autres entrailles.*
 static func plan_corps(e: Dictionary) -> Dictionary:
 	var pr := str(GameData.catalogues.get("races", {}).get(str(e.get("race", "")), {}).get("plan_corps", ""))
-	if not pr.is_empty() and GameData.catalogues.plans_corps.has(pr):
-		return GameData.catalogues.plans_corps[pr]
-	return GameData.catalogues.plans_corps.get(str(e.get("corps", {}).get("silhouette", "")), {})
+	var base: Dictionary = GameData.catalogues.plans_corps[pr] if (not pr.is_empty() and GameData.catalogues.plans_corps.has(pr)) else GameData.catalogues.plans_corps.get(str(e.get("corps", {}).get("silhouette", "")), {})
+	var muts: Array = e.get("corps", {}).get("mutations", [])
+	if muts.is_empty() or base.is_empty():
+		return base
+	# LE PLAN DEVIENT CELUI DE L'ÊTRE (28 quater) : le plan partagé, plus ses mutations. Rangé une fois par combinaison —
+	# deux mutants semblables partagent le même plan, et un corps sans mutation ne paie rien.
+	var cle := "%s|%s" % [str(base.get("id", pr)), ",".join(muts)]
+	if not _plans_mutes.has(cle):
+		_plans_mutes[cle] = _plan_mute(base, muts)
+	return _plans_mutes[cle]
+
+
+static var _plans_mutes: Dictionary = {}
+
+
+static func _plan_mute(base: Dictionary, muts: Array) -> Dictionary:
+	var plan: Dictionary = base.duplicate(true)
+	var liste: Dictionary = GameData.config("mutations").get("liste", {})
+	var parties: Dictionary = plan.get("parties", {})
+	for mid in muts:
+		var m: Dictionary = liste.get(str(mid), {})
+		for nom: String in (m.get("ajoute", {}) as Dictionary).keys():
+			var p: Dictionary = (m.ajoute[nom] as Dictionary).duplicate(true)
+			if bool(p.get("interne", false)) and not parties.has(nom):   # une partie externe n'aurait pas de dessin : on ne l'invente pas
+				parties[nom] = p
+		for pref: String in (m.get("modifie", {}) as Dictionary).keys():
+			for nom2: String in parties.keys():
+				if nom2.begins_with(pref):
+					var mod: Dictionary = m.modifie[pref]
+					if mod.has("part_sante_mult"):
+						parties[nom2]["part_sante"] = float(parties[nom2].get("part_sante", 0.3)) * float(mod.part_sante_mult)
+	return plan
 
 
 ## Les parties QUE CET ÊTRE A PERDUES. Comme pour les piles de tuiles, on ne stocke que l'exception : un corps

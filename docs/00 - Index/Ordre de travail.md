@@ -546,7 +546,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     **Ce que ça ouvre** : le nécromancien, la greffe, la chimère, la vente d'organes — et le cadavre qui traîne, qui
     est aussi ce qui rend une bataille lisible une heure après.
 
-28 quater. **CE QUI ARRIVE À UN CORPS : maladies, drogues, vaccins, médicaments, déformations, mutations**
+~~28 quater. **CE QUI ARRIVE À UN CORPS : maladies, drogues, vaccins, médicaments, déformations, mutations**~~ — **FAIT le 2026-09-13.**
     *(designer 2026-09-09, en marge de l'anatomie : « à noter, maladies, drogues, vaccins, médicaments,
     déformations, mutations, etc »).* **Noté, pas codé.**
     **Elles se rangent ici, et pas ailleurs, pour une raison** : ce sont toutes des choses qui **modulent une règle
@@ -579,7 +579,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     · **Une maladie touche AUSSI les bêtes.** Rien ne réserve la pathologie aux êtres pensants : un troupeau qui
       tombe malade est une catastrophe de village, et la faune malade est un signal que le joueur peut lire.
     *Ces trois réponses agrandissent la ligne plutôt qu'elles ne la simplifient — c'est noté, et c'est assumé.*
-    **LES MALADIES, LES MÉDICAMENTS ET LES VACCINS FAITS le 2026-09-13** (`SimMaladies`, `data/maladies.json`) : la contagion est un champ partagé (un malade charge sa tuile, et les voisines si la voie est l'air ; la charge s'éteint heure après heure ; on respire ce qu'on traverse), elle vise des organes par préfixe (les poumons, les branchies, les trachées), elle se lit sur l'heure d'infection (incubation, symptômes, guérison et immunité), elle touche aussi les bêtes, et un organe vital détruit tue. Trois maladies (grippe, dysenterie, peste), une tisane, une décoction, un vaccin. **Restent** : les drogues, les déformations et les mutations héritables.
+    **LES MALADIES, LES MÉDICAMENTS ET LES VACCINS FAITS le 2026-09-13** (`SimMaladies`, `data/maladies.json`) : la contagion est un champ partagé (un malade charge sa tuile, et les voisines si la voie est l'air ; la charge s'éteint heure après heure ; on respire ce qu'on traverse), elle vise des organes par préfixe (les poumons, les branchies, les trachées), elle se lit sur l'heure d'infection (incubation, symptômes, guérison et immunité), elle touche aussi les bêtes, et un organe vital détruit tue. Trois maladies (grippe, dysenterie, peste), une tisane, une décoction, un vaccin. ~~**Restent** : les drogues, les déformations et les mutations héritables~~ — **faites le même jour, la ligne est entière.** Les drogues : une accoutumance éteinte par demi-vie, un manque qu'une dose seule lève, un effet qui s'émousse (`data/drogues.json` ; bière, vin, chique de tabac). Les mutations : le plan de corps devient CELUI DE L'ÊTRE (le plan partagé plus ses mutations, rangé par combinaison), une mutation ajoute un organe interne, change les chiffres d'une partie, fait naître sans une partie ou donne des stats ; héritable, elle passe à l'enfant et au petit du bétail une fois sur deux ; la corruption fait muter (`data/mutations.json`). *Les parties externes ne s'inventent pas : le rig les dessine.*
 
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 

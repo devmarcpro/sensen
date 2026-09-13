@@ -948,6 +948,7 @@ static func _naitre_bete(sim: Simulation, mere: Dictionary, cell: Vector2i, endo
 		petit = SimObjets.ajouter(sim, espece, ou, "ia")
 		if petit.is_empty():
 			return false
+	SimMaladies.heriter(sim, petit, [mere])   # l'élevage sélectionne ce qu'il reproduit (28 quater)
 	petit["ai_profile"] = str(mere.get("ai_profile", GameData.config("villes").get("enclos", {}).get("profil", "proie")))
 	petit["statut_habitat"] = "betail"
 	petit["betail"] = str(mere.get("betail", ""))
@@ -1270,6 +1271,7 @@ static func _naitre(sim: Simulation, parent: Dictionary, conjoint: Dictionary, t
 	e.family["spouse"] = ""
 	e.family["parent_of"] = []
 	e.family["child_of"] = [parent.id, conjoint.id]
+	SimMaladies.heriter(sim, e, [parent, conjoint])   # les mutations héritables passent à l'enfant (28 quater)
 	for pa in [parent, conjoint]:
 		if not pa.has("family"):
 			pa["family"] = {}

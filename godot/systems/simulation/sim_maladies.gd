@@ -273,3 +273,67 @@ static func tiquer_drogues(sim: Simulation, tick: int) -> void:
 						EventBus.emettre(&"journal", [&"journal.manque", {"nom": e.name_key}])
 			elif en_manque and niv < float(d.get("seuil_manque", 40.0)):
 				SimTalents._retirer_statut(sim, e, st)
+
+
+# ---------------------------------------------------------------- mutations et déformations (28 quater, 2026-09-13)
+
+## MUTER : le corps de CET être reçoit la mutation ; une partie avec laquelle on naît sans est inscrite perdue.
+static func muter(sim: Simulation, e: Dictionary, id: String) -> bool:
+	var m: Dictionary = GameData.config("mutations").get("liste", {}).get(id, {})
+	if m.is_empty() or not e.has("corps"):
+		return false
+	var muts: Array = e.corps.get("mutations", [])
+	if id in muts:
+		return false
+	muts.append(id)
+	muts.sort()   # un ordre fixe : deux êtres de mêmes mutations partagent le même plan
+	e.corps["mutations"] = muts
+	for p in m.get("perdue", []):
+		if Etres.plan_corps(e).get("parties", {}).has(str(p)):
+			var perdues: Array = e.corps.get("perdues", [])
+			if not (str(p) in perdues):
+				perdues.append(str(p))
+			e.corps["perdues"] = perdues
+	Etres.recalculer(e, sim.items, sim.affixes_defs, sim.regles)
+	return true
+
+
+## CE QUI PASSE À L'ENFANT : chaque mutation héritable d'un parent, avec la chance `heredite`. Tiré à la graine.
+static func heriter(sim: Simulation, enfant: Dictionary, parents: Array) -> void:
+	var cfg: Dictionary = GameData.config("mutations")
+	var liste: Dictionary = cfg.get("liste", {})
+	for pa in parents:
+		if not (pa is Dictionary):
+			continue
+		for mid in (pa as Dictionary).get("corps", {}).get("mutations", []):
+			if not bool(liste.get(str(mid), {}).get("heritable", false)):
+				continue
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash([sim.graine, str(enfant.get("id", "")), str(pa.get("id", "")), str(mid)])
+			if rng.randf() < float(cfg.get("heredite", 0.5)):
+				muter(sim, enfant, str(mid))
+
+
+## LA CORRUPTION FAIT MUTER, rarement, qui s'y tient : une passe par heure, à la chance du jour divisée par vingt-quatre.
+static func tiquer_mutations(sim: Simulation, tick: int) -> void:
+	var cfg: Dictionary = GameData.config("mutations")
+	var liste: Dictionary = cfg.get("liste", {})
+	if liste.is_empty() or sim.monde == null or sim.lieu != "camp":
+		return
+	var ids: Array = []
+	for mid in liste.keys():
+		if bool(liste[mid].get("par_corruption", false)):
+			ids.append(str(mid))
+	if ids.is_empty():
+		return
+	ids.sort()
+	var heure := maxi(1, int(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)) / 24)
+	for e in sim.vivants():
+		if sim.monde.corruption_de(sim.monde.cellule_de(e.pos)) < float(cfg.get("seuil_corruption", 60)):
+			continue
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([sim.graine, str(e.id), "mutation", tick / heure])
+		if rng.randf() < float(cfg.get("chance_par_jour", 0.01)) / 24.0:
+			var mid: String = ids[rng.randi() % ids.size()]
+			if muter(sim, e, mid) and e.controle == "joueur":
+				EventBus.emettre(&"journal", [&"journal.mutation", {"nom": e.name_key, "mutation": str(liste[mid].name_key)}])

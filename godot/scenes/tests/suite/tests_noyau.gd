@@ -2105,6 +2105,38 @@ func test_drogues() -> void:
 	EventBus._file.clear()
 
 
+## LES MUTATIONS HÉRITABLES (ordre de travail 28 quater, 2026-09-13) : le plan de corps devient celui de l'être.
+func test_mutations() -> void:
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var autre := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var plan_avant: Dictionary = Etres.plan_corps(j)
+	var end0: int = int(j.stats_eff.endurance)
+	verifier(SimMaladies.muter(s, j, "second_coeur"), "le joueur mute : un second cœur")
+	verifier(Etres.plan_corps(j).parties.has("coeur_second") and not plan_avant.parties.has("coeur_second"), "SON plan porte un second cœur, et le plan partagé n'a pas bougé")
+	verifier(not Etres.plan_corps(autre).parties.has("coeur_second"), "un autre être de la même race n'en a pas")
+	verifier(int(j.stats_eff.endurance) == end0 + 2, "la mutation donne ses stats (%d → %d)" % [end0, int(j.stats_eff.endurance)])
+	SimMaladies.muter(s, autre, "poumons_larges")
+	var pmax_j := Etres.sante_partie_max(j, "poumon_D")
+	var pmax_a := Etres.sante_partie_max(autre, "poumon_D")
+	verifier(pmax_a > 0 and float(Etres.plan_corps(autre).parties.poumon_D.part_sante) > float(plan_avant.parties.poumon_D.part_sante), "des poumons larges tiennent davantage")
+	SimMaladies.muter(s, autre, "oeil_absent")
+	verifier(not Etres.partie_intacte(autre, "oeil_G") and Etres.partie_intacte(autre, "oeil_D"), "une déformation : on naît sans l'œil gauche")
+	# L'HÉRÉDITÉ : sur vingt enfants de deux parents porteurs, la mutation héritable passe à une part d'entre eux ; la
+	# déformation jamais.
+	var passe := 0
+	var deforme := 0
+	for k in 20:
+		var enfant := s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(0, 4)), "ia")
+		SimMaladies.heriter(s, enfant, [autre, autre])
+		if "poumons_larges" in enfant.corps.get("mutations", []):
+			passe += 1
+		if "oeil_absent" in enfant.corps.get("mutations", []):
+			deforme += 1
+	verifier(passe > 0 and passe < 20 and deforme == 0, "héritable, la mutation passe à %d enfant(s) sur 20 ; la déformation à aucun" % passe)
+	EventBus._file.clear()
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

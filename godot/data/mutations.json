@@ -1,0 +1,63 @@
+{
+  "_doc": "LES MUTATIONS ET LES DEFORMATIONS (ordre de travail 28 quater ; designer 2026-09-09 : « une mutation est HERITABLE »). Une mutation modifie le plan de corps DE L ETRE qui la porte : `ajoute` (des organes INTERNES — une partie externe n aurait pas de dessin), `modifie` (des champs d une partie : le prefixe du nom suffit, `part_sante_mult` multiplie), `perdue` (des parties avec lesquelles on nait sans), `bonus_stats`. `heritable` : elle passe a la naissance avec la chance `heredite` par parent qui la porte ; une deformation (`heritable: false`) meurt avec son porteur. `corruption` : au-dela de `seuil_corruption` %, un etre a `chance_par_jour` de muter, tiree dans les mutations qui portent `par_corruption`.",
+  "heredite": 0.5,
+  "seuil_corruption": 60,
+  "chance_par_jour": 0.01,
+  "liste": {
+    "second_coeur": {
+      "name_key": "mutation.second_coeur.name",
+      "heritable": true,
+      "par_corruption": true,
+      "ajoute": {
+        "coeur_second": {
+          "zone": "torse",
+          "interne": true,
+          "contenant": "torse",
+          "poids_coup": 0.033,
+          "part_sante": 0.42
+        }
+      },
+      "bonus_stats": {
+        "endurance": 2
+      }
+    },
+    "poumons_larges": {
+      "name_key": "mutation.poumons_larges.name",
+      "heritable": true,
+      "par_corruption": true,
+      "modifie": {
+        "poumon": {
+          "part_sante_mult": 1.5
+        }
+      },
+      "bonus_stats": {
+        "endurance": 1
+      }
+    },
+    "ossature_dense": {
+      "name_key": "mutation.ossature_dense.name",
+      "heritable": true,
+      "par_corruption": true,
+      "modifie": {
+        "torse": {
+          "part_sante_mult": 1.3
+        }
+      },
+      "bonus_stats": {
+        "force": 1,
+        "dexterite": -1
+      }
+    },
+    "oeil_absent": {
+      "name_key": "mutation.oeil_absent.name",
+      "heritable": false,
+      "par_corruption": false,
+      "perdue": [
+        "oeil_G"
+      ],
+      "bonus_stats": {
+        "perception": -2
+      }
+    }
+  }
+}

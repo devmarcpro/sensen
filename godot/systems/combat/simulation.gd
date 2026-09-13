@@ -1191,6 +1191,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			SimRumeur._tiquer_disparitions(self, tick)   # les corps cachés, trouvés ou regrettés (29 quinquies)
 			SimMaladies.tiquer(self, tick)   # la contagion, les symptômes, les guérisons (28 quater)
 			SimMaladies.tiquer_drogues(self, tick)   # le manque (28 quater)
+			SimMaladies.tiquer_mutations(self, tick)   # la corruption fait muter (28 quater)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
