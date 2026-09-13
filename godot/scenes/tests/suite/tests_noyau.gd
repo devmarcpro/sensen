@@ -2021,6 +2021,50 @@ func test_pourriture() -> void:
 	EventBus._file.clear()
 
 
+## LES MALADIES (ordre de travail 28 quater, 2026-09-13) : un champ de contagion, un organe visé, un médicament, un vaccin.
+func test_maladies() -> void:
+	var cfg: Dictionary = GameData.config("maladies")
+	verifier(cfg.get("liste", {}).has("grippe") and cfg.liste.has("peste"), "les maladies sont en données")
+	var s := nouvelle_sim("gorge")
+	var j := joueur_de(s)
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var heure := jour / 24
+	var t0: int = heure * 1000
+	s.horloge_monde.ticks = t0
+	# 1. INCUBATION, SYMPTÔMES, GUÉRISON — lus sur l'heure d'infection.
+	verifier(SimMaladies.infecter(s, j, "grippe", t0) and SimMaladies.stade(s, j, "grippe", t0 + 1) == "incubation", "infecté : la grippe couve")
+	var for0: int = int(j.stats_eff.force)
+	SimMaladies.tiquer(s, t0 + int(float(cfg.liste.grippe.incubation_jours) * jour) + heure)
+	verifier(SimMaladies.stade(s, j, "grippe", t0 + int(float(cfg.liste.grippe.incubation_jours) * jour) + heure) == "malade" and int(j.stats_eff.force) < for0, "après l'incubation, les symptômes : la force tombe (%d → %d)" % [for0, int(j.stats_eff.force)])
+	var poumons := SimMaladies.organes_vises(j, "grippe")
+	verifier(poumons.size() >= 1 and str(poumons[0]).begins_with("poumon"), "elle vise les poumons de CE corps (%s)" % str(poumons))
+	# 2. LA CONTAGION EST UN LIEU : le malade charge sa tuile, un voisin qui s'y tient la respire ; loin, rien.
+	verifier(SimMaladies.charge(s, j.pos, "grippe") > 0.0, "le malade charge sa tuile (%.2f)" % SimMaladies.charge(s, j.pos, "grippe"))
+	var proche := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var loin := s.ajouter("villageois", s._tuile_libre_autour(j.pos + Vector2i(20, 0)), "ia")
+	for k in 72:
+		SimMaladies.tiquer(s, t0 + int(float(cfg.liste.grippe.incubation_jours) * jour) + heure * (2 + k))
+	verifier((proche.get("maladies", {}) as Dictionary).has("grippe") and not (loin.get("maladies", {}) as Dictionary).has("grippe"), "le voisin l'attrape, celui qui se tient loin non — on peut fuir un quartier malade")
+	# 3. GUÉRIR, PUIS NE PLUS L'ATTRAPER
+	SimMaladies.tiquer(s, t0 + jour * 10)
+	verifier(not (j.get("maladies", {}) as Dictionary).has("grippe") and (j.get("immunites", {}) as Dictionary).has("grippe") and int(j.stats_eff.force) == for0, "guéri, immunisé, la force revenue")
+	verifier(not SimMaladies.infecter(s, j, "grippe", t0 + jour * 11), "et l'on ne l'attrape plus")
+	# 4. LE MÉDICAMENT ET LE VACCIN, sur la fiche de l'objet
+	SimMaladies.infecter(s, loin, "dysenterie", t0)
+	var dec := s.generer_objet("decoction_de_menthe", 1, {}, "commun", 0)
+	loin.sac.append(dec.uid)
+	s._manger(loin, str(dec.uid), t0 + 10)
+	verifier(not (loin.get("maladies", {}) as Dictionary).has("dysenterie"), "la décoction de menthe guérit la dysenterie")
+	var vac := s.generer_objet("vaccin_de_peste", 1, {}, "commun", 0)
+	loin.sac.append(vac.uid)
+	s._manger(loin, str(vac.uid), t0 + 20)
+	verifier(not SimMaladies.infecter(s, loin, "peste", t0 + 30), "vacciné, on n'attrape pas la peste")
+	# 5. UNE BÊTE AUSSI
+	var loup := s.ajouter("loup", s._tuile_libre_autour(j.pos + Vector2i(-6, 0)), "ia")
+	verifier(SimMaladies.sensible(loup, "grippe"), "un loup peut attraper la grippe : la pathologie n'est pas réservée aux êtres pensants")
+	EventBus._file.clear()
+
+
 func test_hydratation() -> void:
 	var f: Dictionary = GameData.config("combat_rules").get("soif", {})
 	verifier(not f.is_empty(), "l'hydratation a ses nombres en données")

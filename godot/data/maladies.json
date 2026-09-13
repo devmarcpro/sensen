@@ -1,0 +1,83 @@
+{
+  "_doc": "LES MALADIES (ordre de travail 28 quater ; designer 2026-09-09 : « oui pour tout »). La CONTAGION est un champ partage : un malade charge sa tuile de `emission` (x `emission_incubation` pendant l incubation ; les voisines aussi a x `air_voisins` si la voie est l air), la charge s eteint de `fondu_par_heure`, et un etre sensible qui s y tient s infecte chaque heure avec la chance charge x `transmission`. Une maladie peut aussi naitre de rien : `apparition_par_jour`, multipliee par `apparition_mult_biome` dans un biome aux tags `biomes_propices`. Elle suit l heure d infection : `incubation_jours` puis `duree_jours` de symptomes (stats x `malus_stats`, `degats_organe_par_jour` aux organes dont le nom commence par un prefixe d `organes` — un organe vital detruit tue), puis la guerison et l immunite. `touche` : les silhouettes ou tags qu elle frappe (vide = tous) — les betes aussi.",
+  "fondu_par_heure": 0.35,
+  "epsilon": 0.02,
+  "air_voisins": 0.5,
+  "liste": {
+    "grippe": {
+      "name_key": "maladie.grippe.name",
+      "voie": "air",
+      "organes": [
+        "poumon",
+        "branchie",
+        "trachee"
+      ],
+      "touche": [
+        "humanoide",
+        "bete",
+        "quadrupede",
+        "oiseau"
+      ],
+      "incubation_jours": 1.0,
+      "duree_jours": 4.0,
+      "emission": 0.35,
+      "emission_incubation": 0.4,
+      "transmission": 0.25,
+      "malus_stats": 0.85,
+      "degats_organe_par_jour": 1.0,
+      "apparition_par_jour": 0.0005,
+      "biomes_propices": [
+        "froid"
+      ],
+      "apparition_mult_biome": 4.0
+    },
+    "dysenterie": {
+      "name_key": "maladie.dysenterie.name",
+      "voie": "contact",
+      "organes": [
+        "intestin",
+        "estomac"
+      ],
+      "touche": [
+        "humanoide",
+        "quadrupede"
+      ],
+      "incubation_jours": 0.5,
+      "duree_jours": 3.0,
+      "emission": 0.25,
+      "emission_incubation": 0.2,
+      "transmission": 0.2,
+      "malus_stats": 0.8,
+      "degats_organe_par_jour": 3.0,
+      "apparition_par_jour": 0.0003,
+      "biomes_propices": [
+        "marecage",
+        "humide"
+      ],
+      "apparition_mult_biome": 5.0
+    },
+    "peste": {
+      "name_key": "maladie.peste.name",
+      "voie": "air",
+      "organes": [
+        "poumon",
+        "coeur",
+        "branchie",
+        "trachee"
+      ],
+      "touche": [],
+      "incubation_jours": 2.0,
+      "duree_jours": 6.0,
+      "emission": 0.5,
+      "emission_incubation": 0.3,
+      "transmission": 0.35,
+      "malus_stats": 0.6,
+      "degats_organe_par_jour": 12.0,
+      "apparition_par_jour": 0.0,
+      "biomes_propices": [
+        "corrompu"
+      ],
+      "apparition_mult_biome": 1.0
+    }
+  }
+}

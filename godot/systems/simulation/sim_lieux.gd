@@ -259,6 +259,7 @@ static func _verifier_fenetre(sim: Simulation, e: Dictionary) -> void:
 	_vider_etats_tuiles(sim)   # la fenêtre a glissé : les index de l'ancienne grille ne veulent plus rien dire
 	nouvelle.modifies.clear()
 	sim.poches_gaz.clear()
+	sim.contagion.clear()   # la contagion est un état de la grille, comme l'air (28 quater)
 	sim.nuages.clear()   # le champ d'air est un état d'étage : un nuage de la mine ne suit pas à la surface   # les poches de gaz sont des index de l'étage : une fenêtre de surface n'en a pas (Gaz dans le sol)
 	sim.poches_sous_sol.clear()
 	for id in sim.ordre:

@@ -1,0 +1,27 @@
+{
+  "name_key": "recipe.preparer_vaccin_de_peste.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "belladone",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "item": "ortie",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "item": "achillee",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "vaccin_de_peste",
+    "amount": 1
+  },
+  "fuel": null
+}

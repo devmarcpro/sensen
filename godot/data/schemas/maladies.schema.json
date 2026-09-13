@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "required": [
+    "fondu_par_heure",
+    "liste"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "fondu_par_heure": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "epsilon": {
+      "type": "number",
+      "minimum": 0
+    },
+    "air_voisins": {
+      "type": "number",
+      "minimum": 0
+    },
+    "liste": {
+      "type": "object"
+    }
+  }
+}

@@ -579,6 +579,7 @@ d'une stat n'est lue par aucune formule. Cinq stats posées avant leurs champs =
     · **Une maladie touche AUSSI les bêtes.** Rien ne réserve la pathologie aux êtres pensants : un troupeau qui
       tombe malade est une catastrophe de village, et la faune malade est un signal que le joueur peut lire.
     *Ces trois réponses agrandissent la ligne plutôt qu'elles ne la simplifient — c'est noté, et c'est assumé.*
+    **LES MALADIES, LES MÉDICAMENTS ET LES VACCINS FAITS le 2026-09-13** (`SimMaladies`, `data/maladies.json`) : la contagion est un champ partagé (un malade charge sa tuile, et les voisines si la voie est l'air ; la charge s'éteint heure après heure ; on respire ce qu'on traverse), elle vise des organes par préfixe (les poumons, les branchies, les trachées), elle se lit sur l'heure d'infection (incubation, symptômes, guérison et immunité), elle touche aussi les bêtes, et un organe vital détruit tue. Trois maladies (grippe, dysenterie, peste), une tisane, une décoction, un vaccin. **Restent** : les drogues, les déformations et les mutations héritables.
 
 ## Palier 7 — les quatre champs restants, dans l'ordre du designer
 

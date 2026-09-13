@@ -400,6 +400,7 @@ static func _veines_de_mine(sim: Simulation, profondeur: int, graine: int, id_do
 ## retrouve ses poches, et une tuile déjà creusée n'est plus pleine — la poche ouverte ne se ressème pas. Rend le compte.
 static func _poches_de_gaz(sim: Simulation, profondeur: int, graine: int, id_donjon: int, est_mine: bool) -> int:
 	sim.poches_gaz.clear()
+	sim.contagion.clear()   # la contagion est un état de la grille, comme l'air (28 quater)
 	sim.nuages.clear()   # le champ d'air est un état d'étage : un nuage de la mine ne suit pas à la surface
 	var cfg: Dictionary = GameData.config("gaz_regles").get("poches", {})
 	if cfg.is_empty() or profondeur < int(cfg.get("mine_etage_min" if est_mine else "etage_min", 2)):

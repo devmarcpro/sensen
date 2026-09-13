@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.infuser_tisane_pectorale.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "camomille",
+      "forme": "",
+      "amount": 1
+    },
+    {
+      "item": "sauge",
+      "forme": "",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "tisane_pectorale",
+    "amount": 1
+  },
+  "fuel": null
+}

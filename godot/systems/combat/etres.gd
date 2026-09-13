@@ -261,6 +261,12 @@ static func recalculer(e: Dictionary, items: Dictionary, affixes_defs: Dictionar
 	if not s_soif.is_empty() and int(e.get("soif", 100)) < int(s_soif.get("seuil_stats", 25)):
 		for k_s in stats.keys():
 			stats[k_s] = maxi(1, roundi(float(stats[k_s]) * float(s_soif.get("malus_stats", 0.9))))
+	# LA MALADIE (ordre de travail 28 quater) : chaque maladie en symptômes rogne les stats, et deux se cumulent.
+	var liste_mal: Dictionary = GameData.config("maladies").get("liste", {})
+	for id_mal in e.get("maladies_actives", []):
+		var mult_mal := float(liste_mal.get(str(id_mal), {}).get("malus_stats", 1.0))
+		for k_m in stats.keys():
+			stats[k_m] = maxi(1, roundi(float(stats[k_m]) * mult_mal))
 	# LE SOMMEIL (ordre de travail 31) : un jour debout rogne tout, deux jours rognent davantage — l'un OU l'autre.
 	var s_som: Dictionary = regles.r.get("sommeil", {})
 	var p_som := int(e.get("fatigue_palier", 0))

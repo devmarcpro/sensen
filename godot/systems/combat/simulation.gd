@@ -89,6 +89,7 @@ var odeur_prochain_pas := 0
 var feu_prochain_pas := 0
 var poches_gaz: Dictionary = {}   # idx → gaz : les poches scellées dans le plein de l'étage (Gaz dans le sol)
 var poches_sous_sol: Dictionary = {}   # idx → eau | geode | magma : les autres poches du plein (Gaz dans le sol, 18 h 40)
+var contagion: Dictionary = {}    # idx → {maladie → charge 0-1} : LA CONTAGION, un champ partagé (ordre de travail 28 quater, 2026-09-13)
 var nuages: Dictionary = {}       # idx → {gaz → charge 0-1} : LE CHAMP D'AIR (ordre de travail 24 ter, 2026-09-12).
                                   # Creux comme les poches : seules les tuiles chargées y sont. L'air respirable
                                   # n'est pas un second champ, c'est son COMPLÉMENT — `SimTerrain.air_a`.
@@ -948,6 +949,7 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 		return false
 	var cru := bool(it.get("cru", false))
 	var nutrition := float(it.get("nutrition", 0)) * (float(regles.r.cru_facteur) if cru else 1.0) * float(it.get("harmonie", 1.0))
+	SimMaladies.soigner_par_objet(self, e, it)   # un médicament guérit, un vaccin immunise (28 quater)
 	var pourri := fraicheur(it, tick) == "pourri"   # la nourriture pourrit (l'ancienne file, 2026-09-13)
 	if pourri:
 		nutrition *= float(regles.r.get("pourriture", {}).get("nutrition_pourrie", 0.3))
@@ -1186,6 +1188,7 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 			peremption_heure = tick / h_per
 			SimObjets._perimer_butin(self, tick)
 			SimRumeur._tiquer_disparitions(self, tick)   # les corps cachés, trouvés ou regrettés (29 quinquies)
+			SimMaladies.tiquer(self, tick)   # la contagion, les symptômes, les guérisons (28 quater)
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))

@@ -1,0 +1,17 @@
+{
+  "name_key": "recipe.decocter_menthe.name",
+  "station": "cuisine",
+  "craft_skill": "cuisine",
+  "inputs": [
+    {
+      "item": "menthe",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "item": "decoction_de_menthe",
+    "amount": 1
+  },
+  "fuel": null
+}
