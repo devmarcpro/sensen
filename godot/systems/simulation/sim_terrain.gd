@@ -370,16 +370,17 @@ static func flammabilite_de(sim: Simulation, t: Vector2i) -> int:
 		return 0
 	var fe: Dictionary = sim.regles.r.get("feu", {})
 	var tags: Array = sim.grille.contenu_de(t).get("tags", [])
+	var sec: float = SimClimat.mult_feu(sim, t)   # le sol sec brûle mieux, le détrempé à peine (climat, 2026-09-13)
 	if "culture" in tags:
-		return int(fe.get("flamm_culture", 60))
+		return roundi(float(fe.get("flamm_culture", 60)) * sec)
 	if "plante_sauvage" in tags:
-		return int(fe.get("flamm_plante_sauvage", 50))
+		return roundi(float(fe.get("flamm_plante_sauvage", 50)) * sec)
 	if "vegetation" in tags or "construit" in tags or "mur" in tags:
-		return int(GameData.catalogues.materials.get(sim.grille.materiau_de(t), {}).get("stats", {}).get("flammabilite", 0))
+		return roundi(float(GameData.catalogues.materials.get(sim.grille.materiau_de(t), {}).get("stats", {}).get("flammabilite", 0)) * sec)
 	if tags.is_empty() and sim.grille.meubles.has(sim.grille.idx(t)):
 		return 40
 	if tags.is_empty():
-		return int(GameData.catalogues.materials.get(sim.grille.materiau_sol(t), {}).get("stats", {}).get("flammabilite", 0))
+		return roundi(float(GameData.catalogues.materials.get(sim.grille.materiau_sol(t), {}).get("stats", {}).get("flammabilite", 0)) * SimClimat.mult_feu(sim, t))
 	return 0
 
 
@@ -1704,6 +1705,16 @@ static func _cible_foudre(sim: Simulation, rng: RandomNumberGenerator, centre: V
 		if score > score_max:
 			score_max = score
 			meilleure = t
+	# LA FOUDRE CHERCHE LE MÉTAL PORTÉ (22 ter, 2026-09-13) : un être dans le rayon concourt avec le terrain, et une armure
+	# conductrice le désigne — le chevalier en plaques au milieu d'un champ, pendant l'orage.
+	var poids_a := float(GameData.config("matiere").get("foudre", {}).get("poids_armure", 0.4))
+	for x in sim.vivants():
+		if Grille.distance(x.pos, centre) > portee or not sim.grille.dans(x.pos) or SimClimat.abrite(sim, x.pos):
+			continue
+		var score_x := float(sim.grille.h(x.pos)) * 10.0 + SimMatiere.conduction(sim, x) * poids_a + rng.randf()
+		if score_x > score_max:
+			score_max = score_x
+			meilleure = x.pos
 	return meilleure
 
 
@@ -2077,7 +2088,8 @@ static func _tiquer_souffle(sim: Simulation, nom: String, tick: int) -> void:
 		var air := air_a(sim, e.pos) if not sim.nuages.is_empty() else 1.0
 		var etouffe := air < s_asphyxie
 		if noye or etouffe:
-			e.souffle = maxi(0, int(e.souffle) - ecoules)
+			var lest_e := SimMatiere.lest(sim, e) if noye else 0.0   # une armure dense et peu flottante tire vers le fond (22 ter)
+			e.souffle = maxi(0, int(e.souffle) - roundi(float(ecoules) * (1.0 + lest_e)))
 			if int(e.souffle) <= 0:
 				var periodes := tick / int(ng.periode_ticks) - (tick - ecoules) / int(ng.periode_ticks)
 				for k in periodes:
@@ -2196,13 +2208,14 @@ static func temperature_ressentie(sim: Simulation, e: Dictionary) -> Dictionary:
 		temp += float(ma.montagne)
 	elif alt >= 0.55:
 		temp += float(ma.colline)
-	var r_c := ressenti_depuis(sim, e, temp)
+	var corr := SimClimat.corriger_ressenti(sim, e, temp, float(etat.get("temp_mod", 0)))   # feu proche, abri, vent, mouillé, air lourd (climat, 2026-09-13)
+	var r_c := ressenti_depuis(sim, e, float(corr.temp), float(corr.iso_mult))
 	return {"temp": r_c.temp, "ecart": r_c.ecart, "meteo": etat_id}
 
 
 ## Du thermomètre au ressenti d'un être : l'isolation de ce qu'il porte (et des potions) compense le froid, les résistances
 ## le chaud ; rend la température ressentie et l'écart à la zone de confort. Séparé pour s'éprouver à une température donnée.
-static func ressenti_depuis(sim: Simulation, e: Dictionary, temp: float) -> Dictionary:
+static func ressenti_depuis(sim: Simulation, e: Dictionary, temp: float, iso_mult: float = 1.0) -> Dictionary:
 	var m: Dictionary = GameData.config("planete").get("meteo", {})
 	var confort: Array = m.confort
 	var ecart := 0.0
@@ -2213,7 +2226,7 @@ static func ressenti_depuis(sim: Simulation, e: Dictionary, temp: float) -> Dict
 			var it: Dictionary = sim.items.get(e.equipement[slot], {})
 			iso += float(it.get("stats", {}).get("isolation", 0.0))
 			iso += float(it.get("doublure_isolation", 0.0))   # la DOUBLURE compte en plus : c'est sa raison d'etre
-		temp += iso / float(m.isolation_div)
+		temp += iso * iso_mult / float(m.isolation_div)   # un vêtement trempé isole mal
 		if temp < float(confort[0]):
 			ecart = temp - float(confort[0])
 	elif temp > float(confort[1]):
@@ -2239,8 +2252,12 @@ static func _tiquer_meteo(sim: Simulation, tick: int) -> void:
 		if demain != sim._meteo_annoncee and demain in ["tempete", "blizzard", "canicule"]:
 			sim._meteo_annoncee = demain
 			EventBus.emettre(&"journal", [&"journal.meteo_annonce", {"meteo": GameData.catalogues.weather_states[demain].name_key}])
+		var mouille_avant_tick := int(e.get("mouille_tick", tick))
+		SimClimat.maj_mouille(sim, e, tick)
+		SimMatiere.user_mouille(sim, e, float(tick - mouille_avant_tick) / maxf(1.0, float(_cycle(sim).get("ticks_par_jour", 24000)) / 24.0))   # le fer rouille, le bois gonfle (22 ter)
 		var tr_ := temperature_ressentie(sim, e)
 		e["temp_ressentie"] = tr_.temp
+		e["soif_chaleur"] = SimClimat.soif_chaleur(float(tr_.temp))
 		e["ecart_confort"] = tr_.ecart
 		degats_hors_confort(sim, e, float(tr_.ecart), tick)
 

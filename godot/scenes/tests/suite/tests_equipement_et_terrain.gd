@@ -1089,6 +1089,117 @@ func test_sonore_etages() -> void:
 	s.monde.fermer()
 
 
+## LE CLIMAT VIVANT (2026-09-13) : le vent souffle, le sol garde la pluie passée, on se mouille dehors et pas sous un toit,
+## un feu réchauffe et sèche, le vent et le mouillé refroidissent, la chaleur fait boire.
+func test_climat_vivant() -> void:
+	var s := Simulation.new(4253)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cell := s.monde.cellule_de(j.pos)
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	# 1. LE VENT : une direction unitaire et une force, qui changent avec le temps.
+	var v1 := SimClimat.vent(s, cell)
+	var change := false
+	for k in 12:
+		var v2 := SimClimat.vent(s, cell, s.horloge_monde.ticks + k * jour)
+		if (v2.dir as Vector2).distance_to(v1.dir) > 0.3:
+			change = true
+	verifier(is_equal_approx((v1.dir as Vector2).length(), 1.0) and float(v1.force) >= 0.0 and float(v1.force) <= 1.0 and change, "le vent a une direction et une force, et il tourne avec les jours")
+	# 2. LE SOL GARDE LA PLUIE : on force la pluie, le sol monte ; au soleil, il redescend.
+	s.meteo_force = "clair"
+	s.climat_cache.clear()
+	var sec := SimClimat.humidite_sol(s, cell)
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	var mouille_sol := SimClimat.humidite_sol(s, cell)
+	verifier(mouille_sol > sec + 0.2, "cinq jours d'orage détrempent le sol (%.2f → %.2f)" % [sec, mouille_sol])
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	verifier(SimClimat.humidite_sol(s, cell) < sec, "et la canicule l'assèche (%.2f)" % SimClimat.humidite_sol(s, cell))
+	verifier(SimClimat.mult_feu(s, j.pos) > 1.0, "un sol sec brûle mieux (×%.2f)" % SimClimat.mult_feu(s, j.pos))
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	verifier(SimClimat.mult_recolte(s, cell) < 1.0 and SimClimat.mult_feu(s, j.pos) < 1.0, "un sol détrempé rend moins et brûle mal (×%.2f, feu ×%.2f)" % [SimClimat.mult_recolte(s, cell), SimClimat.mult_feu(s, j.pos)])
+	# 3. DEHORS SOUS LA PLUIE ON SE MOUILLE, SOUS UN TOIT NON.
+	s.meteo_force = "pluie"
+	j["mouille"] = 0
+	j["mouille_tick"] = s.horloge_monde.ticks
+	SimClimat.maj_mouille(s, j, s.horloge_monde.ticks + jour / 12)
+	var dehors := int(j.mouille)
+	verifier(dehors > 0, "deux heures sous la pluie mouillent (%d)" % dehors)
+	var n0 := s.grille.largeur * s.grille.hauteur_grille
+	s.grille.niveaux_bat[s.grille.idx(j.pos) % n0] = 1
+	j["mouille"] = 0
+	j["mouille_tick"] = s.horloge_monde.ticks
+	SimClimat.maj_mouille(s, j, s.horloge_monde.ticks + jour / 12)
+	verifier(int(j.mouille) == 0, "sous un toit, on reste sec")
+	s.grille.niveaux_bat[s.grille.idx(j.pos) % n0] = 0
+	# 4. LE MOUILLÉ REFROIDIT, LE FEU RÉCHAUFFE.
+	s.meteo_force = "clair"
+	j["mouille"] = 0
+	var sec_t := float(SimClimat.corriger_ressenti(s, j, 10.0, 0.0).temp)
+	j["mouille"] = 100
+	var trempe_t := float(SimClimat.corriger_ressenti(s, j, 10.0, 0.0).temp)
+	verifier(trempe_t < sec_t - 3.0, "trempé, on a plus froid (%.1f contre %.1f)" % [trempe_t, sec_t])
+	SimTerrain.chauffer(s, j.pos, 40.0)
+	verifier(float(SimClimat.corriger_ressenti(s, j, 10.0, 0.0).temp) > sec_t + 10.0, "près d'un feu, on a chaud")
+	j["mouille"] = 100
+	j["mouille_tick"] = s.horloge_monde.ticks
+	SimClimat.maj_mouille(s, j, s.horloge_monde.ticks + jour / 12)
+	verifier(int(j.mouille) < 40, "et on y sèche vite (%d en deux heures)" % int(j.mouille))
+	# 5. LA CHALEUR FAIT BOIRE.
+	verifier(SimClimat.soif_chaleur(35.0) > 1.3 and is_equal_approx(SimClimat.soif_chaleur(15.0), 1.0), "à 35 degrés on boit plus vite, à 15 non")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
+## LA MATIÈRE AUX CROISEMENTS (22 ter, lot 3 — 2026-09-13) : la même armure de plaques est bruyante, conductrice, lestante
+## et brûlante au soleil ; le cuir ne l'est pas. Aucune matière n'est nommée par le code — seules leurs stats décident.
+func test_matiere_aux_croisements() -> void:
+	var s := Simulation.new(4254)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var _habiller := func(matiere: String) -> void:
+		j.equipement = {}
+		for slot in ["cuirasse", "casque", "brassards", "jambieres", "bottes"]:
+			var o := SimObjets.generer_objet(s, "armure_cuir" if GameData.catalogues.items.has("armure_cuir") else "materiau_brut", 1, {}, "commun", 0)
+			o["type"] = "armure"
+			o["materiau"] = matiere
+			o.erase("composants")
+			j.equipement[slot] = str(o.uid)
+	_habiller.call("fer")
+	var fer_pas := SimMatiere.volume_pas(s, j)
+	var fer_cond := SimMatiere.conduction(s, j)
+	var fer_lest := SimMatiere.lest(s, j)
+	var fer_soleil := SimMatiere.ecart_thermique(s, j, 36.0)
+	_habiller.call("cuir")
+	var cuir_pas := SimMatiere.volume_pas(s, j)
+	verifier(fer_pas >= float(GameData.config("sonore").seuil_audible) and cuir_pas < float(GameData.config("sonore").seuil_audible), "le fer s'entend marcher (%.1f), le cuir se tait (%.1f)" % [fer_pas, cuir_pas])
+	verifier(fer_cond > SimMatiere.conduction(s, j) * 3.0, "le fer conduit (%.0f), le cuir non (%.0f)" % [fer_cond, SimMatiere.conduction(s, j)])
+	verifier(fer_lest > SimMatiere.lest(s, j) and fer_lest > 0.3, "le fer leste dans l'eau (%.2f contre %.2f)" % [fer_lest, SimMatiere.lest(s, j)])
+	verifier(fer_soleil > 2.0 and SimMatiere.ecart_thermique(s, j, 36.0) < fer_soleil, "et il chauffe au soleil (+%.1f) bien plus que le cuir (+%.1f)" % [fer_soleil, SimMatiere.ecart_thermique(s, j, 36.0)])
+	# LE PAS S'ENTEND DANS LE CHAMP SONORE.
+	_habiller.call("fer")
+	s.sonore_sources.clear()
+	SimMatiere.sonner_pas(s, j, j.pos)
+	verifier(s.sonore_sources.has(s.grille.idx(j.pos)), "un pas en plaques entre dans le champ sonore")
+	# LA FOUDRE CHERCHE LE MÉTAL : sur un sol plat, l'être en fer l'emporte sur le terrain.
+	var rng := RandomNumberGenerator.new()
+	var coups := 0
+	for k in 20:
+		rng.seed = k
+		if SimTerrain._cible_foudre(s, rng, j.pos) == j.pos:
+			coups += 1
+	verifier(coups > 0, "sous l'orage, la foudre choisit le porteur de fer (%d fois sur 20)" % coups)
+	# L'USURE PAR LE MOUILLÉ.
+	var uid_c := str(j.equipement.cuirasse)
+	s.items[uid_c]["usure"] = 0.0
+	j["mouille"] = 100
+	SimMatiere.user_mouille(s, j, 48.0)
+	verifier(float(s.items[uid_c].usure) > 0.01, "deux jours trempé, la cuirasse de fer rouille (usure %.3f)" % float(s.items[uid_c].usure))
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
@@ -1313,7 +1424,7 @@ func test_feu() -> void:
 	s.grille.poser_contenu(pierre, "mur")
 	s.grille.materiaux[s.grille.idx(pierre)] = "granit"
 	s.meteo_force = "clair"
-	verifier(s.flammabilite_de(base) == 70 and s.flammabilite_de(pierre) == 0 and s.flammabilite_de(base + Vector2i(0, 1)) == 0, "un pin brûle (70), le granit et le sol nu non")
+	verifier(s.flammabilite_de(base) == roundi(70.0 * SimClimat.mult_feu(s, base)) and s.flammabilite_de(base) > 0 and s.flammabilite_de(pierre) == 0 and s.flammabilite_de(base + Vector2i(0, 1)) == 0, "un pin brûle (70, × l'humidité du sol : %d), le granit et le sol nu non" % s.flammabilite_de(base))
 	verifier(s._enflammer(base) and not s._enflammer(base) and not s._enflammer(pierre), "le premier pin prend feu, une seule fois ; le granit jamais")
 	var tick := 2000
 	# La propagation passe désormais par le CHAMP DE CHALEUR (Émergence — les champs partagés) : le feu chauffe sa

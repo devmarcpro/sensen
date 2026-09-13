@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required": [
+    "pas"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "pas": {
+      "type": "object"
+    }
+  }
+}

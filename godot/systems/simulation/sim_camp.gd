@@ -538,6 +538,7 @@ static func _recolter_culture(sim: Simulation, e: Dictionary, vers: Vector2i, ti
 		* sim.regles.skill_factor(sim.regles.niveau(e.competences_eff, str(ag.get("competence", "agriculture"))))
 	if SimTerrain.meteo(sim, cell) == "canicule":
 		q *= float(SimTerritoire._ry(sim).agriculture.canicule_facteur)
+	q *= SimClimat.mult_recolte(sim, cell)   # la sécheresse et le sol détrempé rendent moins (climat, 2026-09-13)
 	var annee := SimVilles.annee_agricole(sim, cell)   # la même année que les villes voisines (l'ancienne file, 2026-09-13)
 	q *= annee
 	if annee < 1.0:

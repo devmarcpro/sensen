@@ -1,0 +1,65 @@
+{
+  "_doc": "LE CLIMAT VIVANT (2026-09-13). Tout ce qui peut se DEDUIRE se deduit : le vent et l humidite du sol se relisent de la graine et de l heure, rien ne se balaie. `vent` : un bruit qui defile avec le temps donne la direction et la force (0-1) d une cellule ; les etats meteo ajoutent leur force (`bonus_meteo`). `sol` : l humidite d une cellule est sa base (couche humidite) plus la pluie des `jours_memoire` derniers jours, relue tous les `pas_heures` heures et ponderee par l anciennete, moins ce que la chaleur a seche ; `pluie_poids` dit ce que vaut chaque etat. `secheresse_seuil` et `detrempe_seuil` bornent un sol normal. `etre` : un etre non abrite se mouille sous la pluie (`mouille_par_heure` par etat), dans l eau il est trempe ; il seche de `sechage_base` par heure, plus vite au chaud, au vent et pres d un feu. `ressenti` : un feu proche rechauffe (la chaleur locale du champ), le vent refroidit en dessous de `vent_froid_sous` degres, le mouille refroidit et mange l isolation, l air lourd rechauffe au-dessus de `lourdeur_des` degres ; un abri coupe le vent et la pluie et ajoute `abri_bonus`. `soif` : au-dessus de `seuil`, chaque degre fait boire `par_degre` plus vite. `feu` : la flammabilite suit le sol, de `sec_mult` a `detrempe_mult`. `recoltes` : un sol trop sec ou detrempe rend moins.",
+  "vent": {
+    "frequence_spatiale": 0.0004,
+    "ticks_par_tour": 1800000,
+    "bonus_meteo": {
+      "vent_fort": 0.5,
+      "tempete": 0.6,
+      "blizzard": 0.6,
+      "orage": 0.3
+    }
+  },
+  "sol": {
+    "jours_memoire": 5,
+    "pas_heures": 6,
+    "pluie_poids": {
+      "pluie": 0.08,
+      "orage": 0.14,
+      "tempete": 0.14,
+      "neige": 0.04,
+      "blizzard": 0.05,
+      "brouillard": 0.01
+    },
+    "sechage_chaud": 0.02,
+    "chaud_des": 25.0,
+    "secheresse_seuil": 0.22,
+    "detrempe_seuil": 0.85
+  },
+  "etre": {
+    "mouille_par_heure": {
+      "pluie": 45,
+      "orage": 70,
+      "tempete": 80,
+      "neige": 15,
+      "blizzard": 30,
+      "brouillard": 4
+    },
+    "sechage_base": 10,
+    "sechage_par_degre": 0.6,
+    "sechage_vent": 15,
+    "sechage_feu": 40,
+    "feu_ecart": 10.0
+  },
+  "ressenti": {
+    "vent_froid": 8.0,
+    "vent_froid_sous": 15.0,
+    "mouille_froid": 7.0,
+    "mouille_isolation": 0.6,
+    "lourdeur": 8.0,
+    "lourdeur_des": 25.0,
+    "abri_bonus": 3.0
+  },
+  "soif": {
+    "seuil": 25.0,
+    "par_degre": 0.06
+  },
+  "feu": {
+    "sec_mult": 1.5,
+    "detrempe_mult": 0.4
+  },
+  "recoltes": {
+    "secheresse_mult": 0.55,
+    "detrempe_mult": 0.8
+  }
+}

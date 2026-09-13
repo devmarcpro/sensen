@@ -4420,6 +4420,8 @@ journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
 journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.glissade,"{nom} slips on the ground"
+journal.objet_rouille,"{objet} has been spoiled by the damp"
 journal.entree_lieu,"You enter {lieu}."
 lieu.sous_type.tour_effondree,"a collapsed tower"
 lieu.sous_type.hameau_abandonne,"an abandoned hamlet"

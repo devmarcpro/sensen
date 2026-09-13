@@ -178,6 +178,7 @@ func vivants() -> Array[Dictionary]:
 	return res
 
 
+var climat_cache: Dictionary = {}   # (cellule, tranche) → humidité du sol déduite (SimClimat) — un cache, jamais sauvé
 var _joueurs: Array[Dictionary] = []
 var _joueurs_cle := -1
 var _joueurs_sale := true
@@ -697,7 +698,7 @@ func _tiquer_soif(tick: int) -> void:
 		if not e.has("soif") or int(e.get("soif_tick", 0)) <= 0:
 			e["soif"] = int(e.get("soif", 100))
 			e["soif_tick"] = tick
-		var periode := maxi(1, int(float(f.get("ticks_par_point", 30000)) / maxf(0.05, float(e.get("soif_vitesse", 1.0)))))
+		var periode := maxi(1, int(float(f.get("ticks_par_point", 30000)) / maxf(0.05, float(e.get("soif_vitesse", 1.0)) * float(e.get("soif_chaleur", 1.0)))))   # la chaleur fait boire (climat, 2026-09-13)
 		var points := tick / periode - int(e.soif_tick) / periode
 		if points > 0:
 			var avant := int(e.soif)
@@ -1666,6 +1667,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	e.pos = vers
 	grille.placer(e.id, vers)
 	SimTerrain.tracer(self, e, vers)   # on laisse une odeur là où l'on passe (Émergence — le champ d'odeur)
+	SimMatiere.sonner_pas(self, e, vers)   # et l'armure s'entend (la matière aux croisements, 2026-09-13)
 	if e.has("porte") and entites.has(str(e.porte)):   # ce qu'on porte suit, sans chemin ni décision propre
 		entites[str(e.porte)].pos = vers
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
@@ -1676,6 +1678,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	if e.get("mecaniques", {}).has("vitesse_deplacement"):   # Effets d'équipement : +pct % de vitesse
 		ticks_dep = maxi(1, roundi(float(ticks_dep) / (1.0 + float(e.mecaniques.vitesse_deplacement.get("pct", 0)) / 100.0)))
 	e.compteur = tick + _ticks_avec_statuts(e, ticks_dep)
+	SimMatiere.glisser(self, e, vers, tick)   # une pierre mouillée ou gelée fait glisser (22 ter)
 	if Etres.a_statut_id(e, "brulure"):   # l'eau éteint la Brûlure (Statuts) : l'eau ne se traverse pas, s'y plonger = y arriver au bord
 		for dd in Grille.DIRS:
 			var q: Vector2i = vers + dd

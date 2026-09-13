@@ -591,6 +591,7 @@ static func _rendement_parcelle(sim: Simulation, pm: Vector2i, champ: Dictionary
 		q *= 1.0 + float(cfg.get("irrigation", {}).get("bonus", 0.35)) * float(pl.get("besoin_eau", 0.5))
 	if SimTerrain.meteo(sim, cell) == "canicule" and not irrigue:
 		q *= float(SimTerritoire._ry(sim).agriculture.canicule_facteur)
+	q *= SimClimat.mult_recolte(sim, cell)   # la sécheresse et le sol détrempé rendent moins (climat, 2026-09-13)
 	q *= annee_agricole(sim, cell)   # une mauvaise année pèse sur toute la région (l'ancienne file, 2026-09-13)
 	return maxi(1, roundi(q))
 

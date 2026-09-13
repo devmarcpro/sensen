@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": [
+    "vent",
+    "sol",
+    "etre",
+    "ressenti"
+  ],
+  "properties": {
+    "vent": {
+      "type": "object"
+    },
+    "sol": {
+      "type": "object"
+    },
+    "etre": {
+      "type": "object"
+    },
+    "ressenti": {
+      "type": "object"
+    },
+    "soif": {
+      "type": "object"
+    },
+    "feu": {
+      "type": "object"
+    },
+    "recoltes": {
+      "type": "object"
+    },
+    "_doc": {
+      "type": "string"
+    }
+  }
+}
