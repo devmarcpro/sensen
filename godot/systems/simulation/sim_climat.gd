@@ -167,3 +167,91 @@ static func mult_recolte(sim: Simulation, cell: Vector2i, irrigue: bool = false)
 	if secheresse(sim, cell) and not irrigue:
 		return float(rc.get("secheresse_mult", 0.55))
 	return 1.0
+
+
+# ---------------------------------------------------------------- lot 2 : l'eau qui change d'état (2026-09-13)
+
+## LA TEMPÉRATURE DE L'AIR d'une cellule à une heure donnée — la même formule que `SimTerrain.temperature_cellule`, mais
+## pour n'importe quel instant : c'est ce qui permet de RELIRE le froid passé au lieu de l'accumuler.
+static func temperature_a(sim: Simulation, cell: Vector2i, tick: int) -> float:
+	if sim.monde == null:
+		return 18.0
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	var tc: int = sim.monde.taille
+	var temp: float = lerpf(float(m.temp_min), float(m.temp_max), sim.monde.surface.valeur("temperature", cell.x * tc + tc / 2, cell.y * tc + tc / 2)) + float(SimTerrain._saison_info(sim, tick).temp)
+	temp += float(GameData.catalogues.weather_states.get(SimTerrain.meteo(sim, cell, tick), {}).get("temp_mod", 0))
+	if SimTerrain.est_nuit(sim, tick):
+		temp += float(m.get("mod_nuit", -8))
+	return temp
+
+
+## LA NEIGE AU SOL d'une cellule, 0-1 : ce qui est tombé ces derniers jours, moins ce qui a fondu. Relue, jamais tenue.
+static func neige_sol(sim: Simulation, cell: Vector2i, tick: int = -1) -> float:
+	if sim.monde == null:
+		return 0.0
+	var c: Dictionary = _cfg().get("neige", {})
+	var t := sim.horloge_monde.ticks if tick < 0 else tick
+	var jour := int(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
+	var pas := maxi(1, jour / 4)
+	var t0 := t - posmod(t, pas)
+	var cle := Vector3i(cell.x, cell.y, -1 - t0 / pas)   # négatif : la neige ne partage pas les clés de l'humidité
+	if sim.climat_cache.has(cle):
+		return float(sim.climat_cache[cle])
+	var n := int(c.get("jours_memoire", 6)) * 4
+	var h := 0.0
+	var ajout: Dictionary = c.get("ajout", {})
+	for k in range(n - 1, -1, -1):   # du plus ancien au plus récent : la fonte ne retire que ce qui est déjà tombé
+		var tk := t0 - k * pas
+		h += float(ajout.get(SimTerrain.meteo(sim, cell, tk), 0.0))
+		var temp := temperature_a(sim, cell, tk)
+		if temp > float(c.get("fonte_des", 1.0)):
+			h -= (temp - float(c.fonte_des)) * float(c.get("fonte_par_degre", 0.012))
+		h = clampf(h, 0.0, 1.0)
+	sim.climat_cache[cle] = h
+	return h
+
+
+## LE FROID QUI DURE : la moyenne des dernières heures est-elle sous le seuil de gel ? Un soir froid ne gèle pas un lac.
+static func froid_durable(sim: Simulation, cell: Vector2i, seuil: float, tick: int = -1) -> bool:
+	if sim.monde == null:
+		return false
+	var t := sim.horloge_monde.ticks if tick < 0 else tick
+	var jour := int(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
+	var heures := int(_cfg().get("gel", {}).get("heures", 36))
+	var pas := maxi(1, jour / 8)
+	var n := maxi(1, heures / 3)
+	var t0 := t - posmod(t, pas)
+	var cle := Vector3i(cell.x, cell.y, -100000000 - t0 / pas)   # la moyenne se relit une fois par tranche
+	if not sim.climat_cache.has(cle):
+		var somme := 0.0
+		for k in n:
+			somme += temperature_a(sim, cell, t0 - k * pas)
+		sim.climat_cache[cle] = somme / float(n)
+	return float(sim.climat_cache[cle]) < seuil
+
+
+## CE QUE LE SOL FAIT À UN PAS : la neige tassée et la boue du sol détrempé ralentissent qui marche à découvert.
+static func mult_marche(sim: Simulation, e: Dictionary, t: Vector2i) -> float:
+	if sim.lieu != "camp" or sim.monde == null or Etres.est_volant(e) or abrite(sim, t):
+		return 1.0
+	var cell := sim.monde.cellule_de(t)
+	var mult := 1.0
+	var nc: Dictionary = _cfg().get("neige", {})
+	var neige := neige_sol(sim, cell)
+	if neige > float(nc.get("ralentit_des", 0.2)):
+		mult *= 1.0 + neige * float(nc.get("ralenti_max", 0.8))
+	var bc: Dictionary = _cfg().get("boue", {})
+	if detrempe(sim, cell) and float(GameData.catalogues.materials.get(sim.grille.materiau_sol(t), {}).get("stats", {}).get("fertilite", 0)) >= float(bc.get("fertilite_min", 30)):
+		mult *= float(bc.get("mult", 1.35))
+	return mult
+
+
+## LES ÉTATS DU CLIMAT : au-delà de `ecart_malus` degrés hors du confort, l'hypothermie ou le coup de chaleur (des malus
+## de stats) précèdent la perte de points de vie ; revenus au confort, ils passent d'eux-mêmes à la fin de leur durée.
+static func etat_climat(sim: Simulation, e: Dictionary, ecart: float) -> void:
+	var c: Dictionary = _cfg().get("etats", {})
+	if absf(ecart) < float(c.get("ecart_malus", 5.0)):
+		return
+	var id := "hypothermie" if ecart < 0.0 else "coup_de_chaleur"
+	if not Etres.a_statut_id(e, id):
+		sim.appliquer_statut(e, id, int(c.get("duree_ticks", 120000)), "")

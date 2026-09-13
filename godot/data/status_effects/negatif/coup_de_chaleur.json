@@ -1,0 +1,24 @@
+{
+  "name_key": "status.coup_de_chaleur.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 0,
+  "duree_ticks": 120000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:endurance",
+      "add": -2
+    },
+    {
+      "cible": "stat:volonte",
+      "add": -1
+    }
+  ],
+  "tags": [
+    "negatif",
+    "climat",
+    "chaud"
+  ]
+}

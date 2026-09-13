@@ -1673,6 +1673,7 @@ func _deplacer(e: Dictionary, vers: Vector2i, tick: int) -> bool:
 	var ticks_dep := regles.ticks_deplacement(cout, e.competences_eff, en_combat(e))
 	if e.controle == "joueur":   # surcharge (Armures et poids porté) : sur les ticks d'Athlétisme, jamais sur une stat
 		ticks_dep = ceili(float(ticks_dep) * poids_de(e).facteur)
+	ticks_dep = maxi(1, roundi(float(ticks_dep) * SimClimat.mult_marche(self, e, vers)))   # la neige et la boue ralentissent (climat, lot 2)
 	if e.has("monture"):   # à cheval, la marche coûte moins (Villes B4)
 		ticks_dep = maxi(1, ceili(float(ticks_dep) * float(GameData.config("villes").get("transports", {}).get("montures", {}).get("facteur_vitesse", 0.5))))
 	if e.get("mecaniques", {}).has("vitesse_deplacement"):   # Effets d'équipement : +pct % de vitesse
@@ -5013,6 +5014,8 @@ func voit_ia(e: Dictionary, autre: Dictionary) -> bool:
 			portee *= float(SimTerrain._cycle(self).get("vision_nuit", 0.6))
 		else:
 			portee *= 1.0 + float(lum) / 100.0 * float(regles.r.engagement.get("lumiere_detection", 0.5))
+	if lieu == "camp" and monde != null and bool(GameData.config("climat").get("detection", {}).get("meteo", true)):   # le brouillard, la neige et l'orage gênent aussi les créatures (climat, lot 2)
+		portee *= float(GameData.catalogues.weather_states.get(SimTerrain.meteo(self, monde.cellule_de(e.pos)), {}).get("visibility_mult", 1.0))
 	if "pas_silencieux" in autre.get("tags_acquis", []):   # Effets d'équipement : détecté de moins loin
 		portee *= float(regles.r.effets_equipement.silence_mult)
 	portee *= 1.0 - discretion_reduction(autre)   # IA des créatures : la Discrétion de la cible raccourcit le cône

@@ -156,6 +156,8 @@ tile_content.plante_sauvage.name,Wild plant
 tile_content.porte.name,Door
 tile_content.roche.name,Rock
 tile_content.station_fixe.name,Workstation
+status.hypothermie.name,"Hypothermia"
+status.coup_de_chaleur.name,"Heatstroke"
 status.affaibli.name,Weakened
 status.antipoison.name,Antidote
 status.beni.name,Blessed

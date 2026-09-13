@@ -1200,6 +1200,49 @@ func test_matiere_aux_croisements() -> void:
 	s.monde.fermer()
 
 
+## L'EAU QUI CHANGE D'ÉTAT (climat, lot 2 — 2026-09-13) : la neige reste et ralentit puis fond, le gel demande un froid qui
+## dure, la boue ralentit, le temps gêne la vue des créatures, et le froid prolongé donne l'hypothermie.
+func test_eau_qui_change_d_etat() -> void:
+	var s := Simulation.new(4255)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cell := s.monde.cellule_de(j.pos)
+	s.meteo_force = "blizzard"
+	s.climat_cache.clear()
+	var neige := SimClimat.neige_sol(s, cell)
+	verifier(neige > 0.5, "six jours de blizzard couvrent le sol de neige (%.2f)" % neige)
+	verifier(SimClimat.mult_marche(s, j, j.pos) > 1.3, "et elle ralentit la marche (×%.2f)" % SimClimat.mult_marche(s, j, j.pos))
+	verifier(SimClimat.froid_durable(s, cell, 0.0), "un froid qui dure")
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	verifier(SimClimat.neige_sol(s, cell) < 0.05, "la canicule la fait fondre (%.2f)" % SimClimat.neige_sol(s, cell))
+	verifier(not SimClimat.froid_durable(s, cell, 0.0), "et l'eau ne gèle plus")
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	var sol_fertile := ""
+	for mid in GameData.catalogues.materials.keys():
+		if float(GameData.catalogues.materials[mid].get("stats", {}).get("fertilite", 0)) >= 60:
+			sol_fertile = str(mid)
+			break
+	s.grille.sols[s.grille.idx(j.pos)] = sol_fertile
+	verifier(SimClimat.mult_marche(s, j, j.pos) > 1.2, "sur une terre détrempée, la boue ralentit (%s, ×%.2f)" % [sol_fertile, SimClimat.mult_marche(s, j, j.pos)])
+	# LE TEMPS GÊNE LA VUE DES CRÉATURES.
+	var loup := s.ajouter("loup", s._tuile_libre_autour(j.pos), "ia")
+	var loin: Vector2i = j.pos + Vector2i(int(float(loup.corps.stats.perception) * float(s.regles.r.engagement.detection_par_perception)) - 1, 0)
+	s.grille.liberer(j.pos, j.id)
+	j.pos = loin
+	s.grille.placer(j.id, j.pos)
+	s.meteo_force = "clair"
+	var vu_clair := s.voit_ia(loup, j)
+	s.meteo_force = "brouillard"
+	verifier(vu_clair and not s.voit_ia(loup, j), "le loup voit au loin par temps clair, pas dans le brouillard")
+	# L'HYPOTHERMIE AVANT LES POINTS DE VIE.
+	SimClimat.etat_climat(s, j, -8.0)
+	verifier(Etres.a_statut_id(j, "hypothermie"), "huit degrés sous le confort : l'hypothermie")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

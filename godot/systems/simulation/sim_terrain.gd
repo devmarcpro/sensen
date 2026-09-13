@@ -2048,8 +2048,11 @@ static func _maj_etats_meteo(sim: Simulation) -> void:
 	var etat: Dictionary = GameData.catalogues.weather_states.get(meteo(sim, cell), {})
 	var neige_avant := sim.grille.neige
 	var gel_avant := sim.grille.gel
-	sim.grille.neige = "neige" in etat.get("effects", [])
-	sim.grille.gel = temperature_cellule(sim) < float(sim.regles.r.deplacement.get("gel_seuil", 0.0))
+	# LA NEIGE RESTE, LE GEL DEMANDE UN FROID QUI DURE (climat, lot 2 — 2026-09-13) : le sol blanchit tant que la neige tombée
+	# n'a pas fondu, et l'eau ne gèle que si le froid tient depuis des heures — un soir froid ne fait pas un lac praticable.
+	var seuil_gel := float(sim.regles.r.deplacement.get("gel_seuil", 0.0))
+	sim.grille.neige = "neige" in etat.get("effects", []) or SimClimat.neige_sol(sim, cell) > float(GameData.config("climat").get("neige", {}).get("ralentit_des", 0.2))
+	sim.grille.gel = temperature_cellule(sim) < seuil_gel and (not sim.meteo_force.is_empty() or SimClimat.froid_durable(sim, cell, seuil_gel))
 	if neige_avant != sim.grille.neige or gel_avant != sim.grille.gel:
 		EventBus.emettre(&"tile_changed", [sim.grille.pos_de(0)])   # le client redessine (neige, glace)
 
@@ -2258,6 +2261,7 @@ static func _tiquer_meteo(sim: Simulation, tick: int) -> void:
 		var tr_ := temperature_ressentie(sim, e)
 		e["temp_ressentie"] = tr_.temp
 		e["soif_chaleur"] = SimClimat.soif_chaleur(float(tr_.temp))
+		SimClimat.etat_climat(sim, e, float(tr_.ecart))   # l'hypothermie et le coup de chaleur avant les points de vie
 		e["ecart_confort"] = tr_.ecart
 		degats_hors_confort(sim, e, float(tr_.ecart), tick)
 

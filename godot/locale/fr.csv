@@ -1349,6 +1349,8 @@ journal.stock_retire,"{nom} ×{n} retirés du stock"
 journal.taxe_guilde,"taxe de guilde : {n} or"
 journal.royaume,"8 cellules et 5 résidents : ton campement est désormais un royaume aux yeux du monde"
 item.ame.name,Âme d'un compagnon
+status.hypothermie.name,"Hypothermie"
+status.coup_de_chaleur.name,"Coup de chaleur"
 status.affaibli.name,Affaibli
 ui.ecran.recruter,Recruter (R)
 ui.ecran.suiveur,Suis-moi sur le territoire (W)
