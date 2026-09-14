@@ -1,0 +1,23 @@
+{
+  "name_key": "item.craft_cuirasse_ecailles.name",
+  "type": "armure",
+  "equip_slot": "cuirasse",
+  "hands": 0,
+  "slots": {
+    "plaque": "plaque",
+    "sangles": "sangles",
+    "doublure": "doublure"
+  },
+  "recipe": {
+    "station": "etabli",
+    "craft_skill": "ecailles"
+  },
+  "genre_grammatical": "fs",
+  "tags": [
+    "armure",
+    "assemble"
+  ],
+  "zone": "torse",
+  "construction": "ecailles",
+  "_doc": "LA CUIRASSE D ECAILLES (decision du 2026-09-14, question 39). La construction `ecailles` avait sa matrice et son bonus (combat_rules.armure) mais aucune fiche : la plaque se fait d ecaille (component_recipes/plaque_ecaille), la competence est `ecailles`."
+}

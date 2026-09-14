@@ -1,0 +1,36 @@
+{
+  "name_key": "item.proto_cuirasse_ecailles.name",
+  "type": "armure",
+  "equip_slot": "cuirasse",
+  "hands": 0,
+  "zone": "torse",
+  "construction": "ecailles",
+  "durete_composite": 14,
+  "qualite": 1.0,
+  "niveau_construction": 0,
+  "tags": [
+    "armure",
+    "prototype",
+    "fortune"
+  ],
+  "elements": {
+    "bois": 1.0
+  },
+  "materiau": "ecaille",
+  "stats": {
+    "durete": 8,
+    "densite": 3,
+    "valeur_base": 8,
+    "conductivite_mana": 4,
+    "flammabilite": 40,
+    "isolation": 45,
+    "conductivite_electrique": 15,
+    "flottabilite": 60,
+    "luminosite": 0,
+    "fertilite": 0,
+    "transparence": 0,
+    "elasticite": 60,
+    "friction": 55
+  },
+  "poids": 4.0
+}
