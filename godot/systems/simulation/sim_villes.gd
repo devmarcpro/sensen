@@ -1415,7 +1415,7 @@ static func tiquer_caracteres(sim: Simulation, tick: int) -> void:
 			par_village[v] = caractere_de(sim, v)
 	for x in civils:
 		var car: Dictionary = cfg.get("liste", {}).get(str(par_village[str(x.village)]), {})
-		if car.get("rixe_par_heure", 0.0) == 0.0 and car.get("boire_par_heure", 0.0) == 0.0:
+		if car.get("rixe_par_heure", 0.0) == 0.0 and car.get("boire_par_heure", 0.0) == 0.0 and car.get("droguer_par_heure", 0.0) == 0.0:
 			continue
 		if Grille.distance(x.pos, sim._coin_de_place(x)) > int(GameData.config("villes").get("rayon_place", 6)) + 2:
 			continue   # on boit et on se bat sur la place, pas au poste
@@ -1424,6 +1424,10 @@ static func tiquer_caracteres(sim: Simulation, tick: int) -> void:
 		if rng.randf() < float(car.get("boire_par_heure", 0.0)):
 			var dose := {"drogue": "alcool", "statut_ticks": 500000}
 			sim.appliquer_statut(x, "ivresse", SimMaladies.prendre(sim, x, dose, tick), x.id)
+		if rng.randf() < float(car.get("droguer_par_heure", 0.0)):   # la cité de rouille s'enivre d'éther (question 34)
+			var fiche: Dictionary = GameData.catalogues.items.get(str(car.get("drogue_item", "")), {})
+			if not fiche.is_empty():
+				sim.appliquer_statut(x, str(fiche.get("statut", "")), SimMaladies.prendre(sim, x, fiche, tick), x.id)
 		if rng.randf() < float(car.get("rixe_par_heure", 0.0)):
 			for y in civils:
 				if y.id != x.id and y.vivant and Grille.distance(x.pos, y.pos) <= 2:

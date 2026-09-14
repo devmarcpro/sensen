@@ -2799,3 +2799,27 @@ func test_razzias() -> void:
 	verifier("nouvelle.razzia" in nouvelles, "et les gens du coin en parlent (%s)" % str(nouvelles))
 	s.monde.fermer()
 
+
+## LA CITÉ DE ROUILLE (question 34, 2026-09-14) : une ville minière sans loi — on y boit, on s'y bat, et on s'y enivre d'éther.
+func test_cite_de_rouille() -> void:
+	var s := Simulation.new(4299)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var rouille := s.creer_territoire("Rouilleville", "", 0)
+	rouille["agglomeration"] = {"palier": "village", "population": 20, "centre": s.monde.cellule_de(j.pos), "culture": "", "gouvernance": "anarchie", "vocation": "miniere"}
+	verifier(SimVilles.caractere_de(s, "Rouilleville") == "cite_de_rouille", "une ville minière sans loi est une cité de rouille (%s)" % SimVilles.caractere_de(s, "Rouilleville"))
+	var a := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	a["village"] = "Rouilleville"
+	a["place"] = a.pos
+	var heure := int(GameData.config("planete").cycle.ticks_par_jour) / 24
+	var ether := false
+	for k in 300:
+		SimVilles.tiquer_caracteres(s, (2000 + k) * heure)
+		a.sante = maxi(int(a.sante), 5)
+		if a.statuts.any(func(st: Dictionary) -> bool: return str(st.id) == "ivresse_ether"):
+			ether = true
+	verifier(ether and float(a.get("accoutumances", {}).get("ether", {}).get("niveau", 0.0)) > 0.0, "sur sa place, on s'enivre d'éther, et l'habitude vient")
+	verifier(not GameData.entree("recipes", "distiller_ether").is_empty() or GameData.catalogues.get("recipes", {}).has("distiller_ether"), "l'éther se distille à l'alambic")
+	EventBus._file.clear()
+	s.monde.fermer()
+

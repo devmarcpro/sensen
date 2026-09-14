@@ -1313,8 +1313,28 @@
     "reputation_ville": 8
   },
   "caracteres": {
-    "_doc": "LE CARACTERE D UNE VILLE (ordre de travail 29 quater ; designer 2026-09-10 : « les villes sont vraiment vivantes… les PNJ se jettent des bouteilles, se battent, se droguent »). Il se DEDUIT : la premiere regle de `regles` dont les conditions tiennent (`gouvernance` : une liste ; `corruption_min` : en % au centre ; `vocation` : une liste) donne le caractere, sinon `defaut`. Ce qu il fait : `social_au_lieu_du_poste` — la part des heures de travail passees sur la place ; `poste_au_lieu_du_social` — l inverse ; `rixe_par_heure` et `boire_par_heure` — la chance, par heure et par habitant sur la place, d en venir aux mains avec un voisin (quelques PV, jamais la mort) ou de boire (l ivresse, et l habitude de l alcool). Le registre « cyberjunkie » du designer est une question ouverte (Decisions en attente) : ici, le chaos est de ce monde-ci.",
+    "_doc": "LE CARACTERE D UNE VILLE (ordre de travail 29 quater ; designer 2026-09-10 : « les villes sont vraiment vivantes… les PNJ se jettent des bouteilles, se battent, se droguent »). Il se DEDUIT : la premiere regle de `regles` dont les conditions tiennent (`gouvernance` : une liste ; `corruption_min` : en % au centre ; `vocation` : une liste) donne le caractere, sinon `defaut`. Ce qu il fait : `social_au_lieu_du_poste` — la part des heures de travail passees sur la place ; `poste_au_lieu_du_social` — l inverse ; `rixe_par_heure` et `boire_par_heure` — la chance, par heure et par habitant sur la place, d en venir aux mains avec un voisin (quelques PV, jamais la mort) ou de boire (l ivresse, et l habitude de l alcool). LA CITE DE ROUILLE (question 34, tranchee le 2026-09-14) : la ville « cyberjunkie » de ce monde — une ville miniere sans loi. `droguer_par_heure` : la chance de prendre une dose de `drogue_item` (sa fiche dit le statut, la duree et la drogue).",
     "regles": [
+      {
+        "si": {
+          "gouvernance": [
+            "anarchie"
+          ],
+          "vocation": [
+            "miniere"
+          ]
+        },
+        "caractere": "cite_de_rouille"
+      },
+      {
+        "si": {
+          "corruption_min": 60,
+          "vocation": [
+            "miniere"
+          ]
+        },
+        "caractere": "cite_de_rouille"
+      },
       {
         "si": {
           "gouvernance": [
@@ -1362,6 +1382,14 @@
         "rixe_par_heure": 0.04,
         "boire_par_heure": 0.1,
         "rixe_degats": "1d3"
+      },
+      "cite_de_rouille": {
+        "social_au_lieu_du_poste": 0.6,
+        "rixe_par_heure": 0.06,
+        "boire_par_heure": 0.08,
+        "rixe_degats": "1d4",
+        "droguer_par_heure": 0.08,
+        "drogue_item": "ether"
       }
     }
   }

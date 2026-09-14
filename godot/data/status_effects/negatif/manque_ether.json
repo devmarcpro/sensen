@@ -1,0 +1,23 @@
+{
+  "name_key": "status.manque_ether.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100000,
+  "duree_ticks": 2400000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:volonte",
+      "add": -3
+    },
+    {
+      "cible": "stat:endurance",
+      "add": -2
+    }
+  ],
+  "tags": [
+    "negatif",
+    "manque"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name_key": "recipe.distiller_ether.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "vin",
+      "forme": "",
+      "amount": 2
+    },
+    {
+      "material": "soufre",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "item": "ether",
+    "amount": 2
+  },
+  "fuel": null
+}

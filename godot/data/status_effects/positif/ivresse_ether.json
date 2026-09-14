@@ -1,0 +1,27 @@
+{
+  "name_key": "status.ivresse_ether.name",
+  "degats_des": null,
+  "element": null,
+  "periode_ticks": 100000,
+  "duree_ticks": 300000,
+  "controle": false,
+  "cumule": false,
+  "modifiers": [
+    {
+      "cible": "stat:volonte",
+      "add": 2
+    },
+    {
+      "cible": "stat:dexterite",
+      "add": -2
+    },
+    {
+      "cible": "stat:perception",
+      "add": -3
+    }
+  ],
+  "tags": [
+    "positif",
+    "drogue"
+  ]
+}
