@@ -365,3 +365,39 @@ static func activite_selon_temps(sim: Simulation, e: Dictionary, activite: Strin
 	if activite == "poste" and etat in c.get("fuit_poste", []):
 		return "lit"
 	return activite
+
+
+## LA DÉCOMPOSITION SUIT LA TEMPÉRATURE (lot 6 — 2026-09-14) : le multiplicateur d'âge de ce qui pourrit dans le lieu. On
+## lit la température DE SAISON (le climat et la saison, sans la nuit ni l'averse) : un orage ne fait pas rajeunir une
+## carcasse, un hiver la garde. Sous terre, la roche tempère — l'ambiante souterraine.
+static func mult_decomposition(sim: Simulation) -> float:
+	var dc: Dictionary = _cfg().get("decomposition", {})
+	if dc.is_empty():
+		return 1.0
+	var t := temperature_saison(sim)
+	if t < 0.0:
+		return float(dc.get("gel_mult", 0.15))
+	if t < float(dc.get("froid_sous", 8.0)):
+		return float(dc.get("froid_mult", 0.6))
+	if t > float(dc.get("chaud_des", 25.0)):
+		return float(dc.get("chaud_mult", 1.6))
+	return 1.0
+
+
+## La température de saison du lieu : le climat de la cellule et la saison, sans nuit ni météo ; sous terre, l'ambiante.
+static func temperature_saison(sim: Simulation) -> float:
+	if sim.lieu != "camp" or sim.monde == null:
+		return float(GameData.config("thermique").get("ambiante_souterraine", 12.0))
+	var m: Dictionary = GameData.config("planete").get("meteo", {})
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	var t := lerpf(float(m.temp_min), float(m.temp_max), sim.monde.surface.valeur("temperature", centre.x, centre.y)) + float(SimTerrain._saison_info(sim).temp)
+	if not sim.meteo_force.is_empty():   # une météo forcée (les essais) dit aussi sa température
+		t += float(GameData.catalogues.weather_states.get(sim.meteo_force, {}).get("temp_mod", 0))
+	return t
+
+
+## L'ÂGE DÉCOMPOSÉ d'une chose qui pourrit : l'âge vrai, au rythme de la saison. Rien ne se cumule — une lecture, aucun tick.
+static func age_decompose(sim: Simulation, x: Dictionary, cle_ne: String, tick: int) -> float:
+	if not x.has(cle_ne):
+		return 0.0
+	return float(tick - int(x[cle_ne])) * mult_decomposition(sim)

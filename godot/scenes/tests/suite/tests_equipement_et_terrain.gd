@@ -1395,6 +1395,40 @@ func test_ecologie_vivante() -> void:
 	s.monde.fermer()
 
 
+## LE VIVANT SUIT LE CLIMAT (22 ter, lot 6 — 2026-09-14) : la grippe aime le froid, la dysenterie la chaleur ; l'hiver
+## conserve ce qui pourrit, l'été le gâte.
+func test_vivant_suit_le_climat() -> void:
+	var s := Simulation.new(4263)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var liste: Dictionary = GameData.config("maladies").liste
+	s.meteo_force = "blizzard"
+	var grippe_froid := SimMaladies.mult_climat(s, j, liste.grippe)
+	var dys_froid := SimMaladies.mult_climat(s, j, liste.dysenterie)
+	var dec_froid := SimClimat.mult_decomposition(s)
+	s.meteo_force = "canicule"
+	var grippe_chaud := SimMaladies.mult_climat(s, j, liste.grippe)
+	var dys_chaud := SimMaladies.mult_climat(s, j, liste.dysenterie)
+	var dec_chaud := SimClimat.mult_decomposition(s)
+	verifier(grippe_froid > grippe_chaud and dys_chaud > dys_froid, "la grippe prend au froid (×%.1f contre ×%.1f), la dysenterie à la chaleur (×%.1f contre ×%.1f)" % [grippe_froid, grippe_chaud, dys_chaud, dys_froid])
+	verifier(dec_froid < 1.0 and dec_chaud > 1.0, "le froid ralentit la pourriture (×%.2f), la chaleur l'accélère (×%.2f)" % [dec_froid, dec_chaud])
+	# UNE DÉPOUILLE : dix jours de blizzard la gardent bien plus fraîche que dix jours de canicule.
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var _age_apres := func(meteo: String) -> float:
+		s.meteo_force = meteo
+		var mort := {"mort_tick": s.horloge_monde.ticks}
+		return SimClimat.age_decompose(s, mort, "mort_tick", s.horloge_monde.ticks + 10 * jour) / float(jour)
+	var jours_neige: float = _age_apres.call("blizzard")
+	var jours_ete: float = _age_apres.call("canicule")
+	verifier(jours_neige < 5.0 and jours_ete > 10.0, "dix jours dans la neige ne vieillissent un mort que de %.1f jours ; au soleil, de %.1f" % [jours_neige, jours_ete])
+	Etres.recalculer(j, s.items, s.affixes_defs, s.regles)
+	s.appliquer_statut(j, "hypothermie", 100000, "")
+	s.meteo_force = "clair"
+	verifier(SimMaladies.mult_climat(s, j, {}) > 1.0, "un corps en hypothermie tombe malade plus facilement")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

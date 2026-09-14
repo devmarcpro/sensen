@@ -184,6 +184,7 @@ static func tiquer(sim: Simulation, tick: int) -> void:
 			rng.seed = hash([sim.graine, str(e.id), str(id), h_idx])
 			var p := charge(sim, e.pos, str(id)) * float(m.get("transmission", 0.5))
 			p += float(m.get("apparition_par_jour", 0.0)) / 24.0 * (float(m.get("apparition_mult_biome", 1.0)) if _biome_propice(sim, e.pos, m) else 1.0)
+			p *= mult_climat(sim, e, m)   # la grippe aime le froid, la dysenterie la chaleur humide (lot 6)
 			if p > 0.0 and rng.randf() < p:
 				infecter(sim, e, str(id), tick)
 
@@ -384,3 +385,20 @@ static func muter_aleatoire(sim: Simulation, e: Dictionary, rng: RandomNumberGen
 			n += 1
 	var code := "rnd:%s@%s#%d" % [type, hote, n]
 	return code if muter(sim, e, code) else ""
+
+
+## CE QUE LE CLIMAT FAIT À UNE MALADIE (lot 6 — 2026-09-14) : le froid, la chaleur, le sol détrempé, et le corps glacé.
+static func mult_climat(sim: Simulation, e: Dictionary, m: Dictionary) -> float:
+	var cl: Dictionary = m.get("climat", {})
+	var mult := 1.0
+	if not cl.is_empty():
+		var t := SimTerrain.ambiante_de(sim)
+		if cl.has("froid_sous") and t < float(cl.froid_sous):
+			mult *= float(cl.get("froid_mult", 1.0))
+		if cl.has("chaud_des") and t > float(cl.chaud_des):
+			mult *= float(cl.get("chaud_mult", 1.0))
+		if cl.has("detrempe_mult") and sim.monde != null and sim.lieu == "camp" and SimClimat.detrempe(sim, sim.monde.cellule_de(e.pos)):
+			mult *= float(cl.detrempe_mult)
+	if Etres.a_statut_id(e, "hypothermie"):
+		mult *= float(_cfg().get("hypothermie_mult", 1.5))
+	return mult

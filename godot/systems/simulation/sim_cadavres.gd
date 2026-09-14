@@ -47,7 +47,7 @@ static func stade(sim: Simulation, c: Dictionary) -> Dictionary:
 	if not c.has("mort_tick"):
 		c["mort_tick"] = sim.horloge_monde.ticks
 	var jour := maxf(1.0, float(SimTerrain._cycle(sim).get("ticks_par_jour", 2400000)))
-	var age := float(sim.horloge_monde.ticks - int(c.mort_tick)) / jour
+	var age := SimClimat.age_decompose(sim, c, "mort_tick", sim.horloge_monde.ticks) / jour   # un mort dans la neige reste frais (lot 6)
 	var res: Dictionary = stades[0]
 	for s in stades:
 		if age >= float((s as Dictionary).get("jours", 0.0)):

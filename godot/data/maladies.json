@@ -1,5 +1,5 @@
 {
-  "_doc": "LES MALADIES (ordre de travail 28 quater ; designer 2026-09-09 : « oui pour tout »). La CONTAGION est un champ partage : un malade charge sa tuile de `emission` (x `emission_incubation` pendant l incubation ; les voisines aussi a x `air_voisins` si la voie est l air), la charge s eteint de `fondu_par_heure`, et un etre sensible qui s y tient s infecte chaque heure avec la chance charge x `transmission`. Une maladie peut aussi naitre de rien : `apparition_par_jour`, multipliee par `apparition_mult_biome` dans un biome aux tags `biomes_propices`. Elle suit l heure d infection : `incubation_jours` puis `duree_jours` de symptomes (stats x `malus_stats`, `degats_organe_par_jour` aux organes dont le nom commence par un prefixe d `organes` — un organe vital detruit tue), puis la guerison et l immunite. `touche` : les silhouettes ou tags qu elle frappe (vide = tous) — les betes aussi.",
+  "_doc": "LES MALADIES (ordre de travail 28 quater ; designer 2026-09-09 : « oui pour tout »). La CONTAGION est un champ partage : un malade charge sa tuile de `emission` (x `emission_incubation` pendant l incubation ; les voisines aussi a x `air_voisins` si la voie est l air), la charge s eteint de `fondu_par_heure`, et un etre sensible qui s y tient s infecte chaque heure avec la chance charge x `transmission`. Une maladie peut aussi naitre de rien : `apparition_par_jour`, multipliee par `apparition_mult_biome` dans un biome aux tags `biomes_propices`. Elle suit l heure d infection : `incubation_jours` puis `duree_jours` de symptomes (stats x `malus_stats`, `degats_organe_par_jour` aux organes dont le nom commence par un prefixe d `organes` — un organe vital detruit tue), puis la guerison et l immunite. `touche` : les silhouettes ou tags qu elle frappe (vide = tous) — les betes aussi. LE CLIMAT (2026-09-14) : `climat` d une maladie multiplie sa transmission et son apparition — x `froid_mult` sous `froid_sous` degres, x `chaud_mult` au-dessus de `chaud_des`, x `detrempe_mult` sur un sol detrempe ; un etre en hypothermie y est x `hypothermie_mult` plus sensible.",
   "fondu_par_heure": 0.35,
   "epsilon": 0.02,
   "air_voisins": 0.5,
@@ -29,7 +29,11 @@
       "biomes_propices": [
         "froid"
       ],
-      "apparition_mult_biome": 4.0
+      "apparition_mult_biome": 4.0,
+      "climat": {
+        "froid_sous": 8.0,
+        "froid_mult": 2.2
+      }
     },
     "dysenterie": {
       "name_key": "maladie.dysenterie.name",
@@ -54,7 +58,12 @@
         "marecage",
         "humide"
       ],
-      "apparition_mult_biome": 5.0
+      "apparition_mult_biome": 5.0,
+      "climat": {
+        "chaud_des": 24.0,
+        "chaud_mult": 2.0,
+        "detrempe_mult": 1.6
+      }
     },
     "peste": {
       "name_key": "maladie.peste.name",
@@ -77,7 +86,13 @@
       "biomes_propices": [
         "corrompu"
       ],
-      "apparition_mult_biome": 1.0
+      "apparition_mult_biome": 1.0,
+      "climat": {
+        "chaud_des": 20.0,
+        "chaud_mult": 1.5,
+        "detrempe_mult": 1.3
+      }
     }
-  }
+  },
+  "hypothermie_mult": 1.5
 }

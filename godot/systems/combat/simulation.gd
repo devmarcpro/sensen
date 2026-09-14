@@ -738,7 +738,7 @@ func fraicheur(it: Dictionary, tick: int) -> String:
 	if jours <= 0 or not it.has("ne_tick"):
 		return "frais"
 	var vie := jours * int(SimTerrain._cycle(self).get("ticks_par_jour", 24000))
-	var age := tick - int(it.ne_tick)
+	var age := int(SimClimat.age_decompose(self, it, "ne_tick", tick))   # l'hiver conserve, l'été gâte (lot 6)
 	if age >= vie:
 		return "pourri"
 	return "rassis" if age * 2 >= vie else "frais"
