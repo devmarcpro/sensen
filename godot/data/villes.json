@@ -580,7 +580,16 @@
       "migration_humeur_seuil_chomeur": 50,
       "migration_chance_semaine": 0.15,
       "semaines_entre_migrations": 8,
-      "majorite_quitte_le_lit": true
+      "majorite_quitte_le_lit": true,
+      "releve": {
+        "_doc": "LA RELEVE DE GARNISON (decision du 2026-09-14, question 10) : une ville retient combien de gardes elle avait a sa premiere semaine (`territoire.gardes_voulus`) ; s il lui en manque, elle recrute chaque semaine un adulte oisif et l equipe comme `modele` (sa fiche de creature), pour `cout` pieces de son tresor. Une ville pauvre ne remplace pas ses morts : c est ce qui fait mordre l equipement qui suit le stock.",
+        "cout": 40,
+        "modele": "garde_village",
+        "fonctions_recrutables": [
+          "oisif",
+          "journalier"
+        ]
+      }
     }
   },
   "enclos": {

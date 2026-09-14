@@ -928,10 +928,10 @@ sa carte entière au changement de grille).
 50. **CE QUI SORT DES DÉCISIONS DU 2026-09-14** *(le designer : « Prends les décisions toi même » — chaque réponse est dans [[Décisions en attente]], révisable d'un mot)*. Dans l'ordre où je les prends — ce qui débloque le plus d'abord, puis ce qui se voit, puis le contenu :
     · **a. 27 bis — la masse et la quantité de mouvement** (une tuile à la fois, `ticks_par_tuile` ; recul sur deux maillons ; le joueur est un corps pour les chocs seulement). Débloque 28, le lancer d'un corps (28 ter) et les talents.
     · ~~**b. Les vivants expirent**~~ — **abandonné le 2026-09-14** : le champ efface ce qui est sous 0,02, une respiration ne s'y accumulerait jamais (question 41, revue).
-    · **c. La faim naît à l'heure de naissance** (question 30), tests recalibrés.
-    · **d. La relève de garnison** (question 10).
-    · **e. L'IA** : aggro transmise au camp qui voit, décrochage après perte de vue, errance autour de l'ancre (question 17) — vérifier ce qui existe déjà.
-    · **f. Le sac pourrit** (question 18) — vérifier ce qui existe déjà.
+    · ~~**c. La faim naît à l'heure de naissance**~~ — **déjà fait le 2026-09-13** (`simulation.gd`, stampé à la première lecture, comme la soif) : la question était en retard sur le code.
+    · ~~**d. La relève de garnison**~~ — **FAIT le 2026-09-14** (`SimVilles._releve_garnison`, `villes.json` → `population.releve`) : une ville retient sa garnison de départ ; il lui manque un garde, elle arme un adulte oisif par semaine pour 40 pièces de son trésor — une ville sans le sou ne remplace pas ses morts (`test_releve_garnison`).
+    · ~~**e. L'IA**~~ — **FAIT le 2026-09-14** : l'alerte, le décrochage (l'aggro qui s'efface) et l'errance existaient ; il manquait que l'alerte passe **par les yeux** — un camarade derrière un mur n'est plus alerté (`_monter_aggro` teste la ligne de vue).
+    · ~~**f. Le sac pourrit**~~ — **déjà fait le 2026-09-13** (`sim.fraicheur`, l'inventaire dit ce qui tourne).
     · **g. 26 quater — un étage ne montre que son niveau**, le dessous par les ouvertures seulement (question 13).
     · **h. L'interface** : pavé de débogage caché (F3), zoom plafonné à 6, l'armure ne peint que ses zones, ombrage de la tête.
     · **i. La difficulté** : étages 1-2 adoucis, trois réglages à la création (question 21).

@@ -1571,6 +1571,69 @@ func test_palette_village() -> void:
 	s.monde.fermer()
 
 
+## LA RELÈVE DE GARNISON (décision du 2026-09-14, question 10) : un garde tombé se remplace par un adulte oisif, armé, payé
+## du trésor de la ville ; une ville sans le sou ne remplace personne.
+func test_releve_garnison() -> void:
+	var s := Simulation.new(9)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var c0: Vector2i = s.monde.cellule_camp
+	var f: Dictionary = {}
+	for dy in range(-20, 21):
+		for dx in range(-20, 21):
+			var cv := c0 + Vector2i(dx, dy)
+			if surf.terre_a(cv) and bool(surf.poi_de(cv).get("village", false)):
+				var fa: Dictionary = surf.fiche_agglomeration(cv)
+				if f.is_empty() or int(fa.population) > int(f.population):
+					f = fa
+	if f.is_empty():
+		verifier(false, "une ville à 20 cellules du camp")
+		return
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var n_sub: int = s.monde.taille / 32
+	var centre: Vector2i = f.centre
+	for cy in n_sub:
+		for cx in n_sub:
+			s.monde.explores[Vector2i(centre.x * n_sub + cx, centre.y * n_sub + cy)] = true
+	verifier(s.voyager(j, centre), "voyager jusqu'à la ville")
+	var nom := str(f.nom)
+	if not s.territoires.has(nom):
+		verifier(false, "la ville a son territoire")
+		return
+	var cfg: Dictionary = GameData.config("villes").anneau_moyen.population
+	var sauve := cfg.duplicate()
+	cfg.naissance_par_couple_semaine = 0.0
+	cfg.migration_chance_semaine = 0.0
+	var t: Dictionary = s.territoires[nom]
+	t.erase("gardes_voulus")
+	var gardes := func() -> Array: return s._dans_territoire(nom, func() -> Array: return s.residents()).filter(func(x: Dictionary) -> bool: return str(x.get("ai_profile", "")) == "garde")
+	var g0: Array = gardes.call()
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	verifier(int(t.get("gardes_voulus", -1)) == g0.size(), "la ville se souvient de sa garnison (%d gardes)" % g0.size())
+	if g0.is_empty():
+		cfg.merge(sauve, true)
+		s.monde.fermer()
+		return
+	var oisif := {}
+	for x in s._dans_territoire(nom, func() -> Array: return s.residents()):
+		if str(x.get("ai_profile", "")) != "garde" and not (str(x.get("fonction", "")) in ["dirigeant", "maitre_de_guilde"]) and float(x.get("age", 30.0)) >= float(s.regles.r.age.adulte):
+			oisif = x
+			break
+	oisif["fonction"] = "oisif"
+	g0[0].vivant = false
+	t.tresor = 0
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	verifier(gardes.call().size() == g0.size() - 1, "une ville sans le sou ne remplace pas son mort")
+	t.tresor = 500
+	s._dans_territoire(nom, func() -> void: SimVilles._semaine_population(s))
+	verifier(gardes.call().size() == g0.size(), "la ville paie : la garnison est relevée")
+	var recrue: Array = gardes.call().filter(func(x: Dictionary) -> bool: return not g0.has(x))
+	verifier(recrue.size() == 1 and (recrue[0].equipement as Dictionary).has("main_principale") and str(recrue[0].fonction) == "garde", "par un adulte qui n'était pas garde, armé comme un garde")
+	verifier(int(t.tresor) == 500 - int(cfg.releve.cout), "et payé de son trésor (%d)" % int(t.tresor))
+	cfg.merge(sauve, true)
+	s.monde.fermer()
+
+
 ## La population des villes (anneau moyen v2, 2026-09-06) : un couple a un enfant, l'enfant est un résident logé chez
 ## ses parents ; un malheureux migre vers la ville connue qui a de la place, endormi si elle est loin.
 func test_population_villes() -> void:

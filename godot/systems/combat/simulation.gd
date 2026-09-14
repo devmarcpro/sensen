@@ -4647,8 +4647,8 @@ func _monter_aggro(e: Dictionary, source: String, valeur: float, alerter: bool) 
 	for allie in vivants():
 		if allie.id == e.id or allie.camp != e.camp or allie.controle == "joueur":
 			continue
-		if Grille.distance(allie.pos, e.pos) > rayon:
-			continue
+		if Grille.distance(allie.pos, e.pos) > rayon or not grille.ligne_de_vue(allie.pos, e.pos):
+			continue   # l'alerte passe par les yeux : un camarade derrière un mur n'a rien vu (décision du 2026-09-14, question 17)
 		_monter_aggro(allie, source, valeur * part, false)   # un seul rebond : pas de proche en proche
 
 

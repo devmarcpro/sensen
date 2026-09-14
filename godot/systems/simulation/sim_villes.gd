@@ -1223,6 +1223,8 @@ static func _semaine_population(sim: Simulation) -> void:
 				if not parent_l.is_empty() and parent_l.has("lit") and Vector2i(parent_l.lit) == Vector2i(x.lit):
 					x.erase("lit")
 					break
+	# 2 quater. LA RELÈVE DE GARNISON (décision du 2026-09-14, question 10) : un garde tombé se remplace, si la ville peut payer.
+	_releve_garnison(sim, res, ici)
 	# 2 ter. Une ville riche BÂTIT plutôt que d'exporter ses enfants (Villes, 2026-09-07) : avant de regarder qui part.
 	_batir_logements(sim, res.size())
 	# 3. Les migrations : vers la ville connue qui a le plus de place, celle du même royaume d'abord.
@@ -1437,3 +1439,46 @@ static func tiquer_caracteres(sim: Simulation, tick: int) -> void:
 static func en_moisson(sim: Simulation, tick: int = -1) -> bool:
 	var sc: Dictionary = GameData.config("villes").get("champs", {}).get("saisonniers", {})
 	return not sc.is_empty() and SimTerrain.saison(sim, tick) in sc.get("saisons", [])
+
+
+## LA RELÈVE DE GARNISON (décision du 2026-09-14, question 10). Une ville se souvient du nombre de gardes qu'elle avait ;
+## s'il en manque, elle recrute un adulte oisif par semaine, l'arme comme un garde et le paie de son trésor. Sans relève,
+## une garnison décimée le restait pour toujours — et l'équipement qui suit le stock ne mordait sur personne.
+static func _releve_garnison(sim: Simulation, res: Array, ici: bool) -> void:
+	var cfg: Dictionary = GameData.config("villes").get("anneau_moyen", {}).get("population", {}).get("releve", {})
+	if cfg.is_empty():
+		return
+	var gardes := res.filter(func(x: Dictionary) -> bool: return str(x.get("ai_profile", "")) == "garde")
+	if not sim.territoire.has("gardes_voulus"):
+		sim.territoire["gardes_voulus"] = gardes.size()
+		return
+	var cout := int(cfg.get("cout", 40))
+	if gardes.size() >= int(sim.territoire.gardes_voulus) or int(sim.territoire.get("tresor", 0)) < cout:
+		return
+	var modele: Dictionary = GameData.catalogues.creatures.get(str(cfg.get("modele", "garde_village")), {})
+	var adulte := float(sim.regles.r.age.adulte)
+	for x in res:
+		if not (str(x.get("fonction", "oisif")) in cfg.get("fonctions_recrutables", ["oisif"])) or float(x.get("age", 30.0)) < adulte:
+			continue
+		x["ai_profile"] = "garde"
+		x["fonction"] = "garde"
+		if x.has("assignation"):
+			x.assignation["fonction"] = "garde"
+		if not gardes.is_empty():
+			x["camp"] = str(gardes[0].get("camp", x.get("camp", "civil")))
+			if gardes[0].has("poste"):
+				x["poste"] = gardes[0].poste
+				x["ancre"] = gardes[0].poste
+		for item_id in modele.get("equipement", []):
+			var it: Dictionary = GameData.catalogues.items.get(str(item_id), {})
+			if not it.is_empty() and not (x.equipement as Dictionary).has(str(it.get("equip_slot", ""))):
+				x.equipement[str(it.equip_slot)] = str(item_id)
+		var roy := str(x.get("royaume", ""))
+		if not roy.is_empty():
+			var etat_r: Dictionary = SimRoyaumes.etat_royaume(sim, roy)
+			if not etat_r.is_empty():
+				x["blason"] = str(etat_r.blason.couleurs[0])
+		sim.territoire.tresor = int(sim.territoire.tresor) - cout
+		if ici:
+			EventBus.emettre(&"journal", [&"journal.releve_garnison", {"nom": x.name_key, "village": str(sim.territoire.agglomeration.get("nom", ""))}])
+		return

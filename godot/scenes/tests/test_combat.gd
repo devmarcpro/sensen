@@ -364,6 +364,7 @@ func _ready() -> void:
 	_lancer("test_metiers_sans_batiment")   # le journalier et le portefaix (2026-09-07)
 	_lancer("test_anneau_moyen")
 	_lancer("test_population_villes")
+	_lancer("test_releve_garnison")
 	_lancer("test_lod_pnj")
 	_lancer("test_economie")
 	_lancer("test_transports")
