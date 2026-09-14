@@ -549,6 +549,18 @@ static func _recolter_culture(sim: Simulation, e: Dictionary, vers: Vector2i, ti
 		var o: Dictionary = SimObjets.generer_objet(sim, str(c.plante), 1, {}, "commun", 0)
 		if not o.is_empty():
 			SimObjets.donner(sim, e, o.uid)
+	if bool(c.get("arbre", false)):
+		# UN FRUITIER RESTE DEBOUT (question 19, 2026-09-14) : cueilli, il redevient un arbre nu et refleurit à la saison suivante.
+		var duree_a := float(pl.duree_jours) * float(SimTerrain._cycle(sim).get("ticks_par_jour", 24000))
+		c.mure = false
+		c.semis = tick
+		c.echeance = tick + int(duree_a)
+		sim.grille.poser_contenu(vers, "verger_arbre")
+		sim.grille.marquer(vers)
+		e.compteur = tick + int(sim.regles.r.actions.objet)
+		EventBus.emettre(&"tile_changed", [vers])
+		EventBus.emettre(&"journal", [&"journal.recolte_culture", {"nom": e.name_key, "plante": pl.name_key, "n": n}])
+		return true
 	sim.territoire.cultures.erase(pm)
 	sim.territoire.fertilite.erase(pm)
 	sim.grille.contenu[sim.grille.idx(vers)] = 0

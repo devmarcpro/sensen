@@ -306,5 +306,34 @@
       "verger",
       "mure"
     ]
+  },
+  "verger_arbre": {
+    "name_key": "tile_content.verger_arbre.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 3,
+    "couleur": "#2f5a24",
+    "tags": [
+      "culture",
+      "parcelle",
+      "verger",
+      "arbre_fruitier",
+      "vegetation"
+    ]
+  },
+  "verger_arbre_mur": {
+    "name_key": "tile_content.verger_arbre_mur.name",
+    "bloque_passage": true,
+    "bloque_vue": true,
+    "hauteur_vue": 3,
+    "couleur": "#8a3a2a",
+    "tags": [
+      "culture",
+      "parcelle",
+      "verger",
+      "arbre_fruitier",
+      "mure",
+      "vegetation"
+    ]
   }
 }

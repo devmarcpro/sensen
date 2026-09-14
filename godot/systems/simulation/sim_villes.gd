@@ -465,7 +465,13 @@ static func _semer_tuile(sim: Simulation, vers: Vector2i, base: String, tick: in
 	if not dans_saison:
 		duree *= float(hs.get("duree", 1.8))
 	var jeune := str(champ.get("contenu", "culture"))
-	sim.territoire.cultures[SimCamp._pm(sim, vers)] = {"plante": base, "semis": tick - int(duree * avancement), "echeance": tick + int(duree * (1.0 - avancement)), "mure": false, "hors_saison": not dans_saison, "mur_id": str(champ.get("contenu_mur", "culture_mure"))}
+	var mur_id := str(champ.get("contenu_mur", "culture_mure"))
+	var arbre: bool = bool(champ.get("verger", false)) and ("arbre_fruitier" in pl.get("tags", []))
+	if arbre:
+		mur_id = "verger_arbre_mur"   # un pommier mûrit en ARBRE : il bloque la vue et le passage (question 19, 2026-09-14)
+	sim.territoire.cultures[SimCamp._pm(sim, vers)] = {"plante": base, "semis": tick - int(duree * avancement), "echeance": tick + int(duree * (1.0 - avancement)), "mure": false, "hors_saison": not dans_saison, "mur_id": mur_id}
+	if arbre:
+		sim.territoire.cultures[SimCamp._pm(sim, vers)]["arbre"] = true
 	sim.grille.poser_contenu(vers, jeune)
 	sim.grille.marquer(vers)
 

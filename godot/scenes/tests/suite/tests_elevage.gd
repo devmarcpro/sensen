@@ -650,3 +650,33 @@ func test_chatoyant() -> void:
 
 
 # ---------------------------------------------------------------- Règle d'anneau : la mesure (sélection dirigée contre hasard)
+
+
+## LES FRUITIERS HAUTS (question 19, 2026-09-14) : un pommier mûrit en arbre — il bloque la vue et le passage, se cueille de
+## la tuile voisine et reste debout ; un framboisier reste un buisson.
+func test_fruitiers_hauts() -> void:
+	var s := Simulation.new(4303)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var g := s.grille
+	var ici: Vector2i = s._tuile_libre_autour(j.pos + Vector2i(3, 0))
+	var la: Vector2i = s._tuile_libre_autour(j.pos + Vector2i(-3, 0))
+	for p in [ici, la]:
+		g.contenu[g.idx(p)] = 0
+	var t0 := s.horloge_monde.ticks
+	SimVilles._semer_tuile(s, ici, "pomme", t0, 0.99, {"verger": true, "plante": "pomme", "contenu": "verger", "contenu_mur": "verger_mur"})
+	SimVilles._semer_tuile(s, la, "framboisier", t0, 0.99, {"verger": true, "plante": "framboisier", "contenu": "verger", "contenu_mur": "verger_mur"})
+	verifier(not g.bloque_passage(ici), "le jeune pommier ne barre rien")
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	SimCamp._heure_parcelles(s, t0 + jour * 30)
+	verifier(g.bloque_passage(ici) and bool(g.contenu_de(ici).get("bloque_vue", false)), "mûr, le pommier est un arbre : il barre le passage et la vue")
+	verifier(not g.bloque_passage(la), "le framboisier reste un buisson")
+	var voisin: Vector2i = s._tuile_libre_autour(ici)
+	s.grille.liberer(j.pos, j.id)
+	j.pos = voisin
+	s.grille.placer(j.id, voisin)
+	var sac0: int = j.sac.size()
+	verifier(SimCamp._recolter_culture(s, j, ici, t0 + jour * 30), "on le cueille depuis la tuile voisine")
+	verifier(j.sac.size() > sac0 and g.bloque_passage(ici) and s.territoire.cultures.has(SimCamp._pm(s, ici)), "des pommes au sac — et l'arbre reste debout, prêt à refleurir")
+	s.monde.fermer()
+
