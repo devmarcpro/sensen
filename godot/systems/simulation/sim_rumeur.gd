@@ -296,3 +296,90 @@ static func connus(sim: Simulation, cellule: Vector2i, tick: int) -> Array:
 			res.append({"fait": f, "fraicheur": fr})
 	res.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a.fraicheur) > float(b.fraicheur))
 	return res
+
+
+# ---------------------------------------------------------------- le monde se dit (22 ter, lot 8 — 2026-09-14)
+
+## LES NOUVELLES DU MONDE qu'un PNJ connaît : ce que la simulation fait autour de lui, lu dans l'état — jamais écrit à la
+## main. Rend [{cle, params}], de la plus urgente à la plus banale.
+static func nouvelles_du_monde(sim: Simulation, pnj: Dictionary) -> Array:
+	var res: Array = []
+	if sim.monde == null or sim.lieu != "camp":
+		return res
+	var pos: Vector2i = pnj.get("pos", Vector2i.ZERO)
+	var cell := sim.monde.cellule_de(pos)
+	if SimVoyage.en_guerre(sim, cell):
+		res.append({"cle": "nouvelle.guerre", "params": {}})
+	for id in (GameData.config("maladies").get("liste", {}) as Dictionary).keys():
+		if SimMaladies.charge(sim, pos, str(id)) > 0.0:
+			res.append({"cle": "nouvelle.maladie", "params": {"maladie": str(GameData.config("maladies").liste[id].get("name_key", id))}})
+			break
+	if SimEcologie.affamee(sim, cell):
+		res.append({"cle": "nouvelle.loups_affames", "params": {}})
+	elif SimEcologie.mult_recolte(sim, cell) < 1.0:
+		res.append({"cle": "nouvelle.cerfs_pullulent", "params": {}})
+	if SimClimat.secheresse(sim, cell):
+		res.append({"cle": "nouvelle.secheresse", "params": {}})
+	elif SimClimat.detrempe(sim, cell):
+		res.append({"cle": "nouvelle.detrempe", "params": {}})
+	if SimClimat.neige_sol(sim, cell) > 0.4:
+		res.append({"cle": "nouvelle.neige", "params": {}})
+	var lieu := lieu_des_environs(sim, pos)
+	if not lieu.is_empty():
+		var tc := int(sim.monde.taille)
+		var d: Vector2i = lieu.centre - pos
+		res.append({"cle": "nouvelle.lieu", "params": {"lieu": "lieu.sous_type." + str(lieu.sous_type), "direction": "direction." + _direction(d), "lieu_id": str(lieu.id),
+			"cellules": maxi(1, roundi(float(maxi(absi(d.x), absi(d.y))) / float(tc)))}})
+	return res
+
+
+## Le lieu des environs dont on parle : le plus proche que le joueur ne connaît pas encore, sinon le plus proche.
+static func lieu_des_environs(sim: Simulation, pos: Vector2i) -> Dictionary:
+	var tc := int(sim.monde.taille)
+	var s0 := Lieux.secteur_de_tuile(pos, tc)
+	var inconnu := {}
+	var d_inc := 999999
+	var connu := {}
+	var d_con := 999999
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			for l in sim.monde.surface.lieux().secteur(s0 + Vector2i(dx, dy)):
+				var dl: int = Grille.distance(pos, l.centre)
+				if sim.monde.lieux_connus.has(str(l.id)):
+					if dl < d_con:
+						d_con = dl
+						connu = l
+				elif dl < d_inc:
+					d_inc = dl
+					inconnu = l
+	return inconnu if not inconnu.is_empty() else connu
+
+
+static func _direction(d: Vector2i) -> String:
+	if d == Vector2i.ZERO:
+		return "ici"
+	var a := fposmod(rad_to_deg(atan2(float(d.y), float(d.x))), 360.0)
+	var noms := ["est", "sud_est", "sud", "sud_ouest", "ouest", "nord_ouest", "nord", "nord_est"]
+	return str(noms[int(round(a / 45.0)) % 8])
+
+
+## ÉCOUTER UNE NOUVELLE : le PNJ choisit la plus urgente qu'on ne lui a pas déjà entendue dire ; un lieu raconté devient
+## connu du joueur — on apprend la carte en parlant aux gens.
+static func raconter_nouvelle(sim: Simulation, pnj: Dictionary) -> Dictionary:
+	var dites: Array = pnj.get("nouvelles_dites", [])
+	var choisie := {}
+	for n in nouvelles_du_monde(sim, pnj):
+		var cle := str(n.cle) + ":" + str(n.params.get("lieu_id", ""))
+		if not (cle in dites):
+			choisie = n
+			dites.append(cle)
+			break
+	if choisie.is_empty():
+		return {}
+	while dites.size() > 6:
+		dites.pop_front()
+	pnj["nouvelles_dites"] = dites
+	pnj["derniere_nouvelle"] = choisie
+	if choisie.params.has("lieu_id"):
+		sim.monde.lieux_connus[str(choisie.params.lieu_id)] = true
+	return choisie

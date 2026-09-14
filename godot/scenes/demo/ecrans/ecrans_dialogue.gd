@@ -304,6 +304,15 @@ static func texte_replique(ec: Ecrans, pnj: Dictionary) -> String:
 	# bûcheron s'indigne de l'arbre abattu, le garde hausse les épaules, le Cercle du soufre s'en amuse.
 	if ec.replique_key == "on_raconte":
 		return texte_on_raconte(ec, pnj)
+	if ec.replique_key == "nouvelles_du_monde":   # ce que la simulation fait autour de lui (lot 8)
+		var n: Dictionary = pnj.get("derniere_nouvelle", {})
+		if n.is_empty():
+			return ec.tr("dialogue.on_raconte.rien")
+		var pr: Dictionary = (n.get("params", {}) as Dictionary).duplicate()
+		for k in pr.keys():
+			if pr[k] is String and str(pr[k]).contains("."):
+				pr[k] = ec.tr(str(pr[k]))
+		return ec.tr(str(n.cle)).format(pr)
 	if ec.replique_key == "opinion":
 		var ops: Dictionary = pnj.get("social", {}).get("opinions", {})
 		for autre in ops.keys():

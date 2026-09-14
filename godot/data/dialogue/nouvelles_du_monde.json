@@ -1,0 +1,11 @@
+{
+  "text_key": "nouvelles_du_monde",
+  "conditions": {
+    "metier": null,
+    "phase": null,
+    "relation_min": null,
+    "relation_max": null,
+    "meteo": null
+  },
+  "poids": 7
+}

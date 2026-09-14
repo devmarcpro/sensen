@@ -40,6 +40,8 @@ static func replique(sim: Simulation, pnj: Dictionary, j: Dictionary) -> String:
 			continue
 		if str(d.text_key) == "histoire" and not pnj.has("histoire"):
 			continue
+		if str(d.text_key) == "nouvelles_du_monde" and SimRumeur.nouvelles_du_monde(sim, pnj).is_empty():
+			continue   # rien à dire du monde : la réplique ne se propose pas (lot 8)
 		if str(d.text_key) == "opinion" and pnj.get("social", {}).get("opinions", {}).is_empty():
 			continue
 		if c.get("fete") != null and bool(c.fete) != (not SimVilles.fete_de(sim, pnj).is_empty()):   # Calendrier : un jour de fête, de marché, d'anniversaire
@@ -62,6 +64,8 @@ static func replique(sim: Simulation, pnj: Dictionary, j: Dictionary) -> String:
 			while recentes.size() > 3:
 				recentes.pop_front()
 			pnj["dernieres_repliques"] = recentes
+			if str(d.text_key) == "nouvelles_du_monde" and SimRumeur.raconter_nouvelle(sim, pnj).is_empty():
+				return "dialogue.salut.text"   # tout ce qu'il savait, il l'a déjà dit
 			return str(d.text_key)
 	return str(candidats.back().text_key)
 

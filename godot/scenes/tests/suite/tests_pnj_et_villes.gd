@@ -392,6 +392,39 @@ func test_valeurs_des_royaumes() -> void:
 	s.monde.fermer()
 
 
+## LE MONDE SE DIT (22 ter, lot 8 — 2026-09-14) : un PNJ parle de ce que la simulation fait autour de lui, et un lieu
+## raconté apparaît sur la carte du joueur.
+func test_le_monde_se_dit() -> void:
+	var s := Simulation.new(4265)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var v := s.ajouter("villageois", s._tuile_libre_autour(j.pos), "ia")
+	var cell := s.monde.cellule_de(v.pos)
+	s.monde.lieux_connus.clear()
+	var n0 := SimRumeur.nouvelles_du_monde(s, v)
+	verifier(n0.any(func(n: Dictionary) -> bool: return str(n.cle) == "nouvelle.lieu"), "un villageois connaît un lieu des environs")
+	s.monde.ecologie[cell] = {"proies": 0.2, "predateurs": 1.2}
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	var n1 := SimRumeur.nouvelles_du_monde(s, v)
+	var cles: Array = n1.map(func(n: Dictionary) -> String: return str(n.cle))
+	verifier("nouvelle.loups_affames" in cles and "nouvelle.secheresse" in cles, "et il parle des loups affamés et de la sécheresse (%s)" % str(cles))
+	# RACONTÉE, UNE NOUVELLE NE SE RÉPÈTE PAS ; UN LIEU RACONTÉ DEVIENT CONNU.
+	var dites := []
+	for k in 6:
+		var n := SimRumeur.raconter_nouvelle(s, v)
+		if n.is_empty():
+			break
+		dites.append(str(n.cle) + ":" + str(n.params.get("lieu_id", "")))
+	var uniques := {}
+	for x in dites:
+		uniques[x] = true
+	verifier(dites.size() >= 3 and uniques.size() == dites.size(), "il ne répète rien : les nouvelles, puis un lieu après l'autre (%d dites, %d distinctes)" % [dites.size(), uniques.size()])
+	verifier(not s.monde.lieux_connus.is_empty(), "et le lieu qu'il a raconté est désormais sur la carte du joueur")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_brouillard() -> void:
 	var s := Simulation.new(7)
 	s.charger_donjon("ruine", 7, 3, 1)
