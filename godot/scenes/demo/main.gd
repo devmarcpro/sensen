@@ -2614,40 +2614,60 @@ func _dessiner_morceau(ci: CanvasItem, coin: Vector2i) -> void:
 	var coupures: PackedInt32Array = res.coupures
 	var debut := 0
 	var teinte := Color.WHITE.lerp(Color(1.4, 1.4, 1.5), 0.5) if g.neige else Color.WHITE
+	# LE LOT (45 ter, 2026-09-14) : les tranches de triangles s'accumulent, et les détails qui savent se dire en triangles
+	# (la traverse et la poignée d'une porte, une caisse) y entrent à leur place. Une coupure ne soumet plus que si elle
+	# DESSINE autre chose — un vrai sprite, un membre posé au sol. Un meuble sans sprite ne coupe plus rien.
+	var lot_p := PackedVector2Array()
+	var lot_c := PackedColorArray()
+	var lot_u := PackedVector2Array()
 	@warning_ignore("integer_division")
 	for k in coupures.size() / 3:
 		var fin: int = coupures[k * 3]
 		var idx: int = coupures[k * 3 + 1]
 		var genre: int = coupures[k * 3 + 2]
 		if fin > debut:
-			_soumettre_triangles(rid, pts, cols, uvs, debut, fin)
+			lot_p.append_array(pts.slice(debut, fin))
+			lot_c.append_array(cols.slice(debut, fin))
+			lot_u.append_array(uvs.slice(debut, fin))
 			debut = fin
 		var t := g.pos_de(idx)
 		var c := _ecran(t, g.h(t))
 		match genre:
-			1:   # la traverse et la poignée d'une porte
-				_porte_details(ci, g, t, c, g.contenu_de(t), teinte)
-			2:   # un contenant : une caisse — ou le membre qu'il porte, tel qu'il était sur la créature (2026-09-13)
+			1:   # la traverse et la poignée d'une porte : des triangles du lot
+				_porte_triangles(lot_p, lot_c, lot_u, g, t, c, g.contenu_de(t), teinte)
+			2:   # un contenant : une caisse (triangles) — ou le membre qu'il porte, tel qu'il était sur la créature (2026-09-13)
 				var membre_sol := _membre_au_sol(g, t) if not ("coffre" in g.contenu_de(t).get("tags", [])) else {}
 				if not membre_sol.is_empty():
+					if not lot_p.is_empty():
+						_soumettre_triangles(rid, lot_p, lot_c, lot_u, 0, lot_p.size())
+						lot_p = PackedVector2Array()
+						lot_c = PackedColorArray()
+						lot_u = PackedVector2Array()
 					Pictos.dessiner_objet(ci, membre_sol, Rect2(c + Vector2(-9, -14), Vector2(18, 18)))
 					continue
 				var cc := (Color(0.55, 0.38, 0.18) if "coffre" in g.contenu_de(t).get("tags", []) else Color(0.75, 0.65, 0.3)) * teinte
-				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc)
-				ci.draw_rect(Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc.darkened(0.5), false, 1.0)
-			3:   # le sprite d'un meuble ou d'une station
+				_rect_triangles(lot_p, lot_c, lot_u, Rect2(c + Vector2(-6, -8), Vector2(12, 8)), cc, cc.darkened(0.5))
+			3:   # le sprite d'un meuble ou d'une station — seulement s'il y en a un à dessiner
+				if not _sprite_tuile_dessinable(g, t):
+					continue
+				if not lot_p.is_empty():
+					_soumettre_triangles(rid, lot_p, lot_c, lot_u, 0, lot_p.size())
+					lot_p = PackedVector2Array()
+					lot_c = PackedColorArray()
+					lot_u = PackedVector2Array()
 				_dessiner_sprite_tuile(ci, g, t, c, teinte)
 	# LES FRANGES PARTENT AVEC LA DERNIÈRE TRANCHE (45 ter, 2026-09-13) : elles étaient une commande de plus par morceau,
 	# soumise juste après cette tranche — les coller au bout ne change pas l'ordre de dessin, et retire un appel.
 	var fr: Array = _franges_matieres(g, coin, p, teinte, coupures)
-	if pts.size() > debut or not (fr[0] as PackedVector2Array).is_empty():
-		var q_pts: PackedVector2Array = pts.slice(debut)
-		var q_cols: PackedColorArray = cols.slice(debut)
-		var q_uvs: PackedVector2Array = uvs.slice(debut)
-		q_pts.append_array(fr[0])
-		q_cols.append_array(fr[1])
-		q_uvs.append_array(fr[2])
-		_soumettre_triangles(rid, q_pts, q_cols, q_uvs, 0, q_pts.size())
+	if pts.size() > debut:
+		lot_p.append_array(pts.slice(debut))
+		lot_c.append_array(cols.slice(debut))
+		lot_u.append_array(uvs.slice(debut))
+	lot_p.append_array(fr[0])
+	lot_c.append_array(fr[1])
+	lot_u.append_array(fr[2])
+	if not lot_p.is_empty():
+		_soumettre_triangles(rid, lot_p, lot_c, lot_u, 0, lot_p.size())
 	for idx in res.vegetaux:
 		_assurer_vegetal(g.pos_de(idx))
 
@@ -2754,6 +2774,65 @@ func _porte_details(ci: CanvasItem, g: Grille, t: Vector2i, c: Vector2, contenu:
 	var trav := (p0 + p1) * 0.5 + haut * 0.55
 	ci.draw_line(p0 + haut * 0.5, p1 + haut * 0.5, bois.darkened(0.25), 1.0)
 	ci.draw_circle(trav.lerp(p1 + haut * 0.55, 0.45), 1.6, Color(0.85, 0.75, 0.35) * teinte)
+
+
+## La traverse et la poignée d'une porte en triangles (45 ter, 2026-09-14) : la même géométrie que `_porte_details`,
+## ajoutée au lot du morceau au lieu d'être une commande de dessin qui coupe la soumission. UV nuls : « plat ».
+func _porte_triangles(lot_p: PackedVector2Array, lot_c: PackedColorArray, lot_u: PackedVector2Array, g: Grille, t: Vector2i, c: Vector2, contenu: Dictionary, teinte: Color) -> void:
+	var bois := _couleur_html(str(contenu.get("couleur", "#6a4a22"))) * teinte
+	var mur_x: bool = (g.dans(t + Vector2i(1, 0)) and g.bloque_passage(t + Vector2i(1, 0))) or (g.dans(t - Vector2i(1, 0)) and g.bloque_passage(t - Vector2i(1, 0)))
+	var demi := Vector2(TW * 0.25, TH * 0.25) if mur_x else Vector2(TW * 0.25, -TH * 0.25)
+	var a := c - demi
+	var b := c + demi
+	var haut := Vector2(0.0, -float((PORTE_BLOCS * BLOC_UNITES) if g.niveaux_bat[g.idx(t)] > 0 else int(contenu.get("hauteur_vue", 2))) * HSTEP)
+	var ferme: bool = "fermee" in contenu.get("tags", [])
+	var p0 := a if ferme else a.lerp(b, 0.68)
+	var p1 := b
+	var trav := (p0 + p1) * 0.5 + haut * 0.55
+	_trait_triangles(lot_p, lot_c, lot_u, p0 + haut * 0.5, p1 + haut * 0.5, 1.0, bois.darkened(0.25))
+	var centre := trav.lerp(p1 + haut * 0.55, 0.45)
+	var col_p := Color(0.85, 0.75, 0.35) * teinte
+	for k in 8:
+		var a0 := TAU * float(k) / 8.0
+		var a1 := TAU * float(k + 1) / 8.0
+		lot_p.append_array([centre, centre + Vector2(cos(a0), sin(a0)) * 1.6, centre + Vector2(cos(a1), sin(a1)) * 1.6])
+		lot_c.append_array([col_p, col_p, col_p])
+		lot_u.append_array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+
+
+## Un trait d'épaisseur `l` en deux triangles.
+static func _trait_triangles(lot_p: PackedVector2Array, lot_c: PackedColorArray, lot_u: PackedVector2Array, a: Vector2, b: Vector2, l: float, col: Color) -> void:
+	var d := (b - a)
+	if d.length() < 0.001:
+		return
+	var n := Vector2(-d.y, d.x).normalized() * l * 0.5
+	lot_p.append_array([a - n, a + n, b + n, a - n, b + n, b - n])
+	lot_c.append_array([col, col, col, col, col, col])
+	lot_u.append_array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+
+
+## Un rectangle plein et son liseré en triangles (la caisse d'un butin, 45 ter).
+static func _rect_triangles(lot_p: PackedVector2Array, lot_c: PackedColorArray, lot_u: PackedVector2Array, r: Rect2, plein: Color, lisere: Color) -> void:
+	var a := r.position
+	var b := Vector2(r.end.x, r.position.y)
+	var cc := r.end
+	var d := Vector2(r.position.x, r.end.y)
+	lot_p.append_array([a, b, cc, a, cc, d])
+	lot_c.append_array([plein, plein, plein, plein, plein, plein])
+	lot_u.append_array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+	for seg in [[a, b], [b, cc], [cc, d], [d, a]]:
+		_trait_triangles(lot_p, lot_c, lot_u, seg[0], seg[1], 1.0, lisere)
+
+
+## Y a-t-il un sprite à dessiner sur cette tuile ? (la même recherche que `_dessiner_sprite_tuile`, sans dessiner)
+func _sprite_tuile_dessinable(g: Grille, t: Vector2i) -> bool:
+	var gi := g.idx(t)
+	for mid in g.meubles_de(gi):
+		if Pictos.texture_objet({"id": "meuble_" + str(mid), "type": "meuble"}) != null:
+			return true
+	if g.stations_fixes.has(gi):
+		return Pictos.texture_objet({"id": "station_" + str(g.stations_fixes[gi]), "type": "station"}) != null
+	return false
 
 
 var _tables_morceau: Dictionary = {}   # les tables des passes (couleur et grain par matériau, par meuble), bâties une fois
