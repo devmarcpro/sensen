@@ -510,6 +510,64 @@ func test_estampage_des_lieux() -> void:
 
 
 ## LE DONJON-BÂTIMENT (39 ter, pas C — 2026-09-13) : y entrer charge le donjon du lieu, en ressortir ramène devant la porte.
+## LES TANIÈRES (39 ter, pas F — 2026-09-14) : là où les prédateurs prolifèrent, une meute s'installe ; la nettoyer calme la
+## cellule ; une cellule redevenue calme l'abandonne. Le premier lieu que la simulation fait naître au lieu de la graine.
+func test_tanieres() -> void:
+	var s := Simulation.new(4271)
+	s.charger_camp()
+	var reg: Lieux = s.monde.surface.lieux()
+	var tc := int(s.monde.taille)
+	var cell := Vector2i(-9999, -9999)
+	for r in range(4, 9):
+		for dx in range(-r, r + 1):
+			var c: Vector2i = s.monde.cellule_camp + Vector2i(dx, r)
+			if s.monde.surface.terre_a(c) and s.monde.surface.agglomeration_de(c).is_empty() and not s.monde.claims.has(c):
+				cell = c
+				break
+		if cell.x != -9999:
+			break
+	verifier(cell.x != -9999, "une cellule de terre sauvage à quelques cellules du camp")
+	s.monde.ecologie.clear()
+	s.monde.ecologie[cell] = {"proies": 1.6, "predateurs": 1.6}
+	SimEcologie.semaine(s)
+	var lieu := {}
+	for l in reg.nes.values():
+		if s.monde.cellule_de(l.centre) == cell:
+			lieu = l
+	verifier(not lieu.is_empty() and str(lieu.type) == "taniere", "les prédateurs prolifèrent : une tanière naît dans la cellule")
+	if lieu.is_empty():
+		s.monde.fermer()
+		return
+	var id := str(lieu.id)
+	verifier(str(reg.par_id(id).get("id", "")) == id, "elle est dans le registre comme un lieu de la graine (%s)" % lieu.sous_type)
+	verifier(not Lieux.habitants_de(lieu).is_empty(), "et elle a ses habitants")
+	verifier(TranslationServer.translate("lieu.sous_type." + str(lieu.sous_type)) != "lieu.sous_type." + str(lieu.sous_type), "et un nom")
+	var trouve := false
+	for l2 in reg.secteur(Lieux.secteur_de_tuile(lieu.centre, tc)):
+		trouve = trouve or str(l2.id) == id
+	verifier(trouve, "son secteur la compte : la rumeur et le voyage la trouvent")
+	SimEcologie.semaine(s)
+	var n := 0
+	for l3 in reg.nes.values():
+		if s.monde.cellule_de(l3.centre) == cell:
+			n += 1
+	verifier(n == 1, "une seule par cellule, même la semaine suivante (%d)" % n)
+	var d := reg.nes_serialise()
+	reg.nes_charger(Sauvegarde.decoder(JSON.parse_string(JSON.stringify(Sauvegarde.encoder(d)))))
+	verifier(reg.nes.has(id) and reg.nes[id].emprise is Rect2i and Vector2i(reg.nes[id].centre) == Vector2i(lieu.centre), "elle survit à la sauvegarde")
+	var avant := float(SimEcologie.indices(s, cell).predateurs)
+	Lieux.habitant_mort(s, {"lieu": id, "vivant": false})
+	verifier(not reg.nes.has(id), "son dernier habitant mort, la tanière n'est plus")
+	verifier(float(SimEcologie.indices(s, cell).predateurs) < avant - 0.3, "et la cellule se calme (%.2f → %.2f)" % [avant, float(SimEcologie.indices(s, cell).predateurs)])
+	s.monde.ecologie[cell] = {"proies": 1.6, "predateurs": 1.6}
+	SimEcologie.semaine(s)
+	verifier(reg.nes.size() == 1, "les prédateurs reviennent : une autre s'installe")
+	s.monde.ecologie[cell] = {"proies": 1.0, "predateurs": 0.5}
+	SimEcologie.semaine(s)
+	verifier(reg.nes.is_empty(), "la cellule redevenue calme l'abandonne")
+	s.monde.fermer()
+
+
 func test_donjon_batiment() -> void:
 	var s := Simulation.new(4252)
 	s.charger_camp()

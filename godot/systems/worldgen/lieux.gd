@@ -14,6 +14,10 @@ extends RefCounted
 
 var surface: Surface
 var _cache: Dictionary = {}   # secteur → Array[Dictionary]
+## LES LIEUX NÉS DE LA SIMULATION (39 ter, pas F — 2026-09-14) : id → lieu. La graine pose les ruines ; la simulation, elle,
+## fait naître une tanière où les prédateurs prolifèrent, et la retire quand on l'a nettoyée. Ceux-là se sauvegardent.
+var nes: Dictionary = {}
+var _n_nes := 0
 var _mutex := Mutex.new()
 
 
@@ -34,16 +38,63 @@ static func secteur_de_tuile(p: Vector2i, taille_cellule: int) -> Vector2i:
 ## Les lieux d'un secteur, du plus ancien tiré au plus récent — toujours les mêmes pour une graine.
 func secteur(sect: Vector2i) -> Array:
 	_mutex.lock()
-	if _cache.has(sect):
-		var deja: Array = _cache[sect]
+	var res: Array = _cache.get(sect, [])
+	var connu := _cache.has(sect)
+	_mutex.unlock()
+	if not connu:
+		res = _generer(sect)
+		_mutex.lock()
+		_cache[sect] = res
 		_mutex.unlock()
-		return deja
-	_mutex.unlock()
-	var res := _generer(sect)
-	_mutex.lock()
-	_cache[sect] = res
-	_mutex.unlock()
-	return res
+	if nes.is_empty():
+		return res
+	var tout := res.duplicate()
+	for l in nes.values():
+		if secteur_de_tuile(l.centre, int(surface.planete.taille_cellule)) == sect:
+			tout.append(l)
+	return tout
+
+
+## FAIRE NAÎTRE UN LIEU (2026-09-14) : un lieu que la simulation pose là où elle en a besoin — il vit dans le registre
+## comme les autres (la rumeur en parle, le voyage le fait découvrir, la carte le montre, la fenêtre le peuple).
+func naitre(type: String, sous_type: String, centre: Vector2i, cote: int, tick: int) -> Dictionary:
+	var tc := int(surface.planete.taille_cellule)
+	var sect := secteur_de_tuile(centre, tc)
+	var id := "lieu:%d,%d:ne%d" % [sect.x, sect.y, _n_nes]
+	while nes.has(id):
+		_n_nes += 1
+		id = "lieu:%d,%d:ne%d" % [sect.x, sect.y, _n_nes]
+	_n_nes += 1
+	var lieu := {"id": id, "type": type, "sous_type": sous_type, "emprise": Rect2i(centre - Vector2i(cote / 2, cote / 2), Vector2i(cote, cote)),
+		"centre": centre, "biome": surface.biome_a(centre.x, centre.y), "graine": hash([surface.graine, "ne", id, tick]), "ne_tick": tick}
+	nes[id] = lieu
+	return lieu
+
+
+func retirer(id: String) -> void:
+	nes.erase(id)
+
+
+## Pour la sauvegarde : l'emprise en nombres (le format ne sait pas écrire un Rect2i).
+func nes_serialise() -> Dictionary:
+	var d := {}
+	for id in nes.keys():
+		var l: Dictionary = nes[id].duplicate()
+		var r: Rect2i = l.emprise
+		l.emprise = [r.position.x, r.position.y, r.size.x, r.size.y]
+		d[id] = l
+	return d
+
+
+func nes_charger(d: Dictionary) -> void:
+	nes.clear()
+	for id in d.keys():
+		var l: Dictionary = (d[id] as Dictionary).duplicate()
+		var e: Array = l.get("emprise", [0, 0, 1, 1])
+		l.emprise = Rect2i(int(e[0]), int(e[1]), int(e[2]), int(e[3]))
+		l.centre = Vector2i(l.centre)
+		nes[str(id)] = l
+	_n_nes = nes.size()
 
 
 ## Les lieux dont l'emprise recoupe un rectangle de tuiles (un morceau à estamper, la fenêtre, une zone de carte).
@@ -372,6 +423,33 @@ static func habitants_de(lieu: Dictionary) -> Array:
 ## PEUPLER LES LIEUX DE LA FENÊTRE : une fois par lieu, quand son centre y entre. Les lits du plan logent les habitants,
 ## la place est le centre du lieu, le poste une tuile libre autour.
 static func peupler(sim: Simulation) -> void:
+	_peupler(sim)
+
+
+## UN HABITANT EST MORT (2026-09-14) : le dernier habitant d'un lieu né de la simulation emporte le lieu avec lui — une
+## tanière nettoyée n'est plus une tanière, et sa cellule s'en ressent.
+static func habitant_mort(sim: Simulation, x: Dictionary) -> void:
+	if sim.monde == null:
+		return
+	var id := str(x.get("lieu", ""))
+	var reg: Lieux = sim.monde.surface.lieux()
+	if id.is_empty() or not reg.nes.has(id):
+		return
+	for y in sim.vivants():
+		if str(y.get("lieu", "")) == id:
+			return
+	var lieu: Dictionary = reg.nes[id]
+	reg.retirer(id)
+	sim.monde.peuplees.erase(id)
+	sim.monde.lieux_connus.erase(id)
+	if str(lieu.type) == "taniere":
+		var cell := sim.monde.cellule_de(lieu.centre)
+		var i := SimEcologie.indices(sim, cell)
+		SimEcologie._poser(sim, cell, float(i.proies), float(i.predateurs) - float(SimEcologie._cfg().get("tanieres", {}).get("nettoyee", 0.6)))
+		EventBus.emettre(&"journal", [&"journal.taniere_nettoyee", {"lieu": "lieu.sous_type." + str(lieu.sous_type)}])
+
+
+static func _peupler(sim: Simulation) -> void:
 	if sim.monde == null or sim.grille == null:
 		return
 	var rect := Rect2i(sim.grille.origine, Vector2i(sim.grille.largeur, sim.grille.hauteur_grille))

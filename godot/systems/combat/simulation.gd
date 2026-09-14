@@ -2642,6 +2642,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 				if str(x_m.get("camp", "")) == "joueur" and x_m.id != cible.id and Grille.distance(x_m.pos, cible.pos) <= int(fr_m.get("allie_distance", 12)) and grille.ligne_de_vue(x_m.pos, cible.pos):
 					effrayer(x_m, float(fr_m.get("allie_mort", 30)), "allie_mort")
 		SimPnj._quetes_sur_mort(self, cible, source)
+		if cible.has("lieu"):
+			Lieux.habitant_mort(self, cible)   # le dernier loup d'une tanière emporte la tanière (39 ter, pas F)
 		if not att.is_empty() and att.controle == "joueur" and bool(cible.get("spawn_faune", false)) and est_faune_paisible(cible):
 			_rarefier_faune(cible.pos)   # massacrer la faune vide la forêt (Créatures, 2026-09-04)
 		if not att.is_empty() and bool(cible.get("spawn_faune", false)):

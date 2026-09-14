@@ -181,6 +181,55 @@
         0,
         2
       ]
+    ],
+    "taniere/taniere_loup": [
+      [
+        "loup",
+        3,
+        5
+      ]
+    ],
+    "taniere/taniere_loup_blanc": [
+      [
+        "loup_blanc",
+        3,
+        5
+      ]
+    ],
+    "taniere/taniere_lynx": [
+      [
+        "lynx",
+        1,
+        2
+      ]
+    ],
+    "taniere/taniere_crocodile": [
+      [
+        "crocodile",
+        2,
+        3
+      ]
+    ],
+    "taniere/taniere_araignee_geante": [
+      [
+        "araignee_geante",
+        2,
+        4
+      ]
+    ],
+    "taniere/taniere_scorpion": [
+      [
+        "scorpion",
+        2,
+        4
+      ]
+    ],
+    "taniere/taniere_sanglier": [
+      [
+        "sanglier",
+        2,
+        4
+      ]
     ]
   },
   "tresors": {
@@ -201,6 +250,10 @@
       1
     ],
     "sanctuaire/autel": [
+      0,
+      1
+    ],
+    "taniere": [
       0,
       1
     ]

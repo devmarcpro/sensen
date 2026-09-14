@@ -503,7 +503,7 @@ func _dessiner() -> void:
 	# LES LIEUX CONNUS (39 ter) : une pastille par lieu découvert, sa couleur dit son type — la carte se remplit de ce qu'on a
 	# croisé en chemin, pas de ce que la graine a posé.
 	var tc_c := int(sim.monde.taille)
-	var couleurs_lieux := {"ruine": Color(0.7, 0.66, 0.6), "donjon_batiment": Color(0.85, 0.3, 0.3), "hameau": Color(0.95, 0.8, 0.45), "camp": Color(0.9, 0.5, 0.2), "sanctuaire": Color(0.6, 0.8, 1.0)}
+	var couleurs_lieux := {"ruine": Color(0.7, 0.66, 0.6), "donjon_batiment": Color(0.85, 0.3, 0.3), "hameau": Color(0.95, 0.8, 0.45), "camp": Color(0.9, 0.5, 0.2), "sanctuaire": Color(0.6, 0.8, 1.0), "taniere": Color(0.5, 0.32, 0.18)}
 	for id_l in sim.monde.lieux_connus.keys():
 		var l: Dictionary = surf.lieux().par_id(str(id_l))
 		if l.is_empty():

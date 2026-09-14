@@ -75,6 +75,7 @@ static func semaine(sim: Simulation) -> void:
 		var p2 := p + float(c.get("retour", 0.12)) * (1.0 - p) - float(c.get("predation", 0.25)) * (q - 1.0) * p
 		var q2 := q + float(c.get("retour", 0.12)) * (1.0 - q) + float(c.get("nourriture", 0.3)) * (p - 1.0) * q
 		_poser(sim, cell, p2, q2)
+	tanieres(sim)
 	if sim.lieu != "camp":
 		return
 	var rng := RandomNumberGenerator.new()
@@ -126,3 +127,49 @@ static func poids_saison(sim: Simulation, id: String) -> float:
 		if id in c.groupes[groupe]:
 			return float(s.get(groupe, 1.0))
 	return 1.0
+
+
+## LES TANIÈRES (39 ter, pas F — 2026-09-14) : là où les prédateurs prolifèrent, une meute s'installe ; une cellule
+## redevenue calme l'abandonne. Jamais sous les yeux du joueur : ni naître ni disparaître dans la fenêtre.
+static func tanieres(sim: Simulation) -> void:
+	var t: Dictionary = _cfg().get("tanieres", {})
+	if t.is_empty() or sim.monde == null:
+		return
+	var reg: Lieux = sim.monde.surface.lieux()
+	var tc := int(sim.monde.taille)
+	var fenetre := Rect2i()
+	if sim.lieu == "camp" and sim.grille != null:
+		fenetre = Rect2i(sim.grille.origine, Vector2i(sim.grille.largeur, sim.grille.hauteur_grille))
+	var occupees := {}
+	for id in reg.nes.keys().duplicate():
+		var l: Dictionary = reg.nes[id]
+		if str(l.type) != "taniere":
+			continue
+		var c := sim.monde.cellule_de(l.centre)
+		if float(indices(sim, c).predateurs) < float(t.get("abandon_sous", 0.9)) and not fenetre.has_point(l.centre):
+			reg.retirer(str(id))
+			sim.monde.peuplees.erase(str(id))
+			continue
+		occupees[c] = true
+	var cellules: Array = sim.monde.ecologie.keys()
+	cellules.sort()
+	for cell: Vector2i in cellules:
+		if occupees.size() >= int(t.get("max", 12)):
+			return
+		if occupees.has(cell) or float(indices(sim, cell).predateurs) < float(t.get("seuil_predateurs", 1.3)):
+			continue
+		if cell == sim.monde.cellule_camp or sim.monde.claims.has(cell) or not sim.monde.surface.terre_a(cell) or not sim.monde.surface.agglomeration_de(cell).is_empty():
+			continue
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([sim.graine, "taniere", cell.x, cell.y, sim.monde.semaine_courante])
+		var cote := int(t.get("cote", 9))
+		var centre := cell * tc + Vector2i(tc / 4 + rng.randi() % maxi(1, tc / 2), tc / 4 + rng.randi() % maxi(1, tc / 2))
+		if fenetre.has_point(centre):
+			continue
+		var rect := Rect2i(centre - Vector2i(cote / 2, cote / 2), Vector2i(cote, cote))
+		if not reg._place_libre(rect, reg.dans(rect.grow(6)), 2, tc):
+			continue
+		var biome := str(sim.monde.surface.resume_cellule(cell).biome)
+		var espece := str((t.get("par_biome", {}) as Dictionary).get(biome, t.get("defaut", "loup")))
+		reg.naitre("taniere", "taniere_" + espece, centre, cote, sim.horloge_monde.ticks)
+		occupees[cell] = true
