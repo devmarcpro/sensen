@@ -334,6 +334,25 @@ static func nouvelles_du_monde(sim: Simulation, pnj: Dictionary) -> Array:
 		res.append({"cle": "nouvelle.detrempe", "params": {}})
 	if SimClimat.neige_sol(sim, cell) > 0.4:
 		res.append({"cle": "nouvelle.neige", "params": {}})
+	# LE DONJON DE CORRUPTION LE PLUS PROCHE SE RACONTE (39 ter, pas F — 2026-09-14).
+	var rd := int(_cfg().get("nouvelles_donjon", {}).get("rayon_cellules", 4))
+	var jour_n := SimVilles.jour_courant(sim)
+	var meilleur_d := 999
+	var dc_n := {}
+	var cell_d := cell
+	for dy in range(-rd, rd + 1):
+		for dx in range(-rd, rd + 1):
+			var cd := cell + Vector2i(dx, dy)
+			var dist := maxi(absi(dx), absi(dy))
+			if dist >= meilleur_d:
+				continue
+			var dcx := sim.monde.donjon_de_corruption(cd, jour_n)
+			if not dcx.is_empty():
+				meilleur_d = dist
+				dc_n = dcx
+				cell_d = cd
+	if not dc_n.is_empty():
+		res.append({"cle": "nouvelle.donjon_corrompu", "params": {"niveau": int(dc_n.get("niveau", 1)), "direction": "direction." + _direction(cell_d - cell), "cellules": maxi(1, meilleur_d)}})
 	var lieu := lieu_des_environs(sim, pos)
 	if not lieu.is_empty():
 		var tc := int(sim.monde.taille)

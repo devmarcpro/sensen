@@ -46,5 +46,9 @@
     "_doc": "Une razzia fraiche (moins de `age_max_ticks`) a moins de `portee_cellules` cellules se raconte.",
     "portee_cellules": 6,
     "age_max_ticks": 336000
+  },
+  "nouvelles_donjon": {
+    "_doc": "LE DONJON DE CORRUPTION SE RACONTE (39 ter, pas F tranche le 2026-09-14) : le plus proche a moins de `rayon_cellules` cellules, avec son niveau. Le foyer et le gouffre restent sur leur cellule — la carte les montre deja ; ce qui leur manquait d un lieu, c est d etre raconte.",
+    "rayon_cellules": 4
   }
 }

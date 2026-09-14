@@ -2864,3 +2864,25 @@ func test_soupcon() -> void:
 	verifier(int(j.get("reputations", {}).get("Bourgade", 0)) == 0, "mais sa réputation, elle, ne bouge pas : pas de preuve, pas de condamnation")
 	s.monde.fermer()
 
+
+## LE DONJON DE CORRUPTION SE RACONTE (39 ter, pas F — 2026-09-14) : près d'un repaire, les gens en parlent, avec son niveau.
+func test_rumeur_donjon_corrompu() -> void:
+	var s := Simulation.new(4309)
+	s.charger_camp()
+	var jour := SimVilles.jour_courant(s)
+	var trouve := Vector2i(-9999, -9999)
+	var c0: Vector2i = s.monde.cellule_camp
+	for r in range(0, 40):
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if trouve.x == -9999 and maxi(absi(dx), absi(dy)) == r and not s.monde.donjon_de_corruption(c0 + Vector2i(dx, dy), jour).is_empty():
+					trouve = c0 + Vector2i(dx, dy)
+	verifier(trouve.x != -9999, "un donjon de corruption existe dans les environs")
+	if trouve.x == -9999:
+		s.monde.fermer()
+		return
+	var pnj := {"pos": s.monde.pos_monde(trouve + Vector2i(2, 0), Vector2i(10, 10))}
+	var n: Array = SimRumeur.nouvelles_du_monde(s, pnj).filter(func(x: Dictionary) -> bool: return str(x.cle) == "nouvelle.donjon_corrompu")
+	verifier(n.size() == 1 and int(n[0].params.cellules) <= 2, "à deux cellules au plus, on en parle (%s)" % str(n))
+	s.monde.fermer()
+
