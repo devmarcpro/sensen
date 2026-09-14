@@ -1503,6 +1503,61 @@ func test_inondation_et_assechement() -> void:
 
 
 ## LA FAUNE SUIT LES SAISONS (22 ter, lot 10 — 2026-09-14) : l'ours hiberne, les oiseaux migrent, les insectes disparaissent.
+## LES CORPS EN MOUVEMENT (27 bis, lot 1 — 2026-09-14) : un corps lancé avance d'une tuile à la fois au fil des ticks, un
+## mur l'arrête, un être le reçoit selon masse × vitesse et recule — et pousse à son tour ce qu'il heurte.
+func test_corps_lances() -> void:
+	var s := Simulation.new(4281)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	for x in s.vivants():
+		if x.id != j.id:
+			x.vivant = false
+			s.grille.liberer(x.pos, x.id)
+	var tps := int(s.regles.r.get("ticks_par_seconde_exploration", 1000))
+	verifier(SimCorps.ticks_par_tuile(s, 10.0) == tps / 10 and SimCorps.ticks_par_tuile(s, 1.0e9) == 1, "une tuile toutes les ticks/s ÷ vitesse, jamais moins d'un tick")
+	# Une ligne dégagée devant le joueur.
+	var d := Vector2i(1, 0)
+	var base: Vector2i = j.pos
+	var libre := true
+	for k in range(1, 9):
+		libre = libre and s.grille.dans(base + d * k) and not s.grille.bloque_passage(base + d * k)
+	if not libre:
+		d = Vector2i(0, 1)
+	var a: Dictionary = SimObjets.ajouter(s, "bandit", base + d * 4, "ia")
+	var b: Dictionary = SimObjets.ajouter(s, "bandit", base + d * 5, "ia")
+	verifier(not a.is_empty() and not b.is_empty(), "deux cibles en file")
+	var sante_a := int(a.sante)
+	var corps := SimCorps.lancer(s, j, base, base + d * 8, 10.0, 10.0)
+	verifier(not corps.is_empty() and s.bombes.has(corps), "le corps part : il est dans la file des échéances")
+	var h := s.horloge_monde
+	var t0 := h.ticks
+	s.bombes.erase(corps)
+	SimCorps.pas(s, corps)
+	verifier(corps.pos == base + d and int(corps.fin) == t0 + 2 * (tps / 10), "une tuile, puis la suivante une échéance plus tard")
+	var n := 0
+	while s.bombes.has(corps) and n < 20:
+		s.bombes.erase(corps)
+		SimCorps.pas(s, corps)
+		n += 1
+	verifier(int(a.sante) < sante_a, "la cible reçoit le choc (%d → %d)" % [sante_a, int(a.sante)])
+	# Un gros choc : a recule, heurte b, qui recule à son tour.
+	a.sante = 1000
+	b.sante = 1000
+	var pos_b: Vector2i = b.pos
+	SimCorps.pousser(s, a, d, 7000.0, j.id, 0)
+	verifier(b.pos != pos_b, "le recul se transmet : b a reculé (%s → %s)" % [str(pos_b), str(b.pos)])
+	# Plus lourd, moins loin : la même quantité de mouvement pousse moins un être plus massif.
+	verifier(SimCorps.masse_etre({"def": "", "tags": ["insecte"]}) < SimCorps.masse_etre({"def": "", "tags": []}), "un insecte pèse moins qu'un homme")
+	# Lancer un objet du sac.
+	var caillou: Dictionary = SimObjets.generer_objet(s, "materiau_brut", 1, {}, "commun", 0)
+	caillou.materiau = "granit"
+	caillou.quantite = 3
+	j.sac.append(caillou.uid)
+	var avant := s.bombes.size()
+	verifier(SimCorps.lancer_objet(s, j, caillou.uid, base - d * 3, h.ticks), "le joueur lance une pierre")
+	verifier(int(caillou.quantite) == 2 and s.bombes.size() == avant + 1, "une pierre de la pile part")
+
+
 func test_faune_des_saisons() -> void:
 	var s := Simulation.new(4267)
 	s.charger_camp()

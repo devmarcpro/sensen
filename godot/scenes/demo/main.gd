@@ -2270,6 +2270,9 @@ func _dessiner_superpositions() -> void:
 	if survol.x >= 0:
 		_losange(survol, Color(1, 1, 1, 0.22))
 	for b in sim.bombes:
+		if bool(b.get("corps", false)):   # un corps en vol (27 bis) : un point qui file, pas une zone d'explosion
+			draw_circle(_ecran(b.pos, sim.grille.h(b.pos)) + Vector2(0, -10), 3.0, Color(0.95, 0.95, 0.85))
+			continue
 		_losange(b.pos, Color(1.0, 0.4, 0.1, 0.7))
 	if not j.is_empty():
 		for t in sim.tresors_detectes(j):   # detection_tresors : les contenants à portée, même hors de vue
@@ -2354,7 +2357,7 @@ func _dessiner_superpositions() -> void:
 	if (hotbar_sel >= 0 or lourde_armee) and survol.x >= 0 and not j.is_empty() and survol != j.pos:   # la ligne de vue (hotbar)
 		var vue_ok := g.ligne_de_vue(j.pos, survol)
 		draw_line(_ecran(j.pos, g.h(j.pos)), _ecran(survol, g.h(survol)), Color(0.3, 1.0, 0.4, 0.8) if vue_ok else Color(1.0, 0.25, 0.2, 0.8), 2.0)
-	if not visee_objet.is_empty() and survol.x >= 0 and not j.is_empty() and sim.items.has(visee_objet):   # le rayon d'une bombe visée
+	if not visee_objet.is_empty() and survol.x >= 0 and not j.is_empty() and sim.items.has(visee_objet) and sim.items[visee_objet].has("bombe"):   # le rayon d'une bombe visée
 		var rb: int = int(sim.items[visee_objet].bombe.rayon)
 		var ok_b: bool = Grille.distance(j.pos, survol) <= int(sim.regles.r.bombes.portee) and g.ligne_de_vue(j.pos, survol)
 		for dy in range(-rb, rb + 1):

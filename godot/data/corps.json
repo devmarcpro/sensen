@@ -1,0 +1,27 @@
+{
+  "_doc": "LES CORPS EN MOUVEMENT (ordre de travail 27 bis — decisions du 2026-09-14). Un corps lance a une MASSE (le poids de l objet, `Regles.poids_objet`) et une VITESSE en tuiles par seconde ; il avance d UNE tuile toutes les `ticks_par_seconde_exploration / vitesse` ticks et teste la collision a chaque tuile franchie — rien ne traverse un mur. LE CHOC : la quantite de mouvement p = masse x vitesse. Un etre touche prend `degats_par_quantite` x p en contondant, et recule de `recul_par_quantite` x p / sa masse tuiles ; ce qu il heurte en reculant recule a son tour avec `part_transmise` de p, sur `maillons_max` maillons au plus, et un mur fait le choc de poussee ordinaire. Le son de l impact vaut `son_par_quantite` x p, plafonne a `son_max`. LANCER : la vitesse vaut `vitesse_base` + `vitesse_par_force` x Force, divisee par la masse au-dela de `masse_legere`, bornee a [`vitesse_min`, `vitesse_max`] ; la portee vaut `portee_par_vitesse` x vitesse, plafonnee a `portee_max`. On ne souleve pas plus de `masse_max_par_force` x Force. LA MASSE D UN ETRE : `masse` de sa fiche, sinon `masse_etres` selon ses tags, sinon `defaut`.",
+  "degats_par_quantite": 0.35,
+  "recul_par_quantite": 0.02,
+  "part_transmise": 0.5,
+  "maillons_max": 2,
+  "son_par_quantite": 0.25,
+  "son_max": 70.0,
+  "lancer": {
+    "vitesse_base": 6.0,
+    "vitesse_par_force": 0.5,
+    "masse_legere": 1.0,
+    "vitesse_min": 2.0,
+    "vitesse_max": 25.0,
+    "portee_par_vitesse": 0.6,
+    "portee_max": 12,
+    "masse_max_par_force": 2.5,
+    "ticks_action": 600
+  },
+  "masse_etres": {
+    "defaut": 70.0,
+    "bete": 45.0,
+    "insecte": 2.0,
+    "volant": 6.0,
+    "robot": 120.0
+  }
+}

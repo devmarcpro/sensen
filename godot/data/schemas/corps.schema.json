@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "degats_par_quantite",
+    "recul_par_quantite",
+    "part_transmise",
+    "maillons_max",
+    "lancer",
+    "masse_etres"
+  ]
+}

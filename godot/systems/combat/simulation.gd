@@ -299,6 +299,8 @@ func _prochaine_bombe(nom: String) -> Dictionary:
 ## Lancer une bombe du sac sur une tuile (Explosions) : portée, ligne de vue ; elle attend sur l'horloge du lanceur.
 func _lancer(e: Dictionary, uid: String, cible: Vector2i, tick: int) -> bool:
 	var it: Dictionary = items.get(uid, {})
+	if not it.is_empty() and not it.has("bombe"):
+		return SimCorps.lancer_objet(self, e, uid, cible, tick)   # tout le reste se lance comme un corps (27 bis)
 	if it.is_empty() or not (uid in e.sac) or not it.has("bombe") or not grille.dans(cible):
 		return false
 	var bc: Dictionary = regles.r.bombes
@@ -316,6 +318,9 @@ func _lancer(e: Dictionary, uid: String, cible: Vector2i, tick: int) -> bool:
 
 ## L'explosion : les tuiles détruites si durete < P × (1 − d/R), 50 % de matériau brut ; dégâts × (1 − d/R) à tout être.
 func _exploser(b: Dictionary) -> void:
+	if bool(b.get("corps", false)):
+		SimCorps.pas(self, b)   # un corps en vol partage la file des bombes : son échéance est la tuile suivante (27 bis)
+		return
 	var bc: Dictionary = regles.r.bombes
 	var pos: Vector2i = b.pos
 	var R: int = int(b.rayon)
@@ -370,7 +375,7 @@ func _exploser(b: Dictionary) -> void:
 	if not lanceur.is_empty() and SimTalents.a_talent(self, lanceur, "chaine_d_amorces"):
 		var voisines: Array = []
 		for autre in bombes:
-			if Grille.distance(pos, autre.pos) <= R:
+			if not bool(autre.get("corps", false)) and Grille.distance(pos, autre.pos) <= R:
 				voisines.append(autre)
 		voisines.sort_custom(func(x: Dictionary, y: Dictionary) -> bool: return Grille.distance(pos, x.pos) < Grille.distance(pos, y.pos))
 		for autre in voisines:

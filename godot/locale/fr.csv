@@ -4613,3 +4613,8 @@ journal.taniere_nettoyee,"{lieu} est nettoyée : les prédateurs du coin se font
 lieu.sous_type.champ_de_bataille,"un champ de bataille"
 lieu.sous_type.camp_deserteurs,"un camp de déserteurs"
 journal.releve_garnison,"{village} arme un nouveau garde : {nom} relève la garnison"
+ui.ecran.lancer,"Lancer (viser au clic)"
+journal.corps_lance,"{nom} lance {objet}"
+journal.corps_impact,"{nom} est frappé de plein fouet ({degats})"
+journal.corps_mur,"Le projectile heurte le mur"
+journal.corps_trop_lourd,"{nom} : trop lourd pour être lancé"

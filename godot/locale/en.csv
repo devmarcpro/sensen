@@ -4593,3 +4593,8 @@ journal.taniere_nettoyee,"{lieu} has been cleared: predators grow scarcer around
 lieu.sous_type.champ_de_bataille,"a battlefield"
 lieu.sous_type.camp_deserteurs,"a deserters' camp"
 journal.releve_garnison,"{village} arms a new guard: {nom} joins the garrison"
+ui.ecran.lancer,"Throw (aim with a click)"
+journal.corps_lance,"{nom} throws {objet}"
+journal.corps_impact,"{nom} is struck full on ({degats})"
+journal.corps_mur,"The projectile hits the wall"
+journal.corps_trop_lourd,"{nom}: too heavy to throw"

@@ -243,6 +243,7 @@ func _ready() -> void:
 	_lancer("test_vegetation_vivante")
 	_lancer("test_inondation_et_assechement")
 	_lancer("test_faune_des_saisons")
+	_lancer("test_corps_lances")
 	_lancer("test_duree_du_jour")
 	_lancer("test_liquides_gelent")
 	_lancer("test_odeur")
