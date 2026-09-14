@@ -1155,7 +1155,12 @@ func _lumiere_tuile(t: Vector2i) -> Color:
 	if _lumiere_img == null or sim == null or not sim.grille.dans(t):
 		return Color.WHITE
 	var l: Vector2i = Grille.plat(t) - sim.grille.origine   # un étage prend la lumière de sa tuile au sol
-	return _lumiere_img.get_pixel(l.x, l.y)
+	var c := _lumiere_img.get_pixel(l.x, l.y)
+	var j_l := joueur()
+	if not j_l.is_empty() and Grille.z_de(t) < Grille.z_de(j_l.pos):   # vu d'un étage, le dessous est dans l'ombre (26 quater)
+		var f := float(GameData.config("styles").get("etage_vue", {}).get("lumiere_dessous", 0.5))
+		c = Color(c.r * f, c.g * f, c.b * f, c.a)
+	return c
 
 
 ## Les flammes des feux (Météo). Plus de halo rond (designer 2026-09-06, 16 h 40 : « la lumière qui émane ne doit pas être
@@ -3231,6 +3236,11 @@ func _dessiner_etage(ci: CanvasItem) -> void:
 		return
 	var zj := Grille.z_de(j.pos)
 	var g := sim.grille
+	# LE DESSOUS, ASSOMBRI (26 quater, 2026-09-14) : à l'étage, tout le terrain du sol passe dans l'ombre — une teinte sur le
+	# nœud des morceaux, sans rien redessiner — et seul le plancher du niveau du joueur se dessine en pleine lumière.
+	var f_e := float(GameData.config("styles").get("etage_vue", {}).get("voile", 0.5))
+	terrain.modulate = Color(1.0 - f_e, 1.0 - f_e, 1.0 - f_e) if zj > 0 else Color.WHITE
+	brouillard.modulate = terrain.modulate   # les bords mémorisés du sol aussi
 	if zj <= 0 or _bat_joueur <= 0 or _bat_joueur > g.batiments_liste.size():
 		return
 	var r: Rect2i = g.batiments_liste[_bat_joueur - 1].rect
@@ -3240,6 +3250,9 @@ func _dessiner_etage(ci: CanvasItem) -> void:
 			var t := Grille.en_couche(Vector2i(x, s_d - x), zj)
 			if not g.dans(t) or not g.decouvert.has(g.idx(t)):
 				continue
+			var i_e := g.idx(t)
+			if int(g.contenu[i_e]) == g.contenu_ids.find("vide") or (i_e < g.bat_de.size() and int(g.bat_de[i_e]) != _bat_joueur):
+				continue   # l'air de l'étage, ou ce que le plan de l'étage ne pose pas : on voit au travers, le dessous assombri (26 quater)
 			_dessine_tuile(ci, t)
 	_lot_fermer(ci)
 

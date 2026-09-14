@@ -679,5 +679,10 @@
     "_doc": "LA PETITE FENETRE DU CLIC DROIT (designer 2026-09-09). `largeur` en pixels ; `lignes_par_page` borne le nombre d options avant qu une page « z) » n apparaisse — c est ce qui garde la fenetre petite quand une tuile en offre douze.",
     "largeur": 210.0,
     "lignes_par_page": 8
+  },
+  "etage_vue": {
+    "_doc": "UN ETAGE NE MONTRE QUE SON NIVEAU (26 quater, decision du 2026-09-14). A l etage, ce qui est plus bas se voit par les ouvertures (l air, la cage d escalier) mais ASSOMBRI : `voile` est ce que le terrain du sol perd de lumiere (0,5 : moitie), `lumiere_dessous` le facteur de lumiere des etres et des plantes qui s y trouvent.",
+    "voile": 0.5,
+    "lumiere_dessous": 0.5
   }
 }
