@@ -470,3 +470,49 @@ static func fletrir(sim: Simulation) -> int:
 	if n > 0:
 		EventBus.emettre(&"journal", [&"journal.secheresse_fletrit", {"n": n}])
 	return n
+
+
+# ---------------------------------------------------------------- lot 9 : l'inondation et l'assèchement (2026-09-14)
+
+## LE RUISSELLEMENT : une heure de pluie sur un sol détrempé — la terre ne boit plus, les bas-fonds se remplissent et
+## l'eau coule (elle reste active, le champ de l'eau la fait descendre). Rend le nombre de tuiles noyées.
+static func inonder(sim: Simulation, tick: int) -> int:
+	if sim.lieu != "camp" or sim.monde == null:
+		return 0
+	var c: Dictionary = _cfg().get("inondation", {})
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	var cell := sim.monde.cellule_de(centre)
+	if not detrempe(sim, cell) or not (SimTerrain.meteo(sim, cell) in c.get("pluies", [])):
+		return 0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "inondation", tick])
+	var n0 := sim.grille.largeur * sim.grille.hauteur_grille
+	var poses := 0
+	for essai in int(c.get("essais", 400)):
+		if poses >= int(c.get("tuiles", 40)):
+			break
+		var t := sim.grille.pos_de(rng.randi_range(0, n0 - 1))
+		if not sim.grille.dans(t) or sim.grille.bloque_passage(t) or sim.grille.niveau_liquide(t) > 0 or abrite(sim, t) or not sim.grille.occupant(t).is_empty() or sim.grille.meubles.has(sim.grille.idx(t)):
+			continue
+		var bas := true
+		for dd in Grille.DIRS:
+			var q: Vector2i = t + dd
+			if sim.grille.dans(q) and sim.grille.h(q) < sim.grille.h(t):
+				bas = false
+				break
+		if not bas:
+			continue
+		SimTerrain._poser_eau(sim, t, 1)
+		poses += 1
+	if poses > 0:
+		EventBus.emettre(&"journal", [&"journal.inondation_ruissellement", {"n": poses}])
+	return poses
+
+
+## L'ASSÈCHEMENT : une heure de sécheresse, les flaques s'évaporent (celles qu'aucune source n'alimente).
+static func assecher(sim: Simulation) -> void:
+	if sim.lieu != "camp" or sim.monde == null:
+		return
+	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
+	if secheresse(sim, sim.monde.cellule_de(centre)):
+		SimTerrain._evaporation(sim)

@@ -1474,6 +1474,31 @@ func test_vegetation_vivante() -> void:
 	s.monde.fermer()
 
 
+## L'INONDATION ET L'ASSÈCHEMENT (22 ter, lot 9 — 2026-09-14) : la pluie sur un sol détrempé noie les bas-fonds ; la
+## même pluie sur un sol sec ne ruisselle pas ; la sécheresse évapore les flaques.
+func test_inondation_et_assechement() -> void:
+	var s := Simulation.new(4266)
+	s.charger_camp()
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	var noyees := SimClimat.inonder(s, s.horloge_monde.ticks)
+	verifier(noyees > 0, "sous l'orage, un sol détrempé ruisselle et noie %d tuiles basses" % noyees)
+	s.meteo_force = "pluie"
+	s.climat_cache.clear()
+	var cfg: Dictionary = GameData.config("climat").sol
+	var seuil0 := float(cfg.detrempe_seuil)
+	cfg["detrempe_seuil"] = 2.0   # le même ciel sur une terre qui boit encore
+	verifier(SimClimat.inonder(s, s.horloge_monde.ticks + 1) == 0, "la même pluie sur une terre qui boit ne ruisselle pas")
+	cfg["detrempe_seuil"] = seuil0
+	var eau_avant := s.grille.niveau_eau.size()
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	SimClimat.assecher(s)
+	verifier(s.grille.niveau_eau.size() < eau_avant, "la sécheresse évapore les flaques (%d → %d)" % [eau_avant, s.grille.niveau_eau.size()])
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

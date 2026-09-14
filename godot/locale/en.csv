@@ -4422,6 +4422,7 @@ journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
 journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.inondation_ruissellement,"The sodden ground drinks no more: runoff floods {n} low tile(s)"
 nouvelles_du_monde,"Any news around here?"
 nouvelle.guerre,"“We're at war. The roads are crawling with deserters, don't travel alone.”"
 nouvelle.maladie,"“{maladie} is going around. Avoid crowds and keep warm.”"

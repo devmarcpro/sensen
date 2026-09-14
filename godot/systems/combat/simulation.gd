@@ -1203,9 +1203,13 @@ func _tiquer_differes(nom: String, tick: int) -> void:
 		var h_ticks := int(SimTerrain._cycle(self).get("ticks_par_jour", 24000)) / 24
 		if lieu == "camp" and monde != null:
 			var met: String = SimTerrain.meteo(self, monde.cellule_de(grille.pos_de(grille.largeur * grille.hauteur_grille / 2)))
-			if tick / h_ticks != pluie_heure and met in ["pluie", "orage"]:   # l'orage arrose aussi
+			if tick / h_ticks != pluie_heure and met in ["pluie", "orage", "tempete"]:   # l'orage et la tempête arrosent aussi
 				pluie_heure = tick / h_ticks
 				SimTerrain._pluie(self, tick)
+				SimClimat.inonder(self, tick)   # sur un sol détrempé, la pluie ruisselle et les bas-fonds se remplissent (lot 9)
+			elif tick / h_ticks != pluie_heure:
+				pluie_heure = tick / h_ticks
+				SimClimat.assecher(self)   # la sécheresse évapore les flaques (lot 9)
 			if tick / h_ticks != foudre_heure and met == "orage":   # Météo : la foudre réelle
 				foudre_heure = tick / h_ticks
 				SimTerrain._foudre(self, tick)
