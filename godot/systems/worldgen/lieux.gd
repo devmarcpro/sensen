@@ -433,8 +433,8 @@ static func habitant_mort(sim: Simulation, x: Dictionary) -> void:
 		return
 	var id := str(x.get("lieu", ""))
 	var reg: Lieux = sim.monde.surface.lieux()
-	if id.is_empty() or not reg.nes.has(id):
-		return
+	if id.is_empty() or not reg.nes.has(id) or str(reg.nes[id].type) != "taniere":
+		return   # les corbeaux d'un champ de bataille ne font pas le champ : il s'efface avec ses morts, pas avec eux
 	for y in sim.vivants():
 		if str(y.get("lieu", "")) == id:
 			return
@@ -447,6 +447,60 @@ static func habitant_mort(sim: Simulation, x: Dictionary) -> void:
 		var i := SimEcologie.indices(sim, cell)
 		SimEcologie._poser(sim, cell, float(i.proies), float(i.predateurs) - float(SimEcologie._cfg().get("tanieres", {}).get("nettoyee", 0.6)))
 		EventBus.emettre(&"journal", [&"journal.taniere_nettoyee", {"lieu": "lieu.sous_type." + str(lieu.sous_type)}])
+
+
+## La fenêtre chargée, en tuiles monde ; vide hors du monde de surface. Un lieu né ne naît ni ne meurt dedans.
+static func fenetre(sim: Simulation) -> Rect2i:
+	if sim.lieu == "camp" and sim.grille != null:
+		return Rect2i(sim.grille.origine, Vector2i(sim.grille.largeur, sim.grille.hauteur_grille))
+	return Rect2i()
+
+
+## LES LIEUX QUI S'EFFACENT (2026-09-14) : un lieu né avec une échéance (`expire_tick`) disparaît quand elle est passée —
+## hors de la vue du joueur.
+static func expirer(sim: Simulation) -> void:
+	if sim.monde == null:
+		return
+	var reg: Lieux = sim.monde.surface.lieux()
+	var f := fenetre(sim)
+	for id in reg.nes.keys().duplicate():
+		var l: Dictionary = reg.nes[id]
+		if l.has("expire_tick") and sim.horloge_monde.ticks >= int(l.expire_tick) and not f.has_point(l.centre):
+			reg.retirer(str(id))
+			sim.monde.peuplees.erase(str(id))
+			sim.monde.lieux_connus.erase(str(id))
+
+
+## LES MORTS D'UN LIEU (2026-09-14) : au premier passage, des corps morts depuis la naissance du lieu — ils ont pourri
+## depuis ce jour-là — et qui lâchent leur butin. Sur un champ de bataille, ils portent les couleurs des deux camps.
+static func poser_morts(sim: Simulation, lieu: Dictionary) -> int:
+	var m: Array = _cfg().get("morts", {}).get(str(lieu.type), [])
+	if m.is_empty():
+		return 0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([int(lieu.graine), "morts"])
+	var roys: Array = lieu.get("royaumes", [])
+	var r: Rect2i = lieu.emprise
+	var n := 0
+	for spec in m:
+		if not GameData.catalogues.creatures.has(str(spec[0])):
+			continue
+		for k in rng.randi_range(int(spec[1]), int(spec[2])):
+			var pos := sim._tuile_libre_autour(Vector2i(r.position.x + rng.randi_range(1, maxi(1, r.size.x - 2)), r.position.y + rng.randi_range(1, maxi(1, r.size.y - 2))))
+			if not sim.grille.dans(pos):
+				continue
+			var x := SimObjets.ajouter(sim, str(spec[0]), pos, "ia")
+			if x.is_empty():
+				continue
+			if not roys.is_empty():
+				x["royaume"] = str(roys[n % roys.size()])
+			x.vivant = false
+			x.sante = 0
+			x["mort_tick"] = int(lieu.get("ne_tick", sim.horloge_monde.ticks))
+			sim.grille.liberer(x.pos, x.id)
+			SimObjets._drop(sim, x, "")
+			n += 1
+	return n
 
 
 static func _peupler(sim: Simulation) -> void:
@@ -463,6 +517,7 @@ static func _peupler(sim: Simulation) -> void:
 			continue
 		sim.monde.peuplees[id] = true
 		poser_tresors(sim, lieu)   # une ruine garde ses coffres (2026-09-14)
+		poser_morts(sim, lieu)   # un champ de bataille, ses morts (2026-09-14)
 		var liste := habitants_de(lieu)
 		if liste.is_empty():
 			continue

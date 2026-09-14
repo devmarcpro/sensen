@@ -76,6 +76,7 @@ static func semaine(sim: Simulation) -> void:
 		var q2 := q + float(c.get("retour", 0.12)) * (1.0 - q) + float(c.get("nourriture", 0.3)) * (p - 1.0) * q
 		_poser(sim, cell, p2, q2)
 	tanieres(sim)
+	Lieux.expirer(sim)   # les champs de bataille s'effacent quand leurs morts ne sont plus que des os
 	if sim.lieu != "camp":
 		return
 	var rng := RandomNumberGenerator.new()

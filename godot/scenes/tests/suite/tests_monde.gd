@@ -512,6 +512,54 @@ func test_estampage_des_lieux() -> void:
 ## LE DONJON-BÂTIMENT (39 ter, pas C — 2026-09-13) : y entrer charge le donjon du lieu, en ressortir ramène devant la porte.
 ## LES TANIÈRES (39 ter, pas F — 2026-09-14) : là où les prédateurs prolifèrent, une meute s'installe ; la nettoyer calme la
 ## cellule ; une cellule redevenue calme l'abandonne. Le premier lieu que la simulation fait naître au lieu de la graine.
+## LES GUERRES LAISSENT DES CHAMPS DE BATAILLE (39 ter, pas F — 2026-09-14) : entre les capitales, des morts des deux camps
+## qui pourrissent depuis le jour de la bataille, des charognards qui gonflent les prédateurs, et un lieu qui s'efface.
+func test_champ_de_bataille() -> void:
+	var s := Simulation.new(4273)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var reg: Lieux = surf.lieux()
+	var tc := int(s.monde.taille)
+	var camp: Vector2i = s.monde.cellule_camp
+	var ca := camp + Vector2i(6, 6)
+	var cb := camp + Vector2i(12, 6)
+	var ra := {"id": "roy_a", "nom": "Aurelia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": ca, "territory_cells": [ca],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_b": "hostile"}, "rivals": [], "tags": []}
+	var rb := {"id": "roy_b", "nom": "Borealis", "government_type": "republique_elue", "culture": "nordique", "race": "humain", "taille": "cite", "capital_poi": cb, "territory_cells": [cb],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_a": "hostile"}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(ca)] = {"roy_a": ra, "roy_b": rb}
+	s.monde.ecologie.clear()
+	var champ := SimRoyaumes.champ_de_bataille(s, "roy_a", ra, "roy_b", 1.0)
+	verifier(not champ.is_empty(), "une semaine de guerre laisse un champ de bataille")
+	if champ.is_empty():
+		s.monde.fermer()
+		return
+	var cell := s.monde.cellule_de(champ.centre)
+	verifier(Grille.distance(cell, (ca + cb) / 2) <= 3, "près du milieu des deux capitales (%s)" % str(cell))
+	verifier(str(reg.par_id(str(champ.id)).get("type", "")) == "champ_de_bataille" and "roy_b" in champ.royaumes, "c'est un lieu du registre, qui sait quelle guerre l'a fait")
+	verifier(float(SimEcologie.indices(s, cell).predateurs) > 1.2, "les charognards gonflent les prédateurs de la cellule")
+	verifier(SimRoyaumes.champ_de_bataille(s, "roy_a", ra, "roy_b", 1.0).is_empty(), "un seul champ à la fois par guerre")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var ici: Dictionary = champ.duplicate()
+	ici.emprise = Rect2i(j.pos - Vector2i(7, 7), Vector2i(15, 15))
+	var avant := s.entites.size()
+	s.horloge_monde.ticks += 3 * int(GameData.config("planete").cycle.ticks_par_jour)
+	var n := Lieux.poser_morts(s, ici)
+	var morts := 0
+	var camps := {}
+	for x in s.entites.values():
+		if not x.vivant and int(x.get("mort_tick", -1)) == int(champ.ne_tick) and str(x.get("royaume", "")) in ["roy_a", "roy_b"]:
+			morts += 1
+			camps[str(x.royaume)] = true
+	verifier(n >= 4 and morts == n and s.entites.size() >= avant + n, "le premier passage y trouve %d morts" % n)
+	verifier(camps.size() == 2, "des deux camps")
+	verifier(not SimCadavres.stade(s, s.entites.values().filter(func(x: Dictionary) -> bool: return not x.vivant and x.has("royaume"))[0]).is_empty(), "et ils pourrissent depuis le jour de la bataille")
+	s.horloge_monde.ticks = int(champ.expire_tick)
+	Lieux.expirer(s)
+	verifier(not reg.nes.has(str(champ.id)), "passé sa durée, le champ s'efface")
+	s.monde.fermer()
+
+
 func test_tanieres() -> void:
 	var s := Simulation.new(4271)
 	s.charger_camp()

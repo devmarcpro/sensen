@@ -230,6 +230,18 @@
         2,
         4
       ]
+    ],
+    "champ_de_bataille": [
+      [
+        "corbeau",
+        2,
+        5
+      ],
+      [
+        "vautour",
+        0,
+        2
+      ]
     ]
   },
   "tresors": {
@@ -256,7 +268,34 @@
     "taniere": [
       0,
       1
+    ],
+    "champ_de_bataille": [
+      1,
+      2
     ]
   },
-  "repeuplement_jours": 30
+  "repeuplement_jours": 30,
+  "morts": {
+    "_doc": "Les MORTS d un lieu (2026-09-14) : des corps poses au premier passage, morts depuis la naissance du lieu (`ne_tick`) — ils pourrissent a partir de ce jour-la, et chacun lache son butin. Sur un champ de bataille, ils portent tour a tour les couleurs des deux royaumes.",
+    "champ_de_bataille": [
+      [
+        "garde_village",
+        4,
+        8
+      ],
+      [
+        "bandit",
+        0,
+        2
+      ]
+    ]
+  },
+  "champs_de_bataille": {
+    "_doc": "Chaque semaine de guerre, chaque paire de royaumes ennemis a `chance` de laisser un champ de bataille pres du milieu de leurs capitales (`recherche` cellules autour), un seul a la fois par paire ; il dure `duree_jours` et nourrit les charognards de sa cellule (+`charognards` a l indice de predateurs).",
+    "chance": 0.5,
+    "recherche": 3,
+    "cote": 15,
+    "duree_jours": 20,
+    "charognards": 0.3
+  }
 }

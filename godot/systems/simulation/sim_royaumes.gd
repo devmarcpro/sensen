@@ -170,6 +170,8 @@ static func _semaine_de_guerre(sim: Simulation, id: String, roy: Dictionary, eta
 			if e2.is_empty():
 				continue
 			pertes += float(e2.get("armee", 0)) * float(g.get("taux_pertes", 0.08))
+			if str(id) < str(autre):
+				champ_de_bataille(sim, id, roy, str(autre))   # la guerre laisse un lieu (39 ter, pas F — 2026-09-14)
 		etat.humeur = clampi(int(etat.humeur) + int(g.get("humeur_semaine", -1)), 0, 100)
 	pertes = minf(pertes, float(armee_paix))
 	etat["pertes"] = pertes
@@ -1045,3 +1047,46 @@ static func _ia_assaut(sim: Simulation, e: Dictionary, tick: int) -> void:
 
 
 # ---------------------------------------------------------------- parcelles et boutique passive (étape 10.2)
+
+
+## LE CHAMP DE BATAILLE (39 ter, pas F — 2026-09-14). La guerre n'existait que dans les comptes des royaumes : une semaine
+## sur deux, elle laisse un lieu près du milieu de leurs capitales — des morts des deux camps, leur butin, des corbeaux. Les
+## charognards gonflent les prédateurs de la cellule : une guerre qui dure finit par y installer une tanière. `chance` < 0 :
+## celle des données.
+static func champ_de_bataille(sim: Simulation, id: String, roy: Dictionary, autre: String, chance: float = -1.0) -> Dictionary:
+	var c: Dictionary = GameData.config("lieux").get("champs_de_bataille", {})
+	var rb := royaume_par_id(sim, autre)
+	if sim.monde == null or c.is_empty() or rb.is_empty() or not roy.has("capital_poi") or not rb.has("capital_poi"):
+		return {}
+	var reg: Lieux = sim.monde.surface.lieux()
+	for l in reg.nes.values():
+		if str(l.type) == "champ_de_bataille" and id in l.get("royaumes", []) and autre in l.get("royaumes", []):
+			return {}   # un champ à la fois par guerre
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, id, autre, "champ", sim.monde.semaine_courante])
+	if rng.randf() >= (float(c.get("chance", 0.5)) if chance < 0.0 else chance):
+		return {}
+	var tc := int(sim.monde.taille)
+	var milieu: Vector2i = (Vector2i(roy.capital_poi) + Vector2i(rb.capital_poi)) / 2
+	var f := Lieux.fenetre(sim)
+	var cote := int(c.get("cote", 15))
+	for r in int(c.get("recherche", 3)) + 1:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var cell := milieu + Vector2i(dx, dy)
+				if cell == sim.monde.cellule_camp or sim.monde.claims.has(cell) or not sim.monde.surface.terre_a(cell):
+					continue
+				var centre := cell * tc + Vector2i(tc / 4 + rng.randi() % maxi(1, tc / 2), tc / 4 + rng.randi() % maxi(1, tc / 2))
+				var rect := Rect2i(centre - Vector2i(cote / 2, cote / 2), Vector2i(cote, cote))
+				if f.intersects(rect) or not reg._place_libre(rect, reg.dans(rect.grow(6)), 2, tc):
+					continue
+				var tick := sim.horloge_monde.ticks
+				var lieu := reg.naitre("champ_de_bataille", "champ_de_bataille", centre, cote, tick)
+				lieu["royaumes"] = [id, autre]
+				lieu["expire_tick"] = tick + int(c.get("duree_jours", 20)) * int(GameData.config("planete").cycle.ticks_par_jour)
+				var i := SimEcologie.indices(sim, cell)
+				SimEcologie._poser(sim, cell, float(i.proies), float(i.predateurs) + float(c.get("charognards", 0.3)))
+				return lieu
+	return {}
