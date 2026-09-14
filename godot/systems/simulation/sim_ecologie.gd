@@ -113,3 +113,16 @@ static func poids_espece(sim: Simulation, cell: Vector2i, id: String) -> float:
 		return 1.0
 	var i := indices(sim, cell)
 	return float(i.proies) if cl == "proie" else float(i.predateurs)
+
+
+## LA SAISON D'UNE ESPÈCE (lot 10 — 2026-09-14) : l'ours hiberne, l'oie migre, le papillon disparaît au froid. Le poids que
+## la saison donne à son tirage, 1 si elle n'appartient à aucun groupe saisonnier.
+static func poids_saison(sim: Simulation, id: String) -> float:
+	var c := _cfg()
+	var s: Dictionary = c.get("saisons", {}).get(SimTerrain.saison(sim), {})
+	if s.is_empty():
+		return 1.0
+	for groupe: String in (c.get("groupes", {}) as Dictionary).keys():
+		if id in c.groupes[groupe]:
+			return float(s.get(groupe, 1.0))
+	return 1.0

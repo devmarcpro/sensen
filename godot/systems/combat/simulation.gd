@@ -528,11 +528,11 @@ func _tiquer_faune(tick: int) -> void:
 		var cell_f := monde.cellule_de(q)
 		var total := 0.0
 		for f in pool:
-			total += float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id))   # l'écologie de la cellule pondère le tirage (lot 5)
+			total += float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id)) * SimEcologie.poids_saison(self, str(f.id))   # l'écologie et la saison pondèrent le tirage (lots 5 et 10)
 		var t := rng.randf() * total
 		var choix := ""
 		for f in pool:
-			t -= float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id))
+			t -= float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id)) * SimEcologie.poids_saison(self, str(f.id))
 			if t <= 0.0:
 				choix = str(f.id)
 				break
@@ -542,6 +542,8 @@ func _tiquer_faune(tick: int) -> void:
 		var n := 1
 		if def.has("meute") and (nuit or def.get("ai_profile", "") == "hostile"):
 			n = des.jet(str(def.meute))
+			if grille.neige:
+				n += int(GameData.config("ecologie").get("meute_hiver", 1))   # la neige rassemble les meutes (lot 10)
 		n = mini(n, int(fa.budget) - betes.size())   # la meute ne dépasse jamais le budget de faune
 		for k in n:
 			var pos: Vector2i = q + Vector2i(rng.randi_range(-2, 2), rng.randi_range(-2, 2)) if k > 0 else q

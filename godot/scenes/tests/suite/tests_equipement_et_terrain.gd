@@ -1499,6 +1499,31 @@ func test_inondation_et_assechement() -> void:
 	s.monde.fermer()
 
 
+## LA FAUNE SUIT LES SAISONS (22 ter, lot 10 — 2026-09-14) : l'ours hiberne, les oiseaux migrent, les insectes disparaissent.
+func test_faune_des_saisons() -> void:
+	var s := Simulation.new(4267)
+	s.charger_camp()
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var saisons: Array = GameData.config("planete").cycle.saisons.liste
+	var jour_de := {}
+	for sa in saisons:
+		jour_de[str(sa[0])] = int(sa[1]) + 1
+	var base: int = s.horloge_monde.ticks - posmod(s.horloge_monde.ticks, int(GameData.config("planete").cycle.saisons.jours_par_an) * jour)
+	var _a := func(saison: String) -> void:
+		s.horloge_monde.ticks = base + int(jour_de.get(saison, 0)) * jour
+	verifier(jour_de.has("hiver") and jour_de.has("ete"), "le calendrier a un hiver et un été")
+	_a.call("hiver")
+	var ours_hiver := SimEcologie.poids_saison(s, "ours_brun")
+	var oie_hiver := SimEcologie.poids_saison(s, "oie")
+	var papillon_hiver := SimEcologie.poids_saison(s, "papillon")
+	var loup_hiver := SimEcologie.poids_saison(s, "loup")
+	_a.call("ete")
+	verifier(ours_hiver < 0.2 and SimEcologie.poids_saison(s, "ours_brun") >= 1.0, "l'ours hiberne l'hiver (×%.2f), pas l'été" % ours_hiver)
+	verifier(oie_hiver < 0.5 and papillon_hiver == 0.0, "l'hiver, l'oie a migré (×%.2f) et le papillon a disparu" % oie_hiver)
+	verifier(is_equal_approx(loup_hiver, 1.0), "et le loup est toujours là")
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

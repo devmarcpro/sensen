@@ -1,5 +1,5 @@
 {
-  "_doc": "L ECOLOGIE VIVANTE (ordre de travail 22 ter, lot 5 — 2026-09-14 ; designer : « une simulation profonde avec gameplay emergent »). Chaque cellule porte deux indices, `proies` et `predateurs`, qui valent 1 a l equilibre ; on ne stocke que les cellules qui s en ecartent. Une bete est une PROIE si son profil est dans `profils_proies`, un PREDATEUR si c est une bete de profil `profils_predateurs`. LA CHASSE : tuer une proie retire `chasse_proie` a la cellule, un predateur `chasse_predateur`. LA SEMAINE : proies += `retour` x (1 - proies) - `predation` x (predateurs - 1) x proies ; predateurs += `retour` x (1 - predateurs) + `nourriture` x (proies - 1) x predateurs — bornes a [`min`, `max`]. LES CONSEQUENCES : le tirage de faune pondere chaque espece par l indice de sa classe ; une cellule AFFAMEE (proies < `affame_proies` et predateurs > `affame_predateurs`) lache ses predateurs de jour et, chaque semaine, chaque bete de troupeau y a `rafle_chance` d etre emportee ; une cellule SURPATUREE (proies > `surpature_proies`) rend x `surpature_recolte`.",
+  "_doc": "L ECOLOGIE VIVANTE (ordre de travail 22 ter, lot 5 — 2026-09-14 ; designer : « une simulation profonde avec gameplay emergent »). Chaque cellule porte deux indices, `proies` et `predateurs`, qui valent 1 a l equilibre ; on ne stocke que les cellules qui s en ecartent. Une bete est une PROIE si son profil est dans `profils_proies`, un PREDATEUR si c est une bete de profil `profils_predateurs`. LA CHASSE : tuer une proie retire `chasse_proie` a la cellule, un predateur `chasse_predateur`. LA SEMAINE : proies += `retour` x (1 - proies) - `predation` x (predateurs - 1) x proies ; predateurs += `retour` x (1 - predateurs) + `nourriture` x (proies - 1) x predateurs — bornes a [`min`, `max`]. LES CONSEQUENCES : le tirage de faune pondere chaque espece par l indice de sa classe ; une cellule AFFAMEE (proies < `affame_proies` et predateurs > `affame_predateurs`) lache ses predateurs de jour et, chaque semaine, chaque bete de troupeau y a `rafle_chance` d etre emportee ; une cellule SURPATUREE (proies > `surpature_proies`) rend x `surpature_recolte`. LES SAISONS (lot 10, 2026-09-14) : `saisons` dit, par groupe d especes, le poids de leur tirage selon la saison (1 par defaut) — les hibernants s effacent l hiver, les migrateurs partent a l automne et reviennent au printemps, les insectes disparaissent au froid. `meute_hiver` : ce que la saison ajoute a la taille d une meute quand la neige tient.",
   "profils_proies": [
     "proie",
     "fuyard",
@@ -19,5 +19,58 @@
   "affame_predateurs": 0.7,
   "rafle_chance": 0.35,
   "surpature_proies": 1.4,
-  "surpature_recolte": 0.8
+  "surpature_recolte": 0.8,
+  "groupes": {
+    "hibernants": [
+      "ours_brun",
+      "ours_des_cavernes",
+      "herisson",
+      "marmotte",
+      "blaireau",
+      "serpent_venimeux",
+      "serpent_geant",
+      "crocodile"
+    ],
+    "migrateurs": [
+      "canard",
+      "canard_sauvage",
+      "oie",
+      "heron",
+      "pie"
+    ],
+    "insectes": [
+      "papillon",
+      "luciole",
+      "grillon",
+      "sauterelle",
+      "libellule",
+      "essaim_abeilles",
+      "nuee_moustiques",
+      "coccinelle",
+      "fourmi_ouvriere"
+    ]
+  },
+  "saisons": {
+    "hiver": {
+      "hibernants": 0.05,
+      "migrateurs": 0.1,
+      "insectes": 0.0
+    },
+    "automne": {
+      "hibernants": 0.7,
+      "migrateurs": 0.5,
+      "insectes": 0.5
+    },
+    "printemps": {
+      "migrateurs": 1.4
+    },
+    "ete": {
+      "insectes": 1.5
+    },
+    "fin_ete": {
+      "migrateurs": 0.8,
+      "insectes": 1.2
+    }
+  },
+  "meute_hiver": 1
 }
