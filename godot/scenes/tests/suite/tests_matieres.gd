@@ -300,3 +300,39 @@ func test_desequiper_jeter() -> void:
 
 
 # ---------------------------------------------------------------- Étape 8.1 : une cellule de surface
+
+
+## ÉQUARRIR (42 bis, 2026-09-14) : une peau rend du cuir, un membre de loup de l'os, du tendon, du suif et du cuir, un
+## estomac du boyau et une vessie — la matière brute qu'aucune porte ne donnait.
+func test_equarrir() -> void:
+	var s := Simulation.new(4291)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var matiere_du_sac := func(mat: String) -> int:
+		var n := 0
+		for u in j.sac:
+			var o: Dictionary = s.items.get(u, {})
+			if str(o.get("materiau", "")) == mat and str(o.get("base", "")) == "materiau_brut":
+				n += int(o.get("quantite", 1))
+		return n
+	var peau: Dictionary = SimObjets.generer_objet(s, "peau", 1, {}, "commun", 0)
+	verifier(not peau.is_empty(), "une peau de chasse")
+	if peau.is_empty():
+		return
+	peau["espece"] = "loup"
+	j.sac.append(peau.uid)
+	verifier(SimCadavres.equarrir(s, j, peau.uid, s.horloge_monde.ticks) and int(matiere_du_sac.call("cuir")) == 1 and not (peau.uid in j.sac), "la peau devient du cuir brut")
+	var membre: Dictionary = SimObjets.generer_objet(s, "membre", 1, {}, "commun", 0)
+	membre["espece"] = "loup"
+	membre["poids"] = 6.0
+	j.sac.append(membre.uid)
+	SimCadavres.equarrir(s, j, membre.uid, s.horloge_monde.ticks)
+	verifier(int(matiere_du_sac.call("os")) == 2 and int(matiere_du_sac.call("tendon")) == 1 and int(matiere_du_sac.call("suif")) == 1 and int(matiere_du_sac.call("cuir")) == 3, "un membre de loup : os, tendon, suif et cuir, selon son poids")
+	var estomac: Dictionary = SimObjets.generer_objet(s, "organe", 1, {}, "commun", 0)
+	estomac["nom"] = {"partie": "partie.estomac"}
+	j.sac.append(estomac.uid)
+	SimCadavres.equarrir(s, j, estomac.uid, s.horloge_monde.ticks)
+	verifier(int(matiere_du_sac.call("boyau")) == 1 and int(matiere_du_sac.call("vessie")) == 1, "un estomac : du boyau et une vessie")
+	var epee: Dictionary = SimObjets.generer_objet(s, "craft_epee", 1, {}, "commun", 0)
+	verifier(SimCadavres.matieres_de(s, epee).is_empty(), "une épée ne s'équarrit pas")
+

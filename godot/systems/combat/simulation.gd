@@ -1422,6 +1422,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._respawn(self, e)
 		"sertir":
 			ok = SimObjets._sertir(self, e, str(i.get("objet", "")), str(i.get("gemme", "")), h.ticks)
+		"equarrir":   # réduire une pièce de bête en matière brute (42 bis)
+			ok = SimCadavres.equarrir(self, e, str(i.get("objet", "")), h.ticks)
 		"reparer":   # remettre un objet en état : sa matière, à une station de sa recette (ordre de travail 30)
 			ok = SimObjets._reparer(self, e, str(i.get("objet", "")), h.ticks)
 		"lire":

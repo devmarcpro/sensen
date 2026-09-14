@@ -64,6 +64,8 @@ static func _actions_objet(ec: Ecrans, uid: String) -> Array:
 		actions.append(["ui.ecran.reforger", "reforger"])
 	if float(it.get("usure", 0.0)) > 0.0:   # un objet usé se répare (ordre de travail 30, 2026-09-09)
 		actions.append(["ui.ecran.reparer", "reparer"])
+	if not SimCadavres.matieres_de(ec.main.sim, it).is_empty():
+		actions.append(["ui.ecran.equarrir", "equarrir"])   # une peau, un membre : la matière brute (42 bis)
 	actions.append(["ui.ecran.lancer", "lancer"])   # tout objet se lance (27 bis) : on vise au clic, comme une bombe
 	actions.append(["ui.ecran.jeter", "jeter"])
 	return actions
@@ -95,6 +97,10 @@ static func _action_objet(ec: Ecrans, action: String, uid: String) -> void:
 			ec.main.sim.intention(j.id, {"type": "reparer", "objet": uid})
 			EcransListe.rafraichir(ec)
 		"jeter": _jeter(ec)
+		"equarrir":
+			ec.main.sim.intention(j.id, {"type": "equarrir", "objet": uid})
+			ec.objet_choisi = ""
+			EcransListe.rafraichir(ec)
 		"lancer":
 			ec.main.visee_objet = uid
 			ec.fermer()

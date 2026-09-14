@@ -168,3 +168,66 @@ static func membre_perdu_au_combat(sim: Simulation, c: Dictionary, nom: String, 
 	if not o.is_empty():
 		sim._poser_contenant(c.pos, [str(o.uid)], "butin")
 	return issue
+
+
+## ÉQUARRIR (ordre de travail 42 bis, 2026-09-14) : ce qu'une pièce de bête rend en MATIÈRE BRUTE. Une peau, une dent, un
+## membre prélevé étaient des objets ; aucune recette ne pouvait partir d'eux. `[]` si l'objet ne se réduit pas.
+static func matieres_de(sim: Simulation, it: Dictionary) -> Array:
+	var eq: Dictionary = _cfg().get("equarrissage", {})
+	var base := str(it.get("base", ""))
+	var res: Array = []
+	if (eq.get("objets", {}) as Dictionary).has(base):
+		for m in eq.objets[base]:
+			res.append([str(m[0]), int(m[1])])
+		return res
+	var pr: Dictionary = _cfg().get("prelevement", {})
+	if base == str(pr.get("item_membre", "membre")):
+		var def: Dictionary = GameData.catalogues.creatures.get(str(it.get("espece", "")), {})
+		var tegument := "cuir"
+		for cle in (eq.get("teguments", {}) as Dictionary).keys():
+			if cle in def.get("drops_chasse", []):
+				tegument = str(eq.teguments[cle])
+				break
+		for m in eq.get("membre", []):
+			var mat := tegument if str(m[0]) == "tegument" else str(m[0])
+			res.append([mat, maxi(1, roundi(float(it.get("poids", 1.0)) * float(m[1])))])
+		return res
+	if base == str(pr.get("item_organe", "organe")):
+		var nom_p := str((it.get("nom", {}) as Dictionary).get("partie", "")).get_slice(".", 1).trim_suffix("_D").trim_suffix("_G")
+		var org: Dictionary = eq.get("organes", {})
+		for m in org.get(nom_p, org.get("_defaut", [])):
+			res.append([str(m[0]), int(m[1])])
+	return res
+
+
+static func equarrir(sim: Simulation, e: Dictionary, uid: String, tick: int) -> bool:
+	var it: Dictionary = sim.items.get(uid, {})
+	if it.is_empty() or not (uid in e.sac):
+		return false
+	var matieres := matieres_de(sim, it)
+	if matieres.is_empty():
+		return false
+	var eq: Dictionary = _cfg().get("equarrissage", {})
+	var rendus: Array[String] = []
+	for m in matieres:
+		if not GameData.catalogues.materials.has(str(m[0])):
+			continue
+		var brut: Dictionary = SimObjets.generer_objet(sim, "materiau_brut", 1, {}, "commun", 0)
+		if brut.is_empty():
+			continue
+		brut.materiau = str(m[0])
+		brut["forme"] = "brut"
+		brut.quantite = int(m[1])
+		brut["espece"] = str(it.get("espece", ""))
+		SimObjets.identifier(sim, brut)
+		e.sac.append(brut.uid)
+		rendus.append("%d %s" % [int(m[1]), str(m[0])])
+	if int(it.get("quantite", 1)) > 1:
+		it.quantite = int(it.quantite) - 1
+	else:
+		e.sac.erase(uid)
+	sim.gagner_xp(e, str(eq.get("competence", "chasse")), int(eq.get("xp", 1)))
+	e.compteur = tick + int(eq.get("ticks", 800))
+	EventBus.emettre(&"journal", [&"journal.equarri", {"nom": e.name_key, "matieres": ", ".join(rendus)}])
+	return true
+
