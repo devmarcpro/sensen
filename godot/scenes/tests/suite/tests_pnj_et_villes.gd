@@ -2752,3 +2752,18 @@ func test_metiers_sans_batiment() -> void:
 				break
 	verifier(trouvee, "une ville d'au moins huit âmes sous la main pour la mesure (%s, %d habitants)" % [str(fiche.nom), int(fiche.population)])
 
+
+## LES SIX HOMMES-BÊTES (29 ter, décision du 2026-09-14) : chacun est une sous-race de l'homme-bête — sa lignée le dit, ses
+## factions le suivent, et son visage n'est pas celui de son voisin.
+func test_six_hommes_betes() -> void:
+	var visages := {}
+	for rid in ["homme_chat", "homme_chien", "homme_loup", "homme_renard", "homme_ours", "homme_lapin"]:
+		var r: Dictionary = GameData.catalogues.races.get(rid, {})
+		verifier(str(r.get("parent", "")) == "homme_bete", "%s descend de l'homme-bête" % rid)
+		var lignee := SimRumeur.lignee_de_race(rid)
+		verifier(lignee.has(rid) and lignee.has("homme_bete"), "sa lignée compte les deux (%s)" % str(lignee))
+		var ap: Dictionary = r.get("apparence", {})
+		visages["%s|%s|%s" % [ap.get("tete", ""), ap.get("oreilles", ""), ap.get("teinte_peau", "")]] = true
+		verifier(TranslationServer.translate(str(r.get("name_key", ""))) != str(r.get("name_key", "")), "%s a un nom" % rid)
+	verifier(visages.size() == 6, "six visages distincts (%d)" % visages.size())
+

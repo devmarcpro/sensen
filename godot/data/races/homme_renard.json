@@ -1,0 +1,38 @@
+{
+  "_doc": "SOUS-RACE DE L HOMME-BETE (29 ter, decision du 2026-09-14). `parent` : un etre appartient aux factions `race:` de toute sa lignee — frapper un homme-renard fache les siens plus que les autres hommes-betes.",
+  "name_key": "race.homme_renard.name",
+  "parent": "homme_bete",
+  "bonus_stats": {
+    "dexterite": 2,
+    "charisme": 1,
+    "endurance": -1
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "discretion": 130,
+    "negociation": 110,
+    "leadership": 110,
+    "athletisme": 110
+  },
+  "talent": null,
+  "lifespan": 55,
+  "tags": [
+    "humanoide",
+    "bete",
+    "vulpin"
+  ],
+  "apparence": {
+    "echelle": 0.95,
+    "carrure": "mince",
+    "tete": "allongee",
+    "yeux": "en_amande",
+    "nez": "fin",
+    "bouche": "sourire",
+    "oreilles": "pointues",
+    "teinte_peau": "#c0642a",
+    "teinte_cheveux": "#e8dcc8",
+    "pilosite": "fournie"
+  },
+  "plan_corps": "homme_bete"
+}

@@ -1,0 +1,39 @@
+{
+  "_doc": "SOUS-RACE DE L HOMME-BETE (29 ter, decision du 2026-09-14). `parent` : un etre appartient aux factions `race:` de toute sa lignee — frapper un homme-ours fache les siens plus que les autres hommes-betes.",
+  "name_key": "race.homme_ours.name",
+  "parent": "homme_bete",
+  "bonus_stats": {
+    "force": 3,
+    "endurance": 3,
+    "dexterite": -2,
+    "charisme": -1
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "athletisme": 120,
+    "survie": 130,
+    "discretion": 50,
+    "esquive": 60
+  },
+  "talent": null,
+  "lifespan": 70,
+  "tags": [
+    "humanoide",
+    "bete",
+    "ursin"
+  ],
+  "apparence": {
+    "echelle": 1.18,
+    "carrure": "trapue",
+    "tete": "ronde",
+    "yeux": "points",
+    "nez": "plat",
+    "bouche": "large",
+    "oreilles": "rondes",
+    "teinte_peau": "#5a3e26",
+    "teinte_cheveux": "#2e2014",
+    "pilosite": "fournie"
+  },
+  "plan_corps": "homme_bete"
+}

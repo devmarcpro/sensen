@@ -1,0 +1,38 @@
+{
+  "_doc": "SOUS-RACE DE L HOMME-BETE (29 ter, decision du 2026-09-14). `parent` : un etre appartient aux factions `race:` de toute sa lignee — frapper un homme-loup fache les siens plus que les autres hommes-betes.",
+  "name_key": "race.homme_loup.name",
+  "parent": "homme_bete",
+  "bonus_stats": {
+    "force": 2,
+    "perception": 2,
+    "charisme": -2
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "chasse": 135,
+    "athletisme": 130,
+    "survie": 125,
+    "leadership": 50
+  },
+  "talent": null,
+  "lifespan": 60,
+  "tags": [
+    "humanoide",
+    "bete",
+    "lupin"
+  ],
+  "apparence": {
+    "echelle": 1.08,
+    "carrure": "large",
+    "tete": "museau",
+    "yeux": "fauves",
+    "nez": "plat",
+    "bouche": "crocs",
+    "oreilles": "pointues",
+    "teinte_peau": "#6d6a66",
+    "teinte_cheveux": "#3a3836",
+    "pilosite": "fournie"
+  },
+  "plan_corps": "homme_bete"
+}

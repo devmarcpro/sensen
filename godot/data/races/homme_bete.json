@@ -9,10 +9,10 @@
   "base_potentials": {
     "_defaut": 85,
     "athletisme": 125,
-    "pistage": 130,
+    "chasse": 130,
     "survie": 120,
-    "eloquence": 55,
-    "negoce": 60
+    "leadership": 55,
+    "negociation": 60
   },
   "talent": null,
   "lifespan": 60,

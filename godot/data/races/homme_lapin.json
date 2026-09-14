@@ -1,0 +1,38 @@
+{
+  "_doc": "SOUS-RACE DE L HOMME-BETE (29 ter, decision du 2026-09-14). `parent` : un etre appartient aux factions `race:` de toute sa lignee — frapper un homme-lapin fache les siens plus que les autres hommes-betes.",
+  "name_key": "race.homme_lapin.name",
+  "parent": "homme_bete",
+  "bonus_stats": {
+    "dexterite": 2,
+    "perception": 2,
+    "force": -2
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "esquive": 135,
+    "athletisme": 130,
+    "discretion": 120,
+    "chasse": 110
+  },
+  "talent": null,
+  "lifespan": 45,
+  "tags": [
+    "humanoide",
+    "bete",
+    "leporin"
+  ],
+  "apparence": {
+    "echelle": 0.9,
+    "carrure": "mince",
+    "tete": "ovale",
+    "yeux": "grands",
+    "nez": "plat",
+    "bouche": "fine",
+    "oreilles": "longues",
+    "teinte_peau": "#d8c8b0",
+    "teinte_cheveux": "#f2ece2",
+    "pilosite": "legere"
+  },
+  "plan_corps": "homme_bete"
+}

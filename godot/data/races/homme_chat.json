@@ -1,0 +1,38 @@
+{
+  "_doc": "SOUS-RACE DE L HOMME-BETE (29 ter, decision du 2026-09-14). `parent` : un etre appartient aux factions `race:` de toute sa lignee — frapper un homme-chat fache les siens plus que les autres hommes-betes.",
+  "name_key": "race.homme_chat.name",
+  "parent": "homme_bete",
+  "bonus_stats": {
+    "dexterite": 3,
+    "perception": 1,
+    "force": -1
+  },
+  "xp_mult": 1.0,
+  "base_potentials": {
+    "_defaut": 85,
+    "discretion": 135,
+    "athletisme": 125,
+    "esquive": 125,
+    "negociation": 60
+  },
+  "talent": null,
+  "lifespan": 55,
+  "tags": [
+    "humanoide",
+    "bete",
+    "felin"
+  ],
+  "apparence": {
+    "echelle": 0.98,
+    "carrure": "mince",
+    "tete": "ronde",
+    "yeux": "fentes",
+    "nez": "plat",
+    "bouche": "crocs",
+    "oreilles": "pointues",
+    "teinte_peau": "#b8864a",
+    "teinte_cheveux": "#6e4a22",
+    "pilosite": "fournie"
+  },
+  "plan_corps": "homme_bete"
+}

@@ -8,9 +8,9 @@
   "xp_mult": 0.9,
   "base_potentials": {
     "_defaut": 80,
-    "ingenierie": 130,
+    "artisanat": 130,
     "forge": 115,
-    "eloquence": 40,
+    "leadership": 40,
     "survie": 60
   },
   "talent": null,

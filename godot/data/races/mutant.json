@@ -10,8 +10,8 @@
     "_defaut": 92,
     "survie": 120,
     "alchimie": 115,
-    "negoce": 60,
-    "eloquence": 50
+    "negociation": 60,
+    "leadership": 50
   },
   "talent": null,
   "lifespan": 55,

@@ -9,9 +9,9 @@
   "base_potentials": {
     "_defaut": 88,
     "nage": 150,
-    "peche": 130,
+    "navigation": 130,
     "survie": 110,
-    "equitation": 50
+    "dressage": 50
   },
   "talent": null,
   "lifespan": 90,

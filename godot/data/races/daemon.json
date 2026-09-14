@@ -8,8 +8,8 @@
   "xp_mult": 1.05,
   "base_potentials": {
     "_defaut": 88,
-    "eloquence": 125,
-    "occultisme": 130,
+    "leadership": 125,
+    "rituel": 130,
     "survie": 70,
     "artisanat": 65
   },
