@@ -1429,6 +1429,51 @@ func test_vivant_suit_le_climat() -> void:
 	s.monde.fermer()
 
 
+## LA VÉGÉTATION VIVANTE (22 ter, lot 7 — 2026-09-14) : la cendre après le feu, la repousse selon l'eau, la cendre et
+## les bêtes, la sécheresse qui flétrit.
+func test_vegetation_vivante() -> void:
+	var s := Simulation.new(4264)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var t: Vector2i = j.pos + Vector2i(4, 0)
+	s.grille.poser_contenu(t, "arbre")
+	s.grille.materiaux[s.grille.idx(t)] = "pin"
+	s.meteo_force = "clair"
+	s.climat_cache.clear()
+	SimTerrain._consumer(s, t)
+	verifier(str(s.grille.materiau_sol(t)) == "cendre", "le pin brûlé laisse un sol de cendre")
+	var o: Dictionary = s.modifs_terrain[t]
+	var sur_cendre := SimClimat.mult_repousse(s, t, o)
+	verifier(sur_cendre < 1.0, "sur la cendre, la forêt repousse plus vite (×%.2f)" % sur_cendre)
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	var au_sec := SimClimat.mult_repousse(s, t, o)
+	s.meteo_force = "orage"
+	s.climat_cache.clear()
+	var au_mouille := SimClimat.mult_repousse(s, t, o)
+	verifier(au_sec > au_mouille, "dans la sécheresse elle repousse bien plus lentement que sous la pluie (×%.2f contre ×%.2f)" % [au_sec, au_mouille])
+	s.monde.ecologie[s.monde.cellule_de(t)] = {"proies": 1.8, "predateurs": 0.2}
+	verifier(SimClimat.mult_repousse(s, t, o) > au_mouille, "et les cerfs qui pullulent la broutent")
+	s.monde.ecologie.clear()
+	# LA SÉCHERESSE FLÉTRIT.
+	var herbes := 0
+	for k in 12:
+		var q: Vector2i = j.pos + Vector2i(-6 + k, 5)
+		if s.grille.dans(q) and not s.grille.bloque_passage(q):
+			s.grille.poser_contenu(q, "plante_sauvage")
+			s.grille.materiaux[s.grille.idx(q)] = "ortie"
+			herbes += 1
+	s.meteo_force = "canicule"
+	s.climat_cache.clear()
+	var fletries := 0
+	for k in 6:
+		s.monde.semaine_courante += 1
+		fletries += SimClimat.fletrir(s)
+	verifier(herbes > 0 and fletries > 0, "des semaines de canicule flétrissent les plantes sauvages (%d sur %d)" % [fletries, herbes])
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

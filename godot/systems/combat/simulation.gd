@@ -585,6 +585,7 @@ func _tiquer_monde(tick: int) -> void:
 		SimTerrain._regenerer_terrain_sauvage(self)
 		_regenerer_faune_hebdo()
 		SimEcologie.semaine(self)   # proies et prédateurs se répondent (22 ter, lot 5)
+		SimClimat.fletrir(self)   # la sécheresse flétrit les plantes sauvages (lot 7)
 		t0 = _top("regeneration", t0)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):

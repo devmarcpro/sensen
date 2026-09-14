@@ -401,3 +401,72 @@ static func age_decompose(sim: Simulation, x: Dictionary, cle_ne: String, tick: 
 	if not x.has(cle_ne):
 		return 0.0
 	return float(tick - int(x[cle_ne])) * mult_decomposition(sim)
+
+
+# ---------------------------------------------------------------- lot 7 : la végétation vivante (2026-09-14)
+
+static func _est_vegetal(contenu: Dictionary) -> bool:
+	var tags: Array = contenu.get("tags", [])
+	return "arbre" in tags or "plante_sauvage" in tags or "plante" in tags or "vegetation" in tags
+
+
+## CE QUI REPOUSSE, À QUELLE VITESSE : une plante ou un arbre repousse vite sur un sol humide ou sur la cendre, lentement
+## dans la sécheresse ou là où les bêtes broutent tout. Rien pour ce qui n'est pas végétal.
+static func mult_repousse(sim: Simulation, t: Vector2i, o: Dictionary) -> float:
+	if sim.monde == null or sim.lieu != "camp":
+		return 1.0
+	var defs: Dictionary = sim.grille.contenu_defs
+	var id_c := str(sim.grille.contenu_ids[int(o.get("contenu", 0))]) if int(o.get("contenu", 0)) < sim.grille.contenu_ids.size() else ""
+	if not _est_vegetal(defs.get(id_c, {})):
+		return 1.0
+	var v: Dictionary = _cfg().get("vegetation", {})
+	var cell := sim.monde.cellule_de(t)
+	var mult := 1.0
+	var h := humidite_sol(sim, cell)
+	if secheresse(sim, cell):
+		mult *= float(v.get("sec_mult", 2.0))
+	elif h > 0.6:
+		mult *= float(v.get("humide_mult", 0.7))
+	if str(sim.grille.materiau_sol(t)) == str(v.get("cendre", "cendre")):
+		mult *= float(v.get("cendre_mult", 0.5))
+	if SimEcologie.mult_recolte(sim, cell) < 1.0:
+		mult *= float(v.get("broute_mult", 1.6))
+	return mult
+
+
+## LE FEU LAISSE LA CENDRE : là où brûlait une plante ou un arbre, le sol devient de la cendre — fertile.
+static func cendrer(sim: Simulation, t: Vector2i, contenu: Dictionary) -> void:
+	if not _est_vegetal(contenu):
+		return
+	var cendre := str(_cfg().get("vegetation", {}).get("cendre", "cendre"))
+	if not GameData.catalogues.materials.has(cendre):
+		return
+	sim.grille.sols[sim.grille.idx(t)] = cendre
+	sim.grille.recompiler_sols()
+
+
+## LA SÉCHERESSE FLÉTRIT : une semaine sèche, les plantes sauvages de la fenêtre peuvent flétrir. Rend combien.
+static func fletrir(sim: Simulation) -> int:
+	if sim.monde == null or sim.lieu != "camp":
+		return 0
+	var chance := float(_cfg().get("vegetation", {}).get("fletrit_chance", 0.3))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, "fletrir", sim.monde.semaine_courante])
+	var n := 0
+	var n0 := sim.grille.largeur * sim.grille.hauteur_grille
+	for i in n0:
+		if sim.grille.contenu[i] == 0:
+			continue
+		var t := sim.grille.pos_de(i)
+		if not ("plante_sauvage" in sim.grille.contenu_de(t).get("tags", [])):
+			continue
+		if not secheresse(sim, sim.monde.cellule_de(t)) or rng.randf() >= chance:
+			continue
+		SimTerrain._memoriser_terrain(sim, t)
+		sim.grille.contenu[i] = 0
+		sim.grille.marquer(t)
+		EventBus.emettre(&"tile_changed", [t])
+		n += 1
+	if n > 0:
+		EventBus.emettre(&"journal", [&"journal.secheresse_fletrit", {"n": n}])
+	return n

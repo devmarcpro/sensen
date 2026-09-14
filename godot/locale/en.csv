@@ -4422,6 +4422,7 @@ journal.deja_arrose,this plot has already been watered today
 journal.denrees_perdues,"{n} unit(s) of food spoiled"
 journal.ville_batit,"{ville} builds {n} house(s): it now houses {logements}"
 journal.deuil,"{village} mourns: {n} inhabitant(s), {proches} of them kin"
+journal.secheresse_fletrit,"The drought withered {n} wild plant(s)"
 journal.rafle_predateurs,"Starving predators carried off {n} animal(s) from the herd"
 journal.voyage_depart,"{nom} sets off ({n} cells)"
 journal.voyage_arrive,"{nom} reaches the destination"

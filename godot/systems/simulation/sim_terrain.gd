@@ -1626,6 +1626,7 @@ static func _consumer(sim: Simulation, t: Vector2i) -> void:
 	sim.grille.oter_danger(idx)
 	if sim.grille.contenu[idx] != 0 and not ("contenant" in sim.grille.contenu_de(t).get("tags", [])):
 		var portait := bool(sim.grille.contenu_de(t).get("bloque_passage", false))
+		SimClimat.cendrer(sim, t, sim.grille.contenu_de(t))   # là où brûlait un arbre, la cendre — fertile (lot 7)
 		_memoriser_terrain(sim, t)
 		sim.grille.contenu[idx] = 0
 		sim.grille.marquer(t)
@@ -1835,7 +1836,7 @@ static func delai_ruine(sim: Simulation, t: Vector2i, o: Dictionary) -> int:
 	if mat.is_empty():
 		mat = str(o.get("materiau", ""))
 	var alt := float(GameData.catalogues.materials.get(mat, {}).get("stats", {}).get("alteration", tl.get("alteration_defaut", 50)))
-	return maxi(1, roundi(float(tl.get("ruine_ticks_base", 36000000)) * (100.0 - alt) / 50.0))
+	return maxi(1, roundi(float(tl.get("ruine_ticks_base", 36000000)) * (100.0 - alt) / 50.0 * SimClimat.mult_repousse(sim, t, o)))   # l'eau, la cendre, les bêtes qui broutent (lot 7)
 
 
 ## Chaque semaine, le monde efface les modifications de terrain hors des claims (Claims et persistance) — **celles
