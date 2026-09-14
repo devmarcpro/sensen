@@ -1,5 +1,5 @@
 {
-  "_doc": "Minerais par profondeur (G.9, adapté au pivot) : tiers de matériaux et bandes d'étage des donjons. filons_par_etage / taille_filon : densité ; croissance_par_etage : +x par étage.",
+  "_doc": "Minerais par profondeur (G.9, adapté au pivot) : tiers de matériaux et bandes d'étage des donjons. filons_par_etage / taille_filon : densité ; croissance_par_etage : +x par étage. LA GEOLOGIE (42 bis, 2026-09-14) : la galene, l azurite, le kaolin et la potasse sont des gisements peu profonds ; l hematite, la magnetite, l alun et le borax viennent ensuite ; l amiante au tier 3, l uraninite au tier 4 — ils existaient au catalogue sans qu aucune table ne les pose.",
   "tiers": {
     "1": [
       "cuivre",
@@ -11,7 +11,11 @@
       "ocre",
       "tourbe_compactee",
       "turquoise",
-      "ambre"
+      "ambre",
+      "galene",
+      "azurite",
+      "kaolin",
+      "potasse"
     ],
     "2": [
       "fer",
@@ -27,7 +31,11 @@
       "bitume",
       "fluorine",
       "phosphorite",
-      "calcite"
+      "calcite",
+      "hematite",
+      "magnetite",
+      "alun",
+      "borax"
     ],
     "3": [
       "or",
@@ -41,7 +49,8 @@
       "topaze",
       "grenat",
       "lapis_lazuli",
-      "geode"
+      "geode",
+      "amiante"
     ],
     "4": [
       "platine",
@@ -53,7 +62,8 @@
       "rubis",
       "saphir",
       "emeraude",
-      "kimberlite"
+      "kimberlite",
+      "uraninite"
     ],
     "5": [
       "tungstene",

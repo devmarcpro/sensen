@@ -42,6 +42,14 @@
     {
       "id": "pierre",
       "density": 0.02
+    },
+    {
+      "id": "gravier",
+      "density": 0.003
+    },
+    {
+      "id": "marne",
+      "density": 0.001
     }
   ],
   "filons_mult": 1.5,

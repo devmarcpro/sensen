@@ -39,7 +39,16 @@
       "density": 0.04
     }
   ],
-  "rochers": [],
+  "rochers": [
+    {
+      "id": "tourbe",
+      "density": 0.004
+    },
+    {
+      "id": "humus",
+      "density": 0.002
+    }
+  ],
   "filons_mult": 0.7,
   "accidents_mult": 1.0,
   "village_palette": {

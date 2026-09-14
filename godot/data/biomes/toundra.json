@@ -30,6 +30,14 @@
     {
       "id": "granit",
       "density": 0.004
+    },
+    {
+      "id": "gravier",
+      "density": 0.002
+    },
+    {
+      "id": "tourbe",
+      "density": 0.001
     }
   ],
   "filons_mult": 0.8,

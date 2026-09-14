@@ -71,6 +71,14 @@
     {
       "id": "calcaire",
       "density": 0.002
+    },
+    {
+      "id": "limon",
+      "density": 0.002
+    },
+    {
+      "id": "marne",
+      "density": 0.001
     }
   ],
   "filons_mult": 1.0,

@@ -79,6 +79,10 @@
     {
       "id": "pierre",
       "density": 0.003
+    },
+    {
+      "id": "humus",
+      "density": 0.002
     }
   ],
   "filons_mult": 0.8,

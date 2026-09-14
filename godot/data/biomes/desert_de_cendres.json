@@ -29,6 +29,10 @@
     {
       "id": "pierre_ponce",
       "density": 0.006
+    },
+    {
+      "id": "sable_noir",
+      "density": 0.003
     }
   ],
   "filons_mult": 1.6,

@@ -35,6 +35,14 @@
     {
       "id": "calcaire",
       "density": 0.006
+    },
+    {
+      "id": "gravier",
+      "density": 0.002
+    },
+    {
+      "id": "sel_marin",
+      "density": 0.001
     }
   ],
   "filons_mult": 0.6,
