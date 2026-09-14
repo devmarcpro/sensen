@@ -90,9 +90,10 @@ static func pas(sim: Simulation, b: Dictionary) -> void:
 
 
 ## LE CHOC : `p` = masse × vitesse. Des dégâts contondants en racine de p, le son, et le recul.
-static func frapper(sim: Simulation, x: Dictionary, dir: Vector2i, p: float, source: String) -> void:
+## `durete` : 1 pour un objet, `mou` pour un corps vivant (lots 3 et 5).
+static func frapper(sim: Simulation, x: Dictionary, dir: Vector2i, p: float, source: String, durete: float = 1.0) -> void:
 	var c := _cfg()
-	var deg := maxi(1, roundi(pow(maxf(0.0, p), float(c.get("degats_exposant", 0.5))) * float(c.get("degats_par_quantite", 2.5))))
+	var deg := maxi(1, roundi(pow(maxf(0.0, p), float(c.get("degats_exposant", 0.5))) * float(c.get("degats_par_quantite", 2.5)) * durete))
 	EventBus.emettre(&"journal", [&"journal.corps_impact", {"nom": x.name_key, "degats": deg}])
 	_sonner(sim, x.pos, p)
 	sim._appliquer_degats(x, deg, source, {"type": "contondant", "element": {}, "impact": true})
@@ -181,3 +182,43 @@ static func lancer_objet(sim: Simulation, e: Dictionary, uid: String, cible: Vec
 	e.compteur = tick + sim._ticks_avec_statuts(e, int(l.get("ticks_action", 600)))
 	EventBus.emettre(&"journal", [&"journal.corps_lance", {"nom": e.name_key, "objet": it.get("name_key", "")}])
 	return true
+
+
+## LE MOU : ce que vaut un corps vivant comme projectile, rapporté à une pierre.
+static func mou() -> float:
+	return float(_cfg().get("mou", 0.3))
+
+
+## LE CHOC D'UNE CHARGE (lot 5) : la bête frappe de sa masse. Le recul suit la même règle — un bison renverse.
+static func charger(sim: Simulation, e: Dictionary, x: Dictionary, vitesse: float) -> void:
+	var dir := Vector2i(signi(x.pos.x - e.pos.x), signi(x.pos.y - e.pos.y))
+	frapper(sim, x, dir, masse_etre(e) * vitesse, str(e.id), mou())
+
+
+## LANCER UN ÊTRE (lot 5, 28 ter) : il vole tuile après tuile vers `cible` ; un mur ou un être l'arrête, et le choc est
+## partagé — ce qu'il heurte le reçoit, lui aussi. Résolu d'un trait : un être n'est pas un objet qu'on range dans la file.
+static func projeter_etre(sim: Simulation, source: Dictionary, x: Dictionary, cible: Vector2i, portee: int) -> void:
+	if not x.vivant or x.pos == cible or Etres.bloque_statuts(x, "projection", sim.statuts_defs):
+		return
+	var v := float(_cfg().get("etre_lance", {}).get("vitesse", 6.0))
+	var trajet: Array = sim.grille.trajectoire(x.pos, cible)
+	trajet.append(cible)
+	var p := masse_etre(x) * v
+	for k in mini(portee, trajet.size()):
+		var t: Vector2i = trajet[k]
+		var dir := Vector2i(signi(t.x - x.pos.x), signi(t.y - x.pos.y))
+		var dh := sim.grille.h(x.pos) - sim.grille.h(t) if sim.grille.dans(t) else 0
+		if not sim.grille.dans(t) or sim.grille.bloque_passage(t) or -dh >= int(sim.regles.r.deplacement.get("falaise_delta", 3)):
+			frapper(sim, x, Vector2i.ZERO, p, str(source.get("id", "")), mou())
+			return
+		var occ := sim.grille.occupant(t)
+		if not occ.is_empty() and occ != str(x.id) and sim.entites.has(occ) and sim.entites[occ].vivant:
+			frapper(sim, sim.entites[occ], dir, p, str(source.get("id", "")), mou())
+			frapper(sim, x, Vector2i.ZERO, p, str(source.get("id", "")), mou())
+			return
+		sim.grille.liberer(x.pos, x.id)
+		x.pos = t
+		sim.grille.placer(x.id, t)
+		if dh >= int(sim.regles.r.deplacement.get("chute_delta", 3)):
+			p = masse_etre(x) * sqrt(v * v + pow(vitesse_chute(float(dh)), 2.0))
+	frapper(sim, x, Vector2i.ZERO, p * 0.5, str(source.get("id", "")), mou())   # l'atterrissage : la moitié du choc

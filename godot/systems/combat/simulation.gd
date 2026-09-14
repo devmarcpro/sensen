@@ -2997,6 +2997,10 @@ func _executer_action_creature(e: Dictionary, action: Dictionary, cible: Diction
 					_poser_segment(e, action.elements, tick_de(e))
 			"deplacement":
 				_effet_deplacement(e, effet, cibles, cible)
+			"choc":   # la charge par la même règle (27 bis, lot 5) : la bête frappe de sa masse
+				for c in cibles:
+					if c.vivant:
+						SimCorps.charger(self, e, c, float(effet.get("vitesse", 3.0)))
 			"attaque_arme":
 				var arme := Etres.arme(e, items)
 				if not arme.is_empty() and not cible.is_empty() and cible.vivant:
@@ -3378,11 +3382,14 @@ func _effet_deplacement(e: Dictionary, effet: Dictionary, cibles: Array[Dictiona
 			if vole.is_empty():
 				EventBus.emettre(&"journal", [&"journal.rien_a_lancer", {"nom": e.name_key}])
 				return
-			_effet_deplacement(e, {"mode": "projection", "distance": str(effet.get("distance", "5"))}, [vole] as Array[Dictionary], {})
 			if not str(e.get("porte", "")).is_empty():
 				SimTalents._liberer_saisie(self, e, vole)
-			var dch := des.jet(str(regles.r.talents.saisie.degats_lancer))
-			_appliquer_degats(vole, dch, e.id, {"type": "contondant", "element": {}, "lancer": true})
+			# LANCER UN ÊTRE PAR LA MÊME RÈGLE (27 bis, lot 5) : il vole, heurte, et le choc se partage.
+			var d_l := Vector2i(signi(vole.pos.x - e.pos.x), signi(vole.pos.y - e.pos.y))
+			if d_l == Vector2i.ZERO:
+				d_l = Vector2i(e.orientation)
+			var n_l := des.jet(str(effet.get("distance", "5")))
+			SimCorps.projeter_etre(self, e, vole, vole.pos + d_l * n_l, n_l)
 		"traversee":   # le lanceur traverse murs et entités : il réapparaît sur la première tuile libre au-delà
 			if cible.is_empty() and cible_hors_entite == Vector2i(-1, -1):
 				return

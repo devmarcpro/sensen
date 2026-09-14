@@ -133,6 +133,7 @@ func _top_client(cle: String, t0: int) -> int:
 	return Time.get_ticks_usec()
 var volet: VoletLateral           # le volet latéral : monde, personnage, compagnons, journal, inventaire (designer 2026-09-04)
 var volet_visible := true
+var infos_visibles := false   # le pavé d'informations du prototype, caché par défaut (F3 — décision du 2026-09-14, question 27)
 var chargement_restant := 0.0     # écran de chargement entre cellules (Grille continue) : secondes restantes, 0 = fermé
 var chargement_cellule := Vector2i.ZERO
 var chargement: ColorRect         # le voile noir de l'écran de chargement, sur le CanvasLayer
@@ -1647,6 +1648,8 @@ func _unhandled_input(ev: InputEvent) -> void:
 					ecrans.basculer("triche")   # menu de triche : tout obtenir, tout déclencher
 			&"volet":
 				volet_visible = not volet_visible   # le volet latéral (aussi au menu Tab)
+			&"infos":
+				infos_visibles = not infos_visibles   # le pavé d'informations détaillées (F3)
 			&"perimetre":
 				if sim.lieu == "camp" and sim.monde != null:   # dessiner un périmètre de récolte (Décision — Gestion de base)
 					ecrans.basculer("perimetre")
@@ -3494,6 +3497,7 @@ func _maj_ui() -> void:
 				lignes.append("  " + tr("ui.capacite.surface").format({"n": n_t, "min": fc_v.x * n_t, "max": fc_v.y * n_t, "monnaie": tr("monnaie." + str(plan.get("monnaie", "")))}))
 			if survol.x >= 0 and not g.occupant(survol).is_empty():
 				lignes.append("  " + _preview_capacite(j, plan, sim.entites[g.occupant(survol)]))
+	ui.visible = infos_visibles
 	ui.text = "\n".join(lignes)
 	var bas: Array[String] = []
 	if not j.is_empty() and not j.sac.is_empty() and (volet == null or not volet.visible):   # l'inventaire est dans le volet quand il est affiché

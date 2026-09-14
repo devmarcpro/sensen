@@ -72,9 +72,9 @@
     "rayon_max": 56,
     "marge": 4,
     "zoom": {
-      "_doc": "Les bornes du zoom (designer 2026-09-08 : « la possibilite de pouvoir zoomer beaucoup plus »). Ctrl + molette. `defaut` est le zoom d'une partie qui commence ; `pas` est le facteur d'un cran. Le plafond sert a regarder un sprite de 64 x 64 de pres ; le plancher est retenu parce qu'un zoom tres recule fait dessiner beaucoup de tuiles — au-dela de `rayon_max`, le fond reparait.",
+      "_doc": "Les bornes du zoom (designer 2026-09-08 : « la possibilite de pouvoir zoomer beaucoup plus »). Ctrl + molette. `defaut` est le zoom d'une partie qui commence ; `pas` est le facteur d'un cran. Le plafond sert a regarder un sprite de 64 x 64 de pres ; le plancher est retenu parce qu'un zoom tres recule fait dessiner beaucoup de tuiles — au-dela de `rayon_max`, le fond reparait. PLAFOND A 6 (decision du 2026-09-14, question 29) : un sprite de 64 px est exact jusqu a ~6,2 ; au-dela le visage demanderait 125 px. Tout reste net.",
       "min": 0.4,
-      "max": 12.0,
+      "max": 6.0,
       "pas": 1.15,
       "defaut": 2.0
     }

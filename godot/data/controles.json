@@ -49,6 +49,12 @@
       "nom_cle": "ui.controle.volet",
       "rebindable": true
     },
+    "infos": {
+      "touche": "F3",
+      "physique": true,
+      "nom_cle": "ui.controle.infos",
+      "rebindable": true
+    },
     "perimetre": {
       "touche": "P",
       "physique": true,

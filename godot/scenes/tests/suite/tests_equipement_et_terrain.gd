@@ -1602,6 +1602,52 @@ func test_chute_meme_regle() -> void:
 	s.monde.fermer()
 
 
+## L'ÉBOULEMENT, LA CHARGE ET L'ÊTRE LANCÉ PAR LA MÊME RÈGLE (27 bis, lots 3 et 5 — 2026-09-14).
+func test_eboulement_et_charge() -> void:
+	var s := Simulation.new(4283)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	for x in s.vivants():
+		if x.id != j.id:
+			x.vivant = false
+			g.liberer(x.pos, x.id)
+	# 1. L'ÉBOULEMENT : un plafond de granit blesse plus qu'un plafond de terre.
+	var degats := {}
+	for roche in ["terre", "granit"]:
+		var v: Dictionary = SimObjets.ajouter(s, "bandit", s._tuile_libre_autour(j.pos + Vector2i(4, 0)), "ia")
+		v.sante = 500
+		g.materiaux[g.idx(v.pos)] = roche
+		SimTerrain._effondrer(s, v.pos, GameData.config("support"), s.horloge_monde.ticks)
+		degats[roche] = 500 - int(v.sante)
+		v.vivant = false
+		g.liberer(v.pos, v.id)
+	verifier(int(degats.granit) > int(degats.terre) and int(degats.terre) > 0, "un bloc de granit blesse plus qu'un bloc de terre (%d contre %d)" % [int(degats.granit), int(degats.terre)])
+	# 2. LA CHARGE : un bison renverse, une chèvre bouscule.
+	var mesure := func(bete: String) -> Array:
+		var cible: Dictionary = SimObjets.ajouter(s, "bandit", s._tuile_libre_autour(j.pos + Vector2i(-6, 0)), "ia")
+		cible.sante = 500
+		var b: Dictionary = SimObjets.ajouter(s, bete, s._tuile_libre_autour(cible.pos + Vector2i(-1, 0)), "ia")
+		var de: Vector2i = cible.pos
+		SimCorps.charger(s, b, cible, 3.0)
+		var r := [500 - int(cible.sante), Grille.distance(de, cible.pos)]
+		for x in [cible, b]:
+			x.vivant = false
+			g.liberer(x.pos, x.id)
+		return r
+	var bison: Array = mesure.call("bison")
+	var chevre: Array = mesure.call("chevre")
+	verifier(int(bison[0]) > int(chevre[0]) and int(bison[1]) >= int(chevre[1]), "un bison frappe plus fort et renverse plus loin qu'une chèvre (%d/%d tuiles contre %d/%d)" % [int(bison[0]), int(bison[1]), int(chevre[0]), int(chevre[1])])
+	verifier(str(GameData.entree("creature_actions", "charge").effets[0].type) == "choc", "la charge des bêtes passe par le choc")
+	# 3. UN ÊTRE LANCÉ contre un autre : les deux encaissent.
+	var lance: Dictionary = SimObjets.ajouter(s, "bandit", s._tuile_libre_autour(j.pos + Vector2i(0, 5)), "ia")
+	var mur_vivant: Dictionary = SimObjets.ajouter(s, "bandit", s._tuile_libre_autour(lance.pos + Vector2i(3, 0)), "ia")
+	lance.sante = 500
+	mur_vivant.sante = 500
+	SimCorps.projeter_etre(s, j, lance, mur_vivant.pos, 8)
+	verifier(int(lance.sante) < 500 and int(mur_vivant.sante) < 500, "un être lancé sur un autre : les deux encaissent (%d, %d)" % [int(lance.sante), int(mur_vivant.sante)])
+
+
 func test_faune_des_saisons() -> void:
 	var s := Simulation.new(4267)
 	s.charger_camp()

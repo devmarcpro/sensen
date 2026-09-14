@@ -1072,7 +1072,7 @@ static func _effondrer_plancher(sim: Simulation, t: Vector2i, cfg: Dictionary, t
 			# ON TOMBE SUR QUELQU'UN (27 bis, lot 2) : il reçoit la masse de celui qui tombe × la vitesse d'un étage, et le
 			# tombé roule à côté. Avant, le plancher « tenait encore un pas » tant que quelqu'un se trouvait dessous.
 			var niv := float(GameData.config("corps").get("chute", {}).get("niveaux_par_etage", 4))
-			SimCorps.frapper(sim, dessous, Vector2i.ZERO, SimCorps.masse_etre(e) * SimCorps.vitesse_chute(niv), "effondrement")
+			SimCorps.frapper(sim, dessous, Vector2i.ZERO, SimCorps.masse_etre(e) * SimCorps.vitesse_chute(niv), "effondrement", SimCorps.mou())
 			var cote := sim._tuile_libre_autour(bas)
 			if not sim.grille.dans(cote):
 				sim.support_a_verifier[sim.grille.idx(t)] = true
@@ -1106,9 +1106,18 @@ static func _effondrer(sim: Simulation, t: Vector2i, cfg: Dictionary, tick: int)
 	var occ := sim.grille.occupant(t)
 	if not occ.is_empty() and sim.entites.has(occ):
 		var e: Dictionary = sim.entites[occ]
-		var d := maxi(int(cfg.get("degats_min", 1)), sim.des.jet(str(cfg.get("degats_des", "3d6"))))
+		# L'ÉBOULEMENT PAR LA MÊME RÈGLE (27 bis, lot 3 — 2026-09-14) : le bloc pèse la densité de sa roche et tombe d'un
+		# étage. Un plafond de terre blesse moins qu'un plafond de granit — mais le granit, lui, tient.
+		var mid_b := str(sim.grille.materiau_de(t))
+		if mid_b.is_empty():
+			mid_b = str(sim.grille.materiau_defaut)
+		var dens := float(GameData.catalogues.materials.get(mid_b, {}).get("stats", {}).get("densite", 10))
+		var cc: Dictionary = GameData.config("corps")
+		var p_b := dens * float(cc.get("eboulement", {}).get("masse_par_densite", 1.0)) * SimCorps.vitesse_chute(float(cc.get("chute", {}).get("niveaux_par_etage", 4)))
+		var avant_b := int(e.sante)
+		SimCorps.frapper(sim, e, Vector2i.ZERO, p_b, "effondrement")
+		var d := avant_b - int(e.sante)
 		EventBus.emettre(&"journal", [&"journal.effondrement_blesse", {"nom": e.name_key, "degats": d}])
-		sim._appliquer_degats(e, d, "effondrement", {"type": "effondrement"})
 		if e.vivant:
 			var fuite := Vector2i(-9999, -9999)
 			for dd in Grille.DIRS:

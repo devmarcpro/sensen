@@ -18,12 +18,8 @@
   "conditions": [],
   "effets": [
     {
-      "type": "degats"
-    },
-    {
-      "type": "deplacement",
-      "mode": "projection",
-      "distance": "1d3"
+      "type": "choc",
+      "vitesse": 3.0
     },
     {
       "type": "deplacement",
@@ -34,5 +30,6 @@
   "tags": [
     "charge",
     "telegraphe"
-  ]
+  ],
+  "_doc": "LA CHARGE PAR LA MEME REGLE (27 bis, lot 5 — 2026-09-14) : plus un de fixe ni une projection tiree au de, un CHOC — la masse de la bete x `vitesse` (data/corps.json). Un bison de 700 renverse, une chevre de 60 bouscule."
 }
