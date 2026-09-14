@@ -618,3 +618,34 @@ func test_lieux_habites() -> void:
 	SimVilles._peupler_fenetre(s)
 	verifier(s.vivants().filter(func(x: Dictionary) -> bool: return str(x.get("lieu", "")) == str(hameau.id)).size() == n, "repasser ne les double pas")
 	s.monde.fermer()
+
+
+## LES TRÉSORS DES LIEUX (2026-09-14) : un fort en ruine garde au moins un coffre plein, une seule fois.
+func test_tresors_des_lieux() -> void:
+	var s := Simulation.new(4270)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var surf: Surface = s.monde.surface
+	var tc := int(surf.planete.taille_cellule)
+	var s0 := Lieux.secteur_de_tuile(j.pos, tc)
+	var fort := {}
+	for dy in range(-2, 3):
+		for dx in range(-2, 3):
+			for l in surf.lieux().secteur(s0 + Vector2i(dx, dy)):
+				if fort.is_empty() and l.type == "ruine" and l.sous_type == "fort_ruine":
+					fort = l
+	verifier(not fort.is_empty(), "un fort en ruine dans les environs")
+	if fort.is_empty():
+		s.monde.fermer()
+		return
+	s.voyager(j, Vector2i(floori(float(fort.centre.x) / tc), floori(float(fort.centre.y) / tc)))
+	var coffres := 0
+	var objets := 0
+	var r: Rect2i = fort.emprise
+	for gi in s.contenants.keys():
+		if r.has_point(s.grille.pos_de(int(gi))):
+			coffres += 1
+			objets += (s.contenants[gi] as Array).size()
+	verifier(coffres >= 1 and objets >= 1, "le fort garde %d coffre(s), %d objet(s)" % [coffres, objets])
+	verifier(Lieux.poser_tresors(s, fort) >= 0 and s.monde.peuplees.has(str(fort.id)), "et il ne se regarnit pas : le lieu est noté")
+	s.monde.fermer()

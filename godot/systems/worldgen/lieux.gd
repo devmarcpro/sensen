@@ -384,6 +384,7 @@ static func peupler(sim: Simulation) -> void:
 		if sim.monde.peuplees.has(id):
 			continue
 		sim.monde.peuplees[id] = true
+		poser_tresors(sim, lieu)   # une ruine garde ses coffres (2026-09-14)
 		var liste := habitants_de(lieu)
 		if liste.is_empty():
 			continue
@@ -413,3 +414,46 @@ static func peupler(sim: Simulation) -> void:
 					x["lit"] = lits[k_lit]
 					k_lit += 1
 				x.ancre = x.poste if sim.grille.dans(x.poste) else pos
+
+
+## LES TRÉSORS D'UN LIEU (2026-09-14) : au premier passage, des coffres dans son emprise, remplis comme ceux d'un donjon —
+## la même table (`loot_rules.contenants`), au niveau du monde. Explorer une ruine rapporte.
+static func poser_tresors(sim: Simulation, lieu: Dictionary) -> int:
+	var t: Dictionary = _cfg().get("tresors", {})
+	var bornes: Array = t.get(str(lieu.type) + "/" + str(lieu.sous_type), t.get(str(lieu.type), []))
+	if bornes.size() < 2:
+		return 0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([int(lieu.graine), "tresors"])
+	var lr: Dictionary = GameData.config("loot_rules").get("contenants", {})
+	var cats: Dictionary = lr.get("categories", {})
+	if cats.is_empty():
+		return 0
+	var r: Rect2i = lieu.emprise
+	var n := 0
+	for k in rng.randi_range(int(bornes[0]), int(bornes[1])):
+		var pos := Vector2i(r.position.x + rng.randi_range(2, maxi(2, r.size.x - 3)), r.position.y + rng.randi_range(2, maxi(2, r.size.y - 3)))
+		if not sim.grille.dans(pos) or sim.grille.bloque_passage(pos) or sim.contenants.has(sim.grille.idx(pos)):
+			continue
+		var uids: Array = []
+		for j in rng.randi_range(int(lr.get("objets_par_coffre", [1, 3])[0]), int(lr.get("objets_par_coffre", [1, 3])[1])):
+			var total := 0.0
+			for c in cats.keys():
+				total += float(cats[c].poids)
+			var tir := rng.randf() * total
+			var cat := str(cats.keys()[0])
+			for c in cats.keys():
+				tir -= float(cats[c].poids)
+				if tir < 0.0:
+					cat = str(c)
+					break
+			var base := GameData.tirer("items", cats[cat].filtre, rng)
+			if base.is_empty():
+				continue
+			var o := SimObjets.generer_objet(sim, base, SimObjets.niveau_loot(sim), {"lieu": str(lieu.id)})
+			if not o.is_empty():
+				uids.append(o.uid)
+		if not uids.is_empty():
+			SimObjets._poser_contenant(sim, pos, uids, "coffre")
+			n += 1
+	return n
