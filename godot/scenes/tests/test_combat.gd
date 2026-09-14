@@ -134,6 +134,7 @@ func _ready() -> void:
 	_lancer("test_six_hommes_betes")
 	_lancer("test_razzias")
 	_lancer("test_cite_de_rouille")
+	_lancer("test_soupcon")
 	_lancer("test_caractere_des_villes")
 	_lancer("test_mauvaises_recoltes")
 	_lancer("test_saisonniers")

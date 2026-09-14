@@ -32,7 +32,15 @@
     "jours_ville": 7,
     "humeur_proches": -8,
     "humeur_ville": -3,
-    "relation_proche": 20
+    "relation_proche": 20,
+    "soupcon": {
+      "_doc": "LE SOUPCON (question 36, 2026-09-14). A la mort cachee, on retient qui etait a `rayon_tuiles` tuiles ; a la decouverte du corps, la ville en soupconne un, tire au sort — un etranger a la ville pese `poids_etranger`, un proche de la victime rien. Le tueur est parmi eux, mais pas seul : le soupcon peut se tromper. Un PNJ soupconne perd `humeur_suspect` et `relation_suspect` dans le coeur de chaque habitant de la ville ; le joueur soupconne perd `mefiance` d opinion aupres des gens de cette ville tant que le souvenir est frais (`rumeur.duree_memoire`) — jamais d arrestation sans temoin.",
+      "rayon_tuiles": 20,
+      "poids_etranger": 2.0,
+      "humeur_suspect": -10,
+      "relation_suspect": -15,
+      "mefiance": 20
+    }
   },
   "nouvelles_razzia": {
     "_doc": "Une razzia fraiche (moins de `age_max_ticks`) a moins de `portee_cellules` cellules se raconte.",

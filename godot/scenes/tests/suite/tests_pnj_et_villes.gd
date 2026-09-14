@@ -2823,3 +2823,44 @@ func test_cite_de_rouille() -> void:
 	EventBus._file.clear()
 	s.monde.fermer()
 
+
+## LE SOUPÇON PEUT SE TROMPER (question 36, 2026-09-14) : la ville soupçonne l'un de ceux qui étaient là — parfois le
+## tueur, parfois un innocent ; un PNJ soupçonné perd l'amitié des siens, le joueur la confiance, jamais la liberté.
+func test_soupcon() -> void:
+	var s := Simulation.new(4301)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var voisins: Array = []
+	for k in 3:
+		var v := s.ajouter("villageois", j.pos + Vector2i(40, k * 2), "ia")
+		v["village"] = "Bourgade"
+		v["humeur"] = 60
+		voisins.append(v)
+	var sur_joueur := 0
+	var sur_pnj := 0
+	var innocent := {}
+	for k in 40:
+		var victime := s.ajouter("villageois", j.pos + Vector2i(-30, k), "ia")
+		victime["village"] = "Bourgade"
+		var etranger := s.ajouter("villageois", j.pos + Vector2i(-28, k), "ia")
+		etranger["village"] = "Ailleurs"
+		etranger["humeur"] = 60
+		victime["mort_cachee"] = true
+		victime["presents_mort"] = [str(j.id), str(etranger.id)]
+		victime.vivant = false
+		var id_s := SimRumeur.soupconner(s, victime, s.horloge_monde.ticks)
+		verifier(id_s in [str(j.id), str(etranger.id)] or k > 0, "le soupçon tombe sur l'un de ceux qui étaient là")
+		if id_s == str(j.id):
+			sur_joueur += 1
+		elif id_s == str(etranger.id):
+			sur_pnj += 1
+			innocent = etranger
+		etranger.vivant = false
+	verifier(sur_joueur > 0 and sur_pnj > 0, "tantôt le joueur (%d fois), tantôt un étranger qui passait (%d fois) : le soupçon peut se tromper" % [sur_joueur, sur_pnj])
+	verifier(not innocent.is_empty() and int(innocent.humeur) < 60 and int(voisins[0].get("social", {}).get("relations", {}).get(str(innocent.id), 0)) < 0, "l'étranger soupçonné perd le moral et l'amitié de la ville")
+	voisins[0]["pos"] = voisins[0].pos
+	s.opinions_memo.clear()
+	verifier(SimRumeur.mefiance(s, voisins[0], j, s.horloge_monde.ticks) < 0 and SimRumeur.opinion(s, voisins[0], j) < 0, "le joueur soupçonné : la ville le regarde de travers")
+	verifier(int(j.get("reputations", {}).get("Bourgade", 0)) == 0, "mais sa réputation, elle, ne bouge pas : pas de preuve, pas de condamnation")
+	s.monde.fermer()
+

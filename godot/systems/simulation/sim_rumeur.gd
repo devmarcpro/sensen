@@ -98,6 +98,7 @@ static func _tiquer_disparitions(sim: Simulation, tick: int) -> void:
 		if not trouveur.is_empty():
 			m.erase("mort_cachee")
 			EventBus.emettre(&"journal", [&"journal.corps_trouve", {"nom": m.name_key, "trouveur": trouveur.name_key}])
+			soupconner(sim, m, tick)   # la ville cherche un coupable parmi ceux qui étaient là (question 36)
 			SimVilles.enterrer(sim, m, "")   # enterré, pleuré — et le tueur reste inconnu : personne ne l'a vu
 			continue
 		# 2. PERSONNE NE L'A TROUVÉ : son absence se remarque, d'abord chez les siens.
@@ -264,7 +265,7 @@ static func reputation(sim: Simulation, fid: String, id_auteur: String, cellule:
 ## sait de lui-même : un garde qui n'a jamais vu le joueur le regarde quand même de travers si la nouvelle du
 ## meurtre est arrivée jusqu'à son village.
 static func opinion(sim: Simulation, pnj: Dictionary, e: Dictionary) -> int:
-	if sim.monde == null or (sim.monde.faits as Array).is_empty():
+	if sim.monde == null or ((sim.monde.faits as Array).is_empty() and sim.monde.soupcons.is_empty()):
 		return 0
 	# ON NE REFAIT PAS LA SOMME À CHAQUE REGARD. `relation_de` est appelé par l'IA pour chaque paire d'êtres et à
 	# chaque pas ; parcourir deux cent quarante faits par appel serait le lag en ville, et le dépôt en a déjà payé
@@ -279,6 +280,7 @@ static func opinion(sim: Simulation, pnj: Dictionary, e: Dictionary) -> int:
 	var total := 0
 	for fid in factions_de(pnj):
 		total += reputation(sim, fid, str(e.id), cellule, tick)
+	total += mefiance(sim, pnj, e, tick)   # le soupçon d'une ville (question 36)
 	total = clampi(total, -100, 100)
 	sim.opinions_memo[cle] = {"v": total, "tick": tick, "version": int(sim.monde.faits.size())}
 	return total
@@ -391,3 +393,70 @@ static func raconter_nouvelle(sim: Simulation, pnj: Dictionary) -> Dictionary:
 	if choisie.params.has("lieu_id"):
 		sim.monde.lieux_connus[str(choisie.params.lieu_id)] = true
 	return choisie
+
+
+## LE SOUPÇON (question 36, 2026-09-14) : un corps trouvé sans témoin, la ville soupçonne l'un de ceux qui étaient là quand
+## il est mort — tiré au sort, un étranger pesant plus, un proche jamais. Le tueur est dans la liste, mais pas seul : le
+## soupçon peut tomber sur un innocent. Rend l'id du soupçonné, ou "".
+static func soupconner(sim: Simulation, m: Dictionary, tick: int) -> String:
+	var sc: Dictionary = _cfg().get("disparition", {}).get("soupcon", {})
+	var village := str(m.get("village", ""))
+	var presents: Array = m.get("presents_mort", [])
+	if sc.is_empty() or village.is_empty() or presents.is_empty():
+		return ""
+	var proches := {}
+	var fam: Dictionary = m.get("family", {})
+	for cle in ["child_of", "children", "parent_of", "spouse"]:
+		var v: Variant = fam.get(cle, [])
+		for pid in (v if v is Array else [v]):
+			proches[str(pid)] = true
+	var candidats: Array = []
+	var total := 0.0
+	for pid in presents:
+		var x: Dictionary = sim.entites.get(str(pid), {})
+		if x.is_empty() or not x.vivant or proches.has(str(pid)):
+			continue
+		var poids := float(sc.get("poids_etranger", 2.0)) if str(x.get("village", "")) != village else 1.0
+		candidats.append([x, poids])
+		total += poids
+	if candidats.is_empty():
+		return ""
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, str(m.id), "soupcon"])
+	var r := rng.randf() * total
+	var suspect: Dictionary = candidats[candidats.size() - 1][0]
+	for c in candidats:
+		r -= float(c[1])
+		if r <= 0.0:
+			suspect = c[0]
+			break
+	if suspect.controle == "joueur":
+		if not sim.monde.soupcons.has(village):
+			sim.monde.soupcons[village] = {}
+		sim.monde.soupcons[village][str(suspect.id)] = tick
+		sim.opinions_memo.clear()
+		EventBus.emettre(&"journal", [&"journal.soupcon_joueur", {"village": village, "nom": m.name_key}])
+	else:
+		suspect["humeur"] = clampi(int(suspect.get("humeur", 60)) + int(sc.get("humeur_suspect", -10)), 0, 100)
+		suspect["soupconne"] = {"victime": str(m.id), "tick": tick, "village": village}
+		for x in sim.vivants():
+			if str(x.get("village", "")) == village and x.id != suspect.id:
+				if not x.has("social"):
+					x["social"] = {"relations": {}}
+				var rel: Dictionary = x.social.get("relations", {})
+				rel[str(suspect.id)] = int(rel.get(str(suspect.id), 0)) + int(sc.get("relation_suspect", -15))
+				x.social["relations"] = rel
+		EventBus.emettre(&"journal", [&"journal.soupcon_pnj", {"village": village, "suspect": suspect.name_key, "nom": m.name_key}])
+	return str(suspect.id)
+
+
+## CE QU'UNE VILLE PENSE ENCORE DU JOUEUR QU'ELLE SOUPÇONNE : `mefiance` points d'opinion en moins, qui s'effacent avec
+## la mémoire des faits.
+static func mefiance(sim: Simulation, pnj: Dictionary, e: Dictionary, tick: int) -> int:
+	var village := str(pnj.get("village", ""))
+	if village.is_empty() or not sim.monde.soupcons.has(village) or not (sim.monde.soupcons[village] as Dictionary).has(str(e.id)):
+		return 0
+	var duree := maxf(1.0, float(_cfg().get("duree_memoire", 24000000)))
+	var frais := clampf(1.0 - float(tick - int(sim.monde.soupcons[village][str(e.id)])) / duree, 0.0, 1.0)
+	return -roundi(float(_cfg().get("disparition", {}).get("soupcon", {}).get("mefiance", 20)) * frais)
+

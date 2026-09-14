@@ -2698,6 +2698,13 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		# tout de suite, et sait QUI.
 		if temoin_mort.is_empty() and not att.is_empty() and "civil" in cible.get("tags", []) and not str(cible.get("village", "")).is_empty():
 			cible["mort_cachee"] = true
+			# QUI ÉTAIT LÀ (question 36) : la ville, le jour où elle trouvera le corps, soupçonnera l'un d'eux — le tueur en est.
+			var presents: Array = []
+			var r_s := int(GameData.config("rumeur").get("disparition", {}).get("soupcon", {}).get("rayon_tuiles", 20))
+			for x_s in vivants():
+				if x_s.id != cible.id and Grille.distance(x_s.pos, cible.pos) <= r_s and (x_s.controle == "joueur" or x_s.camp == "civil"):
+					presents.append(str(x_s.id))
+			cible["presents_mort"] = presents
 		else:
 			SimVilles.enterrer(self, cible, source if not temoin_mort.is_empty() else "")   # un habitant rejoint le cimetière de SA ville, qui apprend alors sa mort
 		if not expedition.is_empty() and entites.get(source, {}).get("controle", "") == "joueur":

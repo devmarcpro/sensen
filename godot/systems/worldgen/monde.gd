@@ -46,6 +46,7 @@ var villages: Dictionary = {}          # nom de village → {cellule, royaume, c
 ## gravite}. Ils ne se propagent pas — un observateur DÉDUIT s'il en a eu vent, de sa distance et du temps écoulé
 ## (`SimRumeur`). C'est la liste entière du système : ni carte de connaissance, ni compteur de réputation.
 var faits: Array = []
+var soupcons: Dictionary = {}   # village → {id du joueur soupçonné → tick} (question 36) — sauvegardé
 var tresors_royaumes: Dictionary = {}  # id de royaume → or prélevé sur ses villes (Villes B3 ; les royaumes-pays de D)
 var etats_royaumes: Dictionary = {}    # id de royaume → son état (population, armée, humeur, règne, ère, blason, guerres, journal) — Royaumes-pays (D)
 var mutex := Mutex.new()
