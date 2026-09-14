@@ -2078,3 +2078,24 @@ func test_courant() -> void:
 			break
 	verifier(not bouge, "trop lourd pour dériver : il tient debout")
 	s.monde.fermer()
+
+
+## LE JEU N'EST PLUS MUET (48, 2026-09-14) : les sons synthétisés existent, se chargent, et chaque source du champ sonore
+## émet le signal que le client écoute.
+func test_sons() -> void:
+	for nom in ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion"]:
+		var st: Variant = load("res://assets/sons/%s.wav" % nom) if ResourceLoader.exists("res://assets/sons/%s.wav" % nom) else null
+		verifier(st is AudioStream and (st as AudioStream).get_length() > 0.05, "le son « %s » existe et dure" % nom)
+	var s := Simulation.new(4287)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	EventBus.dispatcher()   # ce que les tests d'avant ont laissé en file ne doit pas se mêler à ce qu'on écoute
+	var entendus: Array = []
+	var ecoute := func(pos: Vector2i, source: String, volume: float) -> void: entendus.append([source, volume])
+	EventBus.son.connect(ecoute)
+	SimTerrain.sonner_de(s, j.pos, "pioche")
+	EventBus.dispatcher()
+	EventBus.son.disconnect(ecoute)
+	entendus = entendus.filter(func(x: Array) -> bool: return str(x[0]) == "pioche")
+	verifier(entendus.size() == 1 and float(entendus[0][1]) > 0.0, "un coup de pioche émet le signal que le client joue")
+

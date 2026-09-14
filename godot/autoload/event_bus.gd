@@ -34,6 +34,7 @@ signal journal(cle: String, params: Dictionary)             # une ligne de journ
 signal book_read(id: String, livre: String, succes: bool)
 signal controle_change(id: String)                            # le joueur incarne un autre corps (Changer de personnage)
 signal tile_changed(pos: Vector2i)                            # mutation de tuile (hauteur, contenu)
+signal son(pos: Vector2i, source: String, volume: float)      # quelque chose sonne (48, 2026-09-14) : le client le joue
 
 var _file: Array = []
 

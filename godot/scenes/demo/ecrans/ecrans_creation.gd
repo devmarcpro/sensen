@@ -494,6 +494,8 @@ static func _construire_options(ec: Ecrans) -> void:
 	ec.entrees.append({"kind": "options", "id": "resolution", "texte": ec.tr("ui.options.d_resolution")})
 	ec.liste.add_item(ec.tr("ui.options.taille_texte").format({"valeur": "%d %%" % roundi(float(Reglages.options.get("taille_texte", 1.0)) * 100.0)}))
 	ec.entrees.append({"kind": "options", "id": "taille_texte", "texte": ec.tr("ui.options.d_taille_texte")})
+	ec.liste.add_item(ec.tr("ui.options.volume_effets").format({"valeur": "%d %%" % roundi(float(Reglages.options.get("volume_effets", 0.8)) * 100.0)}))
+	ec.entrees.append({"kind": "options", "id": "volume_effets", "texte": ec.tr("ui.options.d_volume_effets")})
 	for nom: String in Reglages.actions().keys():
 		var a: Dictionary = Reglages.actions()[nom]
 		if not bool(a.get("rebindable", true)):

@@ -17,6 +17,7 @@ const FICHIER := "user://options.cfg"
 ## garde la sienne — c'est dit, pas caché.
 const RESOLUTIONS := ["1280x800", "1600x900", "1920x1080", "2560x1440"]
 const TAILLES_TEXTE := [1.0, 1.15, 1.3, 0.85]
+const VOLUMES := [0.8, 1.0, 0.0, 0.2, 0.4, 0.6]   # le volume des effets (48, 2026-09-14) : 0 coupe le son
 const POLICE_DE_BASE := 16
 
 var options := {}

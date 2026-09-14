@@ -469,6 +469,9 @@ func _ready() -> void:
 	ecrans = Ecrans.new()
 	ecrans.main = self
 	add_child(ecrans)
+	var sons := Sons.new()   # le jeu n'est plus muet (48, 2026-09-14)
+	sons.main = self
+	add_child(sons)
 	hud_ecran = HudEcran.new()
 	hud_ecran.main = self
 	$CanvasLayer.add_child(hud_ecran)

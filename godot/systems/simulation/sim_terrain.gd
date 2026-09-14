@@ -707,6 +707,8 @@ static func sonner_de(sim: Simulation, t: Vector2i, quoi: String, e: Dictionary 
 		var n := float(sim.regles.niveau(e.get("competences_eff", {}), "discretion"))
 		v -= n * float(cfg.get("discretion_par_niveau", 0.0))
 	sonner(sim, t, v)
+	if v > 0.0:
+		EventBus.emettre(&"son", [t, quoi, v])   # le client l'entend (48)
 
 
 ## Ce qu'on entend sur une tuile, de 0 à 100.

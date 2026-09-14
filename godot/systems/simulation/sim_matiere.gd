@@ -51,6 +51,7 @@ static func sonner_pas(sim: Simulation, e: Dictionary, t: Vector2i) -> void:
 		v -= float(sim.regles.niveau(e.get("competences_eff", {}), "discretion")) * float(cfg_s.get("discretion_par_niveau", 0.0))
 	if v >= float(cfg_s.get("seuil_audible", 5.0)):
 		SimTerrain.sonner(sim, t, v)
+		EventBus.emettre(&"son", [t, "pas", v])
 
 
 ## LA CONDUCTIVITÉ PORTÉE : la moyenne de la conductivité électrique de l'armure, pondérée par le nombre de pièces (une

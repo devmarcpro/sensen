@@ -132,7 +132,9 @@ static func pousser(sim: Simulation, x: Dictionary, dir: Vector2i, p: float, sou
 
 static func _sonner(sim: Simulation, t: Vector2i, p: float) -> void:
 	var c := _cfg()
-	SimTerrain.sonner(sim, t, minf(float(c.get("son_max", 70.0)), p * float(c.get("son_par_quantite", 0.25))))
+	var v := minf(float(c.get("son_max", 70.0)), p * float(c.get("son_par_quantite", 0.25)))
+	SimTerrain.sonner(sim, t, v)
+	EventBus.emettre(&"son", [t, "impact", v])
 
 
 static func _retomber(sim: Simulation, b: Dictionary, t: Vector2i) -> void:
