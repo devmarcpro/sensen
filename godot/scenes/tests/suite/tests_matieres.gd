@@ -333,6 +333,12 @@ func test_equarrir() -> void:
 	j.sac.append(estomac.uid)
 	SimCadavres.equarrir(s, j, estomac.uid, s.horloge_monde.ticks)
 	verifier(int(matiere_du_sac.call("boyau")) == 1 and int(matiere_du_sac.call("vessie")) == 1, "un estomac : du boyau et une vessie")
+	var patte: Dictionary = SimObjets.generer_objet(s, "membre", 1, {}, "commun", 0)
+	patte["espece"] = "araignee_geante"
+	patte["poids"] = 5.0
+	j.sac.append(patte.uid)
+	SimCadavres.equarrir(s, j, patte.uid, s.horloge_monde.ticks)
+	verifier(int(matiere_du_sac.call("soie_araignee")) == 1, "une patte d'araignée géante rend sa soie")
 	var epee: Dictionary = SimObjets.generer_objet(s, "craft_epee", 1, {}, "commun", 0)
 	verifier(SimCadavres.matieres_de(s, epee).is_empty(), "une épée ne s'équarrit pas")
 

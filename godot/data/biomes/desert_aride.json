@@ -55,6 +55,10 @@
     {
       "id": "pierre",
       "density": 0.003
+    },
+    {
+      "id": "meteorite_ferreuse",
+      "density": 0.0003
     }
   ],
   "filons_mult": 1.3,

@@ -193,6 +193,8 @@ static func matieres_de(sim: Simulation, it: Dictionary) -> Array:
 			if mat.is_empty():
 				continue
 			res.append([mat, maxi(1, roundi(float(it.get("poids", 1.0)) * float(m[1])))])
+		for m2 in (eq.get("par_espece", {}) as Dictionary).get(str(it.get("espece", "")), []):   # l'araignée géante rend sa soie
+			res.append([str(m2[0]), maxi(1, roundi(float(it.get("poids", 1.0)) * float(m2[1])))])
 		return res
 	if base == str(pr.get("item_organe", "organe")):
 		var nom_p := str((it.get("nom", {}) as Dictionary).get("partie", "")).get_slice(".", 1).trim_suffix("_D").trim_suffix("_G")

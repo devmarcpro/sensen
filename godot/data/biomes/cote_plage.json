@@ -43,6 +43,22 @@
     {
       "id": "sel_marin",
       "density": 0.001
+    },
+    {
+      "id": "nacre",
+      "density": 0.0005
+    },
+    {
+      "id": "corail",
+      "density": 0.0005
+    },
+    {
+      "id": "eponge",
+      "density": 0.0005
+    },
+    {
+      "id": "os_de_seiche",
+      "density": 0.0005
     }
   ],
   "filons_mult": 0.6,

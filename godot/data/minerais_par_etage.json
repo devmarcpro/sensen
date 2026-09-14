@@ -116,7 +116,10 @@
     "materiaux": [
       "os_fossile",
       "ammonite",
-      "coquillage_fossile"
+      "coquillage_fossile",
+      "dent_fossile",
+      "trilobite",
+      "bois_petrifie"
     ],
     "etages": [
       1,

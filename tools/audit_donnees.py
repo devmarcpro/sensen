@@ -93,6 +93,10 @@ def sources_materiau():
         src.update(str(x) for x in _tr[2])
     # `depouille` et `drops_chasse` sont des OBJETS (la peau, l'os consommables) dont l'id est parfois homonyme d'un
     # materiau : ce ne sont pas des sources de matiere brute (verifie le 2026-09-13, sim_objets `generer_objet`).
+    _eq = conf("cadavres").get("equarrissage", {})   # equarrir : ce qu une piece de bete rend en matiere brute (42 bis)
+    for _l in list(_eq.get("objets", {}).values()) + [_eq.get("membre", [])] + list(_eq.get("organes", {}).values()) + list(_eq.get("par_espece", {}).values()):
+        src.update(str(x[0]) for x in _l if str(x[0]) != "tegument")
+    src.update(str(v) for v in _eq.get("teguments", {}).values())
     for c in creatures.values():
         for _pr in (c.get("elevage", {}) or {}).get("produits", []) or []:   # la laine du mouton, le lait
             if isinstance(_pr, dict) and _pr.get("materiau"): src.add(str(_pr["materiau"]))
@@ -114,7 +118,7 @@ BIOME_SANS_TABLE = {
 for m, md in sorted(materials.items()):
     # Borne aux BOIS pour l'instant : les 57 autres materiaux « de biome » que ce test leve demandent d'abord que
     # l'audit lise toutes les vraies sources (sous-sol, elevage, minerais par etage) — ordre de travail 42 bis.
-    if md.get("category") not in ("bois", "mineral", "terre", "synthetique"):   # les minéraux et les terres ont leur porte depuis le 2026-09-14
+    if md.get("category") not in ("bois", "mineral", "terre", "synthetique", "fossile", "animal", "vegetal", "roche", "metal", "gemme"):   # les minéraux et les terres ont leur porte depuis le 2026-09-14
         continue
     if str(md.get("world_gen", {}).get("mode", "")) == "biome" and m not in src and m not in BIOME_SANS_TABLE:
         probs["materiau de biome qu'aucune table de biome ne pose"].append(m)

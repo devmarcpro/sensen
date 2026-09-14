@@ -38,6 +38,10 @@
     {
       "id": "tourbe",
       "density": 0.001
+    },
+    {
+      "id": "meteorite_ferreuse",
+      "density": 0.0002
     }
   ],
   "filons_mult": 0.8,
