@@ -310,6 +310,14 @@ static func nouvelles_du_monde(sim: Simulation, pnj: Dictionary) -> Array:
 	var cell := sim.monde.cellule_de(pos)
 	if SimVoyage.en_guerre(sim, cell):
 		res.append({"cle": "nouvelle.guerre", "params": {}})
+	# UNE RAZZIA FRAÎCHE DANS LES PARAGES (question 25, 2026-09-14) : on en parle, et on dit qui.
+	var nr: Dictionary = _cfg().get("nouvelles_razzia", {})
+	for f in sim.monde.faits:
+		if str(f.get("acte", "")) != "razzia" or sim.horloge_monde.ticks - int(f.get("tick", 0)) > int(nr.get("age_max_ticks", 336000)):
+			continue
+		if Grille.distance(Vector2i(f.cellule), cell) <= int(nr.get("portee_cellules", 6)):
+			res.append({"cle": "nouvelle.razzia", "params": {"royaume": str(SimRoyaumes.royaume_par_id(sim, str(f.royaume_auteur)).get("nom", f.royaume_auteur))}})
+			break
 	for id in (GameData.config("maladies").get("liste", {}) as Dictionary).keys():
 		if SimMaladies.charge(sim, pos, str(id)) > 0.0:
 			res.append({"cle": "nouvelle.maladie", "params": {"maladie": str(GameData.config("maladies").liste[id].get("name_key", id))}})

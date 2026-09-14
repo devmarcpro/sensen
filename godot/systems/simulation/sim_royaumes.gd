@@ -172,6 +172,7 @@ static func _semaine_de_guerre(sim: Simulation, id: String, roy: Dictionary, eta
 			pertes += float(e2.get("armee", 0)) * float(g.get("taux_pertes", 0.08))
 			if str(id) < str(autre):
 				champ_de_bataille(sim, id, roy, str(autre))   # la guerre laisse un lieu (39 ter, pas F — 2026-09-14)
+			razzia(sim, id, str(autre))   # la guerre pose des faits (question 25, 2026-09-14)
 		etat.humeur = clampi(int(etat.humeur) + int(g.get("humeur_semaine", -1)), 0, 100)
 		camp_de_deserteurs(sim, id, roy, etat)   # le moral s'effondre : des soldats désertent et font camp (2026-09-14)
 	pertes = minf(pertes, float(armee_paix))
@@ -333,7 +334,7 @@ static func griefs(sim: Simulation, auteurs: Dictionary, victime: Dictionary) ->
 	var total := 0.0
 	for f in sim.monde.faits:
 		var auteur: Dictionary = sim.entites.get(str(f.get("auteur", "")), {})
-		var sujet := str(auteur.get("royaume", ""))
+		var sujet := str(f.get("royaume_auteur", auteur.get("royaume", "")))   # une razzia a un royaume pour auteur, pas un être
 		if sujet.is_empty() or not (sujet == str(auteurs.id) or sujet == str(auteurs.get("nom", ""))):
 			continue
 		if str(sim.monde.surface.royaume_de(f.cellule).get("id", "")) != str(victime.id):
@@ -1132,3 +1133,37 @@ static func camp_de_deserteurs(sim: Simulation, id: String, roy: Dictionary, eta
 				lieu["se_vide"] = true
 				return lieu
 	return {}
+
+
+## LA RAZZIA (question 25, décision du 2026-09-14 — « un royaume doit-il agir ? oui »). Un royaume en guerre frappe une
+## cellule du territoire de son ennemi : un FAIT daté en un lieu, que la mémoire du monde garde et que les valeurs de la
+## victime pèsent. Pas d'être à déplacer : la guerre existe là où le joueur n'est pas, et ce qu'elle laisse, c'est un
+## souvenir, une ville appauvrie et une rumeur. `chance` < 0 : celle des données.
+static func razzia(sim: Simulation, id: String, autre: String, chance: float = -1.0) -> Dictionary:
+	var c: Dictionary = SimTerritoire._ry(sim).get("pays", {}).get("guerre", {}).get("razzia", {})
+	var victime := royaume_par_id(sim, autre)
+	if sim.monde == null or c.is_empty() or victime.is_empty():
+		return {}
+	var cellules: Array = victime.get("territory_cells", [])
+	if cellules.is_empty():
+		return {}
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, id, autre, "razzia", sim.monde.semaine_courante])
+	if rng.randf() >= (float(c.get("chance", 0.4)) if chance < 0.0 else chance):
+		return {}
+	var cell: Vector2i = cellules[rng.randi() % cellules.size()]
+	var cfg_r: Dictionary = GameData.config("rumeur")
+	var fait := {"auteur": "royaume:" + id, "royaume_auteur": id, "victime": autre, "acte": "razzia",
+		"tags": (sim.regles.r.get("faits", {}).get("actes", {}) as Dictionary).get("razzia", []).duplicate(),
+		"cellule": cell, "tick": sim.horloge_monde.ticks, "gravite": float((cfg_r.get("gravite", {}) as Dictionary).get("razzia", 1.0)), "temoin": "public"}
+	sim.monde.faits.append(fait)
+	while sim.monde.faits.size() > int(cfg_r.get("faits_max", 240)):
+		sim.monde.faits.remove_at(0)
+	var ev := etat_royaume(sim, autre)
+	if not ev.is_empty():
+		ev.humeur = clampi(int(ev.humeur) + int(c.get("humeur", -3)), 0, 100)
+		var butin := int(round(float(sim.monde.tresors_royaumes.get(autre, 0)) * float(c.get("butin_pct", 0.05))))
+		sim.monde.tresors_royaumes[autre] = int(sim.monde.tresors_royaumes.get(autre, 0)) - butin
+		sim.monde.tresors_royaumes[id] = int(sim.monde.tresors_royaumes.get(id, 0)) + butin
+		ev.tresor = int(sim.monde.tresors_royaumes[autre])
+	return fait

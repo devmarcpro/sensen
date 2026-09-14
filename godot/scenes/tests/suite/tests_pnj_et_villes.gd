@@ -2767,3 +2767,35 @@ func test_six_hommes_betes() -> void:
 		verifier(TranslationServer.translate(str(r.get("name_key", ""))) != str(r.get("name_key", "")), "%s a un nom" % rid)
 	verifier(visages.size() == 6, "six visages distincts (%d)" % visages.size())
 
+
+## UN ROYAUME AGIT : LES RAZZIAS (question 25, 2026-09-14). La guerre pose un fait daté en un lieu ; la victime s'en
+## souvient par ses valeurs (la relation se dégrade), elle y perd moral et trésor, et les gens du coin en parlent.
+func test_razzias() -> void:
+	var s := Simulation.new(4297)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var camp: Vector2i = s.monde.cellule_camp
+	var ca := camp + Vector2i(1, 0)
+	var cb := camp
+	var ra := {"id": "roy_a", "nom": "Aurelia", "government_type": "dictature_militaire", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": ca + Vector2i(5, 0), "territory_cells": [ca + Vector2i(5, 0)],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_b": "tension"}, "rivals": [], "tags": []}
+	var rb := {"id": "roy_b", "nom": "Borealis", "government_type": "republique_elue", "culture": "nordique", "race": "humain", "taille": "cite", "capital_poi": cb, "territory_cells": [cb],
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {"roy_a": "tension"}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(ca)] = {"roy_a": ra, "roy_b": rb}
+	surf.royaume_par_cellule[ca + Vector2i(5, 0)] = "roy_a"
+	surf.royaume_par_cellule[cb] = "roy_b"
+	s.monde.faits.clear()
+	var eb := s.etat_royaume("roy_b")
+	s.monde.tresors_royaumes["roy_b"] = 1000
+	eb.humeur = 50
+	var rel_avant := SimRoyaumes.griefs(s, ra, rb)
+	var fait := SimRoyaumes.razzia(s, "roy_a", "roy_b", 1.0)
+	verifier(not fait.is_empty() and str(fait.acte) == "razzia" and Vector2i(fait.cellule) == cb, "une semaine de guerre, une razzia sur les terres de l'ennemi")
+	verifier(s.monde.faits.has(fait), "elle entre dans la mémoire du monde")
+	verifier(SimRoyaumes.griefs(s, ra, rb) < rel_avant, "la victime s'en offusque par ses valeurs (%.2f → %.2f)" % [rel_avant, SimRoyaumes.griefs(s, ra, rb)])
+	verifier(int(eb.humeur) == 47 and int(s.monde.tresors_royaumes.roy_b) == 950 and int(s.monde.tresors_royaumes.get("roy_a", 0)) >= 50, "la victime perd moral et trésor, l'assaillant empoche")
+	var pnj := {"pos": s.monde.pos_monde(cb, Vector2i(10, 10))}
+	var nouvelles := SimRumeur.nouvelles_du_monde(s, pnj).map(func(n: Dictionary) -> String: return str(n.cle))
+	verifier("nouvelle.razzia" in nouvelles, "et les gens du coin en parlent (%s)" % str(nouvelles))
+	s.monde.fermer()
+

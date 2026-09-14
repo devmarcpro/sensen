@@ -12,7 +12,8 @@
     "abattre": 0.25,
     "creuser": 0.15,
     "quete": 0.6,
-    "conquete": 1.5
+    "conquete": 1.5,
+    "razzia": 1.2
   },
   "memo_ticks": 60000,
   "temoin": {
@@ -32,5 +33,10 @@
     "humeur_proches": -8,
     "humeur_ville": -3,
     "relation_proche": 20
+  },
+  "nouvelles_razzia": {
+    "_doc": "Une razzia fraiche (moins de `age_max_ticks`) a moins de `portee_cellules` cellules se raconte.",
+    "portee_cellules": 6,
+    "age_max_ticks": 336000
   }
 }

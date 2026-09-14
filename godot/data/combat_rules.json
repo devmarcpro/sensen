@@ -1085,7 +1085,13 @@
         "humeur_semaine": -1,
         "seuil_reddition": 0.4,
         "tribut_pct": 0.3,
-        "recuperation_semaine": 0.1
+        "recuperation_semaine": 0.1,
+        "razzia": {
+          "_doc": "LA RAZZIA (question 25, 2026-09-14) : chaque semaine de guerre, un royaume a `chance` de razzier une cellule du territoire de chaque ennemi. Elle pose un FAIT (acte `razzia`, auteur `royaume:<id>`) que les griefs pesent par les valeurs de la victime ; la victime perd `humeur` et `butin_pct` de son tresor, que l assaillant empoche.",
+          "chance": 0.4,
+          "humeur": -3,
+          "butin_pct": 0.05
+        }
       },
       "humeur_base": 55,
       "humeur_retour": 3,
@@ -2072,6 +2078,12 @@
         "conquete",
         "ordre_trouble",
         "sang_verse"
+      ],
+      "razzia": [
+        "sang_verse",
+        "meurtre",
+        "vol",
+        "ordre_trouble"
       ]
     }
   },
