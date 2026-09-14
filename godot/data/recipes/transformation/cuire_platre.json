@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.cuire_platre.name",
+  "station": "forge",
+  "craft_skill": "forge",
+  "inputs": [
+    {
+      "material": "gypse",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "platre",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

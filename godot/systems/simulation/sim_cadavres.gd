@@ -183,13 +183,15 @@ static func matieres_de(sim: Simulation, it: Dictionary) -> Array:
 	var pr: Dictionary = _cfg().get("prelevement", {})
 	if base == str(pr.get("item_membre", "membre")):
 		var def: Dictionary = GameData.catalogues.creatures.get(str(it.get("espece", "")), {})
-		var tegument := "cuir"
+		var tegument := ""   # une peau se tanne, elle ne se découpe pas : sans plume, écaille ni carapace, le membre ne rend pas de tégument
 		for cle in (eq.get("teguments", {}) as Dictionary).keys():
 			if cle in def.get("drops_chasse", []):
 				tegument = str(eq.teguments[cle])
 				break
 		for m in eq.get("membre", []):
 			var mat := tegument if str(m[0]) == "tegument" else str(m[0])
+			if mat.is_empty():
+				continue
 			res.append([mat, maxi(1, roundi(float(it.get("poids", 1.0)) * float(m[1])))])
 		return res
 	if base == str(pr.get("item_organe", "organe")):

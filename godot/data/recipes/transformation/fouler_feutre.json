@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.fouler_feutre.name",
+  "station": "atelier_tissage",
+  "craft_skill": "tissage",
+  "inputs": [
+    {
+      "material": "laine",
+      "forme": "brut",
+      "amount": 3
+    }
+  ],
+  "output": {
+    "material": "feutre",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

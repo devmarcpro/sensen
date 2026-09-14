@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.faire_colle_d_os.name",
+  "station": "cuve",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "material": "os",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "colle_d_os",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

@@ -108,12 +108,13 @@ BIOME_SANS_TABLE = {
     "bois_flotte": "une transformation (un bois roule par l'eau), pas une essence : attend que l'eau la produise",
     "laterite": "tropical : une terre de climat chaud et humide, attend un biome tropical",
     "chaux": "une transformation (le calcaire cuit), pas un gisement : attend sa recette",
+    "scorie": "un sous-produit de la fonte : attend qu une recette rende deux sorties",
     "cendre": "une transformation (ce que le feu laisse), pas un gisement : le feu la pose en tuile, pas encore en matiere brute",
 }
 for m, md in sorted(materials.items()):
     # Borne aux BOIS pour l'instant : les 57 autres materiaux « de biome » que ce test leve demandent d'abord que
     # l'audit lise toutes les vraies sources (sous-sol, elevage, minerais par etage) — ordre de travail 42 bis.
-    if md.get("category") not in ("bois", "mineral", "terre"):   # les minéraux et les terres ont leur porte depuis le 2026-09-14
+    if md.get("category") not in ("bois", "mineral", "terre", "synthetique"):   # les minéraux et les terres ont leur porte depuis le 2026-09-14
         continue
     if str(md.get("world_gen", {}).get("mode", "")) == "biome" and m not in src and m not in BIOME_SANS_TABLE:
         probs["materiau de biome qu'aucune table de biome ne pose"].append(m)

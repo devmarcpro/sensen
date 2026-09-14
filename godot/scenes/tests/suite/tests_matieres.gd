@@ -315,19 +315,19 @@ func test_equarrir() -> void:
 			if str(o.get("materiau", "")) == mat and str(o.get("base", "")) == "materiau_brut":
 				n += int(o.get("quantite", 1))
 		return n
-	var peau: Dictionary = SimObjets.generer_objet(s, "peau", 1, {}, "commun", 0)
-	verifier(not peau.is_empty(), "une peau de chasse")
-	if peau.is_empty():
+	var dent: Dictionary = SimObjets.generer_objet(s, "dent", 1, {}, "commun", 0)
+	verifier(not dent.is_empty(), "une dent de chasse")
+	if dent.is_empty():
 		return
-	peau["espece"] = "loup"
-	j.sac.append(peau.uid)
-	verifier(SimCadavres.equarrir(s, j, peau.uid, s.horloge_monde.ticks) and int(matiere_du_sac.call("cuir")) == 1 and not (peau.uid in j.sac), "la peau devient du cuir brut")
+	j.sac.append(dent.uid)
+	verifier(SimCadavres.equarrir(s, j, dent.uid, s.horloge_monde.ticks) and int(matiere_du_sac.call("croc")) == 1 and not (dent.uid in j.sac), "la dent devient du croc brut")
+	verifier(SimCadavres.matieres_de(s, SimObjets.generer_objet(s, "peau", 1, {}, "commun", 0)).is_empty(), "une peau ne s'équarrit pas : elle se tanne")
 	var membre: Dictionary = SimObjets.generer_objet(s, "membre", 1, {}, "commun", 0)
 	membre["espece"] = "loup"
 	membre["poids"] = 6.0
 	j.sac.append(membre.uid)
 	SimCadavres.equarrir(s, j, membre.uid, s.horloge_monde.ticks)
-	verifier(int(matiere_du_sac.call("os")) == 2 and int(matiere_du_sac.call("tendon")) == 1 and int(matiere_du_sac.call("suif")) == 1 and int(matiere_du_sac.call("cuir")) == 3, "un membre de loup : os, tendon, suif et cuir, selon son poids")
+	verifier(int(matiere_du_sac.call("os")) == 2 and int(matiere_du_sac.call("tendon")) == 1 and int(matiere_du_sac.call("suif")) == 1 and int(matiere_du_sac.call("cuir")) == 0, "un membre de loup : os, tendon et suif selon son poids — sa peau se tanne ailleurs")
 	var estomac: Dictionary = SimObjets.generer_objet(s, "organe", 1, {}, "commun", 0)
 	estomac["nom"] = {"partie": "partie.estomac"}
 	j.sac.append(estomac.uid)

@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.fondre_cire.name",
+  "station": "cuve",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "item": "miel",
+      "forme": "",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "cire",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

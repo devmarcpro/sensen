@@ -109,17 +109,11 @@
     "defaut": "broye"
   },
   "equarrissage": {
-    "_doc": "EQUARRIR (ordre de travail 42 bis, 2026-09-14) : reduire une piece de bete en MATIERE BRUTE — la porte qui manquait aux matieres animales. `objets` : ce que rend un objet de chasse, [matiere, quantite]. `membre` : ce que rend un membre preleve, [matiere, part de son poids] (au moins un de chaque) ; `tegument` y designe la peau de l espece, lue dans ses `drops_chasse` par `teguments` (une bete a plumes rend de la plume, une bete a ecailles de l ecaille, sinon du cuir). `organes` : ce que rend un organe selon son nom, `_defaut` sinon. `ticks` le temps, `competence` et `xp` ce qu on y apprend.",
+    "_doc": "EQUARRIR (ordre de travail 42 bis, 2026-09-14) : reduire une piece de bete en MATIERE BRUTE — la porte qui manquait aux matieres animales. `objets` : ce que rend un objet de chasse, [matiere, quantite]. `membre` : ce que rend un membre preleve, [matiere, part de son poids] (au moins un de chaque) ; `tegument` y designe la peau de l espece, lue dans ses `drops_chasse` par `teguments` (une bete a plumes rend de la plume, une bete a ecailles de l ecaille, sinon rien : une peau se TANNE, elle ne se decoupe pas — recipes/transformation/tanner_cuir). `organes` : ce que rend un organe selon son nom, `_defaut` sinon. `ticks` le temps, `competence` et `xp` ce qu on y apprend.",
     "ticks": 800,
     "competence": "chasse",
     "xp": 1,
     "objets": {
-      "peau": [
-        [
-          "cuir",
-          1
-        ]
-      ],
       "dent": [
         [
           "croc",
@@ -190,8 +184,7 @@
     "teguments": {
       "plume": "plume",
       "ecaille": "ecaille",
-      "carapace": "carapace",
-      "peau": "cuir"
+      "carapace": "carapace"
     },
     "organes": {
       "estomac": [

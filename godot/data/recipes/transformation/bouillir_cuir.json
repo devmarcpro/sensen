@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.bouillir_cuir.name",
+  "station": "cuve",
+  "craft_skill": "cuir",
+  "inputs": [
+    {
+      "material": "cuir",
+      "forme": "brut",
+      "amount": 1
+    }
+  ],
+  "output": {
+    "material": "cuir_bouilli",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

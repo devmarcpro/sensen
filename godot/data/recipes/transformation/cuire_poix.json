@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.cuire_poix.name",
+  "station": "cuve",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "material": "resine",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "poix",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}
