@@ -3676,7 +3676,7 @@ func _payer(e: Dictionary, plan: Dictionary) -> void:
 			var arme_m: Dictionary = Etres.arme(e, items)
 			var cond := float(arme_m.get("stats", {}).get("conductivite_mana", 0.0))
 			var mult_cond := clampf(1.0 - cond / float(sm_m.get("mana_conductivite_div", 140.0)), 0.2, 1.0)
-			var cout := roundi(float(plan.ressource) * SimTalents.mult_mana_lieu(self, e, plan) * SimTalents.mult_mana_sources(self, e) * float(plan.get("cout_mana_mult_arme", 1.0)) * mult_cond)
+			var cout := roundi(float(plan.ressource) * SimTalents.mult_mana_lieu(self, e, plan) * SimTalents.mult_mana_sources(self, e) * float(plan.get("cout_mana_mult_arme", 1.0)) * mult_cond * SimMatiere.mult_mana_armure(self, e))   # le fer renchérit le sort, l'argent l'allège (lot 4)
 			var deficit: int = maxi(0, cout - int(e.mana))
 			e.mana = maxi(0, int(e.mana) - cout)
 			if deficit > 0:

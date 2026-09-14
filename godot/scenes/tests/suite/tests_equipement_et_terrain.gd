@@ -1320,6 +1320,35 @@ func test_eau_qui_traverse() -> void:
 	s.meteo_force = ""
 
 
+## LA FUMÉE ET LE MANA DANS L'ARMURE (22 ter, lot 4 — 2026-09-14).
+func test_fumee_et_mana_armure() -> void:
+	var s := Simulation.new(4261)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	# 1. LE MANA DANS L'ARMURE : le fer renchérit, l'argent allège, nu rien ne change.
+	verifier(is_equal_approx(SimMatiere.mult_mana_armure(s, j) if j.equipement.is_empty() else 1.0, 1.0), "nu, le sort coûte son prix")
+	var _habiller := func(matiere: String) -> void:
+		j.equipement = {}
+		for slot in ["cuirasse", "casque", "brassards", "jambieres", "bottes"]:
+			var o := SimObjets.generer_objet(s, "materiau_brut", 1, {}, "commun", 0)
+			o["type"] = "armure"
+			o["materiau"] = matiere
+			j.equipement[slot] = str(o.uid)
+	_habiller.call("fer")
+	var fer := SimMatiere.mult_mana_armure(s, j)
+	var argent_id := "argent" if GameData.catalogues.materials.has("argent") else ""
+	_habiller.call(argent_id if not argent_id.is_empty() else "fer")
+	var argent := SimMatiere.mult_mana_armure(s, j)
+	verifier(fer > 1.05 and (argent_id.is_empty() or argent < fer), "en fer, le sort coûte ×%.2f ; en argent ×%.2f" % [fer, argent])
+	# 2. LA FUMÉE : un feu rejette du gaz carbonique sur sa tuile.
+	var t: Vector2i = j.pos + Vector2i(3, 0)
+	s.nuages.clear()
+	SimMatiere.fumer(s, t, 70.0)
+	verifier(float(SimTerrain.gaz_a(s, t).get("dioxyde_de_carbone", 0.0)) > 0.0, "un feu fume : du gaz carbonique sur sa tuile")
+	s.nuages.clear()
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

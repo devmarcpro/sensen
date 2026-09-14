@@ -1613,6 +1613,7 @@ static func _tiquer_feux(sim: Simulation, tick: int) -> void:
 		# La propagation par jet a été RETIRÉE le 2026-09-08 (Émergence — les champs partagés) : le feu ne fait plus
 		# que CHAUFFER sa tuile, et une voisine s'enflamme quand sa propre chaleur atteint le seuil de sa matière.
 		# Le vent n'est pas perdu — il attise la source de chaleur au lieu de doubler un tirage.
+		SimMatiere.fumer(sim, t, float(maxi(flammabilite_de(sim, t), 20)))   # un feu fume : dehors ça se dissipe, dedans ça étouffe (lot 4)
 		sim.feux[idx].reste = int(sim.feux[idx].reste) - periode
 		if int(sim.feux[idx].reste) <= 0:
 			_consumer(sim, t)

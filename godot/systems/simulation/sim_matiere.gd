@@ -144,3 +144,27 @@ static func glisser(sim: Simulation, e: Dictionary, t: Vector2i, tick: int) -> b
 	if e.controle == "joueur":
 		EventBus.emettre(&"journal", [&"journal.glissade", {"nom": e.name_key}])
 	return true
+
+
+## LE MANA DANS L'ARMURE (lot 4 — 2026-09-14) : ce que l'armure fait au coût d'un sort. Le fer conduit mal le mana et le
+## renchérit ; l'argent le conduit et l'allège. Un mage en plaques paie sa protection en mana — personne ne l'interdit.
+static func mult_mana_armure(sim: Simulation, e: Dictionary) -> float:
+	var c: Dictionary = _cfg().get("mana_armure", {})
+	var pieces := armure(sim, e)
+	if pieces.is_empty():
+		return 1.0
+	var total := 0.0
+	for st in pieces:
+		total += float(st.get("conductivite_mana", c.get("reference", 30.0)))
+	var moy := total / float(pieces.size())
+	var ecart := (float(c.get("reference", 30.0)) - moy) / maxf(1.0, float(c.get("div", 110.0))) * float(pieces.size())
+	return clampf(1.0 + ecart, float(c.get("min", 0.8)), float(c.get("max", 1.4)))
+
+
+## LA FUMÉE (lot 4) : ce qu'un feu rejette dans le champ des gaz à chaque pas.
+static func fumer(sim: Simulation, t: Vector2i, flammabilite: float) -> void:
+	var c: Dictionary = _cfg().get("fumee", {})
+	var gaz := str(c.get("gaz", ""))
+	if gaz.is_empty() or not GameData.catalogues.gaz.has(gaz):
+		return
+	SimTerrain.ajouter_gaz(sim, t, gaz, float(c.get("charge", 0.05)) * clampf(flammabilite / 100.0, 0.2, 1.0))

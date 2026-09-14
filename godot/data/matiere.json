@@ -1,5 +1,5 @@
 {
-  "_doc": "LA MATIERE AUX CROISEMENTS (ordre de travail 22 ter, lot 3 — 2026-09-13 ; designer : « regarde les materiaux, je veux une simulation profonde avec gameplay emergent »). Aucune matiere n est nommee : ce sont ses stats qui decident. `pas` : un pas emet `base` dans le champ sonore, plus, par piece d armure portee, densite x durete / `div` (plafonne a `piece_max`) — la plaque s entend de loin, le cuir se tait ; la Discretion retranche comme pour tout son. `foudre` : un etre dans le rayon de la foudre concourt avec le terrain, son score est sa hauteur x 10 plus la conductivite electrique moyenne de son armure x `poids_armure`. `usure_mouille` : ce qu une heure trempee (mouille 100) ajoute a l usure d un objet d alteration 50, porte ou dans le sac. `nage` : une armure dense et peu flottante leste — le souffle se vide (1 + lest) fois plus vite, le lest etant la moyenne de (densite x 10 - flottabilite) / `lest_div`. `thermique` : une armure conductrice et peu isolante chauffe au-dessus de `chaud_des` degres et glace sous `froid_sous`, jusqu a `ecart_max` degres. `glissade` : la friction du sol, x `mouille_mult` sous la pluie a decouvert et x `gel_mult` sur le gel ; en dessous de `seuil`, chaque pas a (seuil - friction) % de chance de faire glisser et perdre `ticks`.",
+  "_doc": "LA MATIERE AUX CROISEMENTS (ordre de travail 22 ter, lot 3 — 2026-09-13 ; designer : « regarde les materiaux, je veux une simulation profonde avec gameplay emergent »). Aucune matiere n est nommee : ce sont ses stats qui decident. `pas` : un pas emet `base` dans le champ sonore, plus, par piece d armure portee, densite x durete / `div` (plafonne a `piece_max`) — la plaque s entend de loin, le cuir se tait ; la Discretion retranche comme pour tout son. `foudre` : un etre dans le rayon de la foudre concourt avec le terrain, son score est sa hauteur x 10 plus la conductivite electrique moyenne de son armure x `poids_armure`. `usure_mouille` : ce qu une heure trempee (mouille 100) ajoute a l usure d un objet d alteration 50, porte ou dans le sac. `nage` : une armure dense et peu flottante leste — le souffle se vide (1 + lest) fois plus vite, le lest etant la moyenne de (densite x 10 - flottabilite) / `lest_div`. `thermique` : une armure conductrice et peu isolante chauffe au-dessus de `chaud_des` degres et glace sous `froid_sous`, jusqu a `ecart_max` degres. `glissade` : la friction du sol, x `mouille_mult` sous la pluie a decouvert et x `gel_mult` sur le gel ; en dessous de `seuil`, chaque pas a (seuil - friction) % de chance de faire glisser et perdre `ticks`. LOT 4 (2026-09-14) : `fumee` — chaque pas de feu rejette `charge` du gaz `gaz` sur sa tuile, x la flammabilite de ce qui brule / 100 ; le champ des gaz fait le reste (dissipe dehors, accumule dedans, le gaz carbonique eteint les feux et epuise qui le respire). `mana_armure` — une armure dont la conductivite de mana moyenne est sous `reference` rend les sorts plus chers de (reference - conductivite) / `div` par piece sur cinq, au-dessus elle les allege, borne a [`min`, `max`].",
   "pas": {
     "base": 3.0,
     "div": 60.0,
@@ -22,5 +22,15 @@
     "mouille_mult": 0.55,
     "gel_mult": 0.3,
     "ticks": 600
+  },
+  "fumee": {
+    "gaz": "dioxyde_de_carbone",
+    "charge": 0.05
+  },
+  "mana_armure": {
+    "reference": 30.0,
+    "div": 110.0,
+    "min": 0.8,
+    "max": 1.4
   }
 }
