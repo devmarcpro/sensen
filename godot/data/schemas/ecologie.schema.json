@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "required": [
+    "retour"
+  ],
+  "properties": {
+    "_doc": {
+      "type": "string"
+    },
+    "retour": {
+      "type": "number"
+    }
+  }
+}

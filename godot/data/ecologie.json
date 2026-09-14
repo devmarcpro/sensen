@@ -1,0 +1,23 @@
+{
+  "_doc": "L ECOLOGIE VIVANTE (ordre de travail 22 ter, lot 5 — 2026-09-14 ; designer : « une simulation profonde avec gameplay emergent »). Chaque cellule porte deux indices, `proies` et `predateurs`, qui valent 1 a l equilibre ; on ne stocke que les cellules qui s en ecartent. Une bete est une PROIE si son profil est dans `profils_proies`, un PREDATEUR si c est une bete de profil `profils_predateurs`. LA CHASSE : tuer une proie retire `chasse_proie` a la cellule, un predateur `chasse_predateur`. LA SEMAINE : proies += `retour` x (1 - proies) - `predation` x (predateurs - 1) x proies ; predateurs += `retour` x (1 - predateurs) + `nourriture` x (proies - 1) x predateurs — bornes a [`min`, `max`]. LES CONSEQUENCES : le tirage de faune pondere chaque espece par l indice de sa classe ; une cellule AFFAMEE (proies < `affame_proies` et predateurs > `affame_predateurs`) lache ses predateurs de jour et, chaque semaine, chaque bete de troupeau y a `rafle_chance` d etre emportee ; une cellule SURPATUREE (proies > `surpature_proies`) rend x `surpature_recolte`.",
+  "profils_proies": [
+    "proie",
+    "fuyard",
+    "bete_sauvage"
+  ],
+  "profils_predateurs": [
+    "hostile"
+  ],
+  "chasse_proie": 0.12,
+  "chasse_predateur": 0.2,
+  "retour": 0.12,
+  "predation": 0.25,
+  "nourriture": 0.15,
+  "min": 0.1,
+  "max": 2.0,
+  "affame_proies": 0.55,
+  "affame_predateurs": 0.7,
+  "rafle_chance": 0.35,
+  "surpature_proies": 1.4,
+  "surpature_recolte": 0.8
+}

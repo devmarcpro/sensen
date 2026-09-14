@@ -1,5 +1,5 @@
 {
-  "_doc": "LE VOYAGE A LA FALLOUT 1 (ordre de travail 39 ter, pas E — 2026-09-13 ; designer : « rajouter le deplacement carte du monde a la Fallout 1 », et le monde reste marchable). Un trajet va de la cellule du joueur a la destination, une cellule par segment ; chaque segment coute ce que couterait la marche (la distance en tuiles x le cout d un pas, la charge, la route) et l horloge avance d autant. `secondes_par_segment` : le rythme de l animation sur la carte. A chaque segment, une RENCONTRE a `chance_base` de chance, x `danger_mult` selon le danger de la cellule, x `route_mult` sur une route, x `nuit_mult` de nuit ; elle interrompt le trajet et pose le joueur dans le monde, a l endroit ou elle a lieu. `rencontres` : chaque type a son poids, un danger minimal, et ce qui apparait (`etres` : [id, min, max] ; `betes` : tirees parmi `betes_par_biome` ; `lieu` : le lieu le plus proche devient connu). On reprend la route ensuite.",
+  "_doc": "LE VOYAGE A LA FALLOUT 1 (ordre de travail 39 ter, pas E — 2026-09-13 ; designer : « rajouter le deplacement carte du monde a la Fallout 1 », et le monde reste marchable). Un trajet va de la cellule du joueur a la destination, une cellule par segment ; chaque segment coute ce que couterait la marche (la distance en tuiles x le cout d un pas, la charge, la route) et l horloge avance d autant. `secondes_par_segment` : le rythme de l animation sur la carte. A chaque segment, une RENCONTRE a `chance_base` de chance, x `danger_mult` selon le danger de la cellule, x `route_mult` sur une route, x `nuit_mult` de nuit ; elle interrompt le trajet et pose le joueur dans le monde, a l endroit ou elle a lieu. `rencontres` : chaque type a son poids, un danger minimal, et ce qui apparait (`etres` : [id, min, max] ; `betes` : tirees parmi `betes_par_biome` ; `lieu` : le lieu le plus proche devient connu). On reprend la route ensuite. LA GUERRE (2026-09-14) : sur les terres d un royaume en guerre, la chance de rencontre est x `guerre_mult`, et le type `deserteurs` (condition `guerre`) peut sortir.",
   "secondes_par_segment": 0.25,
   "chance_base": 0.06,
   "danger_mult": [
@@ -60,6 +60,23 @@
     "lieu": {
       "poids": 3,
       "danger_min": 0
+    },
+    "deserteurs": {
+      "poids": 4,
+      "danger_min": 0,
+      "guerre": true,
+      "etres": [
+        [
+          "bandit",
+          2,
+          4
+        ],
+        [
+          "brute",
+          0,
+          1
+        ]
+      ]
     }
   },
   "betes_par_biome": {
@@ -111,5 +128,6 @@
     "_defaut": [
       "loup"
     ]
-  }
+  },
+  "guerre_mult": 1.6
 }

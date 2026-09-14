@@ -1349,6 +1349,52 @@ func test_fumee_et_mana_armure() -> void:
 	s.monde.fermer()
 
 
+## L'ÉCOLOGIE VIVANTE (22 ter, lot 5 — 2026-09-14) : trop chasser le cerf affame les loups, qui emportent le bétail ;
+## exterminer les loups laisse les cerfs ravager les champs ; et tout revient à l'équilibre avec le temps.
+func test_ecologie_vivante() -> void:
+	var s := Simulation.new(4262)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var cell := s.monde.cellule_de(j.pos)
+	verifier(SimEcologie.classe(GameData.catalogues.creatures.cerf) == "proie" and SimEcologie.classe(GameData.catalogues.creatures.loup) == "predateur", "le cerf est une proie, le loup un prédateur")
+	# 1. ON MASSACRE LES CERFS.
+	for k in 5:
+		SimEcologie.chasser(s, {"def": "cerf"}, j.pos)
+	verifier(float(SimEcologie.indices(s, cell).proies) < 0.5 and SimEcologie.affamee(s, cell), "cinq cerfs tués : la cellule est affamée (proies %.2f)" % float(SimEcologie.indices(s, cell).proies))
+	verifier(SimEcologie.poids_espece(s, cell, "cerf") < 0.5 and is_equal_approx(SimEcologie.poids_espece(s, cell, "loup"), 1.0), "et le tirage offre moins de cerfs, autant de loups")
+	# 2. LES LOUPS AFFAMÉS EMPORTENT LE BÉTAIL.
+	var vache := s.ajouter("vache", s._tuile_libre_autour(j.pos), "ia")
+	vache["betail"] = "joueur"
+	var emportee := false
+	for k in 12:
+		s.monde.semaine_courante += 1
+		SimEcologie.chasser(s, {"def": "cerf"}, j.pos)   # la chasse continue
+		var i_e := SimEcologie.indices(s, cell)
+		s.monde.ecologie[cell] = {"proies": float(i_e.proies), "predateurs": maxf(1.0, float(i_e.predateurs))}   # une meute arrive des cellules voisines
+		SimEcologie.semaine(s)
+		if not vache.vivant:
+			emportee = true
+			break
+	verifier(emportee, "et, semaine après semaine, les prédateurs affamés emportent la vache du troupeau")
+	# 3. ON EXTERMINE LES LOUPS : les cerfs pullulent et ravagent les champs.
+	s.monde.ecologie.clear()
+	for k in 5:
+		SimEcologie.chasser(s, {"def": "loup"}, j.pos)
+	for k in 6:
+		SimEcologie.semaine(s)
+	verifier(float(SimEcologie.indices(s, cell).proies) > 1.0, "sans loups, les proies se multiplient (%.2f)" % float(SimEcologie.indices(s, cell).proies))
+	for k in 20:
+		SimEcologie.chasser(s, {"def": "loup"}, j.pos)
+	s.monde.ecologie[cell] = {"proies": 1.6, "predateurs": 0.2}
+	verifier(SimEcologie.mult_recolte(s, cell) < 1.0, "trop de cerfs : les champs rendent moins")
+	# 4. LE TEMPS RAMÈNE L'ÉQUILIBRE.
+	s.monde.ecologie[cell] = {"proies": 0.6, "predateurs": 1.0}
+	for k in 60:
+		SimEcologie.semaine(s)
+	verifier(not s.monde.ecologie.has(cell), "laissée en paix, la forêt revient à l'équilibre")
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)

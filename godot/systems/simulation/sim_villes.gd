@@ -593,6 +593,7 @@ static func _rendement_parcelle(sim: Simulation, pm: Vector2i, champ: Dictionary
 	if SimTerrain.meteo(sim, cell) == "canicule" and not irrigue:
 		q *= float(SimTerritoire._ry(sim).agriculture.canicule_facteur)
 	q *= SimClimat.mult_recolte(sim, cell)   # la sécheresse et le sol détrempé rendent moins (climat, 2026-09-13)
+	q *= SimEcologie.mult_recolte(sim, cell)   # trop de proies ravagent les champs (lot 5)
 	q *= annee_agricole(sim, cell)   # une mauvaise année pèse sur toute la région (l'ancienne file, 2026-09-13)
 	return maxi(1, roundi(q))
 

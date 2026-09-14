@@ -68,6 +68,7 @@ func cellule_de(p: Vector2i) -> Vector2i:
 
 
 ## `local` peut porter une couche (y + z × BANDE_Z) : la position monde la garde.
+var ecologie: Dictionary = {}   # cellule → {proies, predateurs} : seules les cellules hors d'équilibre (22 ter, lot 5) — sauvegardé
 var lieux_connus: Dictionary = {}   # id de lieu → true : ceux que le joueur a découverts (une rencontre, un passage) — sauvegardé
 var entrees_lieux: Dictionary = {}   # position monde → id du lieu dont c'est l'entrée de donjon (39 ter) — se regénère, ne se sauve pas
 

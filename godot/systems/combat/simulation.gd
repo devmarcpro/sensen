@@ -525,13 +525,14 @@ func _tiquer_faune(tick: int) -> void:
 			pool.append_array(b.get("faune_nuit", []))
 		if pool.is_empty():
 			return
+		var cell_f := monde.cellule_de(q)
 		var total := 0.0
 		for f in pool:
-			total += float(f.density)
+			total += float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id))   # l'écologie de la cellule pondère le tirage (lot 5)
 		var t := rng.randf() * total
 		var choix := ""
 		for f in pool:
-			t -= float(f.density)
+			t -= float(f.density) * SimEcologie.poids_espece(self, cell_f, str(f.id))
 			if t <= 0.0:
 				choix = str(f.id)
 				break
@@ -547,7 +548,7 @@ func _tiquer_faune(tick: int) -> void:
 			if grille.dans(pos) and not grille.bloque_passage(pos) and grille.occupant(pos).is_empty():
 				var x: Dictionary = SimObjets.ajouter(self, choix, pos, "ia")
 				# De jour, une bête est une bête sauvage ; la nuit, le loup chasse (hostile) — Créatures.
-				if def.get("ai_profile", "") == "hostile" and "bete" in def.get("tags", []) and not nuit:
+				if def.get("ai_profile", "") == "hostile" and "bete" in def.get("tags", []) and not nuit and not SimEcologie.affamee(self, cell_f):   # affamés, ils chassent aussi de jour (lot 5)
 					x.ai_profile = "bete_sauvage"
 				x["spawn_faune"] = true
 		return
@@ -583,6 +584,7 @@ func _tiquer_monde(tick: int) -> void:
 		t0 = _top("villes", t0)
 		SimTerrain._regenerer_terrain_sauvage(self)
 		_regenerer_faune_hebdo()
+		SimEcologie.semaine(self)   # proies et prédateurs se répondent (22 ter, lot 5)
 		t0 = _top("regeneration", t0)
 		for x in entites.values():   # les bourses des PNJ se rechargent (+15 % par semaine, Barèmes économiques)
 			if x.has("or_max"):
@@ -2632,6 +2634,8 @@ func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: D
 		SimPnj._quetes_sur_mort(self, cible, source)
 		if not att.is_empty() and att.controle == "joueur" and bool(cible.get("spawn_faune", false)) and est_faune_paisible(cible):
 			_rarefier_faune(cible.pos)   # massacrer la faune vide la forêt (Créatures, 2026-09-04)
+		if not att.is_empty() and bool(cible.get("spawn_faune", false)):
+			SimEcologie.chasser(self, cible, cible.pos)   # la chaîne se déséquilibre : proie ou prédateur (22 ter, lot 5)
 		if not att.is_empty() and SimTalents.a_talent(self, att, "dissimulation"):   # L'Ombre : dissimulé après chaque mise à mort
 			appliquer_statut(att, "dissimule", int(statuts_defs.get("dissimule", {}).get("duree_ticks", 24000)), att.id)
 			EventBus.emettre(&"journal", [&"journal.dissimule", {"nom": att.name_key}])

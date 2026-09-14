@@ -92,7 +92,17 @@ static func chance_rencontre(sim: Simulation, cell: Vector2i) -> float:
 		p *= float(c.get("route_mult", 0.5))
 	if SimTerrain.est_nuit(sim):
 		p *= float(c.get("nuit_mult", 1.5))
+	if en_guerre(sim, cell):
+		p *= float(c.get("guerre_mult", 1.6))   # un pays en guerre : des déserteurs sur les routes (2026-09-14)
 	return p
+
+
+## La cellule est-elle sur les terres d'un royaume en guerre ?
+static func en_guerre(sim: Simulation, cell: Vector2i) -> bool:
+	var roy: Dictionary = sim.monde.surface.royaume_de(cell)
+	if roy.is_empty():
+		return false
+	return not (SimRoyaumes.etat_royaume(sim, str(roy.id)).get("guerres", []) as Array).is_empty()
 
 
 ## Reprendre la route après une rencontre : le chemin repart d'où l'on est.
@@ -112,13 +122,15 @@ static func poser_rencontre(sim: Simulation, e: Dictionary, cell: Vector2i, rng:
 	var ids: Array = types.keys()
 	ids.sort()
 	var total := 0.0
+	var guerre := en_guerre(sim, cell)
+	var permis := func(id: String) -> bool: return danger >= int(types[id].get("danger_min", 0)) and (guerre or not bool(types[id].get("guerre", false)))
 	for id in ids:
-		if danger >= int(types[id].get("danger_min", 0)):
+		if permis.call(str(id)):
 			total += float(types[id].get("poids", 1))
 	var r := rng.randf() * total
 	var choisi := ""
 	for id in ids:
-		if danger < int(types[id].get("danger_min", 0)):
+		if not permis.call(str(id)):
 			continue
 		r -= float(types[id].get("poids", 1))
 		if r <= 0.0:
