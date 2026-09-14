@@ -2144,7 +2144,7 @@ static func heure(sim: Simulation, tick: int = -1) -> float:
 
 static func phase(sim: Simulation, tick: int = -1) -> String:
 	var h := heure(sim, tick)
-	var c := _cycle(sim)
+	var c := bornes_du_jour(sim, tick)
 	if h >= float(c.aube[0]) and h < float(c.aube[1]):
 		return "aube"
 	if h >= float(c.jour[0]) and h < float(c.jour[1]):
@@ -2152,6 +2152,22 @@ static func phase(sim: Simulation, tick: int = -1) -> String:
 	if h >= float(c.crepuscule[0]) and h < float(c.crepuscule[1]):
 		return "crepuscule"
 	return "nuit"
+
+
+## LES JOURS S'ALLONGENT L'ÉTÉ ET RACCOURCISSENT L'HIVER (2026-09-14) : les bornes de l'aube, du jour et du crépuscule, avancées
+## le matin et reculées le soir de `duree_jour_amplitude_h` × sin(2π × jour de l'année / jours par an) — nulles aux
+## équinoxes. Les nuits d'hiver sont plus longues : plus de loups, moins de vue, plus de froid, sans une règle de plus.
+static func bornes_du_jour(sim: Simulation, tick: int = -1) -> Dictionary:
+	var c := _cycle(sim)
+	var t := sim.horloge_monde.ticks if tick < 0 else tick
+	var sa: Dictionary = c.get("saisons", {})
+	var decal := 0.0
+	if not sa.is_empty():
+		var jours_an := maxi(1, int(sa.get("jours_par_an", 360)))
+		var jour_an := posmod(t / maxi(1, int(c.get("ticks_par_jour", 24000))), jours_an)
+		decal = float(c.get("duree_jour_amplitude_h", 0.0)) * sin(TAU * float(jour_an) / float(jours_an))
+	return {"aube": [float(c.aube[0]) - decal, float(c.aube[1]) - decal], "jour": [float(c.jour[0]) - decal, float(c.jour[1]) + decal],
+		"crepuscule": [float(c.crepuscule[0]) + decal, float(c.crepuscule[1]) + decal]}
 
 
 static func est_nuit(sim: Simulation, tick: int = -1) -> bool:

@@ -264,9 +264,10 @@ func _maj_soleil(h: float, en_surface: bool) -> void:
 	var sol: Dictionary = c.get("soleil", {})
 	var direction := Vector3(0.0, 0.0, 1.0)
 	var force := 0.0
-	if en_surface and bool(sol.get("actif", true)) and c.has("aube") and c.has("crepuscule"):
-		var lever := float(c.aube[0])
-		var coucher := float(c.crepuscule[1])
+	if en_surface and bool(sol.get("actif", true)) and c.has("aube") and c.has("crepuscule") and sim != null:
+		var bornes := SimTerrain.bornes_du_jour(sim)   # le soleil se lève plus tôt l'été (2026-09-14)
+		var lever := float(bornes.aube[0])
+		var coucher := float(bornes.crepuscule[1])
 		if h >= lever and h <= coucher and coucher > lever:
 			var f := (h - lever) / (coucher - lever)   # 0 au lever, 1 au coucher
 			var az := PI * f                            # 0 : l'est (droite), π/2 : le sud (bas), π : l'ouest (gauche)
@@ -1019,10 +1020,10 @@ func _maj_ambiance() -> void:
 		_maj_lumiere_si_besoin()
 		lumieres.queue_redraw()
 		return
-	var c: Dictionary = GameData.config("planete").cycle
+	var c: Dictionary = SimTerrain.bornes_du_jour(sim)   # les bornes de la saison, pas celles de la fiche (2026-09-14)
+	var l: Dictionary = GameData.config("planete").cycle.lumiere
 	var h := sim.heure()
 	_maj_soleil(h, true)
-	var l: Dictionary = c.lumiere
 	var jour := Color(l.jour[0], l.jour[1], l.jour[2])
 	var nuit := Color(l.nuit[0], l.nuit[1], l.nuit[2])
 	var aube := Color(l.aube[0], l.aube[1], l.aube[2])

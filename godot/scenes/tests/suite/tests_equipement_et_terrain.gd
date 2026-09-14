@@ -1524,6 +1524,23 @@ func test_faune_des_saisons() -> void:
 	s.monde.fermer()
 
 
+## LES JOURS S'ALLONGENT L'ÉTÉ (2026-09-14) : à 20 h, il fait jour en été et nuit en hiver.
+func test_duree_du_jour() -> void:
+	var s := Simulation.new(4268)
+	s.charger_camp()
+	var jour := int(GameData.config("planete").cycle.ticks_par_jour)
+	var base: int = s.horloge_monde.ticks - posmod(s.horloge_monde.ticks, 360 * jour)
+	var ete: int = base + 90 * jour + jour * 20 / 24
+	var hiver: int = base + 270 * jour + jour * 20 / 24
+	var b_ete := SimTerrain.bornes_du_jour(s, ete)
+	var b_hiver := SimTerrain.bornes_du_jour(s, hiver)
+	verifier(float(b_ete.jour[1]) > float(b_hiver.jour[1]) + 3.0, "le jour finit plus tard l'été (%.1f h) que l'hiver (%.1f h)" % [float(b_ete.jour[1]), float(b_hiver.jour[1])])
+	verifier(SimTerrain.phase(s, ete) != "nuit" and SimTerrain.phase(s, hiver) == "nuit", "à 20 h, il fait encore clair en été (%s), nuit en hiver" % SimTerrain.phase(s, ete))
+	var equinoxe: int = base + 0 * jour + jour * 8 / 24
+	verifier(SimTerrain.phase(s, equinoxe) == "jour", "à l'équinoxe, 8 h reste le jour")
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
