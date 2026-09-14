@@ -4651,3 +4651,5 @@ journal.soupcon_joueur,"À {village}, on murmure que vous étiez là quand {nom}
 journal.soupcon_pnj,"À {village}, on soupçonne {suspect} de la mort de {nom}"
 tile_content.verger_arbre.name,"Arbre fruitier"
 tile_content.verger_arbre_mur.name,"Arbre fruitier chargé de fruits"
+journal.train_siffle,"Le train siffle : quelqu'un est sur la voie"
+journal.train_heurte,"Le train n'a pas pu s'arrêter : {nom} est fauché"

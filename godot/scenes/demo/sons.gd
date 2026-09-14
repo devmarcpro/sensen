@@ -21,7 +21,7 @@ func _ready() -> void:
 	if AudioServer.get_bus_index(&"Effets") < 0:
 		AudioServer.add_bus()
 		AudioServer.set_bus_name(AudioServer.bus_count - 1, &"Effets")
-	for nom in ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion"]:
+	for nom in ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion", "sifflet"]:
 		var chemin := "res://assets/sons/%s.wav" % nom
 		if ResourceLoader.exists(chemin):
 			_flux[nom] = load(chemin)

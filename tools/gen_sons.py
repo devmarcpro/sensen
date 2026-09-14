@@ -112,10 +112,17 @@ def recette(nom, rng):
         g = passe_bas(bruit(n, rng), 0.02)
         e = enveloppe(n, 0.003, 0.35)
         return [(b[i] * 0.6 + g[i] * 4.0) * e[i] for i in range(n)]
+    if nom == "sifflet":
+        n = int(0.9 * TAUX)
+        s1 = sinus(n, 880, 860)
+        s2 = sinus(n, 1175, 1150)
+        b = passe_bas(bruit(n, rng), 0.3)
+        e = enveloppe(n, 0.05, 0.5)
+        return [(s1[i] * 0.5 + s2[i] * 0.4 + b[i] * 0.15) * e[i] for i in range(n)]
     raise KeyError(nom)
 
 
-SONS = ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion"]
+SONS = ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion", "sifflet"]
 
 
 def main():

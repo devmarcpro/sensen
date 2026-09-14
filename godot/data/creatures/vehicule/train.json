@@ -38,5 +38,6 @@
   "competences": {},
   "recruitable": {
     "method": "jamais"
-  }
+  },
+  "masse": 20000
 }

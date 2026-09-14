@@ -224,3 +224,30 @@ static func projeter_etre(sim: Simulation, source: Dictionary, x: Dictionary, ci
 		if dh >= int(sim.regles.r.deplacement.get("chute_delta", 3)):
 			p = masse_etre(x) * sqrt(v * v + pow(vitesse_chute(float(dh)), 2.0))
 	frapper(sim, x, Vector2i.ZERO, p * 0.5, str(source.get("id", "")), mou())   # l'atterrissage : la moitié du choc
+
+
+## LE VÉHICULE QUI HEURTE (lot 4, 2026-09-14). Son pas suivant est occupé : une calèche freine (on rend faux, elle attend
+## comme tout le monde) ; un train siffle au premier échec, et au suivant frappe l'occupant de sa masse × sa vitesse — le
+## recul l'écarte des rails, et le train passera au pas d'après. Rend vrai si le véhicule a agi (sifflé ou heurté).
+static func heurter_en_route(sim: Simulation, v: Dictionary, prochain: Vector2i, echecs: int) -> bool:
+	if not ("vehicule" in v.get("tags", [])):
+		return false
+	var cfg_v: Dictionary = _cfg().get("vehicules", {})
+	var type_v := "train" if "train" in v.get("tags", []) else "caleche"
+	var c: Dictionary = cfg_v.get(type_v, {})
+	if c.is_empty() or bool(c.get("freine", true)):
+		return false
+	var occ := sim.grille.occupant(prochain)
+	var x: Dictionary = sim.entites.get(occ, {})
+	if x.is_empty() or not x.vivant or "vehicule" in x.get("tags", []):
+		return false
+	if echecs <= 1:
+		SimTerrain.sonner(sim, v.pos, float(cfg_v.get("sifflet_son", 60.0)))
+		EventBus.emettre(&"son", [v.pos, "sifflet", float(cfg_v.get("sifflet_son", 60.0))])
+		EventBus.emettre(&"journal", [&"journal.train_siffle", {}])
+		return true
+	var dir := Vector2i(signi(prochain.x - v.pos.x), signi(prochain.y - v.pos.y))
+	EventBus.emettre(&"journal", [&"journal.train_heurte", {"nom": x.name_key}])
+	frapper(sim, x, dir, masse_etre(v) * float(c.get("vitesse", 4.0)), str(v.id))
+	return true
+

@@ -2099,3 +2099,25 @@ func test_sons() -> void:
 	entendus = entendus.filter(func(x: Array) -> bool: return str(x[0]) == "pioche")
 	verifier(entendus.size() == 1 and float(entendus[0][1]) > 0.0, "un coup de pioche émet le signal que le client joue")
 
+
+## LE VÉHICULE QUI HEURTE (27 bis, lot 4 — 2026-09-14) : la calèche freine ; le train siffle, puis frappe de ses vingt tonnes.
+func test_vehicule_heurte() -> void:
+	var s := Simulation.new(4307)
+	s.charger_arene("plaine_au_talus")
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	for x in s.vivants():
+		if x.id != j.id:
+			x.vivant = false
+			s.grille.liberer(x.pos, x.id)
+	var train: Dictionary = SimObjets.ajouter(s, "train", s._tuile_libre_autour(j.pos + Vector2i(5, 0)), "ia")
+	var devant: Vector2i = s._tuile_libre_autour(train.pos + Vector2i(1, 0))
+	var passant: Dictionary = SimObjets.ajouter(s, "bandit", devant, "ia")
+	passant.sante = 5000
+	verifier(SimCorps.heurter_en_route(s, train, devant, 1) and int(passant.sante) == 5000, "le train siffle d'abord")
+	verifier(SimCorps.heurter_en_route(s, train, devant, 2) and int(passant.sante) < 5000, "puis il frappe celui qui est resté sur la voie (%d)" % int(passant.sante))
+	var caleche: Dictionary = SimObjets.ajouter(s, "caleche", s._tuile_libre_autour(j.pos + Vector2i(-5, 0)), "ia")
+	var devant_c: Vector2i = s._tuile_libre_autour(caleche.pos + Vector2i(-1, 0))
+	var pieton: Dictionary = SimObjets.ajouter(s, "bandit", devant_c, "ia")
+	pieton.sante = 5000
+	verifier(not SimCorps.heurter_en_route(s, caleche, devant_c, 5) and int(pieton.sante) == 5000, "la calèche freine et attend")
+

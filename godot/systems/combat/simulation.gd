@@ -5217,6 +5217,10 @@ func _ia_pas_routine(e: Dictionary, cible: Vector2i, tick: int) -> void:
 				e["chemin_routine"] = {"cible": cible, "depuis": e.pos, "chemin": chemin.slice(1) if e.pos == prochain else chemin, "echecs": 0}
 				return
 			var echecs := int(cache.get("echecs", 0)) + 1
+			if SimCorps.heurter_en_route(self, e, prochain, echecs):   # un train ne s'arrête pas (27 bis, lot 4)
+				e["chemin_routine"] = {"cible": cible, "depuis": e.pos, "chemin": chemin, "echecs": echecs}
+				_attendre(e, tick)
+				return
 			if echecs < 3:   # quelqu'un est sur le pas suivant : on attend qu'il passe plutôt que de refaire le chemin
 				e["chemin_routine"] = {"cible": cible, "depuis": e.pos, "chemin": chemin, "echecs": echecs}
 				_attendre(e, tick)
