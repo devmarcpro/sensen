@@ -516,3 +516,19 @@ static func assecher(sim: Simulation) -> void:
 	var centre := sim.grille.pos_de(sim.grille.largeur * sim.grille.hauteur_grille / 2)
 	if secheresse(sim, sim.monde.cellule_de(centre)):
 		SimTerrain._evaporation(sim)
+
+
+## LES LIQUIDES GÈLENT (lot 12 — 2026-09-14) : par grand froid, une potion ou une boisson gèle dans le sac et ne se boit
+## plus ; près d'un feu, elle dégèle. L'hiver se prépare : on ne compte pas sur une potion gelée au milieu d'un blizzard.
+static func gele(sim: Simulation, e: Dictionary, it: Dictionary) -> bool:
+	var c: Dictionary = _cfg().get("liquides", {})
+	var liquide := false
+	for tag in it.get("tags", []):
+		if str(tag) in c.get("tags", []):
+			liquide = true
+			break
+	if not liquide:
+		return false
+	if SimTerrain.ambiante_de(sim) >= float(c.get("gel_sous", -6.0)):
+		return false
+	return SimTerrain.chaleur_a(sim, e.pos) < float(c.get("degel_des", 5.0))

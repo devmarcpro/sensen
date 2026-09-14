@@ -944,6 +944,9 @@ func _manger(e: Dictionary, uid: String, tick: int) -> bool:
 	if not (uid in e.sac) or it.get("type", "") != "consommable":
 		EventBus.emettre(&"journal", [&"journal.pas_comestible", {}])
 		return false
+	if SimClimat.gele(self, e, it):   # par grand froid, la potion a gelé dans le sac (lot 12)
+		EventBus.emettre(&"journal", [&"journal.liquide_gele", {"objet": SimObjets.nom_objet(self, uid)}])
+		return false
 	if not e.has("faim"):
 		e["faim"] = 100
 		e["faim_tick"] = tick

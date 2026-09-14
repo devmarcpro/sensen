@@ -1541,6 +1541,28 @@ func test_duree_du_jour() -> void:
 	s.monde.fermer()
 
 
+## LES LIQUIDES GÈLENT (lot 12 — 2026-09-14) : dans le blizzard, la potion gèle et ne se boit plus ; près d'un feu, si.
+func test_liquides_gelent() -> void:
+	var s := Simulation.new(4269)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var potion := SimObjets.generer_objet(s, "potion_soin", 1, {}, "commun", 0)
+	var pain := {"tags": ["consommable", "viande"]}
+	s.meteo_force = "blizzard"
+	verifier(SimTerrain.ambiante_de(s) < float(GameData.config("climat").liquides.gel_sous), "le blizzard glace l'air (%.0f °C)" % SimTerrain.ambiante_de(s))
+	verifier(SimClimat.gele(s, j, potion) and not SimClimat.gele(s, j, pain), "la potion gèle dans le sac, pas la viande")
+	j.sac.append(str(potion.uid))
+	verifier(not s._manger(j, str(potion.uid), s.horloge_monde.ticks), "et elle ne se boit pas")
+	SimTerrain.chauffer(s, j.pos, 60.0)
+	verifier(not SimClimat.gele(s, j, potion), "près d'un feu, elle dégèle")
+	s.meteo_force = "clair"
+	s.carte_chaleur.clear()
+	s.chaleur_active.clear()
+	verifier(not SimClimat.gele(s, j, potion), "et par temps doux, rien ne gèle")
+	s.meteo_force = ""
+	s.monde.fermer()
+
+
 func test_support_etages() -> void:
 	var cfg: Dictionary = GameData.config("support")
 	var s := Simulation.new(609)
