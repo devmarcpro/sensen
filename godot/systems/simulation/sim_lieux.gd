@@ -467,8 +467,17 @@ static func entrer_lieu(sim: Simulation, e: Dictionary, lieu_id: String) -> bool
 	var cr: Dictionary = GameData.config("planete").corruption
 	var profonds := str(lieu.sous_type) in ["fort", "temple_enfoui", "mine_abandonnee"]
 	sim.donjon = {"etages_fixes": cr.etages_majeur if profonds else cr.etages_mineur, "corruption": sim.monde.corruption_de(cell), "cellule": cell, "lieu": lieu_id}
-	EventBus.emettre(&"journal", [&"journal.entree_lieu", {"lieu": "lieu.sous_type." + str(lieu.sous_type)}])
-	charger_donjon(sim, str(lieu.theme), sim.graine, int(lieu.graine) & 0x7fffffff, 1, e)
+	# LE REPEUPLEMENT (2026-09-14) : vaincu, le donjon reste VIDE un temps ; passé ce temps, d'autres s'y installent — une
+	# autre génération, donc un autre donjon derrière la même porte.
+	var generation := 0
+	if sim.monde.nettoyages.has(lieu_id):
+		var jours := SimVilles.jour_courant(sim) - int(sim.monde.nettoyages[lieu_id])
+		var rep := maxi(1, int(GameData.config("lieux").get("repeuplement_jours", 30)))
+		if jours < rep:
+			sim.donjon["vide"] = true
+		generation = 1 + jours / rep
+	EventBus.emettre(&"journal", [&"journal.entree_lieu_vide" if bool(sim.donjon.get("vide", false)) else &"journal.entree_lieu", {"lieu": "lieu.sous_type." + str(lieu.sous_type)}])
+	charger_donjon(sim, str(lieu.theme), sim.graine, int(hash([int(lieu.graine), generation])) & 0x7fffffff, 1, e)
 	return true
 
 
@@ -610,7 +619,7 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	# un gouffre perdait déjà `gouffre`, ce qui rendait inatteignable le marquage de `gouffres_vides` quarante lignes
 	# plus bas, et un donjon de corruption vaincu ne se notait jamais comme nettoyé.
 	var identite := {}
-	for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes", "lieu"]:
+	for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes", "lieu", "vide"]:
 		if sim.donjon.has(cle_id):
 			identite[cle_id] = sim.donjon[cle_id]
 	sim.donjon = {"theme": theme_id, "graine": graine, "id": id_donjon, "etage": etage, "etages": etages,
@@ -654,6 +663,10 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 	if gouffre_etage_vide(sim, etage):
 		# Un étage du gouffre déjà vidé le reste pour toujours (designer 2026-09-02) : le terrain revient,
 		# les êtres et les coffres non. Redescendre à sa profondeur record est donc rapide et sans butin.
+		sim.maj_vision()
+		return
+	if bool(sim.donjon.get("vide", false)):
+		# Un donjon-bâtiment vaincu, pas encore repeuplé (2026-09-14) : le terrain revient, ni êtres ni coffres.
 		sim.maj_vision()
 		return
 	if sim.donjon.has("gouffre"):

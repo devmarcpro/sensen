@@ -119,7 +119,7 @@ static func sauvegarder(sim: Simulation, nom: String = "", en_fond: bool = false
 		# difficulté affichée. Ce sont exactement les clés que `charger_donjon` préserve désormais.
 		var ident := {"theme": sim.donjon.theme, "graine": int(sim.donjon.graine), "id": int(sim.donjon.id), "etage": int(sim.donjon.etage), "etages": int(sim.donjon.etages), "cellule": sim.donjon.get("cellule", Vector2i(-9999, -9999)), "corruption": float(sim.donjon.get("corruption", 0.0)),
 			"mine": bool(sim.donjon.get("mine", false)), "cellule_mine": sim.donjon.get("cellule_mine", Vector2i(-9999, -9999))}
-		for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes", "lieu"]:
+		for cle_id in ["gouffre", "region", "corrompu", "niveau", "cellules", "etages_fixes", "lieu", "vide"]:
 			if sim.donjon.has(cle_id):
 				ident[cle_id] = sim.donjon[cle_id]
 		exp = {"lieu": "donjon", "donjon": ident,

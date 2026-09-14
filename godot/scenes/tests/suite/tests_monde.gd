@@ -541,6 +541,18 @@ func test_donjon_batiment() -> void:
 	s.grille.placer(j.id, j.pos)
 	verifier(SimLieux._remonter(s, j), "on remonte par l'entrée de l'étage 1")
 	verifier(s.lieu == "camp" and j.pos == porte, "et l'on ressort devant la porte (%s)" % str(j.pos))
+	# VAINCU, IL RESTE VIDE ; UN MOIS PLUS TARD, IL SE REPEUPLE (2026-09-14).
+	s.monde.nettoyages[str(lieu.id)] = SimVilles.jour_courant(s)
+	verifier(SimLieux._partir_en_expedition(s, j), "on y rentre après avoir vaincu son boss")
+	var hostiles_vide := s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "ia").size()
+	verifier(bool(s.donjon.get("vide", false)) and hostiles_vide == 0, "il est vide (%d être(s))" % hostiles_vide)
+	s.grille.liberer(j.pos, j.id)
+	j.pos = s.donjon.entree
+	s.grille.placer(j.id, j.pos)
+	SimLieux._remonter(s, j)
+	s.monde.nettoyages[str(lieu.id)] = SimVilles.jour_courant(s) - 40
+	verifier(SimLieux._partir_en_expedition(s, j), "quarante jours plus tard, on y retourne")
+	verifier(not bool(s.donjon.get("vide", false)) and s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "ia").size() > 0, "et d'autres s'y sont installés")
 	s.monde.fermer()
 
 
