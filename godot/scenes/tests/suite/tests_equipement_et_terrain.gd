@@ -1290,6 +1290,9 @@ func test_pnj_s_abritent() -> void:
 	verifier(s._cible_routine(v, poste) == v.lit, "la tempête, si")
 	v["fonction"] = "garde"
 	verifier(s._cible_routine(v, poste) != v.lit, "et la garde tient sous la tempête")
+	v["maladies_actives"] = ["grippe"]
+	s.meteo_force = "clair"
+	verifier(s._cible_routine(v, poste) == v.lit and s._cible_routine(v, social) == v.lit, "mais malade, même la garde garde le lit")
 	s.meteo_force = ""
 	s.monde.fermer()
 

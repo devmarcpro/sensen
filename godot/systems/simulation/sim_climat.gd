@@ -357,6 +357,8 @@ static func activite_selon_temps(sim: Simulation, e: Dictionary, activite: Strin
 	if sim.lieu != "camp" or sim.monde == null or activite == "lit" or not e.has("lit"):
 		return activite
 	var c: Dictionary = _cfg().get("abri_pnj", {})
+	if not (e.get("maladies_actives", []) as Array).is_empty() and activite != "lit":
+		return "lit"   # LES MALADES GARDENT LE LIT (2026-09-14) : une épidémie vide les places et les ateliers — même la garde
 	if str(e.get("fonction", "")) in c.get("sauf_fonctions", []) or e.get("ai_profile", "") == "garde":
 		return activite
 	var etat := SimTerrain.meteo(sim, sim.monde.cellule_de(e.pos), tick)
