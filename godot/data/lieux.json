@@ -242,6 +242,23 @@
         0,
         2
       ]
+    ],
+    "camp_deserteurs": [
+      [
+        "bandit",
+        2,
+        4
+      ],
+      [
+        "bandit_archer",
+        1,
+        2
+      ],
+      [
+        "chef_de_bande",
+        0,
+        1
+      ]
     ]
   },
   "tresors": {
@@ -272,6 +289,10 @@
     "champ_de_bataille": [
       1,
       2
+    ],
+    "camp_deserteurs": [
+      1,
+      1
     ]
   },
   "repeuplement_jours": 30,
@@ -297,5 +318,12 @@
     "cote": 15,
     "duree_jours": 20,
     "charognards": 0.3
+  },
+  "camps_deserteurs": {
+    "_doc": "Chaque semaine de guerre, un royaume dont l humeur est sous `humeur_sous` a `chance` de voir des soldats deserter et faire camp sur une cellule de son territoire (`recherche` cellules autour d une cellule tiree) — un camp a la fois par royaume. Le camp vit jusqu a ce que son dernier habitant tombe ; ses deserteurs portent la banniere du royaume qu ils ont quitte.",
+    "humeur_sous": 35,
+    "chance": 0.3,
+    "recherche": 2,
+    "cote": 11
   }
 }

@@ -560,6 +560,38 @@ func test_champ_de_bataille() -> void:
 	s.monde.fermer()
 
 
+## LES DÉSERTEURS FONT CAMP (39 ter, pas F — 2026-09-14) : un royaume en guerre au moral effondré perd des soldats qui
+## s'installent dans ses terres ; le camp dure jusqu'à ce que son dernier habitant tombe.
+func test_camp_de_deserteurs() -> void:
+	var s := Simulation.new(4277)
+	s.charger_camp()
+	var surf: Surface = s.monde.surface
+	var reg: Lieux = surf.lieux()
+	var camp: Vector2i = s.monde.cellule_camp
+	var cells: Array = []
+	for dx in range(6, 10):
+		cells.append(camp + Vector2i(dx, -6))
+	var ra := {"id": "roy_d", "nom": "Dornia", "government_type": "monarchie_hereditaire", "culture": "latine", "race": "humain", "taille": "petit", "capital_poi": cells[0], "territory_cells": cells,
+		"taxes": {"base_rate": 0.08, "tariff_default": 0.1}, "tariffs": {}, "laws": [], "diplomacy": {}, "rivals": [], "tags": []}
+	surf.royaumes_cache[surf.secteur_de(cells[0])] = {"roy_d": ra}
+	verifier(SimRoyaumes.camp_de_deserteurs(s, "roy_d", ra, {"humeur": 60}, 1.0).is_empty(), "un royaume au bon moral ne perd personne")
+	var lieu := SimRoyaumes.camp_de_deserteurs(s, "roy_d", ra, {"humeur": 20}, 1.0)
+	verifier(not lieu.is_empty(), "le moral effondré, des soldats désertent et font camp")
+	if lieu.is_empty():
+		s.monde.fermer()
+		return
+	var cell := s.monde.cellule_de(lieu.centre)
+	var proche := false
+	for c in cells:
+		proche = proche or Grille.distance(c, cell) <= 2
+	verifier(proche, "sur les terres de leur royaume (%s)" % str(cell))
+	verifier(str(reg.par_id(str(lieu.id)).get("type", "")) == "camp_deserteurs" and not Lieux.habitants_de(lieu).is_empty(), "c'est un lieu du registre, habité")
+	verifier(SimRoyaumes.camp_de_deserteurs(s, "roy_d", ra, {"humeur": 20}, 1.0).is_empty(), "un camp à la fois par royaume")
+	Lieux.habitant_mort(s, {"lieu": str(lieu.id), "vivant": false})
+	verifier(not reg.nes.has(str(lieu.id)), "son dernier déserteur tombé, le camp n'est plus")
+	s.monde.fermer()
+
+
 func test_tanieres() -> void:
 	var s := Simulation.new(4271)
 	s.charger_camp()

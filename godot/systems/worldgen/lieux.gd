@@ -433,7 +433,7 @@ static func habitant_mort(sim: Simulation, x: Dictionary) -> void:
 		return
 	var id := str(x.get("lieu", ""))
 	var reg: Lieux = sim.monde.surface.lieux()
-	if id.is_empty() or not reg.nes.has(id) or str(reg.nes[id].type) != "taniere":
+	if id.is_empty() or not reg.nes.has(id) or not bool(reg.nes[id].get("se_vide", str(reg.nes[id].type) == "taniere")):
 		return   # les corbeaux d'un champ de bataille ne font pas le champ : il s'efface avec ses morts, pas avec eux
 	for y in sim.vivants():
 		if str(y.get("lieu", "")) == id:
@@ -541,6 +541,8 @@ static func _peupler(sim: Simulation) -> void:
 				if x.is_empty():
 					continue
 				x["lieu"] = id
+				if lieu.has("royaume"):
+					x["royaume"] = str(lieu.royaume)   # un déserteur porte encore la bannière qu'il a quittée
 				x["place"] = lieu.centre
 				x["poste"] = sim._tuile_libre_autour(lieu.centre + Vector2i(rng.randi_range(-4, 4), rng.randi_range(-4, 4)))
 				if k_lit < lits.size():

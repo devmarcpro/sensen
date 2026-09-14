@@ -19,6 +19,47 @@ n'y a que ce dont j'ai besoin **pour écrire du code juste**.
 
 **Comment répondre** : une phrase suffit. J'écris le callout daté dans la note concernée et je code derrière.
 
+> [!success] TOUT EST TRANCHÉ LE 2026-09-14 — le designer : « Prends les décisions toi même »
+> Chaque réponse ci-dessous est **décidée par Claude, révisable d'un mot**. Le travail qui en sort est dans [[Ordre de travail]], ligne 50.
+> - **1. Le grain de la vitesse** : un corps avance d'**une tuile à la fois**, toutes les `ticks_par_tuile` = arrondi(ticks par seconde ÷ vitesse en tuiles/s), jamais moins d'un. La flèche (~30 t/s), la pierre lancée (~10), le rocher roulé (~4) : trois crans suffisent, et la collision se teste à chaque tuile franchie — rien ne traverse un mur.
+> - **2. Le recul** : un corps poussé **pousse à son tour** ce qu'il heurte, avec la moitié de sa quantité de mouvement, **sur deux maillons au plus** ; contre un mur, il encaisse l'impact en dégâts. Assez pour la quille, pas assez pour le carambolage infini.
+> - **3. Le joueur est un corps pour les chocs, pas pour la marche** : recul, chute, charge et projection le traitent comme une masse ; le déplacement ordinaire n'a **aucune inertie** — les contrôles restent nets.
+> - **4 et 5. Les membres** : déjà tranchés par le code (plan de parties, santé par partie, blessures selon le coup) — **oui, un membre perdu l'est pour de bon** ; la prothèse et la greffe le remplaceront.
+> - **6 ter. La place interne** : une contenance en **volume** dérivée de la masse du corps (≈ 10 %), consommée par les organes, les greffes et les membres surnuméraires. À coder avec les greffes.
+> - **7. Le sens de la vérité** : **la donnée est la source**, la note est son reflet (les générateurs écrivent la note depuis la donnée, plus l'inverse).
+> - **8. Les champs** : ils continuent au fil de l'eau — le jeu est jouable, la question n'ordonne plus rien.
+> - **10. La relève de garnison** : **oui** — chaque semaine, un village à qui il manque un garde en recrute un parmi ses habitants et l'équipe sur son stock.
+> - **13. Le dessous vu d'un étage** : **seulement par une ouverture** — une tuile d'air sans plancher (cage d'escalier, trou, balcon) montre le niveau du dessous, assombri, sur un niveau. Comme Dwarf Fortress.
+> - **22. Les races** : on **ajoute**, on ne retire rien (elfe, nain, vampire, spectre restent).
+> - **23. Le lycanthrope** reste distinct de l'homme-bête — confirmé.
+> - **24. Les talents** : réécrits sur la grammaire des modules, **après** 27 bis et 28 ; le catalogue reste parqué jusque-là.
+> - **25. Un royaume agit** : **oui**. C'est commencé — le champ de bataille et le camp de déserteurs sont des actes datés en un lieu ; la razzia entre royaumes suivra, posée comme un fait.
+> - **26. L'armure** ne peint **que les zones qu'elle couvre** ; ailleurs, la peau de la race se voit.
+> - **27. Le pavé de débogage** passe dans un volet **caché par défaut** (F3).
+> - **28. Les six têtes dessinées** : je **génère** leurs calques de points.
+> - **29. Le zoom** plafonne à **6** : tout reste net.
+> - **30. La faim** : **corrigée** comme la soif (`faim_tick` = l'heure de naissance), et ses tests recalibrés.
+> - **31. L'infiltration à 70** et **32. l'usure plafonnée à la moitié** : confirmées.
+> - **34. Le registre technologique** : un monde **mêlé mais régional** — des quartiers industriels dans les royaumes industriels, des robots, de la rouille ; **pas de néons ni de seringues** : les drogues sont alchimiques. Une ville « cyberjunkie » est une **ville chaotique d'un royaume industriel**.
+> - **35. Les sous-races** : six hommes-bêtes — **chat, chien, loup, renard, ours, lapin** — sur des **gabarits générés** (museau, oreilles), que le designer pourra redessiner.
+> - **36. Le soupçon peut se tromper** : **oui pour les PNJ** (un innocent peut être accusé) ; **le joueur** peut être soupçonné (méfiance), jamais arrêté sans témoin.
+> - **37. Un point hors de sa case** : le rig déclare une **marge** de contenant.
+> - **38. Le corps plus sombre que la tête** : la tête dessinée par le code prend **le même ombrage** que les sprites.
+> - **39. Les écailles** : **oubli de contenu** — une cuirasse d'écailles entre au catalogue, faite de matière animale.
+> - **40. Une planche de tête est un crâne nu** ; une tête qui porte déjà son visage le déclare (`traits_inclus`) et le jeu n'en redessine pas.
+> - **41. La pièce scellée** : **non** — le manque d'air reste la présence d'autre chose. *J'avais d'abord décidé que les vivants expirent du gaz carbonique ; lu dans le code, le champ efface toute tuile sous 0,02 et ne tourne que s'il porte un nuage : une respiration ne s'y accumulerait jamais, et chaque être tiendrait le pas du gaz éveillé pour rien.*
+> - **33. Le lancer d'un corps** suit 27 bis, maintenant débloquée.
+> - **13 (coffre). Le pixel art** : pas de SubViewport basse résolution — l'interface resterait illisible.
+> - **14. La matrice des noyaux** et **15. la Règle d'anneau** : tranchées **avec la réécriture des modules** (28) ; l'anneau garde 40/40/20 jusque-là.
+> - **16. La bête paisible** : faite (raréfaction, écologie vivante).
+> - **17. L'IA** : l'aggro **se transmet** aux êtres du même camp qui voient la scène ; un être **décroche** après avoir perdu sa cible de vue un moment ; le roam **erre au hasard** autour de son ancre.
+> - **18. Le sac pourrit** : **oui** pour la nourriture, déduit du temps, ralenti par le froid et le sel.
+> - **19 bis. `sous_sol.json`** : une configuration.
+> - **19. Les fruitiers hauts** : un pommier est un **arbre** (il bloque la vue et le passage) ; les petits fruitiers restent des buissons.
+> - **20. Le son** : **des sons synthétisés par un outil** (pas de fichiers achetés), une architecture de bus, les événements du champ sonore comme source ; l'ambiance par biome ensuite.
+> - **21. La difficulté** : les étages 1 et 2 doivent se survivre avec le kit de départ — on les **adoucit**, et trois réglages (doux, normal, rude) se choisissent à la création, normal par défaut.
+> - **Coop** : la **carte des lieux connus est commune au groupe**, la rumeur s'entend chacun pour soi ; le **territoire est commun** (l'hôte le possède, les invités y bâtissent).
+
 > [!important] Douze questions ajoutées le 2026-09-10, à la demande du designer (« note toutes tes questions »)
 > Elles étaient dispersées dans douze commits, six notes et autant de réponses de fin de tour. **Trois seulement bloquent du code** — la grammaire des talents (24), les actes d'un royaume (25), et la chaîne du lancer de corps (33, elle-même suspendue aux questions 1 à 3). *Les neuf autres sont des choix que je peux attendre sans rien arrêter, et c'est écrit dans leur colonne : c'est la première chose à lire.*
 

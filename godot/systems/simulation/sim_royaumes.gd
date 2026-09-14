@@ -173,6 +173,7 @@ static func _semaine_de_guerre(sim: Simulation, id: String, roy: Dictionary, eta
 			if str(id) < str(autre):
 				champ_de_bataille(sim, id, roy, str(autre))   # la guerre laisse un lieu (39 ter, pas F — 2026-09-14)
 		etat.humeur = clampi(int(etat.humeur) + int(g.get("humeur_semaine", -1)), 0, 100)
+		camp_de_deserteurs(sim, id, roy, etat)   # le moral s'effondre : des soldats désertent et font camp (2026-09-14)
 	pertes = minf(pertes, float(armee_paix))
 	etat["pertes"] = pertes
 	etat.armee = maxi(0, armee_paix - int(round(pertes)))
@@ -1088,5 +1089,46 @@ static func champ_de_bataille(sim: Simulation, id: String, roy: Dictionary, autr
 				lieu["expire_tick"] = tick + int(c.get("duree_jours", 20)) * int(GameData.config("planete").cycle.ticks_par_jour)
 				var i := SimEcologie.indices(sim, cell)
 				SimEcologie._poser(sim, cell, float(i.proies), float(i.predateurs) + float(c.get("charognards", 0.3)))
+				return lieu
+	return {}
+
+
+## LES DÉSERTEURS FONT CAMP (39 ter, pas F — 2026-09-14). Un royaume en guerre dont le moral s'effondre perd des soldats :
+## ils s'installent dans ses terres, un camp qui dure jusqu'à ce qu'on le vide — et que le voyage croise. `chance` < 0 :
+## celle des données.
+static func camp_de_deserteurs(sim: Simulation, id: String, roy: Dictionary, etat: Dictionary, chance: float = -1.0) -> Dictionary:
+	var c: Dictionary = GameData.config("lieux").get("camps_deserteurs", {})
+	if sim.monde == null or c.is_empty() or int(etat.get("humeur", 100)) >= int(c.get("humeur_sous", 35)):
+		return {}
+	var cellules: Array = roy.get("territory_cells", [])
+	if cellules.is_empty():
+		return {}
+	var reg: Lieux = sim.monde.surface.lieux()
+	for l in reg.nes.values():
+		if str(l.type) == "camp_deserteurs" and str(l.get("royaume", "")) == id:
+			return {}   # un camp à la fois par royaume
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([sim.graine, id, "deserteurs", sim.monde.semaine_courante])
+	if rng.randf() >= (float(c.get("chance", 0.3)) if chance < 0.0 else chance):
+		return {}
+	var tc := int(sim.monde.taille)
+	var f := Lieux.fenetre(sim)
+	var cote := int(c.get("cote", 11))
+	var origine: Vector2i = cellules[rng.randi() % cellules.size()]
+	for r in int(c.get("recherche", 2)) + 1:
+		for dy in range(-r, r + 1):
+			for dx in range(-r, r + 1):
+				if maxi(absi(dx), absi(dy)) != r:
+					continue
+				var cell := origine + Vector2i(dx, dy)
+				if cell == sim.monde.cellule_camp or sim.monde.claims.has(cell) or not sim.monde.surface.terre_a(cell):
+					continue
+				var centre := cell * tc + Vector2i(tc / 4 + rng.randi() % maxi(1, tc / 2), tc / 4 + rng.randi() % maxi(1, tc / 2))
+				var rect := Rect2i(centre - Vector2i(cote / 2, cote / 2), Vector2i(cote, cote))
+				if f.intersects(rect) or not reg._place_libre(rect, reg.dans(rect.grow(6)), 2, tc):
+					continue
+				var lieu := reg.naitre("camp_deserteurs", "camp_deserteurs", centre, cote, sim.horloge_monde.ticks)
+				lieu["royaume"] = id
+				lieu["se_vide"] = true
 				return lieu
 	return {}
