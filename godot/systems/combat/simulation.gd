@@ -660,7 +660,7 @@ func _tiquer_faim(tick: int) -> void:
 		if not e.has("faim") or int(e.get("faim_tick", 0)) <= 0:
 			e["faim"] = int(e.get("faim", 100))
 			e["faim_tick"] = tick
-		var periode := int(float(f.ticks_par_point) / (float(e.get("faim_vitesse", 1.0)) * float(e.get("mecaniques", {}).get("faim_vitesse", {}).get("mult", 100)) / 100.0))
+		var periode := maxi(1, int(float(f.ticks_par_point) / (float(e.get("faim_vitesse", 1.0)) * float(e.get("mecaniques", {}).get("faim_vitesse", {}).get("mult", 100)) / 100.0 * float(difficulte().get("besoins", 1.0)))))
 		var points := tick / periode - int(e.faim_tick) / periode
 		if points > 0:
 			var avant := int(e.faim)
@@ -710,7 +710,7 @@ func _tiquer_soif(tick: int) -> void:
 		if not e.has("soif") or int(e.get("soif_tick", 0)) <= 0:
 			e["soif"] = int(e.get("soif", 100))
 			e["soif_tick"] = tick
-		var periode := maxi(1, int(float(f.get("ticks_par_point", 30000)) / maxf(0.05, float(e.get("soif_vitesse", 1.0)) * float(e.get("soif_chaleur", 1.0)))))   # la chaleur fait boire (climat, 2026-09-13)
+		var periode := maxi(1, int(float(f.get("ticks_par_point", 30000)) / maxf(0.05, float(e.get("soif_vitesse", 1.0)) * float(e.get("soif_chaleur", 1.0)) * float(difficulte().get("besoins", 1.0)))))   # la chaleur fait boire (climat, 2026-09-13)
 		var points := tick / periode - int(e.soif_tick) / periode
 		if points > 0:
 			var avant := int(e.soif)
@@ -2513,9 +2513,21 @@ func _tuile_libre_a_cote(pos: Vector2i) -> Vector2i:
 	return _tuile_libre_autour(pos)
 
 
+## LA DIFFICULTÉ DE CETTE PARTIE (question 21, 2026-09-14) : le niveau choisi à l'écran Monde, ses multiplicateurs.
+func difficulte() -> Dictionary:
+	var pl: Dictionary = planete_options if not planete_options.is_empty() and planete_options.has("difficulte") else GameData.config("planete")
+	var d: Dictionary = pl.get("difficulte", {})
+	var niveaux: Array = d.get("niveaux", [])
+	if niveaux.is_empty():
+		return {"degats_subis": 1.0, "spawns": 1.0, "besoins": 1.0}
+	return niveaux[clampi(int(d.get("niveau", 1)), 0, niveaux.size() - 1)]
+
+
 func _appliquer_degats(cible: Dictionary, degats: int, source: String, detail: Dictionary) -> void:
 	if invincible and cible.controle == "joueur":
 		return   # menu de triche
+	if degats > 0 and str(cible.get("camp", "")) == "joueur":
+		degats = maxi(1, roundi(float(degats) * float(difficulte().get("degats_subis", 1.0))))   # la difficulté (question 21)
 	if degats > 0 and Etres.bloque_statuts(cible, "esquive_prochaine", statuts_defs):
 		SimTalents._retirer_statut(self, cible, "voile")   # Voile : le prochain coup subi est esquivé, et le voile tombe
 		EventBus.emettre(&"journal", [&"journal.voile_esquive", {"nom": cible.name_key}])

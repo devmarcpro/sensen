@@ -2478,3 +2478,43 @@ func test_gaz_dans_le_sol() -> void:
 	verifier(is_zero_approx(methane_restant), "la lave allume le grisou : explosion, et tout le méthane du champ part (%.4f restant)" % methane_restant)
 	SimLieux._sortir(s, j)
 
+
+## LA DIFFICULTÉ (question 21, 2026-09-14) : trois réglages à la création ; doux, on subit moins et les donjons sont moins
+## peuplés ; rude, l'inverse ; les deux premiers étages sont adoucis quel que soit le réglage.
+func test_difficulte() -> void:
+	var peuplement := func(niveau: int, etage: int, adoucis: int) -> int:
+		var s := Simulation.new(77)
+		s.charger_camp()
+		var pl: Dictionary = GameData.config("planete").duplicate(true)
+		pl.difficulte.niveau = niveau
+		pl.difficulte.premiers_etages = adoucis
+		s.planete_options = pl
+		s.donjon = {"etages_fixes": [6, 6]}
+		s.charger_donjon("ruine", 77, 5, etage)
+		var n := s.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "ia").size()
+		s.monde.fermer()
+		return n
+	var doux3: int = peuplement.call(0, 3, 2)
+	var normal3: int = peuplement.call(1, 3, 2)
+	var rude3: int = peuplement.call(2, 3, 2)
+	verifier(doux3 < normal3 and normal3 < rude3, "doux, normal, rude : %d, %d, %d habitants au troisième étage" % [doux3, normal3, rude3])
+	var normal1: int = peuplement.call(1, 1, 2)
+	var normal1_brut: int = peuplement.call(1, 1, 0)
+	verifier(normal1 < normal1_brut, "le premier étage est adouci en normal (%d habitants au lieu de %d)" % [normal1, normal1_brut])
+	var s2 := Simulation.new(78)
+	s2.charger_camp()
+	var j: Dictionary = s2.vivants().filter(func(x: Dictionary) -> bool: return x.controle == "joueur")[0]
+	var pl2: Dictionary = GameData.config("planete").duplicate(true)
+	pl2.difficulte.niveau = 0
+	s2.planete_options = pl2
+	j.sante = 100
+	s2._appliquer_degats(j, 10, "", {"type": "contondant", "element": {}})
+	var doux_pris := 100 - int(j.sante)
+	pl2.difficulte.niveau = 2
+	j.sante = 100
+	s2._appliquer_degats(j, 10, "", {"type": "contondant", "element": {}})
+	var rude_pris := 100 - int(j.sante)
+	verifier(doux_pris == 7 and rude_pris == 13, "dix dégâts : %d en doux, %d en rude" % [doux_pris, rude_pris])
+	s2.monde.fermer()
+
+

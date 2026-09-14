@@ -442,6 +442,13 @@
       "min": 2000.0,
       "max": 12000.0,
       "pas": 1000.0
+    },
+    {
+      "id": "difficulte",
+      "chemin": "difficulte.niveau",
+      "min": 0,
+      "max": 2,
+      "pas": 1
     }
   ],
   "monde_ratio": 0.5,
@@ -475,5 +482,31 @@
         ]
       ]
     }
+  },
+  "difficulte": {
+    "_doc": "LA DIFFICULTE (decision du 2026-09-14, question 21). `niveau` : 0 doux, 1 normal (par defaut), 2 rude — un reglage de l ecran Monde. Chaque niveau multiplie les degats que subissent le joueur et ses compagnons (`degats_subis`), le nombre d etres poses dans un etage de donjon (`spawns`) et la vitesse de la faim et de la soif du joueur (`besoins`). QUEL QUE SOIT LE NIVEAU, les `premiers_etages` premiers etages d un donjon ne posent que `premiers_etages_spawns` de leurs habitants : le robot mourait aux etages 1 et 2 avec le kit complet, et la premiere descente doit s apprendre avant de punir.",
+    "niveau": 1,
+    "niveaux": [
+      {
+        "id": "doux",
+        "degats_subis": 0.7,
+        "spawns": 0.75,
+        "besoins": 0.75
+      },
+      {
+        "id": "normal",
+        "degats_subis": 1.0,
+        "spawns": 1.0,
+        "besoins": 1.0
+      },
+      {
+        "id": "rude",
+        "degats_subis": 1.3,
+        "spawns": 1.25,
+        "besoins": 1.25
+      }
+    ],
+    "premiers_etages": 2,
+    "premiers_etages_spawns": 0.7
   }
 }

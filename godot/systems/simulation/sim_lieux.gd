@@ -671,9 +671,19 @@ static func charger_donjon(sim: Simulation, theme_id: String, graine: int, id_do
 		return
 	if sim.donjon.has("gouffre"):
 		sim.gouffres_vides["%d|%d" % [int(sim.donjon.gouffre), etage]] = true
-	var n_spawns := int(ceil(float(e.spawns.size()) * (1.0 + corruption_etage / 100.0)))   # la corruption densifie
+	# LA DIFFICULTÉ (question 21, 2026-09-14) : le réglage de la partie, et les premiers étages adoucis quel qu'il soit.
+	var dif := sim.difficulte()
+	var d_cfg: Dictionary = (sim.planete_options if sim.planete_options.has("difficulte") else GameData.config("planete")).get("difficulte", {})
+	var mult_sp := float(dif.get("spawns", 1.0))
+	if etage <= int(d_cfg.get("premiers_etages", 0)):
+		mult_sp *= float(d_cfg.get("premiers_etages_spawns", 1.0))
+	var n_spawns := int(ceil(float(e.spawns.size()) * (1.0 + corruption_etage / 100.0) * mult_sp))   # la corruption densifie
 	var k_spawn := 0
+	var k_tire := 0
 	for s: Dictionary in e.spawns:
+		k_tire += 1
+		if mult_sp < 1.0 and not bool(s.get("boss", false)) and int(float(k_tire) * mult_sp) == int(float(k_tire - 1) * mult_sp):
+			continue   # un habitant sur quelques-uns reste absent — jamais le boss
 		if sim.grille.occupant(s.pos).is_empty():
 			var ne: Dictionary = SimObjets.ajouter(sim, s.creature, s.pos, "ia")
 			if bool(s.get("boss", false)) and not ne.is_empty():
