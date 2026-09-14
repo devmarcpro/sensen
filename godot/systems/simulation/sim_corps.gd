@@ -32,6 +32,12 @@ static func masse_etre(x: Dictionary) -> float:
 	return float(m.get("defaut", 70.0))
 
 
+## LA VITESSE QU'ON GAGNE EN TOMBANT de `niveaux` niveaux (lot 2) : proportionnelle à la racine de la hauteur, comme
+## sous la pesanteur. C'est elle qui fait qu'un bloc lâché d'un étage blesse ce qui est dessous.
+static func vitesse_chute(niveaux: float) -> float:
+	return float(_cfg().get("chute", {}).get("vitesse_par_racine", 3.0)) * sqrt(maxf(0.0, niveaux))
+
+
 ## LANCER UN CORPS de `depart` vers `cible`. `uid` : l'objet qui vole (il retombera), vide pour un corps sans objet.
 static func lancer(sim: Simulation, source: Dictionary, depart: Vector2i, cible: Vector2i, masse: float, vitesse: float, uid: String = "", portee: int = 999) -> Dictionary:
 	if depart == cible or masse <= 0.0 or vitesse <= 0.0:
@@ -61,6 +67,14 @@ static func pas(sim: Simulation, b: Dictionary) -> void:
 		EventBus.emettre(&"journal", [&"journal.corps_mur", {}])
 		_retomber(sim, b, b.pos)
 		return
+	var dh := sim.grille.h(b.pos) - sim.grille.h(t)
+	if -dh >= int(sim.regles.r.deplacement.get("falaise_delta", 3)):
+		_sonner(sim, b.pos, float(b.masse) * float(b.vitesse))   # une paroi qui monte arrête un corps comme un mur
+		_retomber(sim, b, b.pos)
+		return
+	if dh >= int(sim.regles.r.deplacement.get("chute_delta", 3)):
+		# UN À-PIC : le corps tombe en avançant, et sa vitesse verticale s'ajoute (lot 2).
+		b.vitesse = sqrt(pow(float(b.vitesse), 2.0) + pow(vitesse_chute(float(dh)), 2.0))
 	var occ := sim.grille.occupant(t)
 	if not occ.is_empty() and occ != str(b.source) and sim.entites.has(occ) and sim.entites[occ].vivant:
 		frapper(sim, sim.entites[occ], dir, float(b.masse) * float(b.vitesse), str(b.source))
@@ -75,23 +89,23 @@ static func pas(sim: Simulation, b: Dictionary) -> void:
 	sim.bombes.append(b)
 
 
-## LE CHOC : `p` = masse × vitesse. Des dégâts contondants, le son, et le recul.
+## LE CHOC : `p` = masse × vitesse. Des dégâts contondants en racine de p, le son, et le recul.
 static func frapper(sim: Simulation, x: Dictionary, dir: Vector2i, p: float, source: String) -> void:
 	var c := _cfg()
-	var deg := maxi(1, roundi(p * float(c.get("degats_par_quantite", 0.35))))
+	var deg := maxi(1, roundi(pow(maxf(0.0, p), float(c.get("degats_exposant", 0.5))) * float(c.get("degats_par_quantite", 2.5))))
 	EventBus.emettre(&"journal", [&"journal.corps_impact", {"nom": x.name_key, "degats": deg}])
 	_sonner(sim, x.pos, p)
 	sim._appliquer_degats(x, deg, source, {"type": "contondant", "element": {}, "impact": true})
 	pousser(sim, x, dir, p, source, 0)
 
 
-## LE RECUL : `recul_par_quantite × p / masse` tuiles. Ce qu'il heurte en reculant recule à son tour, avec la moitié de p,
+## LE RECUL : `recul_par_quantite × p / masse` tuiles, plafonné. Ce qu'il heurte en reculant recule à son tour, avec la moitié de p,
 ## sur deux maillons ; un mur fait le choc de poussée ordinaire (un dé par tuile perdue).
 static func pousser(sim: Simulation, x: Dictionary, dir: Vector2i, p: float, source: String, maillon: int) -> int:
 	var c := _cfg()
 	if dir == Vector2i.ZERO or not x.vivant or maillon > int(c.get("maillons_max", 2)) or Etres.bloque_statuts(x, "projection", sim.statuts_defs):
 		return 0
-	var n := floori(p * float(c.get("recul_par_quantite", 0.02)) / maxf(0.1, masse_etre(x)))
+	var n := mini(int(c.get("recul_max", 6)), floori(p * float(c.get("recul_par_quantite", 0.35)) / maxf(0.1, masse_etre(x))))
 	var faits := 0
 	for k in n:
 		var q: Vector2i = x.pos + dir

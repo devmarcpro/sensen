@@ -1558,6 +1558,50 @@ func test_corps_lances() -> void:
 	verifier(int(caillou.quantite) == 2 and s.bombes.size() == avant + 1, "une pierre de la pile part")
 
 
+## LA CHUTE PAR LA MÊME RÈGLE (27 bis, lot 2 — 2026-09-14) : un corps qui franchit un à-pic prend de la vitesse ; un
+## être qui tombe d'un plancher sur un autre le frappe avec sa masse × la vitesse d'un étage.
+func test_chute_meme_regle() -> void:
+	verifier(SimCorps.vitesse_chute(16.0) == 2.0 * SimCorps.vitesse_chute(4.0) and SimCorps.vitesse_chute(0.0) == 0.0, "la vitesse de chute suit la racine de la hauteur")
+	var s := Simulation.new(609)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var g := s.grille
+	for x in s.vivants():
+		if x.id != j.id:
+			x.vivant = false
+			g.liberer(x.pos, x.id)
+	# 1. UN À-PIC SUR LA TRAJECTOIRE : on creuse une marche de six niveaux devant un corps en vol.
+	var base: Vector2i = Grille.plat(j.pos) + Vector2i(6, 0)
+	for k in 4:
+		var q: Vector2i = base + Vector2i(k, 0)
+		g.contenu[g.idx(q)] = 0
+		g.hauteurs[g.idx(q)] = g.h(base) if k < 2 else g.h(base) - 6
+	var corps := {"corps": true, "pos": base, "trajet": [base + Vector2i(1, 0), base + Vector2i(2, 0), base + Vector2i(3, 0)], "i": 0, "masse": 5.0, "vitesse": 4.0, "uid": "", "source": "", "horloge": "monde", "fin": s.horloge_monde.ticks}
+	SimCorps.pas(s, corps)
+	s.bombes.erase(corps)
+	verifier(is_equal_approx(float(corps.vitesse), 4.0), "sur le plat, la vitesse ne change pas")
+	SimCorps.pas(s, corps)
+	s.bombes.erase(corps)
+	verifier(float(corps.vitesse) > 6.0, "passé l'à-pic, le corps tombe et va plus vite (%.1f)" % float(corps.vitesse))
+	# 2. UN ÊTRE TOMBE D'UN PLANCHER SUR UN AUTRE.
+	g.poser_couches(2)
+	var sol: Vector2i = Grille.plat(j.pos) + Vector2i(12, 4)
+	var haut: Vector2i = Grille.en_couche(sol, 1)
+	for q2 in [sol, haut]:
+		g.contenu[g.idx(q2)] = 0
+	for dd in Grille.DIRS:
+		if g.dans(sol + dd):
+			g.contenu[g.idx(sol + dd)] = 0
+	var dessous: Dictionary = SimObjets.ajouter(s, "bandit", sol, "ia")
+	var tombe: Dictionary = SimObjets.ajouter(s, "bandit", haut, "ia")
+	dessous.sante = 500
+	tombe.sante = 500
+	SimTerrain._effondrer_plancher(s, haut, GameData.config("support"), s.horloge_monde.ticks)
+	verifier(int(dessous.sante) < 500 and dessous.vivant, "celui du dessous est frappé, pas tué (%d)" % int(dessous.sante))
+	verifier(Grille.distance(Grille.plat(tombe.pos), sol) == 1 and Grille.z_de(tombe.pos) == 0, "et celui qui tombe roule à côté (%s)" % str(tombe.pos))
+	s.monde.fermer()
+
+
 func test_faune_des_saisons() -> void:
 	var s := Simulation.new(4267)
 	s.charger_camp()

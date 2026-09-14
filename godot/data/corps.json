@@ -1,7 +1,9 @@
 {
-  "_doc": "LES CORPS EN MOUVEMENT (ordre de travail 27 bis — decisions du 2026-09-14). Un corps lance a une MASSE (le poids de l objet, `Regles.poids_objet`) et une VITESSE en tuiles par seconde ; il avance d UNE tuile toutes les `ticks_par_seconde_exploration / vitesse` ticks et teste la collision a chaque tuile franchie — rien ne traverse un mur. LE CHOC : la quantite de mouvement p = masse x vitesse. Un etre touche prend `degats_par_quantite` x p en contondant, et recule de `recul_par_quantite` x p / sa masse tuiles ; ce qu il heurte en reculant recule a son tour avec `part_transmise` de p, sur `maillons_max` maillons au plus, et un mur fait le choc de poussee ordinaire. Le son de l impact vaut `son_par_quantite` x p, plafonne a `son_max`. LANCER : la vitesse vaut `vitesse_base` + `vitesse_par_force` x Force, divisee par la masse au-dela de `masse_legere`, bornee a [`vitesse_min`, `vitesse_max`] ; la portee vaut `portee_par_vitesse` x vitesse, plafonnee a `portee_max`. On ne souleve pas plus de `masse_max_par_force` x Force. LA MASSE D UN ETRE : `masse` de sa fiche, sinon `masse_etres` selon ses tags, sinon `defaut`.",
-  "degats_par_quantite": 0.35,
-  "recul_par_quantite": 0.02,
+  "_doc": "LES CORPS EN MOUVEMENT (ordre de travail 27 bis — decisions du 2026-09-14). Un corps lance a une MASSE (le poids de l objet, `Regles.poids_objet`) et une VITESSE en tuiles par seconde ; il avance d UNE tuile toutes les `ticks_par_seconde_exploration / vitesse` ticks et teste la collision a chaque tuile franchie — rien ne traverse un mur. LE CHOC : la quantite de mouvement p = masse x vitesse. Un etre touche prend `degats_par_quantite` x p^`degats_exposant` en contondant — la racine : un corps lourd et mou ne blesse pas en proportion de sa masse (calibre le 2026-09-14 : une pierre lancee ~10, un homme tombe d un etage ~50, un rocher roule ~70) — et recule de `recul_par_quantite` x p / sa masse tuiles (au plus `recul_max`) ; ce qu il heurte en reculant recule a son tour avec `part_transmise` de p, sur `maillons_max` maillons au plus, et un mur fait le choc de poussee ordinaire. Le son de l impact vaut `son_par_quantite` x p, plafonne a `son_max`. LANCER : la vitesse vaut `vitesse_base` + `vitesse_par_force` x Force, divisee par la masse au-dela de `masse_legere`, bornee a [`vitesse_min`, `vitesse_max`] ; la portee vaut `portee_par_vitesse` x vitesse, plafonnee a `portee_max`. On ne souleve pas plus de `masse_max_par_force` x Force. LA MASSE D UN ETRE : `masse` de sa fiche, sinon `masse_etres` selon ses tags, sinon `defaut`. LA CHUTE (lot 2, 2026-09-14) : un corps qui descend de N niveaux gagne une vitesse verticale `chute.vitesse_par_racine` x racine(N) ; elle s ajoute a la sienne (racine de la somme des carres). Un etage vaut `chute.niveaux_par_etage` niveaux. Un etre qui tombe d un plancher sur un autre le frappe avec sa masse x cette vitesse, puis roule sur une tuile libre a cote.",
+  "degats_par_quantite": 2.5,
+  "degats_exposant": 0.5,
+  "recul_par_quantite": 0.35,
+  "recul_max": 6,
   "part_transmise": 0.5,
   "maillons_max": 2,
   "son_par_quantite": 0.25,
@@ -23,5 +25,9 @@
     "insecte": 2.0,
     "volant": 6.0,
     "robot": 120.0
+  },
+  "chute": {
+    "vitesse_par_racine": 3.0,
+    "niveaux_par_etage": 4
   }
 }

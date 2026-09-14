@@ -1067,7 +1067,20 @@ static func _effondrer_plancher(sim: Simulation, t: Vector2i, cfg: Dictionary, t
 		EventBus.emettre(&"journal", [&"journal.plancher_cede", {"nom": e.name_key, "degats": d}])
 		if d > 0:
 			sim._appliquer_degats(e, d, "effondrement", {"type": "effondrement"})
-		if sim.grille.dans(bas) and not sim.grille.bloque_passage(bas) and sim.grille.occupant(bas).is_empty():
+		var dessous: Dictionary = sim.entites.get(sim.grille.occupant(bas), {}) if sim.grille.dans(bas) else {}
+		if not dessous.is_empty() and dessous.vivant and dessous.id != e.id:
+			# ON TOMBE SUR QUELQU'UN (27 bis, lot 2) : il reçoit la masse de celui qui tombe × la vitesse d'un étage, et le
+			# tombé roule à côté. Avant, le plancher « tenait encore un pas » tant que quelqu'un se trouvait dessous.
+			var niv := float(GameData.config("corps").get("chute", {}).get("niveaux_par_etage", 4))
+			SimCorps.frapper(sim, dessous, Vector2i.ZERO, SimCorps.masse_etre(e) * SimCorps.vitesse_chute(niv), "effondrement")
+			var cote := sim._tuile_libre_autour(bas)
+			if not sim.grille.dans(cote):
+				sim.support_a_verifier[sim.grille.idx(t)] = true
+				return
+			sim.grille.liberer(t, e.id)
+			e.pos = cote
+			sim.grille.placer(e.id, cote)
+		elif sim.grille.dans(bas) and not sim.grille.bloque_passage(bas) and sim.grille.occupant(bas).is_empty():
 			sim.grille.liberer(t, e.id)
 			e.pos = bas
 			sim.grille.placer(e.id, bas)
