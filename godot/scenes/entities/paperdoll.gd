@@ -1024,6 +1024,7 @@ func _teinte_partie(trait_id: String, defaut: Color) -> Color:
 ## Le visage dessiné sur le disque du crâne : yeux, nez, bouche, cheveux, oreilles, barbe.
 ## Tout vient des loci de l'être (Apparence — données et équipement) — jamais de sa race.
 func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) -> void:
+	var visage_inclus: bool = str(_ap.get("tete", "")) in GameData.config("styles").get("planches", {}).get("tetes_traits_inclus", [])   # question 40
 	var cheveux := _teinte_de("teintes_cheveux", str(_ap.get("teinte_cheveux", "")), peau.darkened(0.6))
 	# L'encre des traits (yeux, nez, bouche, mâchoire…) : la peau assombrie, sauf si l'être la déclare —
 	# une planche coloriée veut du blanc, pas de l'encre (2026-09-08).
@@ -1073,8 +1074,8 @@ func _dessine_visage(c: Vector2, r: float, d: Vector2, p: Vector2, peau: Color) 
 			c - p * r * 0.66 + d * r * 0.45, c + p * r * 0.66 + d * r * 0.45,
 			c + p * r * 0.32 + d * (r + pilosite), c - p * r * 0.32 + d * (r + pilosite),
 		]), poils)
-	if _vue_tete == "dos":
-		return
+	if _vue_tete == "dos" or visage_inclus:
+		return   # de dos, rien ; une tête qui porte déjà son visage n'en reçoit pas un second (question 40)
 	var cur: Dictionary = _ap.get("curseurs", {})   # les réglages continus (point 53)
 	var f_ecart := float(cur.get("ecart_yeux", 1.0))
 	var f_haut := float(cur.get("hauteur_yeux", 0.0))

@@ -593,7 +593,11 @@
       "tissu",
       "rituel"
     ],
-    "_doc_constructions": "L ORDRE DES CONSTRUCTIONS D ARMURE (2026-09-10) : l index d une case dans `assets/equipement/<slot>/`. Il est ECRIT ICI et non deduit des cles de `armure.matrice`, parce qu un ordre de dictionnaire est une coincidence et qu un index de sprite ne doit pas dependre d une coincidence."
+    "_doc_constructions": "L ORDRE DES CONSTRUCTIONS D ARMURE (2026-09-10) : l index d une case dans `assets/equipement/<slot>/`. Il est ECRIT ICI et non deduit des cles de `armure.matrice`, parce qu un ordre de dictionnaire est une coincidence et qu un index de sprite ne doit pas dependre d une coincidence.",
+    "tetes_traits_inclus": [
+      "ovale"
+    ],
+    "_doc_tetes_traits_inclus": "Les tetes dont la planche porte deja le visage (question 40, 2026-09-14) : le jeu n y pose ni yeux, ni nez, ni bouche ; les oreilles, les cheveux et la pilosite restent. Une planche de tete est par defaut un crane nu."
   },
   "sprites": {
     "px_par_unite": 8,
