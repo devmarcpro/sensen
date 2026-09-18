@@ -597,7 +597,9 @@
     "tetes_traits_inclus": [
       "ovale"
     ],
-    "_doc_tetes_traits_inclus": "Les tetes dont la planche porte deja le visage (question 40, 2026-09-14) : le jeu n y pose ni yeux, ni nez, ni bouche ; les oreilles, les cheveux et la pilosite restent. Une planche de tete est par defaut un crane nu."
+    "_doc_tetes_traits_inclus": "Les tetes dont la planche porte deja le visage (question 40, 2026-09-14) : le jeu n y pose ni yeux, ni nez, ni bouche ; les oreilles, les cheveux et la pilosite restent. Une planche de tete est par defaut un crane nu.",
+    "ombrage_code": 0.78,
+    "_doc_ombrage_code": "L OMBRAGE DE CE QUE LE CODE DESSINE (question 38, 2026-09-14) : les sprites du corps sont en gris moyen (0,5 a 0,6) et la tete, teinte de plein, sortait plus claire que le corps qu elle surmonte. La peau de la tete ET des segments sans planche (le cou) est multipliee par ce facteur ; oreilles et traits suivent."
   },
   "sprites": {
     "px_par_unite": 8,

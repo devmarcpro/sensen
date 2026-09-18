@@ -733,17 +733,22 @@ func _dessine_segment(m: Dictionary, col: Color, contour: float, nom: String) ->
 		var r := l * 0.5 * float(fact.get(str(_ap.get("tete", "ronde")), 1.0)) * float(_ap.get("curseurs", {}).get("largeur_visage", 1.0))
 		var c := o + d * l * 0.5
 		var peau := col if _ap.is_empty() else _teinte_de("teintes_peau", str(_ap.get("teinte_peau", "")), col)
-		if not _planche_visage("tete", c, r, d, p, _teinte_partie("tete", peau), str(_ap.get("tete", "ronde"))):   # la forme de la tête par planche, sinon le disque
-			draw_circle(c, r, peau)
+		var f_o := float(GameData.config("styles").get("planches", {}).get("ombrage_code", 1.0))   # la tête prend l'ombrage des sprites (question 38)
+		var peau_o := Color(peau.r * f_o, peau.g * f_o, peau.b * f_o, peau.a)
+		if not _planche_visage("tete", c, r, d, p, _teinte_partie("tete", peau_o), str(_ap.get("tete", "ronde"))):   # la forme de la tête par planche, sinon le disque
+			draw_circle(c, r, peau_o)
 			if contour > 0.0:
-				draw_arc(c, r, 0.0, TAU, 16, peau.darkened(0.45), contour)
+				draw_arc(c, r, 0.0, TAU, 16, peau_o.darkened(0.45), contour)
 		if not _ap.is_empty():
-			_dessine_visage(c, r, d, p, peau)
+			_dessine_visage(c, r, d, p, peau_o)
 		return
 	if _planche_membre(nom, m, col):   # le membre par sa planche (assets/membres/<segment>/), sinon le polygone
 		return
-	draw_colored_polygon(poly, col)
-	draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), col.darkened(0.45), maxf(0.7, contour))
+	# UN SEGMENT SANS PLANCHE prend le même ombrage que la tête (question 38) : sinon le cou sort plus clair que tout.
+	var f_c := float(GameData.config("styles").get("planches", {}).get("ombrage_code", 1.0))
+	var col_o := Color(col.r * f_c, col.g * f_c, col.b * f_c, col.a)
+	draw_colored_polygon(poly, col_o)
+	draw_polyline(PackedVector2Array([poly[0], poly[1], poly[2], poly[3], poly[0]]), col_o.darkened(0.45), maxf(0.7, contour))
 
 
 ## Un membre par sa planche (designer 2026-09-06, 20 h 50 : « pour chaque membre et item ; s'il n'y a pas de sprite, fallback
