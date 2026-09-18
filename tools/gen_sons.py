@@ -112,6 +112,54 @@ def recette(nom, rng):
         g = passe_bas(bruit(n, rng), 0.02)
         e = enveloppe(n, 0.003, 0.35)
         return [(b[i] * 0.6 + g[i] * 4.0) * e[i] for i in range(n)]
+    if nom == "amb_vent":
+        n = int(4.0 * TAUX)
+        b = passe_bas(bruit(n, rng), 0.02)
+        out = []
+        for i in range(n):
+            g = 0.55 + 0.45 * math.sin(2 * math.pi * 0.12 * i / TAUX) * math.sin(2 * math.pi * 0.037 * i / TAUX)
+            out.append(b[i] * g)
+        return out
+    if nom == "amb_pluie":
+        n = int(4.0 * TAUX)
+        b = passe_bas(bruit(n, rng), 0.5)
+        g = passe_bas(bruit(n, rng), 0.01)
+        return [b[i] * (0.8 + 0.3 * g[i]) for i in range(n)]
+    if nom == "amb_vagues":
+        n = int(6.0 * TAUX)
+        b = passe_bas(bruit(n, rng), 0.06)
+        out = []
+        for i in range(n):
+            ph = (i / TAUX) % 3.0 / 3.0
+            g = math.pow(math.sin(math.pi * ph), 3.0)
+            out.append(b[i] * (0.15 + 0.95 * g))
+        return out
+    if nom == "amb_oiseaux":
+        n = int(5.0 * TAUX)
+        out = [0.0] * n
+        for _ in range(26):
+            debut = rng.randint(0, n - int(0.35 * TAUX))
+            f0 = rng.uniform(1800, 3600)
+            duree = int(rng.uniform(0.05, 0.16) * TAUX)
+            for k in range(duree):
+                t = k / duree
+                out[debut + k] += math.sin(2 * math.pi * (f0 + 900 * t) * k / TAUX) * math.exp(-t * 3.0) * 0.5
+        return out
+    if nom == "amb_grillons":
+        n = int(4.0 * TAUX)
+        out = [0.0] * n
+        i = 0
+        while i < n:
+            for k in range(int(0.012 * TAUX)):
+                if i + k < n:
+                    out[i + k] += math.sin(2 * math.pi * 4600 * k / TAUX) * math.exp(-k / (0.004 * TAUX)) * 0.6
+            i += int(rng.uniform(0.05, 0.1) * TAUX)
+        return passe_bas(out, 0.8)
+    if nom == "amb_souterrain":
+        n = int(5.0 * TAUX)
+        b = passe_bas(passe_bas(bruit(n, rng), 0.01), 0.05)
+        e = [0.6 + 0.4 * math.sin(2 * math.pi * 0.05 * i / TAUX) for i in range(n)]
+        return [b[i] * e[i] * 3.0 for i in range(n)]
     if nom == "sifflet":
         n = int(0.9 * TAUX)
         s1 = sinus(n, 880, 860)
@@ -123,11 +171,12 @@ def recette(nom, rng):
 
 
 SONS = ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion", "sifflet"]
+AMBIANCES = ["amb_vent", "amb_pluie", "amb_vagues", "amb_oiseaux", "amb_grillons", "amb_souterrain"]
 
 
 def main():
     os.makedirs(SORTIE, exist_ok=True)
-    for nom in SONS:
+    for nom in SONS + AMBIANCES:
         rng = random.Random("sensen-son-" + nom)
         x = normaliser(recette(nom, rng))
         chemin = os.path.join(SORTIE, nom + ".wav")

@@ -2121,3 +2121,23 @@ func test_vehicule_heurte() -> void:
 	pieton.sante = 5000
 	verifier(not SimCorps.heurter_en_route(s, caleche, devant_c, 5) and int(pieton.sante) == 5000, "la calèche freine et attend")
 
+
+## L'AMBIANCE (48, lot 2 — 2026-09-18) : le fond sonore se déduit du lieu, du temps et de l'heure ; ses boucles existent.
+func test_ambiance() -> void:
+	for nom in ["amb_vent", "amb_pluie", "amb_vagues", "amb_oiseaux", "amb_grillons", "amb_souterrain"]:
+		var chemin := "res://assets/sons/%s.wav" % nom
+		var st: Variant = load(chemin) if ResourceLoader.exists(chemin) else null
+		verifier(st is AudioStream and (st as AudioStream).get_length() > 2.0, "la boucle « %s » existe et dure" % nom)
+	var s := Simulation.new(4311)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	s.meteo_force = "pluie"
+	verifier(Sons.ambiance_pour(s, j.pos) == "amb_pluie", "sous la pluie, la pluie couvre tout (%s)" % Sons.ambiance_pour(s, j.pos))
+	s.meteo_force = "clair"
+	var attendue := Sons.ambiance_pour(s, j.pos)
+	verifier(attendue in ["amb_vent", "amb_vagues", "amb_oiseaux", "amb_grillons"], "au clair, le lieu et l'heure décident (%s)" % attendue)
+	s.donjon = {"etages_fixes": [3, 3]}
+	s.charger_donjon("ruine", 77, 5, 1)
+	verifier(Sons.ambiance_pour(s, s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0].pos) == "amb_souterrain", "sous terre, le souffle sourd")
+	s.monde.fermer()
+

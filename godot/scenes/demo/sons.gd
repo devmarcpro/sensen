@@ -10,6 +10,8 @@ var _voix: Array[AudioStreamPlayer] = []
 var _flux: Dictionary = {}          # source → AudioStream
 var _dernier: Dictionary = {}       # source → ms du dernier jeu
 var _rng := RandomNumberGenerator.new()
+var _fond: AudioStreamPlayer = null   # l'ambiance (48, lot 2) : une boucle de fond, choisie par le lieu, le temps et l'heure
+var _piste := ""
 
 
 static func _cfg() -> Dictionary:
@@ -21,7 +23,8 @@ func _ready() -> void:
 	if AudioServer.get_bus_index(&"Effets") < 0:
 		AudioServer.add_bus()
 		AudioServer.set_bus_name(AudioServer.bus_count - 1, &"Effets")
-	for nom in ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion", "sifflet"]:
+	for nom in ["pas", "coup", "impact", "mort", "porte", "pioche", "effondrement", "explosion", "sifflet",
+			"amb_vent", "amb_pluie", "amb_vagues", "amb_oiseaux", "amb_grillons", "amb_souterrain"]:
 		var chemin := "res://assets/sons/%s.wav" % nom
 		if ResourceLoader.exists(chemin):
 			_flux[nom] = load(chemin)
@@ -30,6 +33,10 @@ func _ready() -> void:
 		p.bus = &"Effets"
 		add_child(p)
 		_voix.append(p)
+	_fond = AudioStreamPlayer.new()
+	_fond.bus = &"Effets"
+	add_child(_fond)
+	_fond.finished.connect(func() -> void: _fond.play())   # la boucle : on relance à la fin
 	EventBus.son.connect(_entendre)
 	EventBus.explosion.connect(func(pos: Vector2i, _rayon: int, _source: String) -> void: _entendre(pos, "explosion", 90.0))
 
@@ -62,3 +69,53 @@ func _entendre(pos: Vector2i, source: String, volume: float) -> void:
 			p.pitch_scale = 1.0 + _rng.randf_range(-var_h, var_h)
 			p.play()
 			return
+
+
+## L'AMBIANCE QUE CE LIEU DEMANDE (48, lot 2 — 2026-09-18) : la première règle de `sonore.ambiance.regles` dont les
+## conditions tiennent. Rien n'est écrit dans le code : le donjon gronde, la pluie couvre tout, la côte a ses vagues,
+## la nuit ses grillons, la forêt ses oiseaux, et le reste du vent.
+static func ambiance_pour(sim: Simulation, pos: Vector2i) -> String:
+	var amb: Dictionary = GameData.config("sonore").get("ambiance", {})
+	if amb.is_empty() or sim == null:
+		return ""
+	var cell := sim.monde.cellule_de(pos) if sim.monde != null else Vector2i.ZERO
+	var tags_b: Array = GameData.catalogues.biomes.get(str(sim.monde.surface.resume_cellule(cell).biome), {}).get("tags", []) if sim.monde != null and sim.lieu == "camp" else []
+	var tags_m: Array = GameData.catalogues.weather_states.get(str(SimTerrain.meteo(sim, cell)), {}).get("effects", []) if sim.monde != null and sim.lieu == "camp" else []
+	var nuit := SimTerrain.est_nuit(sim)
+	for r in amb.get("regles", []):
+		var si: Dictionary = r.get("si", {})
+		var ok := true
+		if si.has("lieu") and str(si.lieu) != str(sim.lieu):
+			ok = false
+		if si.has("nuit") and bool(si.nuit) != nuit:
+			ok = false
+		if si.has("meteo_tags"):
+			ok = ok and (si.meteo_tags as Array).any(func(t: String) -> bool: return t in tags_m)
+		if si.has("biome_tags"):
+			ok = ok and (si.biome_tags as Array).any(func(t: String) -> bool: return t in tags_b)
+		if ok:
+			return str(r.get("piste", ""))
+	return ""
+
+
+## La boucle de fond suit ce que demande le lieu. Appelée à chaque image : elle ne fait rien tant que la piste ne change pas.
+func _process(_delta: float) -> void:
+	if _fond == null or main == null or main.sim == null:
+		return
+	var j: Dictionary = main.joueur()
+	if j.is_empty():
+		return
+	var voulue := ambiance_pour(main.sim, j.pos)
+	var amb: Dictionary = GameData.config("sonore").get("ambiance", {})
+	var vol := float(Reglages.options.get("volume_effets", 0.8))
+	if voulue == _piste:
+		_fond.volume_db = float(amb.get("volume_db", -20.0)) + linear_to_db(clampf(vol, 0.001, 1.0))
+		return
+	_piste = voulue
+	if voulue.is_empty() or not _flux.has(voulue) or vol <= 0.0:
+		_fond.stop()
+		return
+	_fond.stream = _flux[voulue]
+	_fond.volume_db = float(amb.get("volume_db", -20.0)) + linear_to_db(clampf(vol, 0.001, 1.0))
+	_fond.play()
+

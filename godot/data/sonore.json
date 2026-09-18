@@ -26,5 +26,54 @@
     "intervalle_ms": 60,
     "variation_hauteur": 0.08,
     "volume_db": -4.0
+  },
+  "ambiance": {
+    "_doc": "L AMBIANCE (48, lot 2 — 2026-09-18). Une boucle de fond, choisie dans l ordre des `regles` : la premiere dont les conditions tiennent gagne (`lieu` : camp/donjon ; `meteo_tags` : un tag de l etat du temps ; `biome_tags` : un tag du biome de la cellule ; `nuit` : vrai/faux). `piste` est le nom du fichier de `assets/sons/`. `volume_db` : le fond reste sous les sons du monde ; `fondu_s` : le temps de passage d une piste a l autre.",
+    "volume_db": -20.0,
+    "fondu_s": 1.5,
+    "regles": [
+      {
+        "si": {
+          "lieu": "donjon"
+        },
+        "piste": "amb_souterrain"
+      },
+      {
+        "si": {
+          "meteo_tags": [
+            "arrose"
+          ]
+        },
+        "piste": "amb_pluie"
+      },
+      {
+        "si": {
+          "biome_tags": [
+            "cote",
+            "littoral"
+          ]
+        },
+        "piste": "amb_vagues"
+      },
+      {
+        "si": {
+          "nuit": true
+        },
+        "piste": "amb_grillons"
+      },
+      {
+        "si": {
+          "biome_tags": [
+            "foret",
+            "boise"
+          ]
+        },
+        "piste": "amb_oiseaux"
+      },
+      {
+        "si": {},
+        "piste": "amb_vent"
+      }
+    ]
   }
 }

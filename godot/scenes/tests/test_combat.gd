@@ -254,6 +254,7 @@ func _ready() -> void:
 	_lancer("test_eboulement_et_charge")
 	_lancer("test_vehicule_heurte")
 	_lancer("test_sons")
+	_lancer("test_ambiance")
 	_lancer("test_equarrir")
 	_lancer("test_difficulte")
 	_lancer("test_duree_du_jour")
