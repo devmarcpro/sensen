@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.distiller_goudron.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "material": "houille",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "goudron",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

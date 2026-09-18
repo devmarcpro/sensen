@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.griller_cinabre.name",
+  "station": "forge",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "material": "cinabre",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "mercure",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

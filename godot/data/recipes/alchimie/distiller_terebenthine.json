@@ -1,0 +1,18 @@
+{
+  "name_key": "recipe.distiller_terebenthine.name",
+  "station": "alambic",
+  "craft_skill": "alchimie",
+  "inputs": [
+    {
+      "material": "resine",
+      "forme": "brut",
+      "amount": 2
+    }
+  ],
+  "output": {
+    "material": "essence_terebenthine",
+    "forme": "brut",
+    "amount": 1
+  },
+  "fuel": null
+}

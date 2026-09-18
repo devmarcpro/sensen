@@ -209,6 +209,28 @@
         [
           "soie_araignee",
           0.2
+        ],
+        [
+          "venin",
+          0.1
+        ]
+      ],
+      "serpent_venimeux": [
+        [
+          "venin",
+          0.1
+        ]
+      ],
+      "serpent_geant": [
+        [
+          "venin",
+          0.1
+        ]
+      ],
+      "scorpion": [
+        [
+          "venin",
+          0.1
         ]
       ]
     }

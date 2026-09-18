@@ -256,6 +256,7 @@ func _ready() -> void:
 	_lancer("test_sons")
 	_lancer("test_ambiance")
 	_lancer("test_equarrir")
+	_lancer("test_puiser")
 	_lancer("test_difficulte")
 	_lancer("test_duree_du_jour")
 	_lancer("test_liquides_gelent")

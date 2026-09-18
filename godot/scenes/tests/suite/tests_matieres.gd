@@ -342,3 +342,30 @@ func test_equarrir() -> void:
 	var epee: Dictionary = SimObjets.generer_objet(s, "craft_epee", 1, {}, "commun", 0)
 	verifier(SimCadavres.matieres_de(s, epee).is_empty(), "une épée ne s'équarrit pas")
 
+
+## PUISER (42 bis, 2026-09-18) : les liquides avaient besoin d'un contenant — sans flacon on ne rapporte rien, avec flacon
+## la tuile rend sa matière.
+func test_puiser() -> void:
+	var s := Simulation.new(4313)
+	s.charger_camp()
+	var j: Dictionary = s.vivants().filter(func(e: Dictionary) -> bool: return e.controle == "joueur")[0]
+	var ou: Vector2i = s._tuile_libre_autour(j.pos)
+	s.grille.poser_contenu(ou, "eau")
+	s.grille.liberer(ou, s.grille.occupant(ou))
+	var avant: int = j.sac.size()
+	verifier(not SimCamp.puiser(s, j, ou, s.horloge_monde.ticks) and j.sac.size() == avant, "sans contenant, on ne rapporte pas d'eau")
+	var flacon: Dictionary = SimObjets.generer_objet(s, "flacon_vide", 1, {}, "commun", 0)
+	verifier(not flacon.is_empty(), "le flacon existe au catalogue")
+	if flacon.is_empty():
+		s.monde.fermer()
+		return
+	j.sac.append(flacon.uid)
+	verifier(SimCamp.puiser(s, j, ou, s.horloge_monde.ticks), "avec un flacon, on puise")
+	var eau := 0
+	for uid in j.sac:
+		var o: Dictionary = s.items.get(uid, {})
+		if str(o.get("base", "")) == "materiau_brut" and str(o.get("materiau", "")) == "eau":
+			eau += int(o.get("quantite", 1))
+	verifier(eau == 1 and (flacon.uid in j.sac), "de l'eau brute au sac, et le flacon reste : c'est l'outil, pas la matière")
+	s.monde.fermer()
+

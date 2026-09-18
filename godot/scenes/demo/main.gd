@@ -1887,6 +1887,8 @@ func _options_tuile(t: Vector2i) -> Array:
 		res.append({"id": "rituel", "vers": t})
 	if "eau" in tags or "liquide" in tags:   # boire à même l'eau (ordre de travail 31)
 		res.append({"id": "boire", "vers": t})
+	if d <= 1 and GameData.config("matiere").get("puiser", {}).get("par_contenu", {}).has(str(g.contenu_ids[int(g.contenu[g.idx(t)])])):
+		res.append({"id": "puiser", "vers": t})   # en rapporter la matière, si l'on a un contenant (42 bis)
 	if "plante_sauvage" in tags and _outil_en_main(j, "cueillir"):
 		res.append({"id": "cueillir", "vers": t})
 	if ("plante" in tags or "arbre" in tags) and _outil_en_main(j, "abattre"):
@@ -1998,6 +2000,8 @@ func _executer_option(opt: Dictionary) -> void:
 			sim.intention(joueur_id, {"type": "terrasser", "vers": opt.vers, "sens": 1})
 		"cueillir":
 			sim.intention(joueur_id, {"type": "cueillir", "vers": opt.vers})
+		"puiser":
+			sim.intention(joueur_id, {"type": "puiser", "vers": opt.vers})
 		"boire_source":
 			sim.intention(joueur_id, {"type": "boire_source", "vers": opt.vers})
 		"boire":

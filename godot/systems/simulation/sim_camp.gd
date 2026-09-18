@@ -676,3 +676,35 @@ static func _rapport_absence(sim: Simulation) -> void:
 
 
 # ---------------------------------------------------------------- compagnons, apprivoisement, âge
+
+
+## PUISER (42 bis, 2026-09-18) : un contenant en main, une tuile de liquide à côté, et l'on rapporte la MATIÈRE — c'est la
+## porte qui manquait aux liquides. Le contenant ne se consomme pas : c'est l'outil du geste, pas la matière.
+static func puiser(sim: Simulation, e: Dictionary, vers: Vector2i, tick: int) -> bool:
+	var cfg: Dictionary = GameData.config("matiere").get("puiser", {})
+	if cfg.is_empty() or not sim.grille.dans(vers) or Grille.distance(e.pos, vers) > 1:
+		return false
+	var mat := str((cfg.get("par_contenu", {}) as Dictionary).get(str(sim.grille.contenu_ids[int(sim.grille.contenu[sim.grille.idx(vers)])]), ""))
+	if mat.is_empty() or not GameData.catalogues.materials.has(mat):
+		return false
+	var contenants: Array = cfg.get("contenants", ["flacon_vide"])
+	var a_contenant := false
+	for uid in (e.sac as Array) + (e.equipement as Dictionary).values():
+		if str(sim.items.get(uid, {}).get("base", "")) in contenants:
+			a_contenant = true
+			break
+	if not a_contenant:
+		EventBus.emettre(&"journal", [&"journal.puiser_sans_contenant", {}])
+		return false
+	var brut: Dictionary = SimObjets.generer_objet(sim, "materiau_brut", 1, {}, "commun", 0)
+	if brut.is_empty():
+		return false
+	brut.materiau = mat
+	brut["forme"] = "brut"
+	brut.quantite = 1
+	SimObjets.identifier(sim, brut)
+	SimObjets.donner(sim, e, brut.uid)
+	e.compteur = tick + int(cfg.get("ticks", 400))
+	EventBus.emettre(&"journal", [&"journal.puise", {"nom": e.name_key, "matiere": "material.%s.name" % mat}])
+	return true
+

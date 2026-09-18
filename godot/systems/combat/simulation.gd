@@ -1410,6 +1410,8 @@ func intention(id: String, i: Dictionary) -> bool:
 			ok = SimObjets._equiper(self, e, str(i.get("objet", "")), h.ticks)
 		"ramasser":
 			ok = SimObjets._ramasser(self, e, h.ticks)
+		"puiser":   # rapporter un liquide dans un contenant (42 bis)
+			ok = SimCamp.puiser(self, e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"boire":   # une gorgée à même l'eau (ordre de travail 31)
 			ok = boire(e, i.get("vers", Vector2i(-1, -1)), h.ticks)
 		"porter":

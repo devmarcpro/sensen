@@ -1,0 +1,25 @@
+{
+  "_doc": "LE CONTENANT DE POCHE (42 bis, 2026-09-18) : sans contenant, un liquide ne se rapporte pas. Le seau (`craft_seau`) fait le meme office ; le flacon tient dans le sac. Il ne se consomme pas en puisant — c est l outil, pas la matiere.",
+  "name_key": "item.flacon_vide.name",
+  "type": "outil",
+  "equip_slot": "",
+  "poids": 0.4,
+  "quantite": 1,
+  "tags": [
+    "outil",
+    "empilable",
+    "contenant"
+  ],
+  "materiau": "verre",
+  "recipe": {
+    "station": "forge",
+    "craft_skill": "forge",
+    "inputs": [
+      {
+        "material": "verre",
+        "forme": "brut",
+        "amount": 1
+      }
+    ]
+  }
+}
