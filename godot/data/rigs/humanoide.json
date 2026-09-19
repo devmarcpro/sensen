@@ -61,6 +61,7 @@
    },
    "zone": "torse",
    "epaisseur": 6,
+   "marge_case": 1.0,
    "partie": "torse"
   },
   "cou": {

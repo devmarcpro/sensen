@@ -768,7 +768,7 @@ func _planche_equipement(m: Dictionary, nom: String, info: Dictionary) -> void:
 	var d: Vector2 = m.direction
 	var p: Vector2 = m.perp
 	var o: Vector2 = m.origine
-	var cote := maxf(l, float(m.largeur))
+	var cote := maxf(l, float(m.largeur)) + 2.0 * float((rig.segments.get(nom, {}) as Dictionary).get("marge_case", 0.0))   # la marge du rig (question 37)
 	var k := cote / float(Planches.case())
 	var miroir := nom.ends_with("_G")
 	var local := Transform2D(-p * k if miroir else p * k, -d * k, o + d * (l * 0.5 + cote * 0.5) + p * (cote * 0.5) * (1.0 if miroir else -1.0))

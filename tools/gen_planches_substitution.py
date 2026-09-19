@@ -306,6 +306,12 @@ def planches_membres(c, rig, facteurs):
             continue
         enfants.setdefault(b_p, {}).setdefault(b_e, []).append((float(a_e[0]), float(a_e[1])))
 
+    marges_seg = {}
+    for nom_m, s_m in rig["segments"].items():
+        b_m = nom_m
+        for suf in ("_G", "_D"):
+            b_m = b_m[: -len(suf)] if b_m.endswith(suf) else b_m
+        marges_seg[b_m] = max(float(marges_seg.get(b_m, 0.0)), float(s_m.get("marge_case", 0.0)))
     couleurs_m = lire_json("styles.json").get("planches", {}).get("marqueurs", {}).get("couleurs", {})
     ancres_m = lire_json("styles.json").get("planches", {}).get("ancres", {})
 
@@ -320,7 +326,7 @@ def planches_membres(c, rig, facteurs):
             t.pilule(c / 2.0, c / 2.0, max(2.0, w - 4.0), c - 5.0, 1.0)   # un liseré : la pilule se lit une fois teintée
             # LES ANCRES DES ENFANTS D ABORD : ce sont les vraies articulations, celles que le rig connait —
             # l epaule, le coude, le poignet. Un torse dit ou pendent les bras et la tete.
-            cote = max(lo, la)
+            cote = max(lo, la) + 2.0 * float(marges_seg.get(base, 0.0))   # la marge déclarée par le rig (question 37)
             for fam, points in enfants.get(base, {}).items():
                 if not couleurs_m.get(fam):
                     continue

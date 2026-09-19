@@ -64,20 +64,20 @@ ORIENTATIONS = {
 # sont numérotées ici dans un ordre qui n'est pas celui du plan. Elle s'écrit donc, une fois.
 PARTIES = {
     "humanoide": {
-        "bassin": "torse", "torse": "torse", "tete": "tete",
+        "bassin": "torse", "torse": "torse", "cou": "cou", "tete": "tete",
         "bras_haut_G": "bras_G", "bras_bas_G": "bras_G", "main_G": "main_G",
         "bras_haut_D": "bras_D", "bras_bas_D": "bras_D", "main_D": "main_D",
         "jambe_haut_G": "jambe_G", "jambe_bas_G": "jambe_G", "pied_G": "pied_G",
         "jambe_haut_D": "jambe_D", "jambe_bas_D": "jambe_D", "pied_D": "pied_D",
     },
     "quadrupede": {
-        "torse": "torse", "tete": "tete",
+        "torse": "torse", "cou": "cou", "tete": "tete",
         "patte_AV_G": "patte_AV_G", "pied_AV_G": "patte_AV_G",
         "patte_AV_D": "patte_AV_D", "pied_AV_D": "patte_AV_D",
         "patte_AR_G": "patte_AR_G", "pied_AR_G": "patte_AR_G",
         "patte_AR_D": "patte_AR_D", "pied_AR_D": "patte_AR_D",
     },
-    "volant": {"torse": "torse", "tete": "tete", "aile_G": "aile_G", "aile_D": "aile_D"},
+    "volant": {"torse": "torse", "cou": "cou", "tete": "tete", "aile_G": "aile_G", "aile_D": "aile_D"},
     # Le serpent : les trois anneaux sont sa QUEUE, le tronc est son corps.
     "serpentin": {"torse": "corps", "tete": "tete", "c1": "queue", "c2": "queue", "c3": "queue"},
     # L'araignée : le tronc dessiné est le céphalothorax, et les huit pattes suivent l'ordre du plan.
@@ -105,7 +105,21 @@ def seg(parent, ancrage, longueur, largeur, angle=90, ancrages=None, zone=None, 
     return d
 
 
+def marges(d):
+    """LA MARGE DE CASE (question 37, 2026-09-18) : de combien la case carrée d'un segment doit s'élargir pour contenir
+    les points qu'il porte. La case fait `max(longueur, largeur)` ; un ancrage à `en_travers` = ±5 sur une case de 9
+    déborde de 0,5 — on l'écrit, le pantin et le calque de points l'appliquent, et plus rien ne se perd en silence."""
+    for nom_s, s in d["segments"].items():
+        cote = max(float(s["longueur"]), float(s["largeur"]))
+        debord = 0.0
+        for a in (s.get("ancrages") or {}).values():
+            debord = max(debord, abs(float(a[1])) - cote / 2.0)   # seul l EN TRAVERS deborde : le long, l ancrage se mesure depuis la base
+        if debord > 0.0:
+            s["marge_case"] = round(debord + 0.5, 2)   # une demi-unite de garde : le marqueur fait deux pixels
+
+
 def ecrire(nom, d):
+    marges(d)
     d["orientations"] = ORIENTATIONS
     # Chaque segment dit la PARTIE du corps qu'il dessine : c'est ce qui permet au pantin de ne pas dessiner un bras
     # qu'on a perdu, et de rougir une partie entamée. Un segment sans correspondance est une erreur, pas un oubli.
@@ -132,8 +146,11 @@ H = {
     "lacet_actif": True,
     "segments": {
         "bassin": seg(None, None, 5, 8, -90, {"taille": [5, 0, 0], "hanche_G": [0, -2.5, -1], "hanche_D": [0, 2.5, -1]}, "torse", epaisseur=6),
-        "torse": seg("bassin", "taille", 9, 9, -90, {"cou": [9, 0, -1], "epaule_G": [7, -5, -1.5], "epaule_D": [7, 5, -1.5], "dos": [3, 0, 2]}, "torse", epaisseur=6),
-        "tete": seg("torse", "cou", 8, 8, -90, {}, "tete", epaisseur=8),   # une tête est aussi profonde que large
+        "torse": seg("bassin", "taille", 9, 9, -90, {"cou": [8, 0, -1], "epaule_G": [7, -5, -1.5], "epaule_D": [7, 5, -1.5], "dos": [3, 0, 2]}, "torse", epaisseur=6),
+        # LE COU (designer 2026-09-13 : « rajouter cou ») — il avait été ajouté à la main dans les JSON, et ce générateur
+        # l'aurait effacé au premier passage (constaté le 2026-09-18 : deux tests rouges). Il est ici désormais.
+        "cou": seg("torse", "cou", 2.5, 3.5, -90, {"tete": [2.5, 0, 0]}, "tete", epaisseur=3),
+        "tete": seg("cou", "tete", 8, 8, -90, {}, "tete", epaisseur=8),   # une tête est aussi profonde que large
         "bras_haut_G": seg("torse", "epaule_G", 8, 3, 100, {"coude": [8, 0, 0]}, "bras", 8),
         "bras_haut_D": seg("torse", "epaule_D", 8, 3, 80, {"coude": [8, 0, 0]}, "bras", 8),
         "bras_bas_G": seg("bras_haut_G", "coude", 7, 3, 95, {"poignet": [7, 0, 0]}, "bras", 6),
@@ -151,7 +168,7 @@ H = {
     },
     # `ordre` ne DÉPARTAGE que les segments à la même profondeur : la profondeur décide, lui n'arbitre que les ex æquo.
     "ordre": ["bras_haut_G", "bras_bas_G", "main_G", "jambe_haut_G", "jambe_bas_G", "pied_G",
-              "jambe_haut_D", "jambe_bas_D", "pied_D", "bassin", "torse", "tete", "bras_haut_D", "bras_bas_D", "main_D"],
+              "jambe_haut_D", "jambe_bas_D", "pied_D", "bassin", "torse", "cou", "tete", "bras_haut_D", "bras_bas_D", "main_D"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse", "bassin"], "brassards": ["bras_haut_G", "bras_haut_D", "bras_bas_G", "bras_bas_D", "main_G", "main_D"],
                        "jambieres": ["jambe_haut_G", "jambe_haut_D", "jambe_bas_G", "jambe_bas_D"], "bottes": ["pied_G", "pied_D"]},
     "prise_arme": "main_D", "prise_bouclier": "main_G",
@@ -176,7 +193,8 @@ Q = {
         "torse": seg(None, None, 20, 8, -90, {"cou": [20, 0, 3], "epaule_AV_G": [17, 3, 0], "epaule_AV_D": [17, -3, 0],
                                               "epaule_AR_G": [3, 3, 0], "epaule_AR_D": [3, -3, 0], "dos": [10, 0, 4]},
                      "torse", 90, epaisseur=9),
-        "tete": seg("torse", "cou", 7, 6, -90, {}, "tete", 70, epaisseur=6),
+        "cou": seg("torse", "cou", 3, 3.5, -90, {"tete": [3, 0, 0]}, "tete", 80, epaisseur=3.5),
+        "tete": seg("cou", "tete", 7, 6, -90, {}, "tete", 70, epaisseur=6),
         "patte_AV_G": seg("torse", "epaule_AV_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
         "patte_AV_D": seg("torse", "epaule_AV_D", 6, 2.5, 85, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
         "patte_AR_G": seg("torse", "epaule_AR_G", 6, 2.5, 95, {"pied": [6, 0, 0]}, "jambes", epaisseur=2.5),
@@ -186,7 +204,7 @@ Q = {
         "pied_AR_G": seg("patte_AR_G", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
         "pied_AR_D": seg("patte_AR_D", "pied", 4, 2.5, 90, {}, "pieds", 35, epaisseur=2.5),
     },
-    "ordre": ["patte_AR_D", "pied_AR_D", "patte_AV_D", "pied_AV_D", "torse", "patte_AR_G", "pied_AR_G", "patte_AV_G", "pied_AV_G", "tete"],
+    "ordre": ["patte_AR_D", "pied_AR_D", "patte_AV_D", "pied_AV_D", "torse", "patte_AR_G", "pied_AR_G", "patte_AV_G", "pied_AV_G", "cou", "tete"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"], "selle": ["torse"]},
     "prise_arme": None, "prise_bouclier": None,
 }
@@ -204,11 +222,12 @@ V = {
         # est exactement ce qu'on voit d'un oiseau de profil.
         "torse": seg(None, None, 10, 6, -90, {"cou": [10, 0, 1], "aile_G": [5, 3, 0], "aile_D": [5, -3, 0]},
                      "torse", 90, epaisseur=6),
-        "tete": seg("torse", "cou", 4, 4, -90, {}, "tete", 70, epaisseur=4),
+        "cou": seg("torse", "cou", 2, 2.5, -90, {"tete": [2, 0, 0]}, "tete", 80, epaisseur=2.5),
+        "tete": seg("cou", "tete", 4, 4, -90, {}, "tete", 70, epaisseur=4),
         "aile_G": seg("torse", "aile_G", 14, 5, 200, {}, "bras", epaisseur=1.5),
         "aile_D": seg("torse", "aile_D", 14, 5, -20, {}, "bras", epaisseur=1.5),
     },
-    "ordre": ["aile_D", "torse", "tete", "aile_G"],
+    "ordre": ["aile_D", "torse", "cou", "tete", "aile_G"],
     "slots_segments": {"casque": ["tete"], "cuirasse": ["torse"]},
     "prise_arme": None, "prise_bouclier": None,
 }
